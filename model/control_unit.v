@@ -48,34 +48,38 @@ module control_unit(
     output wire alu_oe; // ALU output to DI is enabled
 
     // Instructions:
-    // LD x:        [DP] -> x
-    // ST x:        x -> [DP]
-    // ALU x, op:   x = ALU(A, x, op)
-    // LDI x:       IP++, [IP] -> x
-    // Jc:          if c swap(IP, DP)
-    // JMP:         swap(IP, DP)
+    // LD d:         [DP] -> d
+    // ST s:         s -> [DP]
+    // ALU d, s, op: d = ALU(A, s, op)
+    // LDI d:        IP++, [IP] -> d
+    // Jc:           if c swap(IP, DP)
+    // JMP:          swap(IP, DP)
 
-    // LD:  0010__xx
-    // ST:  0011___x
-    // ALU: 000oooxx
-    // LDI: 1010__xx
-    // Jc:  011_0cff
-    // JMP: 011_1cff
+    // ALU: 0ooossdd
+    // LD:  1000__dd
+    // ST:  1001___s
+    // LDI: 1010__dd
+    // Jc:  11000cff
+    // JMP: 11001___
 
     // bits:
-    // 7: 2/1 cycle
-    // 6: condition/register
-    // 5: DI driven by D/ALU
-    // 4: LD or ST (LD, ST, LDI)
+    // 7: other/ALU
+    // 6: jump/other
+    // 5: second cycle
+    // 4: store or load
+    wire ir_is_alu = ~ir[7];
+    wire ir_is_jmp = ir[6];
+    wire ir_is_2cy = ir[5];
+    wire ir_is_sto = ir[4];
 
-    wire ld = ir[7:4] == 4'b0010;
-    wire st = ir[7:4] == 4'b0011;
-    wire alu = ir[7:5] == 3'b000;
+    wire ld = ir[7:4] == 4'b1000;
+    wire st = ir[7:4] == 4'b1001;
+    wire alu = ir[7] == 1'b0;
     wire ldi = ir[7:4] == 4'b1010;
-    wire jc = ir[7:6] == 2'b01;
+    wire jc = ir[7:4] == 4'b1100;
 
     reg cycle;
-    wire reset_cycle = ~ir[7];
+    wire reset_cycle = ir_is_alu | ~ir_is_2cy;
     initial begin
         cycle = 1'b0;
     end
@@ -92,32 +96,38 @@ module control_unit(
 
 
     // mem_oe is high when op is ST and clk is high
-    assign mem_oe = st & clk;
+    assign mem_oe = ~ir_is_alu & ir_is_sto & clk;
     assign mem_we = ~mem_oe;
 
-    assign d_to_di_oe = ~(ld | (ir[7] & cycle));
+    assign d_to_di_oe = ir_is_alu | ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
 
     assign ir_we = cycle;
 
     assign ip_inc = 1'b1;
 
     // (ir == st || ir == ld) & clk
-    assign addr_dp = (ir[7:5] == 3'b001) & clk;
+    assign addr_dp = (ir[7:5] == 3'b100) & clk;
 
-    wire [3:0] decoded_x = ~(1 << ir[1:0]);
-    wire we_x = jc | st | (ldi & (~cycle | ~clk));
-    wire oe_x_alu = ir[5];
-    wire oe_x_d = ~(st & clk);
-    assign {we_ph, we_pl, we_b, we_a} = we_x ? 4'b1111 : decoded_x;
-    assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_x_alu ? 3'b111 : decoded_x[3:1];
-    assign {oe_b_d, oe_a_d} = oe_x_d ? 2'b11 : (ir[0] ? 2'b01 : 2'b10);
+    wire [1:0] dst = ir[1:0];
+    wire [1:0] src = ir[3:2];
+    wire [3:0] dst_decoded = 4'b1 << dst;
+    wire [3:0] src_decoded = 4'b1 << src;
+    wire src_d = ir[0];
 
-    assign we_flags = ~alu;
+    wire we_dst = ~ir_is_alu & (ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle));
+    wire oe_src_alu = ~ir_is_alu;
+    wire oe_src_d = ir_is_alu | ~(ir_is_sto & clk);
+
+    assign {we_ph, we_pl, we_b, we_a} = we_dst ? 4'b1111 : ~dst_decoded;
+    assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_src_alu ? 3'b111 : ~src_decoded[3:1];
+    assign {oe_b_d, oe_a_d} = oe_src_d ? 2'b11 : (src_d ? 2'b01 : 2'b10);
+
+    assign we_flags = ~ir_is_alu;
 
     wire [1:0] flag = ir[1:0];
     wire condition_result = (ir[2] ^ |(flags & (4'b1 << flag))) | ir[3];
-    assign swap_p = jc & condition_result;
+    assign swap_p = ~ir_is_alu & ir_is_jmp & (ir[3] | condition_result);
 
-    assign alu_op = ir[4:2];
-    assign alu_oe = ~alu;
+    assign alu_op = ir[6:4];
+    assign alu_oe = ~ir_is_alu;
 endmodule
