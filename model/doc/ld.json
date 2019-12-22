@@ -1,0 +1,21 @@
+/* https://wavedrom.com/editor.html */
+{signal: [
+  {name: 'clk', wave: '0101'},
+  {name: 'A', wave: '343x', data: "IP DP IP"},
+  {name: 'D', wave: 'z..x'},
+  {name: 'mem_oe', wave: '0..x'},
+  {name: 'mem_we', wave: '1..x'},
+  {name: 'd_to_di_oe', wave: 'x0.x'},
+  {name: 'ir_we', wave: 'x0.x'},
+  {name: 'ip_inc', wave: 'x1.x'},
+  {name: 'addr_dp', wave: '010x'},
+  {name: 'swap_p', wave: 'x0.x'},
+  {name: 'we_x', wave: 'x0.x'},
+  {name: 'oe_x_alu', wave: 'x1.x'},
+  {name: 'oe_x_d', wave: 'x1.x'},
+  {name: 'we_flags', wave: 'x1.x'},
+],
+  head: {text: "LD operation"},
+  foot: {text: "we/oe active level is low, others' high"},
+  config: {hscale: 3}
+}
