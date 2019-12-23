@@ -1,3 +1,5 @@
-8-bit register -374(no clear, z) -364 -380(clear, z), -532(no clear, z)
-counter/register: -ls69 (dual 4 bit, no carry), -161(4 bit, load, carry, clear, no z), -163(4 bit, load, carry, clear, no z)
+8-bit register -273 (clear, no z, no we)
+counter/register: -161(4 bit, load, carry, clear, no z)
 
+z-buffer: -244
+RAM: 62c256
