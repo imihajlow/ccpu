@@ -68,9 +68,9 @@ module control_unit(
     // 5: second cycle
     // 4: store or load
     wire ir_is_alu = ~ir[7];
-    wire ir_is_jmp = ir[6];
-    wire ir_is_2cy = ir[5];
-    wire ir_is_sto = ir[4];
+    wire ir_is_jmp = ir[7] & ir[6];
+    wire ir_is_2cy = ir[7] & ir[5];
+    wire ir_is_sto = ir[7] & ir[4];
 
     wire ld = ir[7:4] == 4'b1000;
     wire st = ir[7:4] == 4'b1001;
@@ -79,7 +79,7 @@ module control_unit(
     wire jc = ir[7:4] == 4'b1100;
 
     reg cycle;
-    wire reset_cycle = ir_is_alu | ~ir_is_2cy;
+    wire reset_cycle = ~ir_is_2cy;
     initial begin
         cycle = 1'b0;
     end
@@ -96,7 +96,7 @@ module control_unit(
 
 
     // mem_oe is high when op is ST and clk is high
-    assign mem_oe = ~ir_is_alu & ir_is_sto & clk;
+    assign mem_oe = ir_is_sto & clk;
     assign mem_we = ~mem_oe;
 
     assign d_to_di_oe = ir_is_alu | ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
@@ -114,9 +114,9 @@ module control_unit(
     wire [3:0] src_decoded = 4'b1 << src;
     wire src_d = ir[0];
 
-    wire we_dst = ~ir_is_alu & (ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle));
+    wire we_dst = ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
     wire oe_src_alu = ~ir_is_alu;
-    wire oe_src_d = ir_is_alu | ~(ir_is_sto & clk);
+    wire oe_src_d = ~(ir_is_sto & clk);
 
     assign {we_ph, we_pl, we_b, we_a} = we_dst ? 4'b1111 : ~dst_decoded;
     assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_src_alu ? 3'b111 : ~src_decoded[3:1];
@@ -126,7 +126,7 @@ module control_unit(
 
     wire [1:0] flag = ir[1:0];
     wire condition_result = (ir[2] ^ |(flags & (4'b1 << flag))) | ir[3];
-    assign swap_p = ~ir_is_alu & ir_is_jmp & (ir[3] | condition_result);
+    assign swap_p = ir_is_jmp & (ir[3] | condition_result);
 
     assign alu_op = ir[6:4];
     assign alu_oe = ~ir_is_alu;
