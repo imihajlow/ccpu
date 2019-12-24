@@ -44,18 +44,20 @@ module control_unit(
     output wire oe_a_d, oe_b_d; // drive external D bus with a or b
 
     output wire we_flags; // latch flags on negedge clk
-    output wire [2:0] alu_op;
+    output wire [3:0] alu_op;
     output wire alu_oe; // ALU output to DI is enabled
 
     // Instructions:
     // LD d:         [DP] -> d
     // ST s:         s -> [DP]
-    // ALU d, s, op: d = ALU(A, s, op)
+    // ALU0 d, op:   A = ALU(A, d, op)
+    // ALU1 d, op:   d = ALU(A, d, op)
     // LDI d:        IP++, [IP] -> d
     // Jc:           if c swap(IP, DP)
     // JMP:          swap(IP, DP)
 
-    // ALU: 0ooossdd
+    // ALU0:0oooo0dd
+    // ALU1:0oooo1dd
     // LD:  1000__dd
     // ST:  1001___s
     // LDI: 1010__dd
@@ -109,17 +111,19 @@ module control_unit(
     assign addr_dp = (ir[7:5] == 3'b100) & clk;
 
     wire [1:0] dst = ir[1:0];
-    wire [1:0] src = ir[3:2];
     wire [3:0] dst_decoded = 4'b1 << dst;
-    wire [3:0] src_decoded = 4'b1 << src;
     wire src_d = ir[0];
 
-    wire we_dst = ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
+    wire we_dst = ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle) | (ir_is_alu & ~ir[2]);
     wire oe_src_alu = ~ir_is_alu;
     wire oe_src_d = ~(ir_is_sto & clk);
 
-    assign {we_ph, we_pl, we_b, we_a} = we_dst ? 4'b1111 : ~dst_decoded;
-    assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_src_alu ? 3'b111 : ~src_decoded[3:1];
+    wire we_a_dst;
+    wire we_a_alua = ~ir_is_alu | ir[2];
+    assign {we_ph, we_pl, we_b, we_a_dst} = we_dst ? 4'b1111 : ~dst_decoded;
+    assign we_a = we_a_dst & we_a_alua;
+
+    assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_src_alu ? 3'b111 : ~dst_decoded[3:1];
     assign {oe_b_d, oe_a_d} = oe_src_d ? 2'b11 : (src_d ? 2'b01 : 2'b10);
 
     assign we_flags = ~ir_is_alu;
@@ -128,6 +132,6 @@ module control_unit(
     wire condition_result = (ir[2] ^ |(flags & (4'b1 << flag))) | ir[3];
     assign swap_p = ir_is_jmp & (ir[3] | condition_result);
 
-    assign alu_op = ir[6:4];
+    assign alu_op = ir[6:3];
     assign alu_oe = ~ir_is_alu;
 endmodule
