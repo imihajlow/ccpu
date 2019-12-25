@@ -158,121 +158,124 @@ module test_alu;
         for (i_a = 0; i_a < 256; i_a = i_a + 1) begin
             for (i_b = 0; i_b < 256; i_b = i_b + 1) begin
                 for (i_carry = 0; i_carry < 2; i_carry = i_carry + 1) begin
-                    a = i_a[7:0];
-                    b = i_b[7:0];
-                    carry_in = i_carry[0];
-                    invert = 0;
+                    for (i_invert = 0; i_invert < 2; i_invert = i_invert + 1) begin
+                        invert = i_invert;
 
-                    op = ADD;
-                    #1
-                    assert(result == ((i_a + i_b) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a + i_b) & 9'h100) >> 8);
-                    assert(flags[3] == ((i_a[7] == i_b[7]) & (i_a[7] != result[7])));
+                        a = i_a[7:0];
+                        b = i_b[7:0];
+                        carry_in = i_carry[0];
 
-                    op = ADC;
-                    #1
-                    assert(result == ((i_a + i_b + carry_in) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a + i_b + i_carry) & 9'h100) >> 8);
-                    assert(flags[3] == ((i_a[7] == i_b[7]) & (i_a[7] != result[7])));
+                        op = ADD;
+                        #1
+                        assert(result == ((i_a + i_b) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a + i_b) & 9'h100) >> 8);
+                        assert(flags[3] == ((i_a[7] == i_b[7]) & (i_a[7] != result[7])));
 
-                    op = SUB;
-                    #1
-                    assert(result == ((i_a - i_b) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a - i_b) & 9'h100) >> 8);
-                    assert(flags[3] == ((i_a[7] != i_b[7]) & (i_a[7] != result[7])));
+                        op = ADC;
+                        #1
+                        assert(result == ((i_a + i_b + carry_in) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a + i_b + i_carry) & 9'h100) >> 8);
+                        assert(flags[3] == ((i_a[7] == i_b[7]) & (i_a[7] != result[7])));
 
-                    op = SBB;
-                    #1
-                    assert(result == ((i_a - i_b - carry_in) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a - i_b - i_carry) & 9'h100) >> 8);
-                    assert(flags[3] == ((i_a[7] != i_b[7]) & (i_a[7] != result[7])));
+                        op = SUB;
+                        #1
+                        assert(result == ((i_a - i_b) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a - i_b) & 9'h100) >> 8);
+                        assert(flags[3] == ((i_a[7] != i_b[7]) & (i_a[7] != result[7])));
 
-                    op = INC;
-                    #1
-                    assert(result == ((i_a + 1) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a + 1) & 9'h100) >> 8);
-                    assert(flags[3] == (~i_a[7] & result[7]));
+                        op = SBB;
+                        #1
+                        assert(result == ((i_a - i_b - carry_in) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a - i_b - i_carry) & 9'h100) >> 8);
+                        assert(flags[3] == ((i_a[7] != i_b[7]) & (i_a[7] != result[7])));
 
-                    op = DEC;
-                    #1
-                    assert(result == ((i_a - 1) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == ((i_a - 1) & 9'h100) >> 8);
-                    assert(flags[3] == (i_a[7] & ~result[7]));
+                        op = INC;
+                        #1
+                        assert(result == ((i_a + 1) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a + 1) & 9'h100) >> 8);
+                        assert(flags[3] == (~i_a[7] & result[7]));
 
-                    op = SHL;
-                    #1
-                    assert(result == {i_a[6:0], 1'b0});
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == i_a[7]);
+                        op = DEC;
+                        #1
+                        assert(result == ((i_a - 1) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == ((i_a - 1) & 9'h100) >> 8);
+                        assert(flags[3] == (i_a[7] & ~result[7]));
 
-                    op = EXP;
-                    #1
-                    assert(result == (i_carry ? 8'hff : 8'h00));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = SHL;
+                        #1
+                        assert(result == {i_a[6:0], 1'b0});
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == i_a[7]);
 
-                    op = MOV;
-                    #1
-                    assert(result == i_a);
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = EXP;
+                        #1
+                        assert(result == (i_carry ? 8'hff : 8'h00));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = NOT;
-                    #1
-                    assert(result == (~i_a & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = MOV;
+                        #1
+                        assert(result == i_a);
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = NEG;
-                    #1
-                    assert(result == ((256 - i_a) & 8'hff));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = NOT;
+                        #1
+                        assert(result == (~i_a & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = AND;
-                    #1
-                    assert(result == (i_a & i_b));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = NEG;
+                        #1
+                        assert(result == ((256 - i_a) & 8'hff));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = OR;
-                    #1
-                    assert(result == (i_a | i_b));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = AND;
+                        #1
+                        assert(result == (i_a & i_b));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = XOR;
-                    #1
-                    assert(result == (i_a ^ i_b));
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
+                        op = OR;
+                        #1
+                        assert(result == (i_a | i_b));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = SHR;
-                    #1
-                    assert(result == {1'b0, i_a[7:1]});
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == i_a[0]);
+                        op = XOR;
+                        #1
+                        assert(result == (i_a ^ i_b));
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
 
-                    op = SAR;
-                    #1
-                    assert(result == {i_a[7], i_a[7:1]});
-                    assert(flags[0] == (result == 0));
-                    assert(flags[2] == result[7]);
-                    assert(flags[1] == i_a[0]);
+                        op = SHR;
+                        #1
+                        assert(result == {1'b0, i_a[7:1]});
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == i_a[0]);
+
+                        op = SAR;
+                        #1
+                        assert(result == {i_a[7], i_a[7:1]});
+                        assert(flags[0] == (result == 0));
+                        assert(flags[2] == result[7]);
+                        assert(flags[1] == i_a[0]);
+                    end
                 end
             end
         end

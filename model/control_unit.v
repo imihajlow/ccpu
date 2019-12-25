@@ -14,6 +14,7 @@ module control_unit(
             oe_pl_alu,
             oe_ph_alu,
             oe_b_alu,
+            oe_zero_alu,
             oe_a_d,
             oe_b_d,
             we_flags,
@@ -41,7 +42,7 @@ module control_unit(
     output wire swap_p; // swap IP and DP on negedge clk
 
     output wire we_pl, we_ph, we_a, we_b; // latch registers from DI on negedge clk
-    output wire oe_pl_alu, oe_ph_alu, oe_b_alu; // drive ALU B input with register values
+    output wire oe_pl_alu, oe_ph_alu, oe_b_alu, oe_zero_alu; // drive ALU B input with register values
     output wire oe_a_d, oe_b_d; // drive external D bus with a or b
 
     output wire we_flags; // latch flags on negedge clk
@@ -83,21 +84,33 @@ module control_unit(
     wire jc = ir[7:4] == 4'b1100;
 
     reg cycle;
-    wire reset_cycle = ~ir_is_2cy;
+    wire n_reset_cycle = ir_is_2cy;
     initial begin
         cycle = 1'b0;
     end
 
-    always @(negedge clk or negedge rst) begin
+    always @(posedge clk or negedge rst or negedge n_reset_cycle) begin
         if (~rst) begin
             cycle <= 1'b0;
-        end else if (reset_cycle) begin
+        end else if (~n_reset_cycle) begin
             cycle <= 1'b0;
         end else begin
             cycle <= ~cycle;
         end
     end
 
+    reg ir_we_reg;
+    initial begin
+        ir_we_reg = 1'b0;
+    end
+
+    always @(negedge clk or negedge rst) begin
+        if (~rst) begin
+            ir_we_reg <= 1'b0;
+        end else if (ir_is_2cy) begin
+            ir_we_reg <= ~ir_we_reg;
+        end
+    end
 
     // mem_oe is high when op is ST and clk is high
     assign mem_oe = ir_is_sto & clk;
@@ -105,7 +118,7 @@ module control_unit(
 
     assign d_to_di_oe = ir_is_alu | ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
 
-    assign ir_we = cycle;
+    assign ir_we = ir_we_reg;
 
     assign ip_inc = 1'b1;
 
@@ -125,7 +138,7 @@ module control_unit(
     assign {we_ph, we_pl, we_b, we_a_dst} = we_dst ? 4'b1111 : ~dst_decoded;
     assign we_a = we_a_dst & we_a_alua;
 
-    assign {oe_ph_alu, oe_pl_alu, oe_b_alu} = oe_src_alu ? 3'b111 : ~dst_decoded[3:1];
+    assign {oe_ph_alu, oe_pl_alu, oe_b_alu, oe_zero_alu} = oe_src_alu ? 3'b1111 : ~dst_decoded;
     assign {oe_b_d, oe_a_d} = oe_src_d ? 2'b11 : (src_d ? 2'b01 : 2'b10);
 
     assign we_flags = ~ir_is_alu;

@@ -27,6 +27,8 @@ SHR = 14 # a >> 1, zero extended
 SAR = 15 # a >> 1, sign extended
 
 def get_result_lo(a, b, op, invert, from_other, carry):
+    if invert:
+        a,b = b,a
     r = 0
     carry_out = 0
     to_other = 0
@@ -94,6 +96,8 @@ def get_overflow(r, a, b, is_sum):
         return 0
 
 def get_result_hi(a, b, op, invert, from_other, carry_in):
+    if invert:
+        a,b = b,a
     r = 0
     carry_out = 0
     to_other = 0

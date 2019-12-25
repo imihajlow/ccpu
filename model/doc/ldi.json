@@ -1,6 +1,7 @@
 /* https://wavedrom.com/editor.html */
 {signal: [
   {name: 'clk', wave: '010101'},
+  {name: 'cycle', wave: 'x0.1.0'},
   {name: 'A', wave: '3.3.3x', data: "IP IP+1 IP+2"},
   {name: 'D', wave: 'z....x', data: "x"},
   {name: 'mem_oe', wave: '0....x'},
@@ -10,7 +11,7 @@
   {name: 'ip_inc', wave: 'x1...x'},
   {name: 'addr_dp', wave: '0....x'},
   {name: 'swap_p', wave: 'x0...x'},
-  {name: 'we_x', wave: 'x1.01x'},
+  {name: 'we_x', wave: 'x1.0.x'},
   {name: 'oe_x_alu', wave: 'x1...x'},
   {name: 'oe_x_d', wave: 'x1...x'},
   {name: 'we_flags', wave: 'x1...x'},
