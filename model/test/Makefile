@@ -19,5 +19,10 @@ test_pointer_pair: test_pointer_pair.v ../pointer_pair.v ../pointer_reg.v ../uni
 test_control_unit: test_control_unit.v ../control_unit.v
 	iverilog -o $@ $^
 
-test_alu: test_alu.v ../alu.v
-	iverilog -o $@ $^
+test_alu: test_alu.v ../alu.v ../alu_hi.v ../alu_lo.v alu_lo.mem alu_hi.mem
+	iverilog -o $@ test_alu.v ../alu.v ../alu_hi.v ../alu_lo.v
+
+alu_lo.mem: ../gen-alu.py
+	../gen-alu.py
+
+alu_hi.mem: alu_lo.mem
