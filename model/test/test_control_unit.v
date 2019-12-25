@@ -24,6 +24,7 @@ module test_control_unit();
     wire we_flags;
     wire [3:0] alu_op;
     wire alu_oe;
+    wire alu_invert;
 
     task assert_short_circuit;
     begin
@@ -67,6 +68,7 @@ module test_control_unit();
             .we_flags(we_flags),
             .alu_op(alu_op),
             .alu_oe(alu_oe),
+            .alu_invert(alu_invert),
             .clk(clk),
             .rst(rst),
             .ir(ir),
@@ -97,7 +99,7 @@ module test_control_unit();
             for (i_op = 0; i_op < 16; i_op = i_op + 1) begin
                 // first cycle
                 #1 clk = 1'b1;
-                // ALU0 src, i
+                // ALU A, src, i
                 ir = {1'b0, i_op[3:0], 1'b0, i_src[1:0]};
                 #1
                 assert(mem_oe == 1'b0);
@@ -119,6 +121,7 @@ module test_control_unit();
                 assert(we_flags == 1'b0);
                 assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
+                assert(alu_invert == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -166,6 +169,7 @@ module test_control_unit();
                 assert(we_flags == 1'b0);
                 assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
+                assert(alu_invert == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -197,7 +201,7 @@ module test_control_unit();
             for (i_op = 0; i_op < 16; i_op = i_op + 1) begin
                 // first cycle
                 #1 clk = 1'b1;
-                // ALU1 src, i
+                // ALU src, A, i
                 ir = {1'b0, i_op[3:0], 1'b1, i_src[1:0]};
                 #1
                 assert(mem_oe == 1'b0);
@@ -219,6 +223,7 @@ module test_control_unit();
                 assert(we_flags == 1'b0);
                 assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
+                assert(alu_invert == 1'b1);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -266,6 +271,7 @@ module test_control_unit();
                 assert(we_flags == 1'b0);
                 assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
+                assert(alu_invert == 1'b1);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
