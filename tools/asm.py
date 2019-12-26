@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import re
+import sys
 
 class AssemblyError(Exception):
     def __init__(self, line, reason):
@@ -89,7 +90,7 @@ def encodeSrc(reg):
     elif reg == 'ph':
         return 3
     else:
-        raise ValueError("Bad register {}".format(reg))
+        raise ValueError("Bad register `{}`".format(reg))
 
 def encodeAlu(op):
     if op == 'add':
@@ -133,7 +134,10 @@ def hi(x):
     return (x >> 8) & 0xff
 
 def evalExpression(value, labels):
-    return eval(value, {'lo': lo, 'hi': hi}, labels)
+    try:
+        return eval(value, {'lo': lo, 'hi': hi}, labels)
+    except BaseException as e:
+        raise ValueError("Error evaluating {}: {}".format(value, e))
 
 def encodeFlag(f):
     if f == 'z':
@@ -202,18 +206,20 @@ def encode(op, args, labels):
 
 
 def assemble(lines):
-    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?\s*(?:(?P<op>[.a-z]\w*\b)\s*(?P<args>\b[^;]+)?)?\s*(?:;.*)?$", re.I)
+    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-*/><, \t]+))?)?(?:\s*;.*)?$", re.I)
     ip = 0
     labels = {}
     result = [None] * 65536
-    for i,line in enumerate(lines):
+    for i,l in enumerate(lines):
+        line = l.strip()
         try:
             m = r.match(line)
             if m is None:
-                raise ValueError("Syntax error at line {}".format(i + 1))
+                raise ValueError("Syntax error")
             label = m.group('label')
             op = m.group('op')
             args = m.group('args')
+            print("label: `{}`, op: `{}`, args: `{}`".format(label, op, args))
             if label:
                 labels[label] = ip
             ip = updateIp(ip, op, args)
@@ -221,7 +227,8 @@ def assemble(lines):
             raise AssemblyError(i + 1, e)
     ip = 0
     init = True
-    for i,line in enumerate(lines):
+    for i,l in enumerate(lines):
+        line = l.strip()
         try:
             m = r.match(line)
             if m is None:
@@ -271,3 +278,4 @@ if __name__ == "__main__":
         save(result, args.o)
     except AssemblyError as e:
         print(e)
+        sys.exit(1)

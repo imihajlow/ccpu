@@ -138,7 +138,7 @@ module control_unit(
     assign {we_ph, we_pl, we_b, we_a_dst} = we_dst ? 4'b1111 : ~dst_decoded;
     assign we_a = we_a_dst & we_a_alua;
 
-    assign {oe_ph_alu, oe_pl_alu, oe_b_alu, oe_zero_alu} = oe_src_alu ? 3'b1111 : ~dst_decoded;
+    assign {oe_ph_alu, oe_pl_alu, oe_b_alu, oe_zero_alu} = oe_src_alu ? 4'b1111 : ~dst_decoded;
     assign {oe_b_d, oe_a_d} = oe_src_d ? 2'b11 : (src_d ? 2'b01 : 2'b10);
 
     assign we_flags = ~ir_is_alu;
