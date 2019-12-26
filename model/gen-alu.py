@@ -17,7 +17,7 @@ INC = 4  # a + 1
 DEC = 5  # a - 1
 SHL = 6  # a << 1
 NEG = 7  # -a
-MOV = 8  # a
+MOV = 8  # b
 NOT = 9  # ~a
 EXP = 10 # c ? 0xff : 0x00
 AND = 11 # a & b
@@ -66,7 +66,7 @@ def get_result_lo(a, b, op, invert, from_other, carry):
     elif op == EXP:
         r = 15 if carry == 1 else 0
     elif op == MOV:
-        r = a
+        r = b
     elif op == NOT:
         r = (~a) & 15
     elif op == NEG:
@@ -132,7 +132,7 @@ def get_result_hi(a, b, op, invert, from_other, carry_in):
     elif op == EXP:
         r = 15 if carry_in == 1 else 0
     elif op == MOV:
-        r = a
+        r = b
     elif op == NOT:
         r = (~a) & 0xf
     elif op == NEG:
