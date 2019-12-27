@@ -24,13 +24,14 @@ module test_cpu();
     always @(we, a, d) begin
         if (~we) begin
             ram[a] <= d;
+            $display("write [%h] <= %h", a, d);
         end
     end
 
     task dump_memory();
         integer i;
-        for (i = 0; i < 256; i = i + 16) begin
-            $display("%h: %h %h %h %h %h %h %h %h  %h %h %h %h %h %h %h %h", i * 16,
+        for (i = 0; i < 512; i = i + 16) begin
+            $display("%h: %h %h %h %h %h %h %h %h  %h %h %h %h %h %h %h %h", i,
                 ram[i],
                 ram[i + 1],
                 ram[i + 2],
@@ -57,12 +58,14 @@ module test_cpu();
         $readmemh("test_cpu.hex", ram);
         rst = 1'b0;
         clk = 1'b0;
+        dump_memory();
 
         #1 rst = 1'b1;
 
         for (i = 0; i < 1000; i = i + 2) begin
             #1
             if (~oe & (a == FINISH_ADDR)) begin
+                $display("Finish address reached");
                 dump_memory();
                 $finish;
             end
@@ -71,6 +74,7 @@ module test_cpu();
         end
         #1
 
+        $display("Time limit reached");
         dump_memory();
     end
 endmodule
