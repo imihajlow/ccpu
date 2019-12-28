@@ -98,7 +98,7 @@ mul_loop_end:
 
         .align  16
 mul_return: dw  0
-mul_a:  db      2
+mul_a:  db      100
 mul_b:  dw      100
 mul_i:  db      0
         .align  16

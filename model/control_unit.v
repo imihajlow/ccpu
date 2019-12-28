@@ -62,7 +62,7 @@ module control_unit(
     // ALU0:0oooo0dd
     // ALU1:0oooo1dd
     // LD:  1000__dd
-    // ST:  1001___s
+    // ST:  1011___s
     // LDI: 1010__dd
     // Jc:  11000cff
     // JMP: 11001___
@@ -78,7 +78,7 @@ module control_unit(
     wire ir_is_sto = ir[7] & ir[4];
 
     wire ld = ir[7:4] == 4'b1000;
-    wire st = ir[7:4] == 4'b1001;
+    wire st = ir[7:4] == 4'b1011;
     wire alu = ir[7] == 1'b0;
     wire ldi = ir[7:4] == 4'b1010;
     wire jc = ir[7:4] == 4'b1100;
@@ -112,26 +112,24 @@ module control_unit(
         end
     end
 
-    // mem_oe is high when op is ST and clk is high
-    assign mem_oe = ir_is_sto & clk;
-    assign mem_we = ~mem_oe;
+    assign mem_oe = st & (~cycle | clk);
+    assign mem_we = ~(st & ~cycle & ~clk);
 
-    assign d_to_di_oe = ir_is_alu | ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle);
+    assign d_to_di_oe = ~((ldi & cycle) | ld);
 
     assign ir_we = ir_we_reg;
 
-    assign ip_inc = 1'b1;
+    assign ip_inc = ~st | cycle;
 
-    // (ir == st || ir == ld) & clk
-    assign addr_dp = (ir[7:5] == 3'b100) & clk;
+    assign addr_dp = (ld & clk) | (st & (~cycle | clk));
 
     wire [1:0] dst = ir[1:0];
     wire [3:0] dst_decoded = 4'b1 << dst;
     wire src_d = ir[0];
 
-    wire we_dst = ir_is_jmp | ir_is_sto | (ir_is_2cy & ~cycle) | (ir_is_alu & ~ir[2]);
+    wire we_dst = ir_is_jmp | ir_is_sto | (ldi & ~cycle) | (ir_is_alu & ~ir[2]);
     wire oe_src_alu = ~ir_is_alu;
-    wire oe_src_d = ~(ir_is_sto & clk);
+    wire oe_src_d = ~(st & ir_we_reg);
 
     wire we_a_dst;
     wire we_a_alua = ~ir_is_alu | ir[2];

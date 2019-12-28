@@ -1,7 +1,7 @@
 module test_control_unit();
     task assert;
         input v;
-        if (!v)
+        if (v !== 1'b1)
             $fatal;
     endtask
 
@@ -891,43 +891,20 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b1001xxx1;
+        ir = 8'b1011xxx1;
         flags = 4'bxxxx;
         #1
         assert(mem_oe == 1'b1);
-        assert(mem_we == 1'b0);
-        // assert(d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b0);
-        assert(ip_inc == 1'b1);
+        assert(mem_we == 1'b1);
+        assert(d_to_di_oe == 1'b1);
+        assert(ir_we == 1'b0);
+        assert(ip_inc == 1'b0);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(we_ph == 1'b1);
         assert(we_pl == 1'b1);
         assert(we_a == 1'b1);
         assert(we_b == 1'b1);
-        // assert(oe_pl_alu == 1'b1);
-        // assert(oe_ph_alu == 1'b1);
-        // assert(oe_b_alu == 1'b1);
-        assert(oe_a_d == 1'b1);
-        assert(oe_b_d == 1'b0);
-        assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
-        // assert(alu_oe == 1'b1);
-        assert_short_circuit();
-
-        #1 clk = 1'b0;
-        #1
-        assert(mem_oe == 1'b0);
-        assert(mem_we == 1'b1);
-        // assert(d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b0);
-        // assert(ip_inc == 1'b1);
-        assert(addr_dp == 1'b0);
-        // assert(swap_p == 1'b0);
-        // assert(we_ph == 1'b1);
-        // assert(we_pl == 1'b1);
-        // assert(we_a == 1'b1);
-        // assert(we_b == 1'b1);
         // assert(oe_pl_alu == 1'b1);
         // assert(oe_ph_alu == 1'b1);
         // assert(oe_b_alu == 1'b1);
@@ -935,16 +912,39 @@ module test_control_unit();
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
         // assert(alu_op == 3'b101);
-        // assert(alu_oe == 1'b0);
+        // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
-        // second cycle - everything the same
-        #1 clk = 1'b1;
+        #1 clk = 1'b0;
         #1
         assert(mem_oe == 1'b1);
         assert(mem_we == 1'b0);
-        // assert(d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b0);
+        assert(d_to_di_oe == 1'b1);
+        assert(ir_we == 1'b1);
+        assert(ip_inc == 1'b0);
+        assert(addr_dp == 1'b1);
+        assert(swap_p == 1'b0);
+        assert(we_ph == 1'b1);
+        assert(we_pl == 1'b1);
+        assert(we_a == 1'b1);
+        assert(we_b == 1'b1);
+        // assert(oe_pl_alu == 1'b1);
+        // assert(oe_ph_alu == 1'b1);
+        // assert(oe_b_alu == 1'b1);
+        assert(oe_a_d == 1'b1);
+        assert(oe_b_d == 1'b0);
+        assert(we_flags == 1'b1);
+        // assert(alu_op == 3'b101);
+        // assert(alu_oe == 1'b0);
+        assert_short_circuit();
+
+        // second cycle
+        #1 clk = 1'b1;
+        #1
+        assert(mem_oe == 1'b1);
+        assert(mem_we == 1'b1);
+        assert(d_to_di_oe == 1'b1);
+        assert(ir_we == 1'b1);
         assert(ip_inc == 1'b1);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
@@ -959,22 +959,22 @@ module test_control_unit();
         assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
         // assert(alu_op == 3'b101);
-        // assert(alu_oe == 1'b1);
+        // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
         assert(mem_oe == 1'b0);
         assert(mem_we == 1'b1);
-        // assert(d_to_di_oe == 1'b1);
+        assert(d_to_di_oe == 1'b1);
         assert(ir_we == 1'b0);
-        // assert(ip_inc == 1'b1);
+        assert(ip_inc == 1'b1);
         assert(addr_dp == 1'b0);
-        // assert(swap_p == 1'b0);
-        // assert(we_ph == 1'b1);
-        // assert(we_pl == 1'b1);
-        // assert(we_a == 1'b1);
-        // assert(we_b == 1'b1);
+        assert(swap_p == 1'b0);
+        assert(we_ph == 1'b1);
+        assert(we_pl == 1'b1);
+        assert(we_a == 1'b1);
+        assert(we_b == 1'b1);
         // assert(oe_pl_alu == 1'b1);
         // assert(oe_ph_alu == 1'b1);
         // assert(oe_b_alu == 1'b1);

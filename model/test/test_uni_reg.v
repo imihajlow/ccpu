@@ -1,3 +1,4 @@
+`timescale 1us/1ns
 module test_uni_reg();
 
 	reg clk;
@@ -16,7 +17,7 @@ module test_uni_reg();
 
 	task assert;
 		input v;
-		if (!v)
+		if (v !== 1'b1)
 			$fatal;
 	endtask
 
@@ -30,20 +31,24 @@ module test_uni_reg();
 		oeb = 1'b1;
 		di = 8'h57;
 
-		assert(doa == 8'hz);
-		assert(dob == 8'hz);
+		#1
+		assert(doa === 8'hz);
+		assert(dob === 8'hz);
 		#1 clk = ~clk;
 		#1 oea = 1'b0;
-		assert(doa == 8'h0);
+		#1
+		assert(doa === 8'h0);
 		#1 clk = ~clk;
 		we = 1'b0;
-		assert(doa == 8'h0);
+		#1
+		assert(doa === 8'h0);
 		#1 clk = ~clk;
 		#1
-		assert(doa == 8'h57);
-		assert(dob == 8'hz);
+		assert(doa === 8'h57);
+		assert(dob === 8'hz);
 		#1 oeb = 1'b0;
-		assert(dob == 8'h57);
+		#1
+		assert(dob === 8'h57);
 		we = 1'b1;
 	end
 endmodule

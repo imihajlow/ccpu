@@ -1,3 +1,4 @@
+`timescale 1us/1ns
 module test_cpu();
     localparam FINISH_ADDR = 16'h1000;
     reg clk;
@@ -19,13 +20,11 @@ module test_cpu();
 
     wire [7:0] ram_out = ram[a];
 
-    assign d = oe ? 8'bzzzzzzzz : ram_out;
+    assign #0.075 d = oe ? 8'bzzzzzzzz : ram_out;
 
-    always @(we, a, d) begin
-        if (~we) begin
-            ram[a] <= d;
-            $display("write [%h] <= %h", a, d);
-        end
+    always @(posedge we) begin
+        ram[a] <= d;
+        $display("write [%h] <= %h", a, d);
     end
 
     task dump_memory();
@@ -62,9 +61,9 @@ module test_cpu();
 
         #1 rst = 1'b1;
 
-        for (i = 0; i < 1000; i = i + 2) begin
+        for (i = 0; i < 5000; i = i + 2) begin
             #1
-            if (~oe & (a == FINISH_ADDR)) begin
+            if (~oe & (a === FINISH_ADDR)) begin
                 $display("Finish address reached");
                 dump_memory();
                 $finish;
@@ -76,5 +75,6 @@ module test_cpu();
 
         $display("Time limit reached");
         dump_memory();
+        $fatal;
     end
 endmodule

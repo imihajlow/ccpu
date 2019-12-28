@@ -2,7 +2,7 @@
 module test_74153();
     task assert;
         input v;
-        if (!v)
+        if (v !== 1'b1)
             $fatal;
     endtask
 
@@ -30,7 +30,7 @@ module test_74153();
         i1 = 4'bx;
         s = 2'bx;
         #1
-        assert(y1 == 1'b0);
+        assert(y1 === 1'b0);
 
         #1
         e1 = 1'b0;
@@ -39,49 +39,49 @@ module test_74153();
         i1 = 4'bxxx0;
         s = 2'b00;
         #1
-        assert(y1 == 1'b0);
+        assert(y1 === 1'b0);
 
         i1 = 4'bxxx1;
         s = 2'b00;
         #1
-        assert(y1 == 1'b1);
+        assert(y1 === 1'b1);
 
         i1 = 4'bxx0x;
         s = 2'b01;
         #1
-        assert(y1 == 1'b0);
+        assert(y1 === 1'b0);
 
         i1 = 4'bxx1x;
         s = 2'b01;
         #1
-        assert(y1 == 1'b1);
+        assert(y1 === 1'b1);
 
         i1 = 4'bx0xx;
         s = 2'b10;
         #1
-        assert(y1 == 1'b0);
+        assert(y1 === 1'b0);
 
         i1 = 4'bx1xx;
         s = 2'b10;
         #1
-        assert(y1 == 1'b1);
+        assert(y1 === 1'b1);
 
         i1 = 4'b0xxx;
         s = 2'b11;
         #1
-        assert(y1 == 1'b0);
+        assert(y1 === 1'b0);
 
         i1 = 4'b1xxx;
         s = 2'b11;
         #1
-        assert(y1 == 1'b1);
+        assert(y1 === 1'b1);
 
         // 2
         e2 = 1'b1;
         i2 = 4'bxxxx;
         s = 2'bxx;
         #1
-        assert(y2 == 1'b0);
+        assert(y2 === 1'b0);
 
         #1
         e2 = 1'b0;
@@ -90,41 +90,41 @@ module test_74153();
         i2 = 4'bxxx0;
         s = 2'b00;
         #1
-        assert(y2 == 1'b0);
+        assert(y2 === 1'b0);
 
         i2 = 4'bxxx1;
         s = 2'b00;
         #1
-        assert(y2 == 1'b1);
+        assert(y2 === 1'b1);
 
         i2 = 4'bxx0x;
         s = 2'b01;
         #1
-        assert(y2 == 1'b0);
+        assert(y2 === 1'b0);
 
         i2 = 4'bxx1x;
         s = 2'b01;
         #1
-        assert(y2 == 1'b1);
+        assert(y2 === 1'b1);
 
         i2 = 4'bx0xx;
         s = 2'b10;
         #1
-        assert(y2 == 1'b0);
+        assert(y2 === 1'b0);
 
         i2 = 4'bx1xx;
         s = 2'b10;
         #1
-        assert(y2 == 1'b1);
+        assert(y2 === 1'b1);
 
         i2 = 4'b0xxx;
         s = 2'b11;
         #1
-        assert(y2 == 1'b0);
+        assert(y2 === 1'b0);
 
         i2 = 4'b1xxx;
         s = 2'b11;
         #1
-        assert(y2 == 1'b1);
+        assert(y2 === 1'b1);
     end
 endmodule

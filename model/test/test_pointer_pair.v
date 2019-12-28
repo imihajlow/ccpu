@@ -1,3 +1,4 @@
+`timescale 1us/1ns
 module test_pointer_pair();
 
     reg clk;
@@ -31,7 +32,7 @@ module test_pointer_pair();
 
     task assert;
         input v;
-        if (!v)
+        if (v !== 1'b1)
             $fatal;
     endtask
 
@@ -52,25 +53,34 @@ module test_pointer_pair();
         di = 8'hFE;
         selector = 1'b0;
 
+        assert(1'bx !== 1'b1);
+        assert(1'bz === 1'bz);
 
-        assert(data_out == 8'hz);
-        assert(addr_out == 16'hz);
+        $display("initial checks ok");
+
+        #1
+        assert(data_out === 8'hz);
+        assert(addr_out === 16'hz);
         #1 clk = 1;
         #1 oe_addr_ip = 1'b0;
-        assert(addr_out == 16'h0);
-        assert(data_out == 8'hz);
+        #1
+        assert(addr_out === 16'h0);
+        assert(data_out === 8'hz);
         #1 clk = 0;
         we_l = 1'b0;
-        assert(addr_out == 16'h0);
+        #1
+        assert(addr_out === 16'h0);
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h0000);
-        assert(data_out == 8'hz);
+        assert(addr_out === 16'h0000);
+        assert(data_out === 8'hz);
         #1 oe_dl = 1'b0;
-        assert(data_out == 8'hfe);
+        #1
+        assert(data_out === 8'hfe);
         #1 oe_dl = 1'b1;
         #1 oe_dh = 1'b0;
-        assert(data_out == 8'h00);
+        #1
+        assert(data_out === 8'h00);
         #1 we_l = 1'b1;
 
         // test count
@@ -78,30 +88,31 @@ module test_pointer_pair();
         oe_dh = 1;
         oe_dl = 1;
         #1 clk = 0;
-        assert(addr_out == 16'h0000);
+        #1
+        assert(addr_out === 16'h0000);
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h0001);
+        assert(addr_out === 16'h0001);
         #1 clk = 0;
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h0002);
+        assert(addr_out === 16'h0002);
         #1 oe_addr_ip = 1'b1;
         oe_addr_dp = 1'b0;
         #1
-        assert(addr_out == 16'h00fe);
+        assert(addr_out === 16'h00fe);
 
 
         // test switch
         selector = 1'b1;
         #1
-        assert(addr_out == 16'h0002);
+        assert(addr_out === 16'h0002);
         #1 oe_addr_ip = 1'b0;
         oe_addr_dp = 1'b1;
         #1
-        assert(addr_out == 16'h00fe);
+        assert(addr_out === 16'h00fe);
         oe_dl = 1'b0;
         #1
-        assert(data_out == 8'h02);
+        assert(data_out === 8'h02);
     end
 endmodule

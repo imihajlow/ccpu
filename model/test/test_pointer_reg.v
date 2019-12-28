@@ -1,3 +1,4 @@
+`timescale 1us/1ns
 module test_pointer_reg();
 
     reg clk;
@@ -27,7 +28,7 @@ module test_pointer_reg();
 
     task assert;
         input v;
-        if (!v)
+        if (v !== 1'b1)
             $fatal;
     endtask
 
@@ -47,24 +48,29 @@ module test_pointer_reg();
         di = 8'hFE;
 
 
-        assert(data_out == 8'hz);
-        assert(addr_out == 16'hz);
+        #1
+        assert(data_out === 8'hz);
+        assert(addr_out === 16'hz);
         #1 clk = 1;
         #1 oe_addr = 1'b0;
-        assert(addr_out == 16'h0);
-        assert(data_out == 8'hz);
+        #1
+        assert(addr_out === 16'h0);
+        assert(data_out === 8'hz);
         #1 clk = 0;
         we_l = 1'b0;
-        assert(addr_out == 16'h0);
+        #1
+        assert(addr_out === 16'h0);
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h00fe);
-        assert(data_out == 8'hz);
+        assert(addr_out === 16'h00fe);
+        assert(data_out === 8'hz);
         #1 oe_dl = 1'b0;
-        assert(data_out == 8'hfe);
+        #1
+        assert(data_out === 8'hfe);
         #1 oe_dl = 1'b1;
         #1 oe_dh = 1'b0;
-        assert(data_out == 8'h00);
+        #1
+        assert(data_out === 8'h00);
         #1 we_l = 1'b1;
 
         // test count
@@ -72,13 +78,14 @@ module test_pointer_reg();
         oe_dh = 1;
         oe_dl = 1;
         #1 clk = 0;
-        assert(addr_out == 16'h00fe);
+        #1
+        assert(addr_out === 16'h00fe);
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h00ff);
+        assert(addr_out === 16'h00ff);
         #1 clk = 0;
         #1 clk = 1;
         #1
-        assert(addr_out == 16'h0100);
+        assert(addr_out === 16'h0100);
     end
 endmodule
