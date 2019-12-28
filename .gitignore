@@ -1,3 +1,5 @@
 *.hex
 *.vcd
 *.mem
+*.bak
+*-bak
