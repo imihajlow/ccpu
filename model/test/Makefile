@@ -1,11 +1,12 @@
 .PHONY: all alu
 
-all: test_uni_reg test_pointer_reg test_pointer_pair test_control_unit test_cpu
+all: test_uni_reg test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153
 	./test_uni_reg
 	./test_pointer_reg
 	./test_pointer_pair
 	./test_control_unit
 	./test_cpu
+	./test_74153
 
 alu: test_alu
 	./test_alu
@@ -27,6 +28,9 @@ test_alu: test_alu.v ../alu.v ../alu_hi.v ../alu_lo.v alu_lo.mem alu_hi.mem
 
 test_cpu: test_cpu.v ../cpu.v ../alu.v ../alu_hi.v ../alu_lo.v alu_lo.mem alu_hi.mem ../control_unit.v ../pointer_pair.v ../pointer_reg.v ../uni_reg.v ../74xx/counter_74163.v test_cpu.hex
 	iverilog -o $@ $(filter %.v,$^)
+
+test_74153: test_74153.v ../74xx/selector_74153.v
+	iverilog -o $@ $^
 
 alu_lo.mem: ../gen-alu.py
 	../gen-alu.py
