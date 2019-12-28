@@ -203,8 +203,6 @@ def encode(op, args, labels):
         return [v & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff,\
             (v >> 32) & 0xff, (v >> 40) & 0xff, (v >> 48) & 0xff, (v >> 56) & 0xff]
 
-
-
 def assemble(lines):
     r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-*/><, \t]+))?)?(?:\s*;.*)?$", re.I)
     ip = 0
@@ -219,10 +217,15 @@ def assemble(lines):
             label = m.group('label')
             op = m.group('op')
             args = m.group('args')
-            print("label: `{}`, op: `{}`, args: `{}`".format(label, op, args))
             if label:
+                if label in labels:
+                    raise ValueError("Label redefinition: {}".format(label))
                 labels[label] = ip
             ip = updateIp(ip, op, args)
+            if ip >= 65536:
+                raise ValueError("IP overflow")
+            if ip < 0:
+                raise ValueError("Negative IP")
         except BaseException as e:
             raise AssemblyError(i + 1, e)
     ip = 0
