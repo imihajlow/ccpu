@@ -60,7 +60,7 @@ module cpu(clk, rst, a, d, oe, we);
     wire [3:0] flags_in;
     wire [3:0] flags_out;
     wire flags_we;
-    counter_74163 reg_flags(
+    counter_74161 reg_flags(
             .Q(flags_out),
             .clk(nclk),
             .clr_n(rst),
@@ -72,8 +72,8 @@ module cpu(clk, rst, a, d, oe, we);
     wire addr_dp;
     wire ip_to_addr_oe = addr_dp;
     wire dp_to_addr_oe = ~addr_dp;
-    wire dph_to_alu_oe;
-    wire dpl_to_alu_oe;
+    wire ph_to_alu_oe;
+    wire pl_to_alu_oe;
     wire ip_cnt;
     wire dpl_we;
     wire dph_we;
@@ -86,8 +86,8 @@ module cpu(clk, rst, a, d, oe, we);
             .di(d_int),
             .oe_addr_ip(ip_to_addr_oe),
             .oe_addr_dp(dp_to_addr_oe),
-            .oe_dl(dpl_to_alu_oe),
-            .oe_dh(dph_to_alu_oe),
+            .oe_dl(pl_to_alu_oe),
+            .oe_dh(ph_to_alu_oe),
             .cnt(ip_cnt),
             .we_l(dpl_we),
             .we_h(dph_we),
@@ -141,8 +141,8 @@ module cpu(clk, rst, a, d, oe, we);
                 .we_ph(dph_we),
                 .we_a(a_we),
                 .we_b(b_we),
-                .oe_pl_alu(dpl_to_alu_oe),
-                .oe_ph_alu(dph_to_alu_oe),
+                .oe_pl_alu(pl_to_alu_oe),
+                .oe_ph_alu(ph_to_alu_oe),
                 .oe_b_alu(b_to_alu_oe),
                 .oe_zero_alu(zero_to_alu_oe),
                 .oe_a_d(a_to_d_oe),

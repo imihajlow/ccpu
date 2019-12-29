@@ -25,26 +25,71 @@ module pointer_reg(
     output wire [15:0] addr_out;
     output wire [7:0] data_out;
 
-    wire carry;
-    uni_reg reg_l(
-            .doa(addr_out[7:0]),
-            .dob(data_out),
-            .rco(carry),
+    wire carry01, carry12, carry23;
+
+    wire [7:0] lo;
+    wire [7:0] hi;
+
+    counter_74161 cnt_0(
             .clk(clk),
-            .rst(rst),
-            .we(we_l),
-            .oea(oe_addr),
-            .oeb(oe_dl),
-            .cnt(cnt),
-            .di(di));
-    uni_reg reg_h(
-            .doa(addr_out[15:8]),
-            .dob(data_out),
+            .clr_n(rst),
+            .enp(cnt),
+            .ent(cnt),
+            .load_n(we_l),
+            .P(di[3:0]),
+            .Q(lo[3:0]),
+            .rco(carry01));
+
+    counter_74161 cnt_1(
             .clk(clk),
-            .rst(rst),
-            .we(we_h),
-            .oea(oe_addr),
-            .oeb(oe_dh),
-            .cnt(carry),
-            .di(di));
+            .clr_n(rst),
+            .enp(cnt),
+            .ent(carry01),
+            .load_n(we_l),
+            .P(di[7:4]),
+            .Q(lo[7:4]),
+            .rco(carry12));
+
+    counter_74161 cnt_2(
+            .clk(clk),
+            .clr_n(rst),
+            .enp(cnt),
+            .ent(carry12),
+            .load_n(we_h),
+            .P(di[3:0]),
+            .Q(hi[3:0]),
+            .rco(carry23));
+
+    counter_74161 cnt_3(
+            .clk(clk),
+            .clr_n(rst),
+            .enp(cnt),
+            .ent(carry23),
+            .load_n(we_h),
+            .P(di[7:4]),
+            .Q(hi[7:4]));
+
+    buffer_74244 buf_a_lo(
+            .o(addr_out[7:0]),
+            .i(lo),
+            .n_oe1(oe_addr),
+            .n_oe2(oe_addr));
+
+    buffer_74244 buf_a_hi(
+            .o(addr_out[15:8]),
+            .i(hi),
+            .n_oe1(oe_addr),
+            .n_oe2(oe_addr));
+
+    buffer_74244 buf_d_lo(
+            .o(data_out),
+            .i(lo),
+            .n_oe1(oe_dl),
+            .n_oe2(oe_dl));
+
+    buffer_74244 buf_d_hi(
+            .o(data_out),
+            .i(hi),
+            .n_oe1(oe_dh),
+            .n_oe2(oe_dh));
 endmodule

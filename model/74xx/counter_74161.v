@@ -1,8 +1,5 @@
 `timescale 1ns/1ps
-// Purpose: 4 bit fully synchronous binary counter
-// Western: 74LS163
-// USSR: K555IE18/К555ИЕ18
-module counter_74163
+module counter_74161
 (
   input clk,
   input clr_n,
@@ -14,8 +11,6 @@ module counter_74163
   output [3:0] Q,  // Parallel outputs
   output rco
 );
-
-// localparam counter_74163 = 20; // Propagation delay from datasheet
 
 reg [3:0] count = 0;
 wire overflow;
