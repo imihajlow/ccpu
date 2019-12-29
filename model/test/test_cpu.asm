@@ -101,8 +101,14 @@ mul_return: dw  0
 mul_a:  db      100
 mul_b:  dw      100
 mul_i:  db      0
-        .align  16
-mul_result: dw  0
+
+        .offset 0x100
+result:
+mul_result:
+        dw  0
+
+        .offset 0x200
+sample: dw      0x2710  ; checked by the testbench
 
         .offset 0x1000
 finish:

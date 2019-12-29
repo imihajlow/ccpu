@@ -1,3 +1,4 @@
+`timescale 1ns/1ps
 module cpu(clk, rst, a, d, oe, we);
     input clk;
     input rst;
@@ -9,45 +10,52 @@ module cpu(clk, rst, a, d, oe, we);
     wire nclk = ~clk;
 
     wire [7:0] ir_out;
-    wire ir_we;
-    uni_reg reg_ir(
-            .doa(ir_out),
-            .clk(clk),
-            .rst(rst),
-            .we(ir_we),
-            .oea(1'b0), // always enable one output
-            .oeb(1'b1),
-            .cnt(1'b0), // never count
-            .di(d));
+    wire ir_we; // TODO make this active 1
+
+    wire ir_w_clk;
+    assign #10 ir_w_clk = clk & ~ir_we; // 74act08 AND gate
+
+    register_74273 reg_ir(
+            .q(ir_out),
+            .d(d),
+            .n_mr(rst),
+            .cp(ir_w_clk)
+        );
 
     wire [7:0] d_int = 8'bzzzzzzzz; // internal data bus
     wire [7:0] alu_a = 8'bz; // first ALU input
     wire [7:0] alu_b = 8'bz; // second ALU input
 
-    wire a_we;
+    wire a_we; // TODO make this active 1
     wire a_to_d_oe;
-    uni_reg reg_a(
+
+    wire a_w_clk;
+    assign #10 a_w_clk = nclk & ~a_we; // 74act08 AND gate
+    gp_reg_b reg_a(
             .doa(d),
             .dob(alu_a),
-            .clk(nclk),
-            .rst(rst),
-            .we(a_we),
-            .oea(a_to_d_oe),
-            .oeb(1'b0), // always output to ALU
-            .di(d_int));
+            .di(d_int),
+            .w_clk(a_w_clk),
+            .n_rst(rst),
+            .n_oe_a(a_to_d_oe),
+            .n_oe_b(1'b0) // TODO replace component
+        );
 
-    wire b_we;
+    wire b_we;  // TODO make this active 1
     wire b_to_d_oe;
     wire b_to_alu_oe;
-    uni_reg reg_b(
+
+    wire b_w_clk;
+    assign #10 b_w_clk = nclk & ~b_we; // 74act08 AND gate
+    gp_reg_b reg_b(
             .doa(d),
             .dob(alu_b),
-            .clk(nclk),
-            .rst(rst),
-            .we(b_we),
-            .oea(b_to_d_oe),
-            .oeb(b_to_alu_oe),
-            .di(d_int));
+            .di(d_int),
+            .w_clk(b_w_clk),
+            .n_rst(rst),
+            .n_oe_a(b_to_d_oe),
+            .n_oe_b(b_to_alu_oe)
+        );
 
     wire [3:0] flags_in;
     wire [3:0] flags_out;

@@ -1,6 +1,9 @@
 `timescale 1us/1ns
 module test_cpu();
     localparam FINISH_ADDR = 16'h1000;
+    localparam RESULT_ADDR = 16'h0100;
+    localparam SAMPLE_ADDR = 16'h0200;
+    localparam RESULT_SIZE = 2;
     reg clk;
     reg rst;
     wire [15:0] a;
@@ -51,6 +54,7 @@ module test_cpu();
     endtask
 
     integer i;
+    integer j;
     initial begin
         $dumpfile("test_cpu.vcd");
         $dumpvars;
@@ -66,6 +70,14 @@ module test_cpu();
             if (~oe & (a === FINISH_ADDR)) begin
                 $display("Finish address reached");
                 dump_memory();
+
+                for (j = 0; j < RESULT_SIZE; j = j + 1) begin
+                    if (ram[RESULT_ADDR + j] !== ram[SAMPLE_ADDR + j]) begin
+                        $display("Result mismatch");
+                        $fatal;
+                    end
+                end
+                $display("Result check OK");
                 $finish;
             end
             clk = 1'b1;
