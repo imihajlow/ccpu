@@ -75,8 +75,8 @@ module cpu(clk, rst, a, d, oe, we);
     wire ph_to_alu_oe;
     wire pl_to_alu_oe;
     wire ip_cnt;
-    wire dpl_we;
-    wire dph_we;
+    wire pl_we;
+    wire ph_we;
     wire p_selector;
     pointer_pair reg_p(
             .addr_out(a),
@@ -89,8 +89,8 @@ module cpu(clk, rst, a, d, oe, we);
             .oe_dl(pl_to_alu_oe),
             .oe_dh(ph_to_alu_oe),
             .cnt(ip_cnt),
-            .we_l(dpl_we),
-            .we_h(dph_we),
+            .we_l(pl_we),
+            .we_h(ph_we),
             .selector(p_selector));
 
     wire alu_oe;
@@ -137,8 +137,8 @@ module cpu(clk, rst, a, d, oe, we);
                 .ip_inc(ip_cnt),
                 .addr_dp(addr_dp),
                 .swap_p(p_toggle),
-                .we_pl(dpl_we),
-                .we_ph(dph_we),
+                .we_pl(pl_we),
+                .we_ph(ph_we),
                 .we_a(a_we),
                 .we_b(b_we),
                 .oe_pl_alu(pl_to_alu_oe),
