@@ -32,8 +32,8 @@ test_74153: test_74153.v ../74xx/selector_74153.v
 test_gp_reg: test_gp_reg.v ../gp_reg_b.v ../74xx/buffer_74244.v ../74xx/register_74273.v
 	iverilog -o $@ $^
 
-alu_lo.mem: ../gen-alu.py
-	../gen-alu.py
+alu_lo.mem: ../../tools/gen-alu.py
+	../../tools/gen-alu.py
 
 alu_hi.mem: alu_lo.mem
 
