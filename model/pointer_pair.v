@@ -75,25 +75,25 @@ module pointer_pair(
         .addr_out(addr_out),
         .data_out(data_out),
         .clk(clk),
-        .rst(n_rst),
+        .n_rst(n_rst),
         .di(di),
-        .oe_addr(n_a_oe_addr),
-        .oe_dl(n_a_oe_dl),
-        .oe_dh(n_a_oe_dh),
+        .n_oe_addr(n_a_oe_addr),
+        .n_oe_dl(n_a_oe_dl),
+        .n_oe_dh(n_a_oe_dh),
         .cnt(a_cnt),
-        .we_l(n_a_we_l),
-        .we_h(n_a_we_h));
+        .n_we_l(n_a_we_l),
+        .n_we_h(n_a_we_h));
 
     pointer_reg reg_b(
         .addr_out(addr_out),
         .data_out(data_out),
         .clk(clk),
-        .rst(n_rst),
+        .n_rst(n_rst),
         .di(di),
-        .oe_addr(n_b_oe_addr),
-        .oe_dl(n_b_oe_dl),
-        .oe_dh(n_b_oe_dh),
+        .n_oe_addr(n_b_oe_addr),
+        .n_oe_dl(n_b_oe_dl),
+        .n_oe_dh(n_b_oe_dh),
         .cnt(b_cnt),
-        .we_l(n_b_we_l),
-        .we_h(n_b_we_h));
+        .n_we_l(n_b_we_l),
+        .n_we_h(n_b_we_h));
 endmodule
