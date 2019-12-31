@@ -10,10 +10,10 @@ module cpu(clk, rst, a, d, oe, we);
     wire nclk = ~clk;
 
     wire [7:0] ir_out;
-    wire ir_we; // TODO make this active 1
+    wire ir_we;
 
     wire ir_w_clk;
-    assign #10 ir_w_clk = clk & ~ir_we; // 74act08 AND gate
+    assign #10 ir_w_clk = clk & ir_we; // 74act08 AND gate
 
     register_74273 reg_ir(
             .q(ir_out),
@@ -26,11 +26,11 @@ module cpu(clk, rst, a, d, oe, we);
     wire [7:0] alu_a = 8'bz; // first ALU input
     wire [7:0] alu_b = 8'bz; // second ALU input
 
-    wire a_we; // TODO make this active 1
+    wire a_we;
     wire a_to_d_oe;
 
     wire a_w_clk;
-    assign #10 a_w_clk = nclk & ~a_we; // 74act08 AND gate
+    assign #10 a_w_clk = nclk & a_we; // 74act08 AND gate
     gp_reg_b reg_a(
             .doa(d),
             .dob(alu_a),
@@ -41,12 +41,12 @@ module cpu(clk, rst, a, d, oe, we);
             .n_oe_b(1'b0) // TODO replace component
         );
 
-    wire b_we;  // TODO make this active 1
+    wire b_we;
     wire b_to_d_oe;
     wire b_to_alu_oe;
 
     wire b_w_clk;
-    assign #10 b_w_clk = nclk & ~b_we; // 74act08 AND gate
+    assign #10 b_w_clk = nclk & b_we; // 74act08 AND gate
     gp_reg_b reg_b(
             .doa(d),
             .dob(alu_b),

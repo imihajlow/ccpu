@@ -33,14 +33,15 @@ module control_unit(
     output wire mem_oe; // CPU output
     output wire mem_we; // CPU output
 
-    output wire d_to_di_oe; // output the D bus into the DI bus
-    output wire ir_we; // latch D into IR on posedge clk
+    output wire d_to_di_oe; // output the D bus into the DI bus, active low
+    output wire ir_we; // latch D into IR on posedge clk, active high
 
     output wire ip_inc; // increment IP on negedge clk
     output wire addr_dp; // 0 - drive Address with IP, 1 - with DP
     output wire swap_p; // swap IP and DP on negedge clk
 
-    output wire we_pl, we_ph, we_a, we_b; // latch registers from DI on negedge clk
+    output wire we_pl, we_ph; // latch registers from DI on negedge clk, active low
+    output wire we_a, we_b; // latch registers from DI on negedge clk, active high
     output wire oe_pl_alu, oe_ph_alu, oe_b_alu, oe_zero_alu; // drive ALU B input with register values
     output wire oe_a_d, oe_b_d; // drive external D bus with a or b
 
@@ -115,7 +116,7 @@ module control_unit(
 
     assign d_to_di_oe = ~((ldi & cycle) | ld);
 
-    assign ir_we = ir_we_reg;
+    assign ir_we = ~ir_we_reg;
 
     assign ip_inc = ~st | cycle;
 
@@ -129,10 +130,12 @@ module control_unit(
     wire oe_src_alu = ~ir_is_alu;
     wire oe_src_d = ~(st & ir_we_reg);
 
-    wire we_a_dst;
+    wire n_we_a_dst;
     wire we_a_alua = ~ir_is_alu | ir[2];
-    assign {we_ph, we_pl, we_b, we_a_dst} = we_dst ? 4'b1111 : ~dst_decoded;
-    assign we_a = we_a_dst & we_a_alua;
+    wire n_we_b;
+    assign {we_ph, we_pl, n_we_b, n_we_a_dst} = we_dst ? 4'b1111 : ~dst_decoded;
+    assign we_b = ~n_we_b;
+    assign we_a = ~(n_we_a_dst & we_a_alua);
 
     assign {oe_ph_alu, oe_pl_alu, oe_b_alu, oe_zero_alu} = oe_src_alu ? 4'b1111 : ~dst_decoded;
     assign {oe_b_d, oe_a_d} = oe_src_d ? 2'b11 : (src_d ? 2'b01 : 2'b10);
