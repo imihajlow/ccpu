@@ -94,7 +94,7 @@ module cpu(clk, rst, a, d, oe, we);
             .selector(p_selector));
 
     wire alu_oe;
-    wire [3:0] alu_op;
+    wire [3:0] alu_op = ir_out[6:3];
     wire alu_invert;
     alu alu_inst(
         .a(alu_a),
@@ -148,7 +148,6 @@ module cpu(clk, rst, a, d, oe, we);
                 .oe_a_d(a_to_d_oe),
                 .oe_b_d(b_to_d_oe),
                 .we_flags(flags_we),
-                .alu_op(alu_op),
                 .alu_oe(alu_oe),
                 .alu_invert(alu_invert),
                 .clk(clk),

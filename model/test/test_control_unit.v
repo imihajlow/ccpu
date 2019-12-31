@@ -22,7 +22,6 @@ module test_control_unit();
     wire oe_a_d;
     wire oe_b_d;
     wire we_flags;
-    wire [3:0] alu_op;
     wire alu_oe;
     wire alu_invert;
 
@@ -66,7 +65,6 @@ module test_control_unit();
             .oe_a_d(oe_a_d),
             .oe_b_d(oe_b_d),
             .we_flags(we_flags),
-            .alu_op(alu_op),
             .alu_oe(alu_oe),
             .alu_invert(alu_invert),
             .clk(clk),
@@ -119,7 +117,6 @@ module test_control_unit();
                 assert(oe_a_d == 1'b1);
                 assert(oe_b_d == 1'b1);
                 assert(we_flags == 1'b0);
-                assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
                 assert(alu_invert == 1'b0);
                 assert_short_circuit();
@@ -143,7 +140,6 @@ module test_control_unit();
                 // assert(oe_a_d == 1'b1);
                 // assert(oe_b_d == 1'b1);
                 // assert(we_flags == 1'b0);
-                // assert(alu_op == 3'b101);
                 // assert(alu_oe == 1'b0);
                 assert_short_circuit();
 
@@ -167,7 +163,6 @@ module test_control_unit();
                 assert(oe_a_d == 1'b1);
                 assert(oe_b_d == 1'b1);
                 assert(we_flags == 1'b0);
-                assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
                 assert(alu_invert == 1'b0);
                 assert_short_circuit();
@@ -191,7 +186,6 @@ module test_control_unit();
                 // assert(oe_a_d == 1'b1);
                 // assert(oe_b_d == 1'b1);
                 // assert(we_flags == 1'b0);
-                // assert(alu_op == 3'b101);
                 // assert(alu_oe == 1'b0);
                 assert_short_circuit();
             end
@@ -221,7 +215,6 @@ module test_control_unit();
                 assert(oe_a_d == 1'b1);
                 assert(oe_b_d == 1'b1);
                 assert(we_flags == 1'b0);
-                assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
                 assert(alu_invert == 1'b1);
                 assert_short_circuit();
@@ -245,7 +238,6 @@ module test_control_unit();
                 // assert(oe_a_d == 1'b1);
                 // assert(oe_b_d == 1'b1);
                 // assert(we_flags == 1'b0);
-                // assert(alu_op == 3'b101);
                 // assert(alu_oe == 1'b0);
                 assert_short_circuit();
 
@@ -269,7 +261,6 @@ module test_control_unit();
                 assert(oe_a_d == 1'b1);
                 assert(oe_b_d == 1'b1);
                 assert(we_flags == 1'b0);
-                assert(alu_op == i_op);
                 assert(alu_oe == 1'b0);
                 assert(alu_invert == 1'b1);
                 assert_short_circuit();
@@ -293,7 +284,6 @@ module test_control_unit();
                 // assert(oe_a_d == 1'b1);
                 // assert(oe_b_d == 1'b1);
                 // assert(we_flags == 1'b0);
-                // assert(alu_op == 3'b101);
                 // assert(alu_oe == 1'b0);
                 assert_short_circuit();
             end
@@ -322,7 +312,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -345,7 +334,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -369,7 +357,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -392,7 +379,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -421,7 +407,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -444,7 +429,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -468,7 +452,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -491,7 +474,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -519,7 +501,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -542,7 +523,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -566,7 +546,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -589,7 +568,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -617,7 +595,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -640,7 +617,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -664,7 +640,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -687,7 +662,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -715,7 +689,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -738,7 +711,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -762,7 +734,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -785,7 +756,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -813,7 +783,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -836,7 +805,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -860,7 +828,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -883,7 +850,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -911,7 +877,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -934,7 +899,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -958,7 +922,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -981,7 +944,6 @@ module test_control_unit();
         assert(oe_a_d == 1'b1);
         assert(oe_b_d == 1'b1);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -1009,7 +971,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -1032,7 +993,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b1);
         // assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -1057,7 +1017,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -1080,7 +1039,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b1);
         // assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -1108,7 +1066,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -1131,7 +1088,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b1);
         // assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
 
@@ -1156,7 +1112,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b0);
         assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b1);
         assert_short_circuit();
 
@@ -1179,7 +1134,6 @@ module test_control_unit();
         // assert(oe_a_d == 1'b1);
         // assert(oe_b_d == 1'b1);
         // assert(we_flags == 1'b1);
-        // assert(alu_op == 3'b101);
         // assert(alu_oe == 1'b0);
         assert_short_circuit();
     end
