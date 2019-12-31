@@ -31,14 +31,13 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
 
     wire a_w_clk;
     assign #10 a_w_clk = n_clk & a_we; // 74act08 AND gate
-    gp_reg_b reg_a(
+    gp_reg_a reg_a(
             .doa(d),
             .dob(alu_a),
             .di(d_int),
             .w_clk(a_w_clk),
             .n_rst(n_rst),
-            .n_oe_a(n_a_to_d_oe),
-            .n_oe_b(1'b0) // TODO replace component
+            .n_oe_a(n_a_to_d_oe)
         );
 
     wire b_we;

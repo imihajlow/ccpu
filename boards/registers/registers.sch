@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A3 16535 11693
 encoding utf-8
-Sheet 1 6
+Sheet 1 7
 Title "CPU registers and memory module"
 Date "2019-12-28"
 Rev "1"
@@ -29,15 +29,13 @@ F9 "cnt" I L 10150 2800 50
 F10 "~we_h" I L 10150 2300 50 
 F11 "~we_l" I L 10150 2400 50 
 F12 "selector" I L 10150 2600 50 
-F13 "addr_out[0..15]" I R 11400 1350 50 
-F14 "data_out[0..7]" I R 11400 1450 50 
+F13 "addr_out[0..15]" T R 11400 1350 50 
+F14 "data_out[0..7]" T R 11400 1450 50 
 $EndSheet
 Wire Bus Line
 	10150 1500 9900 1500
 Text Label 9900 1500 2    50   ~ 0
 di[0..7]
-Wire Bus Line
-	11400 1450 11600 1450
 Text Label 11600 1450 0    50   ~ 0
 alu_b[0..7]
 Wire Bus Line
@@ -673,19 +671,6 @@ clk
 Text Label 3600 5500 2    50   ~ 0
 ir_we
 $Sheet
-S 10150 3300 1250 1300
-U 5E73B7F6
-F0 "gp_reg_a" 50
-F1 "gp_reg.sch" 50
-F2 "w_clk" I L 10150 3450 50 
-F3 "~rst" I L 10150 3550 50 
-F4 "~oea" I L 10150 3750 50 
-F5 "~oeb" I L 10150 3850 50 
-F6 "di[0..7]" I L 10150 4050 50 
-F7 "doa[0..7]" I R 11400 3550 50 
-F8 "dob[0..7]" I R 11400 4350 50 
-$EndSheet
-$Sheet
 S 10150 4900 1250 1300
 U 5E7CA397
 F0 "gp_reg_b" 50
@@ -695,8 +680,8 @@ F3 "~rst" I L 10150 5150 50
 F4 "~oea" I L 10150 5350 50 
 F5 "~oeb" I L 10150 5450 50 
 F6 "di[0..7]" I L 10150 5650 50 
-F7 "doa[0..7]" I R 11400 5150 50 
-F8 "dob[0..7]" I R 11400 5950 50 
+F7 "doa[0..7]" T R 11400 5150 50 
+F8 "dob[0..7]" T R 11400 5950 50 
 $EndSheet
 $Comp
 L 74xx:74LS08 U?
@@ -734,35 +719,16 @@ Text Label 10000 3550 2    50   ~ 0
 ~rst
 Wire Wire Line
 	10150 3750 10000 3750
-Wire Wire Line
-	10150 3850 10000 3850
 Wire Bus Line
 	10150 4050 10000 4050
 Text Label 10000 4050 2    50   ~ 0
 di[0..7]
 Text Label 10000 3750 2    50   ~ 0
-oe_a_d
-$Comp
-L power:GND #PWR?
-U 1 1 5E7EB4E9
-P 10000 3850
-F 0 "#PWR?" H 10000 3600 50  0001 C CNN
-F 1 "GND" V 10005 3722 50  0000 R CNN
-F 2 "" H 10000 3850 50  0001 C CNN
-F 3 "" H 10000 3850 50  0001 C CNN
-	1    10000 3850
-	0    1    1    0   
-$EndComp
-Text Notes 10600 3900 0    50   ~ 0
-TODO\nremove extra chip
-Wire Bus Line
-	11400 3550 11600 3550
+~oe_a_d
 Text Label 11600 4350 0    50   ~ 0
 alu_a[0..7]
 Text Label 11600 3550 0    50   ~ 0
 d[0..7]
-Wire Bus Line
-	11600 4350 11400 4350
 Wire Bus Line
 	11400 5150 11600 5150
 Text Label 11600 5950 0    50   ~ 0
@@ -782,9 +748,9 @@ Wire Bus Line
 Text Label 10000 5650 2    50   ~ 0
 di[0..7]
 Text Label 10000 5350 2    50   ~ 0
-oe_b_d
+~oe_b_d
 Text Label 10000 5450 2    50   ~ 0
-oe_b_alu
+~oe_b_alu
 Text Label 8850 4950 2    50   ~ 0
 ~clk
 Text Label 8850 5150 2    50   ~ 0
@@ -1486,6 +1452,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A723F
 P 6000 1100
+AR Path="/5E7CA397/5E9A723F" Ref="R?"  Part="1" 
+AR Path="/5E9A723F" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 1900 50  0000 C CNN
 F 1 "1k" V 6000 1750 50  0000 C CNN
 F 2 "" V 5930 1100 50  0001 C CNN
@@ -1497,6 +1465,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A7245
 P 6000 1200
+AR Path="/5E7CA397/5E9A7245" Ref="R?"  Part="1" 
+AR Path="/5E9A7245" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2000 50  0000 C CNN
 F 1 "1k" V 6000 1850 50  0000 C CNN
 F 2 "" V 5930 1200 50  0001 C CNN
@@ -1508,6 +1478,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A724B
 P 6000 1300
+AR Path="/5E7CA397/5E9A724B" Ref="R?"  Part="1" 
+AR Path="/5E9A724B" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2100 50  0000 C CNN
 F 1 "1k" V 6000 1950 50  0000 C CNN
 F 2 "" V 5930 1300 50  0001 C CNN
@@ -1519,6 +1491,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A7251
 P 6000 1400
+AR Path="/5E7CA397/5E9A7251" Ref="R?"  Part="1" 
+AR Path="/5E9A7251" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2200 50  0000 C CNN
 F 1 "1k" V 6000 2050 50  0000 C CNN
 F 2 "" V 5930 1400 50  0001 C CNN
@@ -1530,6 +1504,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A7257
 P 6000 1500
+AR Path="/5E7CA397/5E9A7257" Ref="R?"  Part="1" 
+AR Path="/5E9A7257" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2300 50  0000 C CNN
 F 1 "1k" V 6000 2150 50  0000 C CNN
 F 2 "" V 5930 1500 50  0001 C CNN
@@ -1541,6 +1517,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A725D
 P 6000 1600
+AR Path="/5E7CA397/5E9A725D" Ref="R?"  Part="1" 
+AR Path="/5E9A725D" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2400 50  0000 C CNN
 F 1 "1k" V 6000 2250 50  0000 C CNN
 F 2 "" V 5930 1600 50  0001 C CNN
@@ -1552,6 +1530,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A7263
 P 6000 1700
+AR Path="/5E7CA397/5E9A7263" Ref="R?"  Part="1" 
+AR Path="/5E9A7263" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2500 50  0000 C CNN
 F 1 "1k" V 6000 2350 50  0000 C CNN
 F 2 "" V 5930 1700 50  0001 C CNN
@@ -1563,6 +1543,8 @@ $Comp
 L Device:R R?
 U 1 1 5E9A7269
 P 6000 1800
+AR Path="/5E7CA397/5E9A7269" Ref="R?"  Part="1" 
+AR Path="/5E9A7269" Ref="R?"  Part="1" 
 F 0 "R?" V 6000 2600 50  0000 C CNN
 F 1 "1k" V 6000 2450 50  0000 C CNN
 F 2 "" V 5930 1800 50  0001 C CNN
@@ -1570,6 +1552,70 @@ F 3 "~" H 6000 1800 50  0001 C CNN
 	1    6000 1800
 	0    1    1    0   
 $EndComp
+$Sheet
+S 13250 4250 900  800 
+U 5E9B4830
+F0 "alu" 50
+F1 "alu.sch" 50
+F2 "a[0..7]" I L 13250 4350 50 
+F3 "b[0..7]" I L 13250 4450 50 
+F4 "op[0..3]" I L 13250 4550 50 
+F5 "~oe" I L 13250 4750 50 
+F6 "carry_in" I L 13250 4850 50 
+F7 "invert" I L 13250 4950 50 
+F8 "result[0..7]" T R 14150 4350 50 
+F9 "flags[0..3]" O R 14150 4450 50 
+$EndSheet
+Wire Bus Line
+	12050 5950 12050 4450
+Wire Bus Line
+	12050 4450 13250 4450
+Connection ~ 12050 5950
+Wire Bus Line
+	12050 1450 12050 4450
+Wire Bus Line
+	11400 1450 12050 1450
+Connection ~ 12050 4450
+Wire Wire Line
+	13250 4750 13100 4750
+Wire Wire Line
+	13250 4850 13100 4850
+Wire Wire Line
+	13250 4950 13100 4950
+Text Label 13100 4750 2    50   ~ 0
+~alu_oe
+Text Label 13100 4850 2    50   ~ 0
+flags_out1
+Text Label 13100 4950 2    50   ~ 0
+alu_invert
+Wire Bus Line
+	13250 4550 13100 4550
+Text Label 13100 4550 2    50   ~ 0
+ir_out[3..6]
+Wire Bus Line
+	14150 4450 14350 4450
+Text Label 14350 4450 0    50   ~ 0
+flags_in[0..3]
+Wire Bus Line
+	14150 4350 14350 4350
+Text Label 14350 4350 0    50   ~ 0
+di[0..7]
+$Sheet
+S 10150 3300 1250 1300
+U 5E9FD18D
+F0 "gp_reg_a" 50
+F1 "gp_reg_a.sch" 50
+F2 "w_clk" I L 10150 3450 50 
+F3 "~rst" I L 10150 3550 50 
+F4 "di[0..7]" I L 10150 4050 50 
+F5 "doa[0..7]" T R 11400 3550 50 
+F6 "dob[0..7]" T R 11400 4350 50 
+F7 "~oea" I L 10150 3750 50 
+$EndSheet
+Wire Bus Line
+	11600 3550 11400 3550
+Wire Bus Line
+	11400 4350 13250 4350
 Wire Bus Line
 	4350 6100 4350 6750
 Wire Bus Line

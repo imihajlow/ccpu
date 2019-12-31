@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A3 11693 16535 portrait
 encoding utf-8
-Sheet 3 6
+Sheet 3 7
 Title "Pointer register"
 Date "2019-12-28"
 Rev "1"
@@ -31,9 +31,9 @@ Text HLabel 1500 5300 0    50   Input ~ 0
 ~oe_dh
 Text HLabel 1500 5150 0    50   Input ~ 0
 ~oe_dl
-Text HLabel 10150 4750 2    50   Input ~ 0
+Text HLabel 10150 4750 2    50   3State ~ 0
 a_out[0..15]
-Text HLabel 10150 4900 2    50   Input ~ 0
+Text HLabel 10150 4900 2    50   3State ~ 0
 d_out[0..7]
 $Comp
 L 74xx:74HC244 U?

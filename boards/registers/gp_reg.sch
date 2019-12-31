@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 6 6
+Sheet 5 7
 Title "General-purpose register"
 Date "2019-12-29"
 Rev "1"
@@ -23,9 +23,9 @@ Text HLabel 1200 4200 0    50   Input ~ 0
 ~oeb
 Text HLabel 1200 950  0    50   Input ~ 0
 di[0..7]
-Text HLabel 9250 950  2    50   Input ~ 0
+Text HLabel 9250 950  2    50   3State ~ 0
 doa[0..7]
-Text HLabel 9250 3100 2    50   Input ~ 0
+Text HLabel 9250 3100 2    50   3State ~ 0
 dob[0..7]
 $Comp
 L 74xx:74HC244 U?
