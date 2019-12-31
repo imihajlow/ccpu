@@ -5,11 +5,11 @@ module test_control_unit();
             $fatal;
     endtask
 
-    wire n_mem_oe;
-    wire n_mem_we;
-    wire n_d_to_di_oe;
-    wire ir_we;
-    wire ip_inc;
+    wire n_oe_mem;
+    wire n_we_mem;
+    wire n_oe_d_di;
+    wire we_ir;
+    wire inc_ip;
     wire addr_dp;
     wire swap_p;
     wire n_we_pl;
@@ -22,7 +22,7 @@ module test_control_unit();
     wire n_oe_a_d;
     wire n_oe_b_d;
     wire n_we_flags;
-    wire n_alu_oe;
+    wire n_oe_alu_di;
 
     task assert_short_circuit;
     begin
@@ -30,11 +30,11 @@ module test_control_unit();
             $display("ALU B input short circuit");
             $fatal;
         end
-        if (3'b0 + n_oe_a_d + n_oe_b_d + n_mem_oe < 2) begin
+        if (3'b0 + n_oe_a_d + n_oe_b_d + n_oe_mem < 2) begin
             $display("D short circuit");
             $fatal;
         end
-        if (~n_alu_oe & ~n_d_to_di_oe) begin
+        if (~n_oe_alu_di & ~n_oe_d_di) begin
             $display("DI short circuit");
             $fatal;
         end
@@ -47,11 +47,11 @@ module test_control_unit();
     reg [3:0] flags;
 
     control_unit inst(
-            .n_mem_oe(n_mem_oe),
-            .n_mem_we(n_mem_we),
-            .n_d_to_di_oe(n_d_to_di_oe),
-            .ir_we(ir_we),
-            .ip_inc(ip_inc),
+            .n_oe_mem(n_oe_mem),
+            .n_we_mem(n_we_mem),
+            .n_oe_d_di(n_oe_d_di),
+            .we_ir(we_ir),
+            .inc_ip(inc_ip),
             .addr_dp(addr_dp),
             .swap_p(swap_p),
             .n_we_pl(n_we_pl),
@@ -64,7 +64,7 @@ module test_control_unit();
             .n_oe_a_d(n_oe_a_d),
             .n_oe_b_d(n_oe_b_d),
             .n_we_flags(n_we_flags),
-            .n_alu_oe(n_alu_oe),
+            .n_oe_alu_di(n_oe_alu_di),
             .clk(clk),
             .n_rst(n_rst),
             .ir(ir),
@@ -98,11 +98,11 @@ module test_control_unit();
                 // ALU A, src, i
                 ir = {1'b0, i_op[3:0], 1'b0, i_src[1:0]};
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 assert(swap_p == 1'b0);
                 assert(n_we_ph == 1'b1);
@@ -115,16 +115,16 @@ module test_control_unit();
                 assert(n_oe_a_d == 1'b1);
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
-                assert(n_alu_oe == 1'b0);
+                assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 // assert(swap_p == 1'b0);
                 // assert(n_we_ph == 1'b1);
@@ -137,17 +137,17 @@ module test_control_unit();
                 // assert(n_oe_a_d == 1'b1);
                 // assert(n_oe_b_d == 1'b1);
                 // assert(n_we_flags == 1'b0);
-                // assert(n_alu_oe == 1'b0);
+                // assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 // second cycle: everything should stay the same
                 #1 clk = 1'b1;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 assert(swap_p == 1'b0);
                 assert(n_we_ph == 1'b1);
@@ -160,16 +160,16 @@ module test_control_unit();
                 assert(n_oe_a_d == 1'b1);
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
-                assert(n_alu_oe == 1'b0);
+                assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 // assert(swap_p == 1'b0);
                 // assert(n_we_ph == 1'b1);
@@ -182,7 +182,7 @@ module test_control_unit();
                 // assert(n_oe_a_d == 1'b1);
                 // assert(n_oe_b_d == 1'b1);
                 // assert(n_we_flags == 1'b0);
-                // assert(n_alu_oe == 1'b0);
+                // assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
             end
 
@@ -194,11 +194,11 @@ module test_control_unit();
                 // ALU src, A, i
                 ir = {1'b0, i_op[3:0], 1'b1, i_src[1:0]};
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 assert(swap_p == 1'b0);
                 assert(n_we_ph == ~(i_src == 3));
@@ -211,16 +211,16 @@ module test_control_unit();
                 assert(n_oe_a_d == 1'b1);
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
-                assert(n_alu_oe == 1'b0);
+                assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 // assert(swap_p == 1'b0);
                 // assert(n_we_ph == 1'b1);
@@ -233,17 +233,17 @@ module test_control_unit();
                 // assert(n_oe_a_d == 1'b1);
                 // assert(n_oe_b_d == 1'b1);
                 // assert(n_we_flags == 1'b0);
-                // assert(n_alu_oe == 1'b0);
+                // assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 // second cycle: everything should stay the same
                 #1 clk = 1'b1;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 assert(swap_p == 1'b0);
                 assert(n_we_ph == ~(i_src == 3));
@@ -256,16 +256,16 @@ module test_control_unit();
                 assert(n_oe_a_d == 1'b1);
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
-                assert(n_alu_oe == 1'b0);
+                assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
                 #1
-                assert(n_mem_oe == 1'b0);
-                assert(n_mem_we == 1'b1);
-                assert(n_d_to_di_oe == 1'b1);
-                assert(ir_we == 1'b1);
-                assert(ip_inc == 1'b1);
+                assert(n_oe_mem == 1'b0);
+                assert(n_we_mem == 1'b1);
+                assert(n_oe_d_di == 1'b1);
+                assert(we_ir == 1'b1);
+                assert(inc_ip == 1'b1);
                 assert(addr_dp == 1'b0);
                 // assert(swap_p == 1'b0);
                 // assert(n_we_ph == 1'b1);
@@ -278,7 +278,7 @@ module test_control_unit();
                 // assert(n_oe_a_d == 1'b1);
                 // assert(n_oe_b_d == 1'b1);
                 // assert(n_we_flags == 1'b0);
-                // assert(n_alu_oe == 1'b0);
+                // assert(n_oe_alu_di == 1'b0);
                 assert_short_circuit();
             end
         end
@@ -289,11 +289,11 @@ module test_control_unit();
         clk = 1'b1;
         ir = 8'b11001xxx;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -306,16 +306,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -328,17 +328,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -351,16 +351,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -373,7 +373,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
 
@@ -384,11 +384,11 @@ module test_control_unit();
         ir = 8'b11000001;
         flags = 4'b0110;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -401,16 +401,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -423,17 +423,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -446,16 +446,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -468,7 +468,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // Jc - condition true - inversed
@@ -478,11 +478,11 @@ module test_control_unit();
         ir = 8'b11000101;
         flags = 4'b0001;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -495,16 +495,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -517,17 +517,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b1);
         assert(n_we_ph == 1'b1);
@@ -540,16 +540,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -562,7 +562,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // Jc - condition false
@@ -572,11 +572,11 @@ module test_control_unit();
         ir = 8'b11000000;
         flags = 4'b0000;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -589,16 +589,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -611,17 +611,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -634,16 +634,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -656,7 +656,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // Jc - condition false - inversed
@@ -666,11 +666,11 @@ module test_control_unit();
         ir = 8'b11000100;
         flags = 4'b0001;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -683,16 +683,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -705,17 +705,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         // assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -728,16 +728,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -750,7 +750,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // LD pl
@@ -760,11 +760,11 @@ module test_control_unit();
         ir = 8'b1000xx10;
         flags = 4'bxxxx;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -777,16 +777,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         // assert(n_we_ph == 1'b1);
@@ -799,17 +799,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle - everything the same
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -822,16 +822,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        // assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        // assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         // assert(n_we_ph == 1'b1);
@@ -844,7 +844,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // ST b
@@ -854,11 +854,11 @@ module test_control_unit();
         ir = 8'b1011xxx1;
         flags = 4'bxxxx;
         #1
-        assert(n_mem_oe == 1'b1);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b0);
+        assert(n_oe_mem == 1'b1);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b0);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -871,16 +871,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b1);
-        assert(n_mem_we == 1'b0);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b0);
-        assert(ip_inc == 1'b0);
+        assert(n_oe_mem == 1'b1);
+        assert(n_we_mem == 1'b0);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b0);
+        assert(inc_ip == 1'b0);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -893,17 +893,17 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle
         #1 clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b1);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b0);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b1);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b0);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b1);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -916,16 +916,16 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -938,7 +938,7 @@ module test_control_unit();
         assert(n_oe_a_d == 1'b1);
         assert(n_oe_b_d == 1'b1);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // LDI a
@@ -948,11 +948,11 @@ module test_control_unit();
         ir = 8'b1010xx00;
         flags = 4'bxxxx;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -965,16 +965,16 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b0);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b0);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         // assert(n_we_ph == 1'b1);
@@ -987,18 +987,18 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b1);
         // assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle
         #1
         clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -1011,16 +1011,16 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -1033,7 +1033,7 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b1);
         // assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // once again LDI ph
@@ -1043,11 +1043,11 @@ module test_control_unit();
         ir = 8'b1010xx11;
         flags = 4'bxxxx;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b1);
@@ -1060,16 +1060,16 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b1);
-        assert(ir_we == 1'b0);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b1);
+        assert(we_ir == 1'b0);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         // assert(n_we_ph == 1'b1);
@@ -1082,18 +1082,18 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b1);
         // assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
 
         // second cycle
         #1
         clk = 1'b1;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        // assert(ir_we == 1'b1);
-        assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        // assert(we_ir == 1'b1);
+        assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b0);
@@ -1106,16 +1106,16 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b0);
         assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b1);
+        // assert(n_oe_alu_di == 1'b1);
         assert_short_circuit();
 
         #1 clk = 1'b0;
         #1
-        assert(n_mem_oe == 1'b0);
-        assert(n_mem_we == 1'b1);
-        assert(n_d_to_di_oe == 1'b0);
-        assert(ir_we == 1'b1);
-        // assert(ip_inc == 1'b1);
+        assert(n_oe_mem == 1'b0);
+        assert(n_we_mem == 1'b1);
+        assert(n_oe_d_di == 1'b0);
+        assert(we_ir == 1'b1);
+        // assert(inc_ip == 1'b1);
         assert(addr_dp == 1'b0);
         // assert(swap_p == 1'b0);
         assert(n_we_ph == 1'b0);
@@ -1128,7 +1128,7 @@ module test_control_unit();
         // assert(n_oe_a_d == 1'b1);
         // assert(n_oe_b_d == 1'b1);
         // assert(n_we_flags == 1'b1);
-        // assert(n_alu_oe == 1'b0);
+        // assert(n_oe_alu_di == 1'b0);
         assert_short_circuit();
     end
 endmodule

@@ -1,10 +1,10 @@
 module control_unit(
 //output
-            n_mem_oe,
-            n_mem_we,
-            n_d_to_di_oe,
-            ir_we,
-            ip_inc,
+            n_oe_mem,
+            n_we_mem,
+            n_oe_d_di,
+            we_ir,
+            inc_ip,
             addr_dp,
             swap_p,
             n_we_pl,
@@ -18,24 +18,26 @@ module control_unit(
             n_oe_a_d,
             n_oe_b_d,
             n_we_flags,
-            n_alu_oe,
+            n_oe_alu_di,
 //input
             clk,
             n_rst,
             ir,
-            flags);
+            flags,
+            n_mem_rdy);
     input wire clk; // clock
     input wire n_rst; // reset
     input wire [7:0] ir; // current instruction
     input wire [3:0] flags; // stored ALU flags
+    input wire n_mem_rdy; // for the future
 
-    output wire n_mem_oe; // CPU output
-    output wire n_mem_we; // CPU output
+    output wire n_oe_mem; // CPU output
+    output wire n_we_mem; // CPU output
 
-    output wire n_d_to_di_oe; // output the D bus into the DI bus, active low
-    output wire ir_we; // latch D into IR on posedge clk, active high
+    output wire n_oe_d_di; // output the D bus into the DI bus, active low
+    output wire we_ir; // latch D into IR on posedge clk, active high
 
-    output wire ip_inc; // increment IP on negedge clk
+    output wire inc_ip; // increment IP on negedge clk
     output wire addr_dp; // 0 - drive Address with IP, 1 - with DP
     output wire swap_p; // swap IP and DP on negedge clk
 
@@ -45,7 +47,7 @@ module control_unit(
     output wire n_oe_a_d, n_oe_b_d; // drive external D bus with a or b
 
     output wire n_we_flags; // latch flags on negedge clk
-    output wire n_alu_oe; // ALU output to DI is enabled
+    output wire n_oe_alu_di; // ALU output to DI is enabled
 
     // Instructions:
     // LD d:         [DP] -> d
@@ -109,14 +111,14 @@ module control_unit(
         end
     end
 
-    assign n_mem_oe = st & (~cycle | clk);
-    assign n_mem_we = ~(st & ~cycle & ~clk);
+    assign n_oe_mem = st & (~cycle | clk);
+    assign n_we_mem = ~(st & ~cycle & ~clk);
 
-    assign n_d_to_di_oe = ~((ldi & cycle) | ld);
+    assign n_oe_d_di = ~((ldi & cycle) | ld);
 
-    assign ir_we = ~ir_we_reg;
+    assign we_ir = ~ir_we_reg;
 
-    assign ip_inc = ~st | cycle;
+    assign inc_ip = ~st | cycle;
 
     assign addr_dp = (ld & clk) | (st & (~cycle | clk));
 
@@ -144,5 +146,5 @@ module control_unit(
     wire condition_result = (ir[2] ^ |(flags & (4'b1 << flag))) | ir[3];
     assign swap_p = ir_is_jmp & (ir[3] | condition_result);
 
-    assign n_alu_oe = ~ir_is_alu;
+    assign n_oe_alu_di = ~ir_is_alu;
 endmodule

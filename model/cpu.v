@@ -10,10 +10,10 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
     wire n_clk = ~clk;
 
     wire [7:0] ir_out;
-    wire ir_we;
+    wire we_ir;
 
     wire ir_w_clk;
-    assign #10 ir_w_clk = clk & ir_we; // 74act08 AND gate
+    assign #10 ir_w_clk = clk & we_ir; // 74act08 AND gate
 
     register_74273 reg_ir(
             .q(ir_out),
@@ -106,8 +106,8 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
         .carry_in(flags_out[1])
         );
 
-    wire n_d_to_di_oe;
-    assign d_int = n_d_to_di_oe ? 8'bz : d;
+    wire n_oe_d_di;
+    assign d_int = n_oe_d_di ? 8'bz : d;
 
     reg p_switch;
     wire p_toggle;
@@ -129,11 +129,11 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
     assign alu_b = n_zero_to_alu_oe ? 8'bz : 8'b0;
 
     control_unit cu(
-                .n_mem_oe(n_oe),
-                .n_mem_we(n_we),
-                .n_d_to_di_oe(n_d_to_di_oe),
-                .ir_we(ir_we),
-                .ip_inc(ip_cnt),
+                .n_oe_mem(n_oe),
+                .n_we_mem(n_we),
+                .n_oe_d_di(n_oe_d_di),
+                .we_ir(we_ir),
+                .inc_ip(ip_cnt),
                 .addr_dp(addr_dp),
                 .swap_p(p_toggle),
                 .n_we_pl(n_pl_we),
@@ -147,7 +147,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
                 .n_oe_a_d(n_a_to_d_oe),
                 .n_oe_b_d(n_b_to_d_oe),
                 .n_we_flags(n_flags_we),
-                .n_alu_oe(n_alu_oe),
+                .n_oe_alu_di(n_alu_oe),
                 .clk(clk),
                 .n_rst(n_rst),
                 .ir(ir_out),
