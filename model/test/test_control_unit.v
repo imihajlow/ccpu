@@ -23,7 +23,6 @@ module test_control_unit();
     wire n_oe_b_d;
     wire n_we_flags;
     wire n_alu_oe;
-    wire alu_invert;
 
     task assert_short_circuit;
     begin
@@ -66,7 +65,6 @@ module test_control_unit();
             .n_oe_b_d(n_oe_b_d),
             .n_we_flags(n_we_flags),
             .n_alu_oe(n_alu_oe),
-            .alu_invert(alu_invert),
             .clk(clk),
             .n_rst(n_rst),
             .ir(ir),
@@ -118,7 +116,6 @@ module test_control_unit();
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
                 assert(n_alu_oe == 1'b0);
-                assert(alu_invert == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -164,7 +161,6 @@ module test_control_unit();
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
                 assert(n_alu_oe == 1'b0);
-                assert(alu_invert == 1'b0);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -216,7 +212,6 @@ module test_control_unit();
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
                 assert(n_alu_oe == 1'b0);
-                assert(alu_invert == 1'b1);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;
@@ -262,7 +257,6 @@ module test_control_unit();
                 assert(n_oe_b_d == 1'b1);
                 assert(n_we_flags == 1'b0);
                 assert(n_alu_oe == 1'b0);
-                assert(alu_invert == 1'b1);
                 assert_short_circuit();
 
                 #1 clk = 1'b0;

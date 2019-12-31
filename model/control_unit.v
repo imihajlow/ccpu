@@ -19,7 +19,6 @@ module control_unit(
             n_oe_b_d,
             n_we_flags,
             n_alu_oe,
-            alu_invert,
 //input
             clk,
             n_rst,
@@ -47,7 +46,6 @@ module control_unit(
 
     output wire n_we_flags; // latch flags on negedge clk
     output wire n_alu_oe; // ALU output to DI is enabled
-    output wire alu_invert;
 
     // Instructions:
     // LD d:         [DP] -> d
@@ -147,5 +145,4 @@ module control_unit(
     assign swap_p = ir_is_jmp & (ir[3] | condition_result);
 
     assign n_alu_oe = ~ir_is_alu;
-    assign alu_invert = ir_is_alu & ir[2];
 endmodule

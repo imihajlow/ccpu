@@ -95,7 +95,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
 
     wire n_alu_oe;
     wire [3:0] alu_op = ir_out[6:3];
-    wire alu_invert;
+    wire alu_invert = ir_out[2];
     alu alu_inst(
         .a(alu_a),
         .b(alu_b),
@@ -149,7 +149,6 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
                 .n_oe_b_d(n_b_to_d_oe),
                 .n_we_flags(n_flags_we),
                 .n_alu_oe(n_alu_oe),
-                .alu_invert(alu_invert),
                 .clk(clk),
                 .n_rst(n_rst),
                 .ir(ir_out),
