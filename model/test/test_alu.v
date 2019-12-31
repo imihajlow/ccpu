@@ -25,7 +25,7 @@ module test_alu;
     reg [7:0] a;
     reg [7:0] b;
     reg [3:0] op;
-    reg oe;
+    reg n_oe;
     reg invert;
     reg carry_in;
     wire [7:0] result;
@@ -36,7 +36,7 @@ module test_alu;
         .a(alu_a),
         .b(alu_b),
         .op(op),
-        .oe(oe),
+        .n_oe(n_oe),
         .invert(invert),
         .carry_in(carry_in),
         .result(result),
@@ -47,7 +47,7 @@ module test_alu;
         $dumpfile("test_alu.vcd");
         $dumpvars;
 
-        oe = 1'b0;
+        n_oe = 1'b0;
 
         // inversion-independent
         for (i_invert = 0; i_invert < 2; i_invert = i_invert + 1) begin

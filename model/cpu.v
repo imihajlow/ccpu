@@ -100,7 +100,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
         .a(alu_a),
         .b(alu_b),
         .op(alu_op),
-        .oe(n_alu_oe),
+        .n_oe(n_alu_oe),
         .invert(alu_invert),
         .result(d_int),
         .flags(flags_in),

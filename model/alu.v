@@ -1,9 +1,9 @@
-module alu(a, b, op, oe, invert, carry_in, result, flags);
+module alu(a, b, op, n_oe, invert, carry_in, result, flags);
     input [7:0] a;
     input [7:0] b;
     output [7:0] result;
     input [3:0] op;
-    input oe;
+    input n_oe;
     input invert;
     input carry_in;
     output [3:0] flags;
@@ -55,5 +55,5 @@ module alu(a, b, op, oe, invert, carry_in, result, flags);
     assign flags[1] = carry_out_lo | carry_out_hi;
     assign flags[2] = res[7];
 
-    assign result = oe ? 8'bzzzzzzzz : res;
+    assign result = n_oe ? 8'bzzzzzzzz : res;
 endmodule
