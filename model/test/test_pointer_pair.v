@@ -2,13 +2,13 @@
 module test_pointer_pair();
 
     reg clk;
-    reg rst;
-    reg we_l;
-    reg we_h;
-    reg oe_addr_ip;
-    reg oe_addr_dp;
-    reg oe_dl;
-    reg oe_dh;
+    reg n_rst;
+    reg n_we_l;
+    reg n_we_h;
+    reg n_oe_addr_ip;
+    reg n_oe_addr_dp;
+    reg n_oe_dl;
+    reg n_oe_dh;
     reg cnt;
     reg selector;
     reg [7:0] di;
@@ -19,15 +19,15 @@ module test_pointer_pair();
         .addr_out(addr_out),
         .data_out(data_out),
         .clk(clk),
-        .rst(rst),
+        .n_rst(n_rst),
         .di(di),
-        .oe_addr_ip(oe_addr_ip),
-        .oe_addr_dp(oe_addr_dp),
-        .oe_dl(oe_dl),
-        .oe_dh(oe_dh),
+        .n_oe_addr_ip(n_oe_addr_ip),
+        .n_oe_addr_dp(n_oe_addr_dp),
+        .n_oe_dl(n_oe_dl),
+        .n_oe_dh(n_oe_dh),
         .cnt(cnt),
-        .we_l(we_l),
-        .we_h(we_h),
+        .n_we_l(n_we_l),
+        .n_we_h(n_we_h),
         .selector(selector));
 
     task assert;
@@ -39,16 +39,16 @@ module test_pointer_pair();
     initial begin
         $dumpfile("test_pointer_pair.vcd");
         $dumpvars;
-        $monitor("clk = %b, rst = %b, sel = %b, we_l = %b, we_h = %b, oe_addr_ip = %b, oe_addr_dp = %b, oe_dl = %b, oe_dh = %b, di = %h, addr_out = %h, data_out = %h",
-                 clk, rst, selector, we_l, we_h, oe_addr_ip, oe_addr_dp, oe_dl, oe_dh, di, addr_out, data_out);
+        $monitor("clk = %b, n_rst = %b, sel = %b, n_we_l = %b, n_we_h = %b, n_oe_addr_ip = %b, n_oe_addr_dp = %b, n_oe_dl = %b, n_oe_dh = %b, di = %h, addr_out = %h, data_out = %h",
+                 clk, n_rst, selector, n_we_l, n_we_h, n_oe_addr_ip, n_oe_addr_dp, n_oe_dl, n_oe_dh, di, addr_out, data_out);
         clk = 1'b0;
-        rst = 1'b1;
-        we_l = 1'b1;
-        we_h = 1'b1;
-        oe_addr_ip = 1'b1;
-        oe_addr_dp = 1'b1;
-        oe_dl = 1'b1;
-        oe_dh = 1'b1;
+        n_rst = 1'b1;
+        n_we_l = 1'b1;
+        n_we_h = 1'b1;
+        n_oe_addr_ip = 1'b1;
+        n_oe_addr_dp = 1'b1;
+        n_oe_dl = 1'b1;
+        n_oe_dh = 1'b1;
         cnt = 1'b0;
         di = 8'hFE;
         selector = 1'b0;
@@ -62,31 +62,31 @@ module test_pointer_pair();
         assert(data_out === 8'hz);
         assert(addr_out === 16'hz);
         #1 clk = 1;
-        #1 oe_addr_ip = 1'b0;
+        #1 n_oe_addr_ip = 1'b0;
         #1
         assert(addr_out === 16'h0);
         assert(data_out === 8'hz);
         #1 clk = 0;
-        we_l = 1'b0;
+        n_we_l = 1'b0;
         #1
         assert(addr_out === 16'h0);
         #1 clk = 1;
         #1
         assert(addr_out === 16'h0000);
         assert(data_out === 8'hz);
-        #1 oe_dl = 1'b0;
+        #1 n_oe_dl = 1'b0;
         #1
         assert(data_out === 8'hfe);
-        #1 oe_dl = 1'b1;
-        #1 oe_dh = 1'b0;
+        #1 n_oe_dl = 1'b1;
+        #1 n_oe_dh = 1'b0;
         #1
         assert(data_out === 8'h00);
-        #1 we_l = 1'b1;
+        #1 n_we_l = 1'b1;
 
         // test count
         cnt = 1;
-        oe_dh = 1;
-        oe_dl = 1;
+        n_oe_dh = 1;
+        n_oe_dl = 1;
         #1 clk = 0;
         #1
         assert(addr_out === 16'h0000);
@@ -97,8 +97,8 @@ module test_pointer_pair();
         #1 clk = 1;
         #1
         assert(addr_out === 16'h0002);
-        #1 oe_addr_ip = 1'b1;
-        oe_addr_dp = 1'b0;
+        #1 n_oe_addr_ip = 1'b1;
+        n_oe_addr_dp = 1'b0;
         #1
         assert(addr_out === 16'h00fe);
 
@@ -107,11 +107,11 @@ module test_pointer_pair();
         selector = 1'b1;
         #1
         assert(addr_out === 16'h0002);
-        #1 oe_addr_ip = 1'b0;
-        oe_addr_dp = 1'b1;
+        #1 n_oe_addr_ip = 1'b0;
+        n_oe_addr_dp = 1'b1;
         #1
         assert(addr_out === 16'h00fe);
-        oe_dl = 1'b0;
+        n_oe_dl = 1'b0;
         #1
         assert(data_out === 8'h02);
     end

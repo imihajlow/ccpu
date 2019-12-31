@@ -82,15 +82,15 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
             .addr_out(a),
             .data_out(alu_b),
             .clk(n_clk),
-            .rst(n_rst),
+            .n_rst(n_rst),
             .di(d_int),
-            .oe_addr_ip(n_ip_to_addr_oe),
-            .oe_addr_dp(n_dp_to_addr_oe),
-            .oe_dl(n_pl_to_alu_oe),
-            .oe_dh(n_ph_to_alu_oe),
+            .n_oe_addr_ip(n_ip_to_addr_oe),
+            .n_oe_addr_dp(n_dp_to_addr_oe),
+            .n_oe_dl(n_pl_to_alu_oe),
+            .n_oe_dh(n_ph_to_alu_oe),
             .cnt(ip_cnt),
-            .we_l(n_pl_we),
-            .we_h(n_ph_we),
+            .n_we_l(n_pl_we),
+            .n_we_h(n_ph_we),
             .selector(p_selector));
 
     wire n_alu_oe;
