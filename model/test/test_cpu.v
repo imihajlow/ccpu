@@ -5,27 +5,27 @@ module test_cpu();
     localparam SAMPLE_ADDR = 16'h0200;
     localparam RESULT_SIZE = 2;
     reg clk;
-    reg rst;
+    reg n_rst;
     wire [15:0] a;
     wire [7:0] d;
-    wire oe;
-    wire we;
+    wire n_oe;
+    wire n_we;
 
     cpu inst(
         .clk(clk),
-        .rst(rst),
+        .n_rst(n_rst),
         .a(a),
         .d(d),
-        .oe(oe),
-        .we(we));
+        .n_oe(n_oe),
+        .n_we(n_we));
 
     reg [7:0] ram [0:65535];
 
     wire [7:0] ram_out = ram[a];
 
-    assign #0.075 d = oe ? 8'bzzzzzzzz : ram_out;
+    assign #0.075 d = n_oe ? 8'bzzzzzzzz : ram_out;
 
-    always @(posedge we) begin
+    always @(posedge n_we) begin
         ram[a] <= d;
         $display("write [%h] <= %h", a, d);
     end
@@ -59,15 +59,15 @@ module test_cpu();
         $dumpfile("test_cpu.vcd");
         $dumpvars;
         $readmemh("test_cpu.hex", ram);
-        rst = 1'b0;
+        n_rst = 1'b0;
         clk = 1'b0;
         dump_memory();
 
-        #1 rst = 1'b1;
+        #1 n_rst = 1'b1;
 
         for (i = 0; i < 5000; i = i + 2) begin
             #1
-            if (~oe & (a === FINISH_ADDR)) begin
+            if (~n_oe & (a === FINISH_ADDR)) begin
                 $display("Finish address reached");
                 dump_memory();
 

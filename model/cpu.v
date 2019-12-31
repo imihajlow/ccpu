@@ -1,13 +1,13 @@
 `timescale 1ns/1ps
-module cpu(clk, rst, a, d, oe, we);
+module cpu(clk, n_rst, a, d, n_oe, n_we);
     input clk;
-    input rst;
+    input n_rst;
     output [15:0] a;
     inout [7:0] d;
-    output oe;
-    output we;
+    output n_oe;
+    output n_we;
 
-    wire nclk = ~clk;
+    wire n_clk = ~clk;
 
     wire [7:0] ir_out;
     wire ir_we;
@@ -18,7 +18,7 @@ module cpu(clk, rst, a, d, oe, we);
     register_74273 reg_ir(
             .q(ir_out),
             .d(d),
-            .n_mr(rst),
+            .n_mr(n_rst),
             .cp(ir_w_clk)
         );
 
@@ -27,88 +27,88 @@ module cpu(clk, rst, a, d, oe, we);
     wire [7:0] alu_b = 8'bz; // second ALU input
 
     wire a_we;
-    wire a_to_d_oe;
+    wire n_a_to_d_oe;
 
     wire a_w_clk;
-    assign #10 a_w_clk = nclk & a_we; // 74act08 AND gate
+    assign #10 a_w_clk = n_clk & a_we; // 74act08 AND gate
     gp_reg_b reg_a(
             .doa(d),
             .dob(alu_a),
             .di(d_int),
             .w_clk(a_w_clk),
-            .n_rst(rst),
-            .n_oe_a(a_to_d_oe),
+            .n_rst(n_rst),
+            .n_oe_a(n_a_to_d_oe),
             .n_oe_b(1'b0) // TODO replace component
         );
 
     wire b_we;
-    wire b_to_d_oe;
-    wire b_to_alu_oe;
+    wire n_b_to_d_oe;
+    wire n_b_to_alu_oe;
 
     wire b_w_clk;
-    assign #10 b_w_clk = nclk & b_we; // 74act08 AND gate
+    assign #10 b_w_clk = n_clk & b_we; // 74act08 AND gate
     gp_reg_b reg_b(
             .doa(d),
             .dob(alu_b),
             .di(d_int),
             .w_clk(b_w_clk),
-            .n_rst(rst),
-            .n_oe_a(b_to_d_oe),
-            .n_oe_b(b_to_alu_oe)
+            .n_rst(n_rst),
+            .n_oe_a(n_b_to_d_oe),
+            .n_oe_b(n_b_to_alu_oe)
         );
 
     wire [3:0] flags_in;
     wire [3:0] flags_out;
-    wire flags_we;
+    wire n_flags_we;
     counter_74161 reg_flags(
             .Q(flags_out),
-            .clk(nclk),
-            .clr_n(rst),
+            .clk(n_clk),
+            .clr_n(n_rst),
             .enp(1'b0),
             .ent(1'b0),
-            .load_n(flags_we),
+            .load_n(n_flags_we),
             .P(flags_in));
 
     wire addr_dp;
-    wire ip_to_addr_oe = addr_dp;
-    wire dp_to_addr_oe = ~addr_dp;
-    wire ph_to_alu_oe;
-    wire pl_to_alu_oe;
+    wire n_ip_to_addr_oe = addr_dp;
+    wire n_dp_to_addr_oe = ~addr_dp;
+    wire n_ph_to_alu_oe;
+    wire n_pl_to_alu_oe;
     wire ip_cnt;
-    wire pl_we;
-    wire ph_we;
+    wire n_pl_we;
+    wire n_ph_we;
     wire p_selector;
     pointer_pair reg_p(
             .addr_out(a),
             .data_out(alu_b),
-            .clk(nclk),
-            .rst(rst),
+            .clk(n_clk),
+            .rst(n_rst),
             .di(d_int),
-            .oe_addr_ip(ip_to_addr_oe),
-            .oe_addr_dp(dp_to_addr_oe),
-            .oe_dl(pl_to_alu_oe),
-            .oe_dh(ph_to_alu_oe),
+            .oe_addr_ip(n_ip_to_addr_oe),
+            .oe_addr_dp(n_dp_to_addr_oe),
+            .oe_dl(n_pl_to_alu_oe),
+            .oe_dh(n_ph_to_alu_oe),
             .cnt(ip_cnt),
-            .we_l(pl_we),
-            .we_h(ph_we),
+            .we_l(n_pl_we),
+            .we_h(n_ph_we),
             .selector(p_selector));
 
-    wire alu_oe;
+    wire n_alu_oe;
     wire [3:0] alu_op = ir_out[6:3];
     wire alu_invert;
     alu alu_inst(
         .a(alu_a),
         .b(alu_b),
         .op(alu_op),
-        .oe(alu_oe),
+        .oe(n_alu_oe),
         .invert(alu_invert),
         .result(d_int),
         .flags(flags_in),
         .carry_in(flags_out[1])
         );
 
-    wire d_to_di_oe;
-    assign d_int = d_to_di_oe ? 8'bz : d;
+    wire n_d_to_di_oe;
+    assign d_int = n_d_to_di_oe ? 8'bz : d;
 
     reg p_switch;
     wire p_toggle;
@@ -116,8 +116,8 @@ module cpu(clk, rst, a, d, oe, we);
         p_switch = 0;
     end
 
-    always @(posedge nclk or negedge rst) begin
-        if (~rst) begin
+    always @(posedge n_clk or negedge n_rst) begin
+        if (~n_rst) begin
             p_switch <= 0;
         end else if (p_toggle) begin
             p_switch <= ~p_switch;
@@ -126,32 +126,32 @@ module cpu(clk, rst, a, d, oe, we);
 
     assign p_selector = p_switch;
 
-    wire zero_to_alu_oe;
-    assign alu_b = zero_to_alu_oe ? 8'bz : 8'b0;
+    wire n_zero_to_alu_oe;
+    assign alu_b = n_zero_to_alu_oe ? 8'bz : 8'b0;
 
     control_unit cu(
-                .n_mem_oe(oe),
-                .n_mem_we(we),
-                .n_d_to_di_oe(d_to_di_oe),
+                .n_mem_oe(n_oe),
+                .n_mem_we(n_we),
+                .n_d_to_di_oe(n_d_to_di_oe),
                 .ir_we(ir_we),
                 .ip_inc(ip_cnt),
                 .addr_dp(addr_dp),
                 .swap_p(p_toggle),
-                .n_we_pl(pl_we),
-                .n_we_ph(ph_we),
+                .n_we_pl(n_pl_we),
+                .n_we_ph(n_ph_we),
                 .we_a(a_we),
                 .we_b(b_we),
-                .n_oe_pl_alu(pl_to_alu_oe),
-                .n_oe_ph_alu(ph_to_alu_oe),
-                .n_oe_b_alu(b_to_alu_oe),
-                .n_oe_zero_alu(zero_to_alu_oe),
-                .n_oe_a_d(a_to_d_oe),
-                .n_oe_b_d(b_to_d_oe),
-                .n_we_flags(flags_we),
-                .n_alu_oe(alu_oe),
+                .n_oe_pl_alu(n_pl_to_alu_oe),
+                .n_oe_ph_alu(n_ph_to_alu_oe),
+                .n_oe_b_alu(n_b_to_alu_oe),
+                .n_oe_zero_alu(n_zero_to_alu_oe),
+                .n_oe_a_d(n_a_to_d_oe),
+                .n_oe_b_d(n_b_to_d_oe),
+                .n_we_flags(n_flags_we),
+                .n_alu_oe(n_alu_oe),
                 .alu_invert(alu_invert),
                 .clk(clk),
-                .n_rst(rst),
+                .n_rst(n_rst),
                 .ir(ir_out),
                 .flags(flags_out));
 endmodule
