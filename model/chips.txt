@@ -4,3 +4,4 @@ counter/register: -161(4 bit, load, carry, clear, no z)
 z-buffer: -244
 RAM: 62c256
 dual 4 to 1 selector: -153
+d flip-flop: -74
