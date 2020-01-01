@@ -69,8 +69,6 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
             .P(flags_in));
 
     wire addr_dp;
-    wire n_ip_to_addr_oe = addr_dp;
-    wire n_dp_to_addr_oe = ~addr_dp;
     wire n_ph_to_alu_oe;
     wire n_pl_to_alu_oe;
     wire ip_cnt;
@@ -83,8 +81,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
             .clk(n_clk),
             .n_rst(n_rst),
             .di(d_int),
-            .n_oe_addr_ip(n_ip_to_addr_oe),
-            .n_oe_addr_dp(n_dp_to_addr_oe),
+            .addr_dp(addr_dp),
             .n_oe_dl(n_pl_to_alu_oe),
             .n_oe_dh(n_ph_to_alu_oe),
             .cnt(ip_cnt),

@@ -7,8 +7,7 @@ module pointer_pair(
          clk,
          n_rst,
          di,
-         n_oe_addr_ip,
-         n_oe_addr_dp,
+         addr_dp,
          n_oe_dl,
          n_oe_dh,
          cnt,
@@ -18,8 +17,7 @@ module pointer_pair(
     input wire clk;
     input wire n_rst;
     input wire [7:0] di;
-    input wire n_oe_addr_ip;
-    input wire n_oe_addr_dp;
+    input wire addr_dp;
     input wire n_oe_dl;
     input wire n_oe_dh;
     input wire cnt;
@@ -45,7 +43,7 @@ module pointer_pair(
     wire n_b_we_h;
 
     wire n_selector;
-    assign #35 n_selector = ~selector; // MOSFET invertor, 10k pull-up, 3.5 pF input capacitance
+    assign #20 n_selector = selector ^ 1'b1; // 74x86 XOR gate
 
     // 74x32 OR gate
     assign #20 n_a_oe_dl = n_selector | n_oe_dl; // can only read DP;
@@ -57,14 +55,9 @@ module pointer_pair(
     assign #20 n_b_we_l = selector | n_we_l;
     assign #20 n_b_we_h = selector | n_we_h;
 
-    selector_74153 sel_inst(
-        .y1(n_a_oe_addr),
-        .y2(n_b_oe_addr),
-        .i1({2'b00, n_oe_addr_dp, n_oe_addr_ip}),
-        .i2({2'b00, n_oe_addr_ip, n_oe_addr_dp}),
-        .s({1'b0, selector}),
-        .e1(1'b0),
-        .e2(1'b0));
+    // 74x86 XOR gate
+    assign #20 n_a_oe_addr = selector ^ addr_dp;
+    assign #20 n_b_oe_addr = n_selector ^ addr_dp;
 
     // 74x08 AND gate
     assign #20 a_cnt = n_selector & cnt;       // can only count IP;
