@@ -3,10 +3,10 @@ EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 8 8
-Title ""
-Date ""
-Rev ""
+Sheet 8 9
+Title "Control unit interface"
+Date "2020-01-02"
+Rev "1"
 Comp ""
 Comment1 ""
 Comment2 ""

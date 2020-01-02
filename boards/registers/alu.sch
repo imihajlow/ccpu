@@ -3,10 +3,10 @@ EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 6 8
-Title ""
-Date ""
-Rev ""
+Sheet 6 9
+Title "ALU interface"
+Date "2020-01-02"
+Rev "1"
 Comp ""
 Comment1 ""
 Comment2 ""

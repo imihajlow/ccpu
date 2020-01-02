@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A3 16535 11693
 encoding utf-8
-Sheet 1 8
+Sheet 1 9
 Title "CPU registers and memory module"
 Date "2019-12-28"
 Rev "1"
@@ -1726,6 +1726,43 @@ Text Label 8750 4950 0    50   ~ 0
 ~oe_alu
 Wire Wire Line
 	11300 1900 11050 1900
+Text Label 11050 1900 2    50   ~ 0
+addr_dp
+Text Label 8750 3750 0    50   ~ 0
+addr_dp
+Text Label 8750 3850 0    50   ~ 0
+p_selector
+$Sheet
+S 7500 7450 1000 1000
+U 5EC337E5
+F0 "cpu_interface" 50
+F1 "cpu_interface.sch" 50
+F2 "a[0..15]" I L 7500 7550 50 
+F3 "d[0..7]" B L 7500 7700 50 
+F4 "~oe" I L 7500 7850 50 
+F5 "~we" I L 7500 7950 50 
+F6 "~rdy" O L 7500 8050 50 
+F7 "clk" I L 7500 8200 50 
+F8 "~rst" I L 7500 8300 50 
+$EndSheet
+Wire Bus Line
+	7500 7550 7350 7550
+Wire Bus Line
+	7500 7700 7350 7700
+Text Label 7350 7550 2    50   ~ 0
+a[0..15]
+Text Label 7350 7700 2    50   ~ 0
+d[0..7]
+Wire Wire Line
+	7500 7850 7350 7850
+Wire Wire Line
+	7500 7950 7350 7950
+Wire Wire Line
+	7500 8050 7350 8050
+Wire Wire Line
+	7500 8200 7350 8200
+Wire Wire Line
+	7500 8300 7350 8300
 Wire Bus Line
 	2350 6050 2350 6700
 Wire Bus Line
@@ -1738,10 +1775,14 @@ Wire Bus Line
 	4400 3450 4400 5900
 Wire Bus Line
 	2400 1150 2400 4750
-Text Label 11050 1900 2    50   ~ 0
-addr_dp
-Text Label 8750 3750 0    50   ~ 0
-addr_dp
-Text Label 8750 3850 0    50   ~ 0
-p_selector
+Text Label 7350 8200 2    50   ~ 0
+clk
+Text Label 7350 8300 2    50   ~ 0
+~rst
+Text Label 7350 8050 2    50   ~ 0
+~mem_rdy
+Text Label 7350 7850 2    50   ~ 0
+~oe_mem
+Text Label 7350 7950 2    50   ~ 0
+~we_mem
 $EndSCHEMATC

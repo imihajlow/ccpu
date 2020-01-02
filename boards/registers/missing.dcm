@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 62256-TSOP
+D 32k x 8 RAM, TSOP-I package
+F http://www.farnell.com/datasheets/1674430.pdf
+$ENDCMP
+#
+#End Doc Library
