@@ -212,7 +212,6 @@ Text Label 4250 2350 0    50   ~ 0
 d6
 Text Label 4250 2450 0    50   ~ 0
 d7
-NoConn ~ 3350 3350
 $Comp
 L missing:62256-TSOP U?
 U 1 1 5EC8A148
@@ -763,4 +762,15 @@ Wire Bus Line
 	5450 1200 5450 3300
 Wire Bus Line
 	2800 1200 2800 5600
+$Comp
+L power:VCC #PWR?
+U 1 1 5ED0A785
+P 3350 3350
+F 0 "#PWR?" H 3350 3200 50  0001 C CNN
+F 1 "VCC" V 3368 3477 50  0000 L CNN
+F 2 "" H 3350 3350 50  0001 C CNN
+F 3 "" H 3350 3350 50  0001 C CNN
+	1    3350 3350
+	0    -1   -1   0   
+$EndComp
 $EndSCHEMATC
