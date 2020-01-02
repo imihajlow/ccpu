@@ -6,7 +6,7 @@ module control_unit(
             we_ir,
             inc_ip,
             addr_dp,
-            swap_p,
+            p_selector,
             n_we_pl,
             n_we_ph,
             we_a,
@@ -39,7 +39,7 @@ module control_unit(
 
     output wire inc_ip; // increment IP on negedge clk
     output wire addr_dp; // 0 - drive Address with IP, 1 - with DP
-    output wire swap_p; // swap IP and DP on negedge clk
+    output wire p_selector; // swap IP and DP
 
     output wire n_we_pl, n_we_ph; // latch registers from DI on negedge clk, active low
     output wire we_a, we_b; // latch registers from DI on negedge clk, active high
@@ -82,6 +82,8 @@ module control_unit(
     wire ldi = ir[7:4] == 4'b1010;
     wire jc = ir[7:4] == 4'b1100;
 
+    wire n_clk = ~clk;
+
     reg cycle;
     wire n_reset_cycle = ir_is_2cy;
     initial begin
@@ -110,6 +112,22 @@ module control_unit(
             ir_we_reg <= ~ir_we_reg;
         end
     end
+
+    wire swap_p; // swap IP and DP on negedge clk
+    reg p_switch;
+    initial begin
+        p_switch = 0;
+    end
+
+    always @(posedge n_clk or negedge n_rst) begin
+        if (~n_rst) begin
+            p_switch <= 0;
+        end else if (swap_p) begin
+            p_switch <= ~p_switch;
+        end
+    end
+
+    assign p_selector = p_switch;
 
     assign n_oe_mem = st & (~cycle | clk);
     assign n_we_mem = ~(st & ~cycle & ~clk);

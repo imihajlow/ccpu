@@ -106,22 +106,6 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
     wire n_oe_d_di;
     assign d_int = n_oe_d_di ? 8'bz : d;
 
-    reg p_switch;
-    wire p_toggle;
-    initial begin
-        p_switch = 0;
-    end
-
-    always @(posedge n_clk or negedge n_rst) begin
-        if (~n_rst) begin
-            p_switch <= 0;
-        end else if (p_toggle) begin
-            p_switch <= ~p_switch;
-        end
-    end
-
-    assign p_selector = p_switch;
-
     wire n_zero_to_alu_oe;
     assign alu_b = n_zero_to_alu_oe ? 8'bz : 8'b0;
 
@@ -132,7 +116,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
                 .we_ir(we_ir),
                 .inc_ip(ip_cnt),
                 .addr_dp(addr_dp),
-                .swap_p(p_toggle),
+                .p_selector(p_selector),
                 .n_we_pl(n_pl_we),
                 .n_we_ph(n_ph_we),
                 .we_a(a_we),
