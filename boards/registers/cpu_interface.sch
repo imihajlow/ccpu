@@ -754,14 +754,6 @@ Wire Wire Line
 	2300 5900 7050 5900
 Wire Wire Line
 	7050 5900 7050 5500
-Wire Bus Line
-	4500 1300 4500 2350
-Wire Bus Line
-	7350 1300 7350 2400
-Wire Bus Line
-	5450 1200 5450 3300
-Wire Bus Line
-	2800 1200 2800 5600
 $Comp
 L power:VCC #PWR?
 U 1 1 5ED0A785
@@ -773,4 +765,206 @@ F 3 "" H 3350 3350 50  0001 C CNN
 	1    3350 3350
 	0    -1   -1   0   
 $EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5EDD5828
+P 9950 1400
+F 0 "#PWR?" H 9950 1150 50  0001 C CNN
+F 1 "GND" V 9955 1272 50  0000 R CNN
+F 2 "" H 9950 1400 50  0001 C CNN
+F 3 "" H 9950 1400 50  0001 C CNN
+	1    9950 1400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5EDD64B3
+P 9450 2600
+F 0 "#PWR?" H 9450 2350 50  0001 C CNN
+F 1 "GND" V 9455 2472 50  0000 R CNN
+F 2 "" H 9450 2600 50  0001 C CNN
+F 3 "" H 9450 2600 50  0001 C CNN
+	1    9450 2600
+	0    1    1    0   
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5EDD71B4
+P 9450 1400
+F 0 "#PWR?" H 9450 1250 50  0001 C CNN
+F 1 "VCC" V 9468 1527 50  0000 L CNN
+F 2 "" H 9450 1400 50  0001 C CNN
+F 3 "" H 9450 1400 50  0001 C CNN
+	1    9450 1400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5EDD7F36
+P 9950 2600
+F 0 "#PWR?" H 9950 2450 50  0001 C CNN
+F 1 "VCC" V 9967 2728 50  0000 L CNN
+F 2 "" H 9950 2600 50  0001 C CNN
+F 3 "" H 9950 2600 50  0001 C CNN
+	1    9950 2600
+	0    1    1    0   
+$EndComp
+Text Label 9950 2500 0    50   ~ 0
+~io_rdy
+Text Label 9950 2300 0    50   ~ 0
+~io_cs
+Text Label 1750 1800 0    50   ~ 0
+~we
+Text Label 1750 1700 0    50   ~ 0
+~oe
+Text Label 1500 2000 0    50   ~ 0
+clk
+Text Label 1500 2100 0    50   ~ 0
+~rst
+Text Label 9450 2400 2    50   ~ 0
+~oe
+Text Label 9450 2500 2    50   ~ 0
+~we
+Text Label 9950 2400 0    50   ~ 0
+~rst
+Text Label 9450 2300 2    50   ~ 0
+clk
+Entry Wire Line
+	10300 1600 10400 1500
+Entry Wire Line
+	10300 1500 10400 1400
+Wire Wire Line
+	9950 1500 10300 1500
+Wire Wire Line
+	10300 1600 9950 1600
+Entry Wire Line
+	10300 1800 10400 1700
+Entry Wire Line
+	10300 1700 10400 1600
+Wire Wire Line
+	9950 1700 10300 1700
+Wire Wire Line
+	10300 1800 9950 1800
+Entry Wire Line
+	9100 1600 9200 1500
+Entry Wire Line
+	9100 1700 9200 1600
+Wire Wire Line
+	9450 1500 9200 1500
+Wire Wire Line
+	9200 1600 9450 1600
+Entry Wire Line
+	9100 1800 9200 1700
+Entry Wire Line
+	9100 1900 9200 1800
+Wire Wire Line
+	9450 1700 9200 1700
+Wire Wire Line
+	9200 1800 9450 1800
+Text Label 9250 1500 0    50   ~ 0
+a0
+Text Label 9250 1600 0    50   ~ 0
+a2
+Text Label 9250 1700 0    50   ~ 0
+a4
+Text Label 9250 1800 0    50   ~ 0
+a6
+Text Label 10100 1500 0    50   ~ 0
+a1
+Text Label 10100 1600 0    50   ~ 0
+a3
+Text Label 10100 1700 0    50   ~ 0
+a5
+Text Label 10100 1800 0    50   ~ 0
+a7
+$Comp
+L Connector_Generic:Conn_02x13_Odd_Even J?
+U 1 1 5EEDDD9A
+P 9650 2000
+F 0 "J?" H 9700 2817 50  0000 C CNN
+F 1 "IO" H 9700 2726 50  0000 C CNN
+F 2 "" H 9650 2000 50  0001 C CNN
+F 3 "~" H 9650 2000 50  0001 C CNN
+	1    9650 2000
+	1    0    0    -1  
+$EndComp
+Text Label 10100 2200 0    50   ~ 0
+d7
+Text Label 10100 2100 0    50   ~ 0
+d5
+Text Label 10100 2000 0    50   ~ 0
+d3
+Text Label 10100 1900 0    50   ~ 0
+d1
+Wire Wire Line
+	9950 1900 10300 1900
+Wire Wire Line
+	10300 2000 9950 2000
+Wire Wire Line
+	9950 2100 10300 2100
+Wire Wire Line
+	10300 2200 9950 2200
+Entry Wire Line
+	10300 2200 10400 2100
+Entry Wire Line
+	10300 2100 10400 2000
+Entry Wire Line
+	10300 2000 10400 1900
+Entry Wire Line
+	10300 1900 10400 1800
+Text Label 9250 2200 0    50   ~ 0
+d6
+Text Label 9250 2100 0    50   ~ 0
+d4
+Text Label 9250 2000 0    50   ~ 0
+d2
+Text Label 9250 1900 0    50   ~ 0
+d0
+Wire Wire Line
+	9200 2200 9450 2200
+Wire Wire Line
+	9450 2100 9200 2100
+Wire Wire Line
+	9200 2000 9450 2000
+Wire Wire Line
+	9450 1900 9200 1900
+Entry Wire Line
+	9100 2000 9200 1900
+Entry Wire Line
+	9100 2100 9200 2000
+Entry Wire Line
+	9100 2200 9200 2100
+Entry Wire Line
+	9100 2300 9200 2200
+Wire Bus Line
+	10400 1100 9100 1100
+Wire Bus Line
+	5450 1200 9100 1200
+Wire Bus Line
+	9100 1100 9100 1200
+Connection ~ 5450 1200
+Connection ~ 9100 1200
+Wire Bus Line
+	10400 2750 9100 2750
+Wire Bus Line
+	9100 2000 7350 2000
+Wire Bus Line
+	10400 1100 10400 1700
+Wire Bus Line
+	7350 1300 7350 2000
+Wire Bus Line
+	9100 1200 9100 1900
+Wire Bus Line
+	10400 1800 10400 2750
+Wire Bus Line
+	9100 2000 9100 2750
+Wire Bus Line
+	7350 2000 7350 2400
+Wire Bus Line
+	4500 1300 4500 2350
+Wire Bus Line
+	5450 1200 5450 3300
+Wire Bus Line
+	2800 1200 2800 5600
+Connection ~ 7350 2000
 $EndSCHEMATC
