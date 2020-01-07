@@ -45,7 +45,7 @@ $Comp
 L 74xx:74HCT273 U?
 U 1 1 5E6ECBBA
 P 3350 4150
-F 0 "U?" H 3700 3600 50  0000 C CNN
+F 0 "U?" H 3750 3600 50  0000 C CNN
 F 1 "74AC273" H 3800 3500 50  0000 C CNN
 F 2 "" H 3350 4150 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 3350 4150 50  0001 C CNN
@@ -56,7 +56,7 @@ $Comp
 L 74xx:74HC244 U?
 U 1 1 5E6F3C0E
 P 3350 1550
-F 0 "U?" H 3700 1000 50  0000 C CNN
+F 0 "U?" H 3750 1000 50  0000 C CNN
 F 1 "74ACT244" H 3650 900 50  0000 C CNN
 F 2 "" H 3350 1550 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 3350 1550 50  0001 C CNN
@@ -1024,7 +1024,7 @@ $Comp
 L 74xx:74LS161 U?
 U 1 1 5E857F06
 P 3350 6800
-F 0 "U?" H 3700 6250 50  0000 C CNN
+F 0 "U?" H 3750 6250 50  0000 C CNN
 F 1 "74LS161" H 3650 6150 50  0000 C CNN
 F 2 "" H 3350 6800 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS161" H 3350 6800 50  0001 C CNN
@@ -1578,10 +1578,6 @@ flags_out1
 Text Label 14250 4950 2    50   ~ 0
 alu_invert
 Wire Bus Line
-	14400 4550 14250 4550
-Text Label 14250 4550 2    50   ~ 0
-ir_out[3..6]
-Wire Bus Line
 	15300 4450 15500 4450
 Text Label 15500 4450 0    50   ~ 0
 flags_in[0..3]
@@ -1770,9 +1766,9 @@ Text Label 7350 8300 2    50   ~ 0
 Text Label 7350 8050 2    50   ~ 0
 ~mem_rdy
 Text Label 7350 7850 2    50   ~ 0
-~oe_mem
+~oe
 Text Label 7350 7950 2    50   ~ 0
-~we_mem
+~we
 $Sheet
 S 7500 950  550  600 
 U 5EF05415
@@ -1788,8 +1784,58 @@ Wire Wire Line
 	8150 1200 8050 1200
 Wire Wire Line
 	8150 1450 8050 1450
+Text Label 8150 1100 0    50   ~ 0
+clk
+Text Label 8150 1200 0    50   ~ 0
+~clk
+Text Label 8150 1450 0    50   ~ 0
+~rst
+Wire Bus Line
+	14400 4550 13750 4550
+Text Label 13750 5100 1    50   ~ 0
+alu_op[0..3]
+Entry Wire Line
+	13750 5650 13850 5550
+Entry Wire Line
+	13750 5750 13850 5650
+Entry Wire Line
+	13750 5850 13850 5750
+Entry Wire Line
+	13750 5950 13850 5850
+Text Label 13850 5550 0    50   ~ 0
+alu_op0
+Text Label 13850 5650 0    50   ~ 0
+alu_op1
+Text Label 13850 5750 0    50   ~ 0
+alu_op2
+Text Label 13850 5850 0    50   ~ 0
+alu_op3
+Text Label 14300 5550 0    50   ~ 0
+ir_out3
+Text Label 14300 5650 0    50   ~ 0
+ir_out4
+Text Label 14300 5750 0    50   ~ 0
+ir_out5
+Text Label 14300 5850 0    50   ~ 0
+ir_out6
+Wire Wire Line
+	13850 5550 14300 5550
+Wire Wire Line
+	13850 5650 14300 5650
+Wire Wire Line
+	13850 5750 14300 5750
+Wire Wire Line
+	13850 5850 14300 5850
+Text Label 14300 5450 0    50   ~ 0
+ir_out2
+Wire Wire Line
+	14300 5450 14250 5450
+Wire Wire Line
+	14250 5450 14250 4950
 Wire Bus Line
 	2350 6050 2350 6700
+Wire Bus Line
+	13750 4550 13750 5950
 Wire Bus Line
 	4400 6200 4400 7700
 Wire Bus Line
@@ -1800,10 +1846,4 @@ Wire Bus Line
 	4400 3450 4400 5900
 Wire Bus Line
 	2400 1150 2400 4750
-Text Label 8150 1100 0    50   ~ 0
-clk
-Text Label 8150 1200 0    50   ~ 0
-~clk
-Text Label 8150 1450 0    50   ~ 0
-~rst
 $EndSCHEMATC

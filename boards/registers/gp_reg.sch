@@ -33,7 +33,7 @@ U 1 1 5E73BC4E
 P 6800 1650
 AR Path="/5E73B7F6/5E73BC4E" Ref="U?"  Part="1" 
 AR Path="/5E7CA397/5E73BC4E" Ref="U?"  Part="1" 
-F 0 "U?" H 7150 1100 50  0000 C CNN
+F 0 "U?" H 7200 1100 50  0000 C CNN
 F 1 "74ACT244" H 7100 1000 50  0000 C CNN
 F 2 "" H 6800 1650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 6800 1650 50  0001 C CNN
@@ -152,7 +152,7 @@ U 1 1 5E74CA38
 P 6800 3850
 AR Path="/5E73B7F6/5E74CA38" Ref="U?"  Part="1" 
 AR Path="/5E7CA397/5E74CA38" Ref="U?"  Part="1" 
-F 0 "U?" H 7150 3300 50  0000 C CNN
+F 0 "U?" H 7200 3300 50  0000 C CNN
 F 1 "74ACT244" H 7100 3200 50  0000 C CNN
 F 2 "" H 6800 3850 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 6800 3850 50  0001 C CNN
@@ -309,7 +309,7 @@ U 1 1 5E755BB1
 P 4300 1650
 AR Path="/5E73B7F6/5E755BB1" Ref="U?"  Part="1" 
 AR Path="/5E7CA397/5E755BB1" Ref="U?"  Part="1" 
-F 0 "U?" H 4650 1100 50  0000 C CNN
+F 0 "U?" H 4700 1100 50  0000 C CNN
 F 1 "74AC273" H 4650 1000 50  0000 C CNN
 F 2 "" H 4300 1650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 4300 1650 50  0001 C CNN
