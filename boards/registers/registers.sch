@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A3 16535 11693
 encoding utf-8
-Sheet 1 9
+Sheet 1 10
 Title "CPU registers and memory module"
 Date "2019-12-28"
 Rev "1"
@@ -1763,6 +1763,31 @@ Wire Wire Line
 	7500 8200 7350 8200
 Wire Wire Line
 	7500 8300 7350 8300
+Text Label 7350 8200 2    50   ~ 0
+clk
+Text Label 7350 8300 2    50   ~ 0
+~rst
+Text Label 7350 8050 2    50   ~ 0
+~mem_rdy
+Text Label 7350 7850 2    50   ~ 0
+~oe_mem
+Text Label 7350 7950 2    50   ~ 0
+~we_mem
+$Sheet
+S 7500 950  550  600 
+U 5EF05415
+F0 "pwr_and_clk" 50
+F1 "pwr_and_clk.sch" 50
+F2 "clk" O R 8050 1100 50 
+F3 "~rst" O R 8050 1450 50 
+F4 "~clk" O R 8050 1200 50 
+$EndSheet
+Wire Wire Line
+	8050 1100 8150 1100
+Wire Wire Line
+	8150 1200 8050 1200
+Wire Wire Line
+	8150 1450 8050 1450
 Wire Bus Line
 	2350 6050 2350 6700
 Wire Bus Line
@@ -1775,14 +1800,10 @@ Wire Bus Line
 	4400 3450 4400 5900
 Wire Bus Line
 	2400 1150 2400 4750
-Text Label 7350 8200 2    50   ~ 0
+Text Label 8150 1100 0    50   ~ 0
 clk
-Text Label 7350 8300 2    50   ~ 0
+Text Label 8150 1200 0    50   ~ 0
+~clk
+Text Label 8150 1450 0    50   ~ 0
 ~rst
-Text Label 7350 8050 2    50   ~ 0
-~mem_rdy
-Text Label 7350 7850 2    50   ~ 0
-~oe_mem
-Text Label 7350 7950 2    50   ~ 0
-~we_mem
 $EndSCHEMATC
