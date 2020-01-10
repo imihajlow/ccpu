@@ -5,3 +5,6 @@ z-buffer: -244
 RAM: 62c256
 dual 4 to 1 selector: -153
 d flip-flop: -74
+
+610126249121 + SSW-113-02-G-D-RA - 26 pin
+61304021021 + SSW-120-02-G-D-RA - 40 pin
