@@ -357,11 +357,11 @@ Wire Wire Line
 Wire Wire Line
 	6000 3200 5550 3200
 Text Label 5650 1800 2    50   ~ 0
-a0
+a2
 Text Label 5550 1900 0    50   ~ 0
 a1
 Text Label 5550 2000 0    50   ~ 0
-a2
+a0
 Text Label 5550 2100 0    50   ~ 0
 a3
 Text Label 5550 2200 0    50   ~ 0
@@ -371,21 +371,21 @@ a5
 Text Label 5550 2400 0    50   ~ 0
 a6
 Text Label 5550 2600 0    50   ~ 0
-a8
+a12
 Text Label 5550 2500 0    50   ~ 0
 a7
 Text Label 5550 2700 0    50   ~ 0
-a9
+a13
 Text Label 5550 2800 0    50   ~ 0
 a10
 Text Label 5550 2900 0    50   ~ 0
-a11
-Text Label 5550 3000 0    50   ~ 0
-a12
-Text Label 5550 3100 0    50   ~ 0
-a13
-Text Label 5550 3200 0    50   ~ 0
 a14
+Text Label 5550 3000 0    50   ~ 0
+a8
+Text Label 5550 3100 0    50   ~ 0
+a11
+Text Label 5550 3200 0    50   ~ 0
+a9
 Wire Bus Line
 	5450 1200 2800 1200
 Wire Bus Line
@@ -862,21 +862,21 @@ Wire Wire Line
 Wire Wire Line
 	9200 1800 9450 1800
 Text Label 9250 1500 0    50   ~ 0
-a0
-Text Label 9250 1600 0    50   ~ 0
-a2
-Text Label 9250 1700 0    50   ~ 0
-a4
-Text Label 9250 1800 0    50   ~ 0
-a6
-Text Label 10100 1500 0    50   ~ 0
 a1
-Text Label 10100 1600 0    50   ~ 0
+Text Label 9250 1600 0    50   ~ 0
 a3
-Text Label 10100 1700 0    50   ~ 0
+Text Label 9250 1700 0    50   ~ 0
 a5
-Text Label 10100 1800 0    50   ~ 0
+Text Label 9250 1800 0    50   ~ 0
 a7
+Text Label 10100 1500 0    50   ~ 0
+a0
+Text Label 10100 1600 0    50   ~ 0
+a2
+Text Label 10100 1700 0    50   ~ 0
+a4
+Text Label 10100 1800 0    50   ~ 0
+a6
 $Comp
 L Connector_Generic:Conn_02x13_Odd_Even J3
 U 1 1 5EEDDD9A

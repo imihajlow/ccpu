@@ -311,7 +311,7 @@ AR Path="/5E73B7F6/5E755BB1" Ref="U?"  Part="1"
 AR Path="/5E7CA397/5E755BB1" Ref="U25"  Part="1" 
 F 0 "U25" H 4700 1100 50  0000 C CNN
 F 1 "74AC273" H 4650 1000 50  0000 C CNN
-F 2 "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm" H 4300 1650 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 4300 1650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 4300 1650 50  0001 C CNN
 	1    4300 1650
 	1    0    0    -1  

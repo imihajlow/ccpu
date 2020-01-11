@@ -47,7 +47,7 @@ U 1 1 5E6ECBBA
 P 3350 4150
 F 0 "U3" H 3750 3600 50  0000 C CNN
 F 1 "74AC273" H 3800 3500 50  0000 C CNN
-F 2 "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm" H 3350 4150 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 3350 4150 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 3350 4150 50  0001 C CNN
 	1    3350 4150
 	1    0    0    -1  
@@ -100,13 +100,13 @@ Wire Wire Line
 Wire Wire Line
 	3850 4350 4300 4350
 Text Label 4250 3650 2    50   ~ 0
-ir_out0
-Text Label 4250 3750 2    50   ~ 0
-ir_out1
-Text Label 4250 3850 2    50   ~ 0
-ir_out2
-Text Label 4250 3950 2    50   ~ 0
 ir_out3
+Text Label 4250 3750 2    50   ~ 0
+ir_out2
+Text Label 4250 3850 2    50   ~ 0
+ir_out1
+Text Label 4250 3950 2    50   ~ 0
+ir_out0
 Text Label 4250 4050 2    50   ~ 0
 ir_out4
 Text Label 4250 4150 2    50   ~ 0
@@ -544,13 +544,13 @@ d6
 Text Label 2500 1750 0    50   ~ 0
 d7
 Text Label 2500 3650 0    50   ~ 0
-d0
-Text Label 2500 3750 0    50   ~ 0
-d1
-Text Label 2500 3850 0    50   ~ 0
-d2
-Text Label 2500 3950 0    50   ~ 0
 d3
+Text Label 2500 3750 0    50   ~ 0
+d2
+Text Label 2500 3850 0    50   ~ 0
+d1
+Text Label 2500 3950 0    50   ~ 0
+d0
 Text Label 2500 4050 0    50   ~ 0
 d4
 Text Label 2500 4150 0    50   ~ 0
@@ -1836,94 +1836,6 @@ Text Label 10750 3450 0    50   ~ 0
 a_w_clk
 Text Label 10750 5050 0    50   ~ 0
 b_w_clk
-$Comp
-L Mechanical:MountingHole_Pad H2
-U 1 1 5F02246C
-P 950 950
-F 0 "H2" H 1050 953 50  0000 L CNN
-F 1 "MountingHole_Pad" H 1050 908 50  0001 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 950 950 50  0001 C CNN
-F 3 "~" H 950 950 50  0001 C CNN
-	1    950  950 
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR02
-U 1 1 5F023377
-P 950 1050
-F 0 "#PWR02" H 950 800 50  0001 C CNN
-F 1 "GND" H 955 877 50  0000 C CNN
-F 2 "" H 950 1050 50  0001 C CNN
-F 3 "" H 950 1050 50  0001 C CNN
-	1    950  1050
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole_Pad H3
-U 1 1 5F0249F8
-P 15500 950
-F 0 "H3" H 15600 953 50  0000 L CNN
-F 1 "MountingHole_Pad" H 15600 908 50  0001 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 15500 950 50  0001 C CNN
-F 3 "~" H 15500 950 50  0001 C CNN
-	1    15500 950 
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR040
-U 1 1 5F0249FE
-P 15500 1050
-F 0 "#PWR040" H 15500 800 50  0001 C CNN
-F 1 "GND" H 15505 877 50  0000 C CNN
-F 2 "" H 15500 1050 50  0001 C CNN
-F 3 "" H 15500 1050 50  0001 C CNN
-	1    15500 1050
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole_Pad H1
-U 1 1 5F02D6E1
-P 850 9100
-F 0 "H1" H 950 9103 50  0000 L CNN
-F 1 "MountingHole_Pad" H 950 9058 50  0001 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 850 9100 50  0001 C CNN
-F 3 "~" H 850 9100 50  0001 C CNN
-	1    850  9100
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR01
-U 1 1 5F02D6E7
-P 850 9200
-F 0 "#PWR01" H 850 8950 50  0001 C CNN
-F 1 "GND" H 855 9027 50  0000 C CNN
-F 2 "" H 850 9200 50  0001 C CNN
-F 3 "" H 850 9200 50  0001 C CNN
-	1    850  9200
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole_Pad H4
-U 1 1 5F035F46
-P 15500 9400
-F 0 "H4" H 15600 9403 50  0000 L CNN
-F 1 "MountingHole_Pad" H 15600 9358 50  0001 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 15500 9400 50  0001 C CNN
-F 3 "~" H 15500 9400 50  0001 C CNN
-	1    15500 9400
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR041
-U 1 1 5F035F4C
-P 15500 9500
-F 0 "#PWR041" H 15500 9250 50  0001 C CNN
-F 1 "GND" H 15505 9327 50  0000 C CNN
-F 2 "" H 15500 9500 50  0001 C CNN
-F 3 "" H 15500 9500 50  0001 C CNN
-	1    15500 9500
-	1    0    0    -1  
-$EndComp
 Wire Bus Line
 	2350 6050 2350 6700
 Wire Bus Line
@@ -1938,4 +1850,48 @@ Wire Bus Line
 	4400 3450 4400 5900
 Wire Bus Line
 	2400 1150 2400 4750
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 5F1D6D3E
+P 700 750
+F 0 "H1" H 800 796 50  0000 L CNN
+F 1 "MountingHole" H 800 705 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 700 750 50  0001 C CNN
+F 3 "~" H 700 750 50  0001 C CNN
+	1    700  750 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H4
+U 1 1 5F1D725A
+P 15400 700
+F 0 "H4" H 15500 746 50  0000 L CNN
+F 1 "MountingHole" H 15500 655 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 15400 700 50  0001 C CNN
+F 3 "~" H 15400 700 50  0001 C CNN
+	1    15400 700 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 5F1D7797
+P 850 9400
+F 0 "H2" H 950 9446 50  0000 L CNN
+F 1 "MountingHole" H 950 9355 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 850 9400 50  0001 C CNN
+F 3 "~" H 850 9400 50  0001 C CNN
+	1    850  9400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 5F1D7D9A
+P 15350 9500
+F 0 "H3" H 15450 9546 50  0000 L CNN
+F 1 "MountingHole" H 15450 9455 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 15350 9500 50  0001 C CNN
+F 3 "~" H 15350 9500 50  0001 C CNN
+	1    15350 9500
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

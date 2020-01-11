@@ -30,7 +30,7 @@ P 7250 1700
 AR Path="/5E73B7F6/5EA6BD49" Ref="U?"  Part="1" 
 AR Path="/5E7CA397/5EA6BD49" Ref="U?"  Part="1" 
 AR Path="/5E9FD18D/5EA6BD49" Ref="U29"  Part="1" 
-F 0 "U29" H 7600 1150 50  0000 C CNN
+F 0 "U29" H 7650 1150 50  0000 C CNN
 F 1 "74ACT244" H 7550 1050 50  0000 C CNN
 F 2 "Package_SO:SO-20_12.8x7.5mm_P1.27mm" H 7250 1700 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 7250 1700 50  0001 C CNN
@@ -236,9 +236,9 @@ P 4750 1700
 AR Path="/5E73B7F6/5EA6BDD0" Ref="U?"  Part="1" 
 AR Path="/5E7CA397/5EA6BDD0" Ref="U?"  Part="1" 
 AR Path="/5E9FD18D/5EA6BDD0" Ref="U28"  Part="1" 
-F 0 "U28" H 5100 1150 50  0000 C CNN
+F 0 "U28" H 5150 1150 50  0000 C CNN
 F 1 "74AC273" H 5100 1050 50  0000 C CNN
-F 2 "Package_SO:SOIC-20W_7.5x12.8mm_P1.27mm" H 4750 1700 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 4750 1700 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 4750 1700 50  0001 C CNN
 	1    4750 1700
 	1    0    0    -1  
