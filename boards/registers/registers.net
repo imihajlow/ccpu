@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /Users/ivan/projects/ccpu/boards/registers/registers.sch)
-    (date "2020 January 18, Saturday 11:34:03")
+    (date "2020 January 18, Saturday 11:55:08")
     (tool "Eeschema (5.1.5-0-10_14)")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -1488,7 +1488,7 @@
       (tstamp 5EF4DEE4))
     (comp (ref C37)
       (value 0.1u)
-      (footprint LED_SMD:LED_0805_2012Metric)
+      (footprint Capacitor_SMD:C_0805_2012Metric)
       (datasheet ~)
       (libsource (lib Device) (part C) (description "Unpolarized capacitor"))
       (sheetpath (names /pwr_and_clk/) (tstamps /5EF05415/))
