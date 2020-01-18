@@ -8,3 +8,5 @@ d flip-flop: -74
 
 610126249121 + SSW-113-02-G-D-RA - 26 pin
 61304021021 + SSW-120-02-G-D-RA - 40 pin
+
+OS102011MS2QN1 - switch

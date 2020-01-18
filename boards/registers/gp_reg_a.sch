@@ -32,7 +32,7 @@ AR Path="/5E7CA397/5EA6BD49" Ref="U?"  Part="1"
 AR Path="/5E9FD18D/5EA6BD49" Ref="U29"  Part="1" 
 F 0 "U29" H 7650 1150 50  0000 C CNN
 F 1 "74ACT244" H 7550 1050 50  0000 C CNN
-F 2 "Package_SO:SO-20_12.8x7.5mm_P1.27mm" H 7250 1700 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7250 1700 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 7250 1700 50  0001 C CNN
 	1    7250 1700
 	1    0    0    -1  
@@ -85,22 +85,6 @@ Entry Wire Line
 	8350 1800 8450 1700
 Entry Wire Line
 	8350 1900 8450 1800
-Wire Wire Line
-	8350 1200 8050 1200
-Wire Wire Line
-	8050 1300 8350 1300
-Wire Wire Line
-	8350 1400 8050 1400
-Wire Wire Line
-	8050 1500 8350 1500
-Wire Wire Line
-	8350 1600 8050 1600
-Wire Wire Line
-	8050 1700 8350 1700
-Wire Wire Line
-	8350 1800 8050 1800
-Wire Wire Line
-	8050 1900 8350 1900
 Text Label 6500 1200 0    50   ~ 0
 d0
 Text Label 6500 1300 0    50   ~ 0
@@ -770,48 +754,6 @@ Wire Bus Line
 	1650 1000 3900 1000
 $Comp
 L Device:C C?
-U 1 1 5EA6BED9
-P 8400 2300
-AR Path="/5E73B7F6/5EA6BED9" Ref="C?"  Part="1" 
-AR Path="/5E7CA397/5EA6BED9" Ref="C?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BED9" Ref="C29"  Part="1" 
-F 0 "C29" H 8515 2346 50  0000 L CNN
-F 1 "0.1u" H 8515 2255 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 8438 2150 50  0001 C CNN
-F 3 "~" H 8400 2300 50  0001 C CNN
-	1    8400 2300
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 5EA6BEDF
-P 8400 2450
-AR Path="/5E73B7F6/5EA6BEDF" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5EA6BEDF" Ref="#PWR?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BEDF" Ref="#PWR0189"  Part="1" 
-F 0 "#PWR0189" H 8400 2200 50  0001 C CNN
-F 1 "GND" H 8405 2277 50  0000 C CNN
-F 2 "" H 8400 2450 50  0001 C CNN
-F 3 "" H 8400 2450 50  0001 C CNN
-	1    8400 2450
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 5EA6BEE5
-P 8400 2150
-AR Path="/5E73B7F6/5EA6BEE5" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5EA6BEE5" Ref="#PWR?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BEE5" Ref="#PWR0188"  Part="1" 
-F 0 "#PWR0188" H 8400 2000 50  0001 C CNN
-F 1 "VCC" H 8417 2323 50  0000 C CNN
-F 2 "" H 8400 2150 50  0001 C CNN
-F 3 "" H 8400 2150 50  0001 C CNN
-	1    8400 2150
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:C C?
 U 1 1 5EA6BEEB
 P 4050 2400
 AR Path="/5E73B7F6/5EA6BEEB" Ref="C?"  Part="1" 
@@ -852,118 +794,6 @@ F 3 "" H 4200 2400 50  0001 C CNN
 	1    4200 2400
 	0    1    1    0   
 $EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BEFD
-P 7900 1200
-AR Path="/5E7CA397/5EA6BEFD" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BEFD" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BEFD" Ref="R158"  Part="1" 
-F 0 "R158" V 7900 2000 50  0000 C CNN
-F 1 "1k" V 7900 1850 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1200 50  0001 C CNN
-F 3 "~" H 7900 1200 50  0001 C CNN
-	1    7900 1200
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF03
-P 7900 1300
-AR Path="/5E7CA397/5EA6BF03" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF03" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF03" Ref="R159"  Part="1" 
-F 0 "R159" V 7900 2100 50  0000 C CNN
-F 1 "1k" V 7900 1950 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1300 50  0001 C CNN
-F 3 "~" H 7900 1300 50  0001 C CNN
-	1    7900 1300
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF09
-P 7900 1400
-AR Path="/5E7CA397/5EA6BF09" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF09" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF09" Ref="R160"  Part="1" 
-F 0 "R160" V 7900 2200 50  0000 C CNN
-F 1 "1k" V 7900 2050 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1400 50  0001 C CNN
-F 3 "~" H 7900 1400 50  0001 C CNN
-	1    7900 1400
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF0F
-P 7900 1500
-AR Path="/5E7CA397/5EA6BF0F" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF0F" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF0F" Ref="R161"  Part="1" 
-F 0 "R161" V 7900 2300 50  0000 C CNN
-F 1 "1k" V 7900 2150 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1500 50  0001 C CNN
-F 3 "~" H 7900 1500 50  0001 C CNN
-	1    7900 1500
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF15
-P 7900 1600
-AR Path="/5E7CA397/5EA6BF15" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF15" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF15" Ref="R162"  Part="1" 
-F 0 "R162" V 7900 2400 50  0000 C CNN
-F 1 "1k" V 7900 2250 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1600 50  0001 C CNN
-F 3 "~" H 7900 1600 50  0001 C CNN
-	1    7900 1600
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF1B
-P 7900 1700
-AR Path="/5E7CA397/5EA6BF1B" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF1B" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF1B" Ref="R163"  Part="1" 
-F 0 "R163" V 7900 2500 50  0000 C CNN
-F 1 "1k" V 7900 2350 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1700 50  0001 C CNN
-F 3 "~" H 7900 1700 50  0001 C CNN
-	1    7900 1700
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF21
-P 7900 1800
-AR Path="/5E7CA397/5EA6BF21" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF21" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF21" Ref="R164"  Part="1" 
-F 0 "R164" V 7900 2600 50  0000 C CNN
-F 1 "1k" V 7900 2450 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1800 50  0001 C CNN
-F 3 "~" H 7900 1800 50  0001 C CNN
-	1    7900 1800
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R?
-U 1 1 5EA6BF27
-P 7900 1900
-AR Path="/5E7CA397/5EA6BF27" Ref="R?"  Part="1" 
-AR Path="/5E73B7F6/5EA6BF27" Ref="R?"  Part="1" 
-AR Path="/5E9FD18D/5EA6BF27" Ref="R165"  Part="1" 
-F 0 "R165" V 7900 2700 50  0000 C CNN
-F 1 "1k" V 7900 2550 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7830 1900 50  0001 C CNN
-F 3 "~" H 7900 1900 50  0001 C CNN
-	1    7900 1900
-	0    1    1    0   
-$EndComp
 Text HLabel 1650 2800 0    50   Input ~ 0
 ~oea
 Wire Wire Line
@@ -984,6 +814,22 @@ Wire Wire Line
 	6500 3400 7050 3400
 Wire Bus Line
 	9700 3150 7150 3150
+Wire Wire Line
+	7750 1900 8350 1900
+Wire Wire Line
+	7750 1800 8350 1800
+Wire Wire Line
+	7750 1700 8350 1700
+Wire Wire Line
+	7750 1600 8350 1600
+Wire Wire Line
+	7750 1500 8350 1500
+Wire Wire Line
+	7750 1400 8350 1400
+Wire Wire Line
+	7750 1300 8350 1300
+Wire Wire Line
+	7750 1200 8350 1200
 Wire Bus Line
 	7150 3150 7150 4000
 Wire Bus Line

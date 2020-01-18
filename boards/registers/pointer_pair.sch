@@ -484,17 +484,6 @@ Connection ~ 6400 1500
 Wire Wire Line
 	6400 1500 6450 1500
 $Comp
-L Device:C C5
-U 1 1 5E6C09D7
-P 9300 2650
-F 0 "C5" H 9350 2550 50  0000 L CNN
-F 1 "0.1u" H 9350 2450 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 9338 2500 50  0001 C CNN
-F 3 "~" H 9300 2650 50  0001 C CNN
-	1    9300 2650
-	1    0    0    -1  
-$EndComp
-$Comp
 L Device:C C6
 U 1 1 5E6C2B4E
 P 9600 2650
@@ -505,27 +494,6 @@ F 3 "~" H 9600 2650 50  0001 C CNN
 	1    9600 2650
 	1    0    0    -1  
 $EndComp
-$Comp
-L Device:C C7
-U 1 1 5E6C302E
-P 9900 2650
-F 0 "C7" H 9950 2550 50  0000 L CNN
-F 1 "0.1u" H 9950 2450 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 9938 2500 50  0001 C CNN
-F 3 "~" H 9900 2650 50  0001 C CNN
-	1    9900 2650
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	9300 2800 9600 2800
-Connection ~ 9600 2800
-Wire Wire Line
-	9600 2800 9900 2800
-Wire Wire Line
-	9900 2500 9600 2500
-Connection ~ 9600 2500
-Wire Wire Line
-	9600 2500 9300 2500
 $Comp
 L power:GND #PWR049
 U 1 1 5E6CC7A3
@@ -623,23 +591,6 @@ F 3 "" H 9750 3950 50  0001 C CNN
 	1    9750 3950
 	1    0    0    -1  
 $EndComp
-$Comp
-L Device:C C8
-U 1 1 5EBA32AE
-P 10200 2650
-F 0 "C8" H 10250 2550 50  0000 L CNN
-F 1 "0.1u" H 10250 2450 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 10238 2500 50  0001 C CNN
-F 3 "~" H 10200 2650 50  0001 C CNN
-	1    10200 2650
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	10200 2500 9900 2500
-Connection ~ 9900 2500
-Wire Wire Line
-	9900 2800 10200 2800
-Connection ~ 9900 2800
 Text HLabel 1400 2100 0    50   Input ~ 0
 addr_dp
 $Comp

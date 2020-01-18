@@ -278,21 +278,21 @@ Wire Wire Line
 Wire Wire Line
 	7000 2500 7250 2500
 Text Label 7100 1800 0    50   ~ 0
-d0
-Text Label 7100 1900 0    50   ~ 0
-d1
-Text Label 7100 2000 0    50   ~ 0
-d2
-Text Label 7100 2100 0    50   ~ 0
-d3
-Text Label 7100 2200 0    50   ~ 0
-d4
-Text Label 7100 2300 0    50   ~ 0
-d5
-Text Label 7100 2400 0    50   ~ 0
-d6
-Text Label 7100 2500 0    50   ~ 0
 d7
+Text Label 7100 1900 0    50   ~ 0
+d6
+Text Label 7100 2000 0    50   ~ 0
+d5
+Text Label 7100 2100 0    50   ~ 0
+d4
+Text Label 7100 2200 0    50   ~ 0
+d3
+Text Label 7100 2300 0    50   ~ 0
+d2
+Text Label 7100 2400 0    50   ~ 0
+d1
+Text Label 7100 2500 0    50   ~ 0
+d0
 Wire Bus Line
 	7350 1300 4500 1300
 Connection ~ 4500 1300
@@ -692,39 +692,6 @@ F 3 "" H 10300 5300 50  0001 C CNN
 	1    10300 5300
 	1    0    0    -1  
 $EndComp
-$Comp
-L Device:C C33
-U 1 1 5ECF04C3
-P 9800 4800
-F 0 "C33" H 9915 4846 50  0000 L CNN
-F 1 "0.1u" H 9915 4755 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 9838 4650 50  0001 C CNN
-F 3 "~" H 9800 4800 50  0001 C CNN
-	1    9800 4800
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VCC #PWR0211
-U 1 1 5ECF04C9
-P 9800 4650
-F 0 "#PWR0211" H 9800 4500 50  0001 C CNN
-F 1 "VCC" H 9817 4823 50  0000 C CNN
-F 2 "" H 9800 4650 50  0001 C CNN
-F 3 "" H 9800 4650 50  0001 C CNN
-	1    9800 4650
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR0212
-U 1 1 5ECF04CF
-P 9800 4950
-F 0 "#PWR0212" H 9800 4700 50  0001 C CNN
-F 1 "GND" H 9805 4777 50  0000 C CNN
-F 2 "" H 9800 4950 50  0001 C CNN
-F 3 "" H 9800 4950 50  0001 C CNN
-	1    9800 4950
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	6450 4900 6450 4800
 Wire Wire Line
@@ -809,9 +776,9 @@ F 3 "" H 9950 2600 50  0001 C CNN
 	1    9950 2600
 	0    1    1    0   
 $EndComp
-Text Label 9950 2500 0    50   ~ 0
+Text Label 9450 1500 2    50   ~ 0
 ~io_rdy
-Text Label 9950 2300 0    50   ~ 0
+Text Label 9950 1500 0    50   ~ 0
 ~io_cs
 Text Label 1750 1800 0    50   ~ 0
 ~we
@@ -821,62 +788,60 @@ Text Label 1500 2000 0    50   ~ 0
 clk
 Text Label 1500 2100 0    50   ~ 0
 ~rst
-Text Label 9450 2400 2    50   ~ 0
+Text Label 9450 1600 2    50   ~ 0
 ~oe
-Text Label 9450 2500 2    50   ~ 0
+Text Label 9950 1600 0    50   ~ 0
 ~we
-Text Label 9950 2400 0    50   ~ 0
+Text Label 9950 1700 0    50   ~ 0
 ~rst
-Text Label 9450 2300 2    50   ~ 0
+Text Label 9450 1700 2    50   ~ 0
 clk
 Entry Wire Line
-	10300 1600 10400 1500
+	10300 2300 10400 2200
 Entry Wire Line
-	10300 1500 10400 1400
+	10300 2200 10400 2100
 Wire Wire Line
-	9950 1500 10300 1500
+	9950 2200 10300 2200
 Wire Wire Line
-	10300 1600 9950 1600
+	10300 2300 9950 2300
 Entry Wire Line
-	10300 1800 10400 1700
+	10300 2500 10400 2400
 Entry Wire Line
-	10300 1700 10400 1600
+	10300 2400 10400 2300
 Wire Wire Line
-	9950 1700 10300 1700
-Wire Wire Line
-	10300 1800 9950 1800
+	9950 2400 10300 2400
 Entry Wire Line
-	9100 1600 9200 1500
+	9100 2300 9200 2200
 Entry Wire Line
-	9100 1700 9200 1600
+	9100 2400 9200 2300
 Wire Wire Line
-	9450 1500 9200 1500
+	9450 2200 9200 2200
 Wire Wire Line
-	9200 1600 9450 1600
+	9200 2300 9450 2300
 Entry Wire Line
-	9100 1800 9200 1700
+	9100 2500 9200 2400
 Entry Wire Line
-	9100 1900 9200 1800
+	9100 2600 9200 2500
 Wire Wire Line
-	9450 1700 9200 1700
+	9450 2400 9200 2400
 Wire Wire Line
-	9200 1800 9450 1800
-Text Label 9250 1500 0    50   ~ 0
-a1
-Text Label 9250 1600 0    50   ~ 0
-a3
-Text Label 9250 1700 0    50   ~ 0
-a5
-Text Label 9250 1800 0    50   ~ 0
-a7
-Text Label 10100 1500 0    50   ~ 0
+	9200 2500 9450 2500
+Text Label 9250 2200 0    50   ~ 0
 a0
-Text Label 10100 1600 0    50   ~ 0
+Text Label 9250 2300 0    50   ~ 0
 a2
-Text Label 10100 1700 0    50   ~ 0
+Text Label 9250 2400 0    50   ~ 0
 a4
-Text Label 10100 1800 0    50   ~ 0
+Text Label 9250 2500 0    50   ~ 0
 a6
+Text Label 10100 2200 0    50   ~ 0
+a1
+Text Label 10100 2300 0    50   ~ 0
+a3
+Text Label 10100 2400 0    50   ~ 0
+a5
+Text Label 10100 2500 0    50   ~ 0
+a7
 $Comp
 L Connector_Generic:Conn_02x13_Odd_Even J3
 U 1 1 5EEDDD9A
@@ -888,54 +853,54 @@ F 3 "~" H 9650 2000 50  0001 C CNN
 	1    9650 2000
 	1    0    0    -1  
 $EndComp
-Text Label 10100 2200 0    50   ~ 0
-d7
 Text Label 10100 2100 0    50   ~ 0
-d5
+d0
 Text Label 10100 2000 0    50   ~ 0
-d3
+d2
 Text Label 10100 1900 0    50   ~ 0
-d1
+d4
+Text Label 10100 1800 0    50   ~ 0
+d6
 Wire Wire Line
-	9950 1900 10300 1900
+	9950 1800 10300 1800
 Wire Wire Line
-	10300 2000 9950 2000
+	10300 1900 9950 1900
 Wire Wire Line
-	9950 2100 10300 2100
+	9950 2000 10300 2000
 Wire Wire Line
-	10300 2200 9950 2200
-Entry Wire Line
-	10300 2200 10400 2100
+	10300 2100 9950 2100
 Entry Wire Line
 	10300 2100 10400 2000
 Entry Wire Line
 	10300 2000 10400 1900
 Entry Wire Line
 	10300 1900 10400 1800
-Text Label 9250 2200 0    50   ~ 0
-d6
+Entry Wire Line
+	10300 1800 10400 1700
 Text Label 9250 2100 0    50   ~ 0
-d4
+d1
 Text Label 9250 2000 0    50   ~ 0
-d2
+d3
 Text Label 9250 1900 0    50   ~ 0
-d0
+d5
+Text Label 9250 1800 0    50   ~ 0
+d7
 Wire Wire Line
-	9200 2200 9450 2200
+	9200 2100 9450 2100
 Wire Wire Line
-	9450 2100 9200 2100
+	9450 2000 9200 2000
 Wire Wire Line
-	9200 2000 9450 2000
+	9200 1900 9450 1900
 Wire Wire Line
-	9450 1900 9200 1900
+	9450 1800 9200 1800
+Entry Wire Line
+	9100 1900 9200 1800
 Entry Wire Line
 	9100 2000 9200 1900
 Entry Wire Line
 	9100 2100 9200 2000
 Entry Wire Line
 	9100 2200 9200 2100
-Entry Wire Line
-	9100 2300 9200 2200
 Wire Bus Line
 	10400 1100 9100 1100
 Wire Bus Line
@@ -943,26 +908,12 @@ Wire Bus Line
 Wire Bus Line
 	9100 1100 9100 1200
 Connection ~ 5450 1200
-Connection ~ 9100 1200
-Wire Bus Line
-	10400 2750 9100 2750
-Wire Bus Line
-	9100 2000 7350 2000
-Connection ~ 7350 2000
-Wire Bus Line
-	10400 1100 10400 1700
-Wire Bus Line
-	7350 1300 7350 2000
-Wire Bus Line
-	9100 1200 9100 1900
-Wire Bus Line
-	10400 1800 10400 2750
-Wire Bus Line
-	9100 2000 9100 2750
-Wire Bus Line
-	7350 2000 7350 2400
+Wire Wire Line
+	9950 2500 10300 2500
 Wire Bus Line
 	4500 1300 4500 2350
+Wire Bus Line
+	7350 1300 7350 2400
 Wire Bus Line
 	5450 1200 5450 3300
 Wire Bus Line

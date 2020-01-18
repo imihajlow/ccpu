@@ -35,7 +35,7 @@ AR Path="/5E73B7F6/5E73BC4E" Ref="U?"  Part="1"
 AR Path="/5E7CA397/5E73BC4E" Ref="U26"  Part="1" 
 F 0 "U26" H 7200 1100 50  0000 C CNN
 F 1 "74ACT244" H 7100 1000 50  0000 C CNN
-F 2 "Package_SO:SO-20_12.8x7.5mm_P1.27mm" H 6800 1650 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 6800 1650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 6800 1650 50  0001 C CNN
 	1    6800 1650
 	1    0    0    -1  
@@ -88,22 +88,6 @@ Entry Wire Line
 	7900 1750 8000 1650
 Entry Wire Line
 	7900 1850 8000 1750
-Wire Wire Line
-	7900 1150 7600 1150
-Wire Wire Line
-	7600 1250 7900 1250
-Wire Wire Line
-	7900 1350 7600 1350
-Wire Wire Line
-	7600 1450 7900 1450
-Wire Wire Line
-	7900 1550 7600 1550
-Wire Wire Line
-	7600 1650 7900 1650
-Wire Wire Line
-	7900 1750 7600 1750
-Wire Wire Line
-	7600 1850 7900 1850
 Text Label 6050 1150 0    50   ~ 0
 d0
 Text Label 6050 1250 0    50   ~ 0
@@ -154,7 +138,7 @@ AR Path="/5E73B7F6/5E74CA38" Ref="U?"  Part="1"
 AR Path="/5E7CA397/5E74CA38" Ref="U27"  Part="1" 
 F 0 "U27" H 7200 3300 50  0000 C CNN
 F 1 "74ACT244" H 7100 3200 50  0000 C CNN
-F 2 "Package_SO:SO-20_12.8x7.5mm_P1.27mm" H 6800 3850 50  0001 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 6800 3850 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 6800 3850 50  0001 C CNN
 	1    6800 3850
 	1    0    0    -1  
@@ -207,22 +191,6 @@ Entry Wire Line
 	7900 3950 8000 3850
 Entry Wire Line
 	7900 4050 8000 3950
-Wire Wire Line
-	7900 3350 7600 3350
-Wire Wire Line
-	7600 3450 7900 3450
-Wire Wire Line
-	7900 3550 7600 3550
-Wire Wire Line
-	7600 3650 7900 3650
-Wire Wire Line
-	7900 3750 7600 3750
-Wire Wire Line
-	7600 3850 7900 3850
-Wire Wire Line
-	7900 3950 7600 3950
-Wire Wire Line
-	7600 4050 7900 4050
 Text Label 6050 3350 0    50   ~ 0
 d0
 Text Label 6050 3450 0    50   ~ 0
@@ -357,13 +325,13 @@ d2
 Text Label 4850 1450 0    50   ~ 0
 d3
 Text Label 4850 1550 0    50   ~ 0
-d4
-Text Label 4850 1650 0    50   ~ 0
-d5
-Text Label 4850 1750 0    50   ~ 0
-d6
-Text Label 4850 1850 0    50   ~ 0
 d7
+Text Label 4850 1650 0    50   ~ 0
+d6
+Text Label 4850 1750 0    50   ~ 0
+d5
+Text Label 4850 1850 0    50   ~ 0
+d4
 Wire Bus Line
 	5100 850  5950 850 
 $Comp
@@ -795,13 +763,11 @@ di2
 Text Label 3600 1450 0    50   ~ 0
 di3
 Text Label 3600 1550 0    50   ~ 0
-di4
-Text Label 3600 1650 0    50   ~ 0
-di5
-Text Label 3600 1750 0    50   ~ 0
-di6
-Text Label 3600 1850 0    50   ~ 0
 di7
+Text Label 3600 1750 0    50   ~ 0
+di5
+Text Label 3600 1850 0    50   ~ 0
+di4
 Wire Wire Line
 	1200 4200 6300 4200
 Wire Wire Line
@@ -861,292 +827,40 @@ F 3 "" H 7900 4300 50  0001 C CNN
 	1    7900 4300
 	1    0    0    -1  
 $EndComp
-$Comp
-L Device:C C?
-U 1 1 5E7B8018
-P 7950 2250
-AR Path="/5E73B7F6/5E7B8018" Ref="C?"  Part="1" 
-AR Path="/5E7CA397/5E7B8018" Ref="C27"  Part="1" 
-F 0 "C27" H 8065 2296 50  0000 L CNN
-F 1 "0.1u" H 8065 2205 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 7988 2100 50  0001 C CNN
-F 3 "~" H 7950 2250 50  0001 C CNN
-	1    7950 2250
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 5E7B801E
-P 7950 2400
-AR Path="/5E73B7F6/5E7B801E" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5E7B801E" Ref="#PWR0169"  Part="1" 
-F 0 "#PWR0169" H 7950 2150 50  0001 C CNN
-F 1 "GND" H 7955 2227 50  0000 C CNN
-F 2 "" H 7950 2400 50  0001 C CNN
-F 3 "" H 7950 2400 50  0001 C CNN
-	1    7950 2400
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 5E7B8024
-P 7950 2100
-AR Path="/5E73B7F6/5E7B8024" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5E7B8024" Ref="#PWR0168"  Part="1" 
-F 0 "#PWR0168" H 7950 1950 50  0001 C CNN
-F 1 "VCC" H 7967 2273 50  0000 C CNN
-F 2 "" H 7950 2100 50  0001 C CNN
-F 3 "" H 7950 2100 50  0001 C CNN
-	1    7950 2100
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:C C?
-U 1 1 5E7BE329
-P 3600 2350
-AR Path="/5E73B7F6/5E7BE329" Ref="C?"  Part="1" 
-AR Path="/5E7CA397/5E7BE329" Ref="C25"  Part="1" 
-F 0 "C25" H 3715 2396 50  0000 L CNN
-F 1 "0.1u" H 3715 2305 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 3638 2200 50  0001 C CNN
-F 3 "~" H 3600 2350 50  0001 C CNN
-	1    3600 2350
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 5E7BE32F
-P 3450 2350
-AR Path="/5E73B7F6/5E7BE32F" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5E7BE32F" Ref="#PWR0150"  Part="1" 
-F 0 "#PWR0150" H 3450 2100 50  0001 C CNN
-F 1 "GND" H 3455 2177 50  0000 C CNN
-F 2 "" H 3450 2350 50  0001 C CNN
-F 3 "" H 3450 2350 50  0001 C CNN
-	1    3450 2350
-	0    1    1    0   
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 5E7BE335
-P 3750 2350
-AR Path="/5E73B7F6/5E7BE335" Ref="#PWR?"  Part="1" 
-AR Path="/5E7CA397/5E7BE335" Ref="#PWR0151"  Part="1" 
-F 0 "#PWR0151" H 3750 2200 50  0001 C CNN
-F 1 "VCC" H 3767 2523 50  0000 C CNN
-F 2 "" H 3750 2350 50  0001 C CNN
-F 3 "" H 3750 2350 50  0001 C CNN
-	1    3750 2350
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R134
-U 1 1 5E990C07
-P 7450 1150
-AR Path="/5E7CA397/5E990C07" Ref="R134"  Part="1" 
-AR Path="/5E73B7F6/5E990C07" Ref="R?"  Part="1" 
-F 0 "R134" V 7450 1950 50  0000 C CNN
-F 1 "1k" V 7450 1800 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1150 50  0001 C CNN
-F 3 "~" H 7450 1150 50  0001 C CNN
-	1    7450 1150
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R135
-U 1 1 5E9940A6
-P 7450 1250
-AR Path="/5E7CA397/5E9940A6" Ref="R135"  Part="1" 
-AR Path="/5E73B7F6/5E9940A6" Ref="R?"  Part="1" 
-F 0 "R135" V 7450 2050 50  0000 C CNN
-F 1 "1k" V 7450 1900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1250 50  0001 C CNN
-F 3 "~" H 7450 1250 50  0001 C CNN
-	1    7450 1250
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R136
-U 1 1 5E9942B2
-P 7450 1350
-AR Path="/5E7CA397/5E9942B2" Ref="R136"  Part="1" 
-AR Path="/5E73B7F6/5E9942B2" Ref="R?"  Part="1" 
-F 0 "R136" V 7450 2150 50  0000 C CNN
-F 1 "1k" V 7450 2000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1350 50  0001 C CNN
-F 3 "~" H 7450 1350 50  0001 C CNN
-	1    7450 1350
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R137
-U 1 1 5E9945CF
-P 7450 1450
-AR Path="/5E7CA397/5E9945CF" Ref="R137"  Part="1" 
-AR Path="/5E73B7F6/5E9945CF" Ref="R?"  Part="1" 
-F 0 "R137" V 7450 2250 50  0000 C CNN
-F 1 "1k" V 7450 2100 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1450 50  0001 C CNN
-F 3 "~" H 7450 1450 50  0001 C CNN
-	1    7450 1450
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R138
-U 1 1 5E994748
-P 7450 1550
-AR Path="/5E7CA397/5E994748" Ref="R138"  Part="1" 
-AR Path="/5E73B7F6/5E994748" Ref="R?"  Part="1" 
-F 0 "R138" V 7450 2350 50  0000 C CNN
-F 1 "1k" V 7450 2200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1550 50  0001 C CNN
-F 3 "~" H 7450 1550 50  0001 C CNN
-	1    7450 1550
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R139
-U 1 1 5E994A8F
-P 7450 1650
-AR Path="/5E7CA397/5E994A8F" Ref="R139"  Part="1" 
-AR Path="/5E73B7F6/5E994A8F" Ref="R?"  Part="1" 
-F 0 "R139" V 7450 2450 50  0000 C CNN
-F 1 "1k" V 7450 2300 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1650 50  0001 C CNN
-F 3 "~" H 7450 1650 50  0001 C CNN
-	1    7450 1650
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R140
-U 1 1 5E994BF3
-P 7450 1750
-AR Path="/5E7CA397/5E994BF3" Ref="R140"  Part="1" 
-AR Path="/5E73B7F6/5E994BF3" Ref="R?"  Part="1" 
-F 0 "R140" V 7450 2550 50  0000 C CNN
-F 1 "1k" V 7450 2400 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1750 50  0001 C CNN
-F 3 "~" H 7450 1750 50  0001 C CNN
-	1    7450 1750
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R141
-U 1 1 5E994EE6
-P 7450 1850
-AR Path="/5E7CA397/5E994EE6" Ref="R141"  Part="1" 
-AR Path="/5E73B7F6/5E994EE6" Ref="R?"  Part="1" 
-F 0 "R141" V 7450 2650 50  0000 C CNN
-F 1 "1k" V 7450 2500 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 1850 50  0001 C CNN
-F 3 "~" H 7450 1850 50  0001 C CNN
-	1    7450 1850
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R142
-U 1 1 5E99BC46
-P 7450 3350
-AR Path="/5E7CA397/5E99BC46" Ref="R142"  Part="1" 
-AR Path="/5E73B7F6/5E99BC46" Ref="R?"  Part="1" 
-F 0 "R142" V 7450 4150 50  0000 C CNN
-F 1 "1k" V 7450 4000 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3350 50  0001 C CNN
-F 3 "~" H 7450 3350 50  0001 C CNN
-	1    7450 3350
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R143
-U 1 1 5E99BC4C
-P 7450 3450
-AR Path="/5E7CA397/5E99BC4C" Ref="R143"  Part="1" 
-AR Path="/5E73B7F6/5E99BC4C" Ref="R?"  Part="1" 
-F 0 "R143" V 7450 4250 50  0000 C CNN
-F 1 "1k" V 7450 4100 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3450 50  0001 C CNN
-F 3 "~" H 7450 3450 50  0001 C CNN
-	1    7450 3450
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R144
-U 1 1 5E99BC52
-P 7450 3550
-AR Path="/5E7CA397/5E99BC52" Ref="R144"  Part="1" 
-AR Path="/5E73B7F6/5E99BC52" Ref="R?"  Part="1" 
-F 0 "R144" V 7450 4350 50  0000 C CNN
-F 1 "1k" V 7450 4200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3550 50  0001 C CNN
-F 3 "~" H 7450 3550 50  0001 C CNN
-	1    7450 3550
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R145
-U 1 1 5E99BC58
-P 7450 3650
-AR Path="/5E7CA397/5E99BC58" Ref="R145"  Part="1" 
-AR Path="/5E73B7F6/5E99BC58" Ref="R?"  Part="1" 
-F 0 "R145" V 7450 4450 50  0000 C CNN
-F 1 "1k" V 7450 4300 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3650 50  0001 C CNN
-F 3 "~" H 7450 3650 50  0001 C CNN
-	1    7450 3650
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R146
-U 1 1 5E99BC5E
-P 7450 3750
-AR Path="/5E7CA397/5E99BC5E" Ref="R146"  Part="1" 
-AR Path="/5E73B7F6/5E99BC5E" Ref="R?"  Part="1" 
-F 0 "R146" V 7450 4550 50  0000 C CNN
-F 1 "1k" V 7450 4400 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3750 50  0001 C CNN
-F 3 "~" H 7450 3750 50  0001 C CNN
-	1    7450 3750
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R147
-U 1 1 5E99BC64
-P 7450 3850
-AR Path="/5E7CA397/5E99BC64" Ref="R147"  Part="1" 
-AR Path="/5E73B7F6/5E99BC64" Ref="R?"  Part="1" 
-F 0 "R147" V 7450 4650 50  0000 C CNN
-F 1 "1k" V 7450 4500 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3850 50  0001 C CNN
-F 3 "~" H 7450 3850 50  0001 C CNN
-	1    7450 3850
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R148
-U 1 1 5E99BC6A
-P 7450 3950
-AR Path="/5E7CA397/5E99BC6A" Ref="R148"  Part="1" 
-AR Path="/5E73B7F6/5E99BC6A" Ref="R?"  Part="1" 
-F 0 "R148" V 7450 4750 50  0000 C CNN
-F 1 "1k" V 7450 4600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 3950 50  0001 C CNN
-F 3 "~" H 7450 3950 50  0001 C CNN
-	1    7450 3950
-	0    1    1    0   
-$EndComp
-$Comp
-L Device:R R149
-U 1 1 5E99BC70
-P 7450 4050
-AR Path="/5E7CA397/5E99BC70" Ref="R149"  Part="1" 
-AR Path="/5E73B7F6/5E99BC70" Ref="R?"  Part="1" 
-F 0 "R149" V 7450 4850 50  0000 C CNN
-F 1 "1k" V 7450 4700 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 7380 4050 50  0001 C CNN
-F 3 "~" H 7450 4050 50  0001 C CNN
-	1    7450 4050
-	0    1    1    0   
-$EndComp
+Wire Wire Line
+	7300 1150 7900 1150
+Wire Wire Line
+	7300 1250 7900 1250
+Wire Wire Line
+	7300 1350 7900 1350
+Wire Wire Line
+	7300 1450 7900 1450
+Wire Wire Line
+	7300 1550 7900 1550
+Wire Wire Line
+	7300 1650 7900 1650
+Wire Wire Line
+	7300 1750 7900 1750
+Wire Wire Line
+	7300 1850 7900 1850
+Wire Wire Line
+	7300 3350 7900 3350
+Wire Wire Line
+	7300 3450 7900 3450
+Wire Wire Line
+	7300 3550 7900 3550
+Wire Wire Line
+	7300 3650 7900 3650
+Wire Wire Line
+	7300 3750 7900 3750
+Wire Wire Line
+	7300 3850 7900 3850
+Wire Wire Line
+	7300 3950 7900 3950
+Wire Wire Line
+	7300 4050 7900 4050
+Text Label 3600 1650 0    50   ~ 0
+di6
 Wire Bus Line
 	8000 3100 8000 3950
 Wire Bus Line

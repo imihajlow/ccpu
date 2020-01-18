@@ -23,7 +23,7 @@ Text HLabel 4700 3550 0    50   Input ~ 0
 flags[0..3]
 Text HLabel 6250 4000 2    50   Input ~ 0
 ~mem_rdy
-Text HLabel 6250 2900 2    50   Output ~ 0
+Text HLabel 6250 4600 2    50   Output ~ 0
 ~we_mem
 Text HLabel 5550 3000 0    50   Output ~ 0
 ~oe_d_di
@@ -162,7 +162,7 @@ Text Label 6250 3500 0    50   ~ 0
 flags3
 Wire Wire Line
 	5650 4100 5550 4100
-Text HLabel 5550 2900 0    50   Output ~ 0
+Text HLabel 5550 4600 0    50   Output ~ 0
 ~oe_mem
 Wire Wire Line
 	6150 3400 6850 3400
@@ -205,8 +205,8 @@ Wire Wire Line
 Wire Wire Line
 	6150 4100 6250 4100
 NoConn ~ 5650 4000
-NoConn ~ 6150 4600
-NoConn ~ 5650 4600
+NoConn ~ 5650 2900
+NoConn ~ 6150 2900
 Wire Wire Line
 	5650 4500 5550 4500
 Wire Wire Line
@@ -232,9 +232,9 @@ Wire Wire Line
 Wire Wire Line
 	6150 3000 6250 3000
 Wire Wire Line
-	6250 2900 6150 2900
+	6250 4600 6150 4600
 Wire Wire Line
-	5650 2900 5550 2900
+	5650 4600 5550 4600
 Wire Wire Line
 	5550 3000 5650 3000
 Wire Wire Line
