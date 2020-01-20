@@ -5,8 +5,8 @@ def encode_address(a, b, op, invert, from_other, carry):
     return a | (b << 4) | (op << 8) | (carry << 12) | (from_other << 13) | (invert << 14)
 
 def encode_result(r, carry, to_other, overflow):
-    return r | (carry << 4) | (to_other << 5) | (overflow << 6)
-
+    n_carry = ~carry & 1
+    return r | (n_carry << 4) | (to_other << 5) | (overflow << 6)
 
 # ALU operations:
 ADD = 0  # a + b
