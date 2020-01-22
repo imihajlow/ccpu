@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module ram(a, d, oe, we, clk);
     parameter D_WIDTH = 8;
     parameter A_WIDTH = 15;

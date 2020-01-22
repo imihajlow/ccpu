@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 module cpu(clk, n_rst, a, d, n_oe, n_we);
     input clk;
     input n_rst;

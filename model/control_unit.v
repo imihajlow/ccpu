@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module control_unit(
 //output
             n_oe_mem,

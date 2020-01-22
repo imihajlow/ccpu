@@ -1,3 +1,4 @@
+`timescale 1ms/1ns
 module test_control_unit();
     task assert;
         input v;

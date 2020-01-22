@@ -1,3 +1,4 @@
+`timescale 1ns/1ns
 module rom(a, d, ena);
     parameter A_WIDTH = 15;
     parameter FILENAME = "rom.hex";

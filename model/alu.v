@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 module alu(a, b, op, n_oe, invert, carry_in, result, flags);
     input [7:0] a;
     input [7:0] b;
