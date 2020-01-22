@@ -84,57 +84,38 @@ module control_unit(
 
     wire n_clk = ~clk;
 
-    reg cycle;
+    wire cycle;
     wire n_reset_cycle = ir_is_2cy;
-    initial begin
-        cycle = 1'b0;
-    end
+    wire n_cycle;
+    d_ff_7474 ff_cycle(
+        .q(cycle),
+        .n_q(n_cycle),
+        .d(n_cycle),
+        .cp(clk),
+        .n_cd(n_rst & n_reset_cycle),
+        .n_sd(1'b1));
 
-    always @(posedge clk or negedge n_rst or negedge n_reset_cycle) begin
-        if (~n_rst) begin
-            cycle <= 1'b0;
-        end else if (~n_reset_cycle) begin
-            cycle <= 1'b0;
-        end else begin
-            cycle <= ~cycle;
-        end
-    end
-
-    reg ir_we_reg;
-    initial begin
-        ir_we_reg = 1'b0;
-    end
-
-    always @(negedge clk or negedge n_rst) begin
-        if (~n_rst) begin
-            ir_we_reg <= 1'b0;
-        end else if (ir_is_2cy) begin
-            ir_we_reg <= ~ir_we_reg;
-        end
-    end
+    wire n_we_ir;
+    d_ff_7474 ff_we_ir(
+        .q(n_we_ir),
+        .n_q(we_ir),
+        .d(ir_is_2cy ^ n_we_ir),
+        .cp(n_clk),
+        .n_cd(n_rst),
+        .n_sd(1'b1));
 
     wire swap_p; // swap IP and DP on negedge clk
-    reg p_switch;
-    initial begin
-        p_switch = 0;
-    end
-
-    always @(posedge n_clk or negedge n_rst) begin
-        if (~n_rst) begin
-            p_switch <= 0;
-        end else if (swap_p) begin
-            p_switch <= ~p_switch;
-        end
-    end
-
-    assign p_selector = p_switch;
+    d_ff_7474 ff_p_selector(
+        .q(p_selector),
+        .d(swap_p ^ p_selector),
+        .cp(n_clk),
+        .n_cd(n_rst),
+        .n_sd(1'b1));
 
     assign n_oe_mem = st & (~cycle | clk);
-    assign n_we_mem = ~(st & ~cycle & ~clk);
+    assign n_we_mem = ~(st & ~cycle & n_clk);
 
     assign n_oe_d_di = ~((ldi & cycle) | ld);
-
-    assign we_ir = ~ir_we_reg;
 
     assign inc_ip = ~st | cycle;
 
@@ -146,7 +127,7 @@ module control_unit(
 
     wire we_dst = ir_is_jmp | ir_is_sto | (ldi & ~cycle) | (ir_is_alu & ~ir[2]);
     wire oe_src_alu = ~ir_is_alu;
-    wire oe_src_d = ~(st & ir_we_reg);
+    wire oe_src_d = ~(st & n_we_ir);
 
     wire n_we_a_dst;
     wire we_a_alua = ~ir_is_alu | ir[2];

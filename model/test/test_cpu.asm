@@ -108,7 +108,7 @@ mul_result:
         dw  0
 
         .offset 0x200
-sample: dw      0x2710  ; checked by the testbench
+sample: dw      100 * 100  ; checked by the testbench
 
         .offset 0x1000
 finish:
