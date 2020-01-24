@@ -23,15 +23,13 @@ module alu_lo(
     output wire to_hi;
     output wire n_carry_out;
 
-    reg [7:0] rom [0:(1 << 15) - 1];
-
     wire [14:0] address = {invert, from_hi, carry_in, op, b, a};
-    // AT28C256
     wire [7:0] data;
-    assign #350 data = rom[address];
-    assign #100 {to_hi, n_carry_out, result} = n_oe ? 8'bz : rom[address];
-
-    initial begin
-        $readmemh("alu_lo.mem", rom);
-    end
+    rom_28c256 #(.FILENAME("alu_lo.mem")) rom_inst(
+      .a(address),
+      .d(data),
+      .n_oe(n_oe),
+      .n_cs(1'b0)
+    );
+    assign {to_hi, n_carry_out, result} = data;
 endmodule

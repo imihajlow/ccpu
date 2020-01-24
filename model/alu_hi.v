@@ -25,15 +25,14 @@ module alu_hi(
     output wire n_carry_out;
     output wire overflow_out;
 
-    reg [7:0] rom [0:(1 << 15) - 1];
-
     wire [14:0] address = {invert, from_lo, carry_in, op, b, a};
     // AT28C256
     wire [7:0] data;
-    assign #350 data = rom[address];
-    assign #100 {overflow_out, to_lo, n_carry_out, result} = n_oe ? 8'bz : data;
-
-    initial begin
-        $readmemh("alu_hi.mem", rom);
-    end
+    rom_28c256 #(.FILENAME("alu_hi.mem")) rom_inst(
+      .a(address),
+      .d(data),
+      .n_oe(n_oe),
+      .n_cs(1'b0)
+    );
+    assign {overflow_out, to_lo, n_carry_out, result} = data;
 endmodule
