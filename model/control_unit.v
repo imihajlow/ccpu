@@ -73,32 +73,52 @@ module control_unit(
     // 5: second cycle
     // 4: store or load
 
-    wire n_clk = ~clk;
+    wire n_clk;
+    assign #10 n_clk = clk ^ 1'b1; // 74x86 XOR gate
 
     wire cycle;
     wire n_reset_cycle;
     wire n_cycle;
+    wire ff_cycle_n_cd;
+    assign #10 ff_cycle_n_cd = n_rst & n_reset_cycle; // 74x08 AND gate
     d_ff_7474 ff_cycle(
         .q(cycle),
         .n_q(n_cycle),
         .d(n_cycle),
         .cp(clk),
-        .n_cd(n_rst & n_reset_cycle),
+        .n_cd(ff_cycle_n_cd),
         .n_sd(1'b1));
 
     wire swap_p; // swap IP and DP on negedge clk
+    wire ff_p_selector_d;
+    assign #10 ff_p_selector_d = swap_p ^ p_selector; // 74x86 XOR gate
     d_ff_7474 ff_p_selector(
         .q(p_selector),
-        .d(swap_p ^ p_selector),
+        .d(ff_p_selector_d),
         .cp(n_clk),
         .n_cd(n_rst),
         .n_sd(1'b1));
 
     wire condition_result;
     wire [1:0] flag = ir[1:0];
-    assign #40 condition_result = |(flags & (4'b1 << flag));
 
-    wire [14:0] rom_addr = {3'b000, cycle, n_mem_rdy, condition_result, clk, ir};
+    wire [3:0] n_decoded_flag;
+    decoder_74139 dec_flag(
+           .n_o(n_decoded_flag),
+           .a(flag),
+           .n_e(1'b0));
+
+    wire [3:0] cr_vec;
+    assign #10 cr_vec = n_decoded_flag | flags; // 74x32 OR gate
+
+    wire cr_01;
+    wire cr_23;
+    // 74x08 AND gate
+    assign #10 cr_01 = cr_vec[0] & cr_vec[1];
+    assign #10 cr_23 = cr_vec[2] & cr_vec[3];
+    assign #10 condition_result = cr_01 & cr_23;
+
+    wire [14:0] rom_addr = {3'b000, n_mem_rdy, cycle, condition_result, clk, ir};
     wire [7:0] d_a;
     rom_28c256 #(.FILENAME("cu_a.mem")) rom_a(
         .a(rom_addr),

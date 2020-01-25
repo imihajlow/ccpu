@@ -2,7 +2,7 @@
 bits = 15
 
 def encode_address(ir, clk, condition_result, n_mem_rdy, cycle):
-    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 10) | (cycle << 11)
+    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 11) | (cycle << 10)
 
 def encode_a(n_oe_mem, n_we_mem, n_oe_d_di, inc_ip, addr_dp, we_ir):
     return n_oe_mem | (n_we_mem << 1) | (n_oe_d_di << 2) | (inc_ip << 3) | (addr_dp << 4) | (we_ir << 5)
