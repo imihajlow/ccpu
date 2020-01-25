@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name missing)(type KiCad)(uri ${KIPRJMOD}/missing.pretty)(options "")(descr ""))
+)

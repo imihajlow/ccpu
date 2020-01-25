@@ -30,17 +30,6 @@ Text HLabel 1500 2100 0    50   Input ~ 0
 Text Notes 2000 1050 0    50   ~ 0
 0000-7FFF - ROM\n8000-EFFF - RAM\nF000-FFFF - IO
 $Comp
-L Memory_EEPROM:28C256 U31
-U 1 1 5EC757DC
-P 3750 2650
-F 0 "U31" H 4150 1700 50  0000 C CNN
-F 1 "28C256" H 4100 1600 50  0000 C CNN
-F 2 "Package_LCC:PLCC-28_SMD-Socket" H 3750 2650 50  0001 C CNN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 3750 2650 50  0001 C CNN
-	1    3750 2650
-	1    0    0    -1  
-$EndComp
-$Comp
 L power:GND #PWR0198
 U 1 1 5EC7B846
 P 3750 3750
@@ -127,11 +116,7 @@ Wire Wire Line
 Wire Wire Line
 	2900 3550 3350 3550
 Wire Wire Line
-	2500 3450 2500 1700
-Wire Wire Line
 	2500 1700 1500 1700
-Wire Wire Line
-	2500 3450 3350 3450
 Text Label 3000 1750 2    50   ~ 0
 a0
 Text Label 2900 1850 0    50   ~ 0
@@ -394,14 +379,11 @@ Connection ~ 2800 1200
 Wire Bus Line
 	2800 1200 1500 1200
 Wire Wire Line
-	2500 3450 2500 4000
-Wire Wire Line
 	2500 4000 5450 4000
 Wire Wire Line
 	5450 4000 5450 3500
 Wire Wire Line
 	5450 3500 6000 3500
-Connection ~ 2500 3450
 Wire Wire Line
 	1500 1800 2400 1800
 Wire Wire Line
@@ -724,12 +706,12 @@ Wire Wire Line
 $Comp
 L power:VCC #PWR0194
 U 1 1 5ED0A785
-P 3350 3350
-F 0 "#PWR0194" H 3350 3200 50  0001 C CNN
-F 1 "VCC" V 3368 3477 50  0000 L CNN
-F 2 "" H 3350 3350 50  0001 C CNN
-F 3 "" H 3350 3350 50  0001 C CNN
-	1    3350 3350
+P 3350 3450
+F 0 "#PWR0194" H 3350 3300 50  0001 C CNN
+F 1 "VCC" V 3368 3577 50  0000 L CNN
+F 2 "" H 3350 3450 50  0001 C CNN
+F 3 "" H 3350 3450 50  0001 C CNN
+	1    3350 3450
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -910,6 +892,21 @@ Wire Bus Line
 Connection ~ 5450 1200
 Wire Wire Line
 	9950 2500 10300 2500
+$Comp
+L missing:AT28C256-PLCC32 U31
+U 1 1 6014E21E
+P 3750 2650
+F 0 "U31" H 4150 1650 50  0000 C CNN
+F 1 "AT28C256-PLCC32" H 4350 1550 50  0000 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 4000 3000 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 4000 3000 50  0001 C CNN
+	1    3750 2650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 1700 2500 3350
+Wire Wire Line
+	3350 3350 2500 3350
 Wire Bus Line
 	4500 1300 4500 2350
 Wire Bus Line
@@ -918,4 +915,7 @@ Wire Bus Line
 	5450 1200 5450 3300
 Wire Bus Line
 	2800 1200 2800 5600
+Connection ~ 2500 3350
+Wire Wire Line
+	2500 3350 2500 4000
 $EndSCHEMATC

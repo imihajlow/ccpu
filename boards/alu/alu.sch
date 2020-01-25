@@ -13,17 +13,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-$Comp
-L Memory_EEPROM:28C256 U1
-U 1 1 5FC22E82
-P 6500 3650
-F 0 "U1" H 6900 2700 50  0000 C CNN
-F 1 "28C256" H 6850 2550 50  0000 C CNN
-F 2 "Package_LCC:PLCC-28_SMD-Socket" H 6500 3650 50  0001 C CNN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 6500 3650 50  0001 C CNN
-	1    6500 3650
-	1    0    0    -1  
-$EndComp
 Text Label 6100 2750 2    50   ~ 0
 a0
 Text Label 6100 2850 2    50   ~ 0
@@ -110,17 +99,6 @@ Text Label 8700 3150 0    50   ~ 0
 ~carry_hi
 Text Label 8700 3250 0    50   ~ 0
 to_lo
-$Comp
-L Memory_EEPROM:28C256 U3
-U 1 1 5FC23A8E
-P 8300 3650
-F 0 "U3" H 8700 2700 50  0000 C CNN
-F 1 "28C256" H 8700 2550 50  0000 C CNN
-F 2 "Package_LCC:PLCC-28_SMD-Socket" H 8300 3650 50  0001 C CNN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 8300 3650 50  0001 C CNN
-	1    8300 3650
-	1    0    0    -1  
-$EndComp
 NoConn ~ 8700 3450
 $Comp
 L power:GND #PWR04
@@ -191,23 +169,23 @@ $EndComp
 $Comp
 L power:VCC #PWR01
 U 1 1 5FC2D9E5
-P 6100 4350
-F 0 "#PWR01" H 6100 4200 50  0001 C CNN
-F 1 "VCC" V 6118 4477 50  0000 L CNN
-F 2 "" H 6100 4350 50  0001 C CNN
-F 3 "" H 6100 4350 50  0001 C CNN
-	1    6100 4350
+P 6100 4450
+F 0 "#PWR01" H 6100 4300 50  0001 C CNN
+F 1 "VCC" V 6118 4577 50  0000 L CNN
+F 2 "" H 6100 4450 50  0001 C CNN
+F 3 "" H 6100 4450 50  0001 C CNN
+	1    6100 4450
 	0    -1   -1   0   
 $EndComp
 $Comp
 L power:VCC #PWR07
 U 1 1 5FC2E2AC
-P 7900 4350
-F 0 "#PWR07" H 7900 4200 50  0001 C CNN
-F 1 "VCC" V 7918 4477 50  0000 L CNN
-F 2 "" H 7900 4350 50  0001 C CNN
-F 3 "" H 7900 4350 50  0001 C CNN
-	1    7900 4350
+P 7900 4450
+F 0 "#PWR07" H 7900 4300 50  0001 C CNN
+F 1 "VCC" V 7918 4577 50  0000 L CNN
+F 2 "" H 7900 4450 50  0001 C CNN
+F 3 "" H 7900 4450 50  0001 C CNN
+	1    7900 4450
 	0    -1   -1   0   
 $EndComp
 $Comp
@@ -286,9 +264,9 @@ Wire Bus Line
 	12700 3100 12950 3100
 Text Label 12950 3100 0    50   ~ 0
 flags[0..3]
-Text Label 7900 4450 2    50   ~ 0
+Text Label 7900 4350 2    50   ~ 0
 ~oe
-Text Label 6100 4450 2    50   ~ 0
+Text Label 6100 4350 2    50   ~ 0
 ~oe
 Text Label 9350 3650 0    50   ~ 0
 flags2
@@ -2169,4 +2147,26 @@ Wire Bus Line
 	11400 1700 11400 3000
 Wire Bus Line
 	10750 1700 10750 3100
+$Comp
+L missing:AT28C256-PLCC32 U1
+U 1 1 60197966
+P 6500 3650
+F 0 "U1" H 6500 4931 50  0000 C CNN
+F 1 "AT28C256-PLCC32" H 6500 4840 50  0000 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 6750 4000 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 6750 4000 50  0001 C CNN
+	1    6500 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L missing:AT28C256-PLCC32 U3
+U 1 1 60199147
+P 8300 3650
+F 0 "U3" H 8300 4931 50  0000 C CNN
+F 1 "AT28C256-PLCC32" H 8300 4840 50  0000 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 8550 4000 50  0001 C CNN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 8550 4000 50  0001 C CNN
+	1    8300 3650
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
