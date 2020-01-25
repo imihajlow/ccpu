@@ -5,4 +5,8 @@ D 32k x 8 RAM, TSOP-I package
 F http://www.farnell.com/datasheets/1674430.pdf
 $ENDCMP
 #
+$CMP AT28C256-PLCC32
+F http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf
+$ENDCMP
+#
 #End Doc Library
