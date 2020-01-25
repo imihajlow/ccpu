@@ -1,4 +1,4 @@
-`timescale 1ms/1ns
+`timescale 1us/1ns
 module test_control_unit();
     task assert;
         input v;
@@ -46,6 +46,7 @@ module test_control_unit();
     reg n_rst = 1'b1;
     reg [7:0] ir;
     reg [3:0] flags;
+    reg n_mem_rdy;
 
     control_unit inst(
             .n_oe_mem(n_oe_mem),
@@ -69,7 +70,8 @@ module test_control_unit();
             .clk(clk),
             .n_rst(n_rst),
             .ir(ir),
-            .flags(flags));
+            .flags(flags),
+            .n_mem_rdy(n_mem_rdy));
 
     integer i_op, i_src;
 
@@ -79,7 +81,8 @@ module test_control_unit();
 
         clk = 1'b0;
         n_rst = 1'b0;
-        flags = 4'bxxxx;
+        flags = 4'b0000;
+        n_mem_rdy = 1'b0;
 
         ir = 8'bxxxxxxxx;
 
@@ -288,8 +291,8 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b1000xx10;
-        flags = 4'bxxxx;
+        ir = 8'b10000010;
+        flags = 4'b0000;
         #1
         assert(n_oe_mem == 1'b0);
         assert(n_we_mem == 1'b1);
@@ -382,8 +385,8 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b1011xxx1;
-        flags = 4'bxxxx;
+        ir = 8'b10110001;
+        flags = 4'b0000;
         #1
         assert(n_oe_mem == 1'b1);
         assert(n_we_mem == 1'b1);
@@ -476,8 +479,8 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b1010xx00;
-        flags = 4'bxxxx;
+        ir = 8'b10100000;
+        flags = 4'b0000;
         #1
         assert(n_oe_mem == 1'b0);
         assert(n_we_mem == 1'b1);
@@ -571,8 +574,8 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b1010xx11;
-        flags = 4'bxxxx;
+        ir = 8'b10100011;
+        flags = 4'b0000;
         #1
         assert(n_oe_mem == 1'b0);
         assert(n_we_mem == 1'b1);
@@ -666,7 +669,7 @@ module test_control_unit();
         // first cycle
         #1
         clk = 1'b1;
-        ir = 8'b11001xxx;
+        ir = 8'b11001000;
         #1
         assert(n_oe_mem == 1'b0);
         assert(n_we_mem == 1'b1);

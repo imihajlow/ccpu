@@ -1,4 +1,4 @@
-`timescale 1us/1ns
+`timescale 1ms/1ns
 module test_cpu();
     localparam FINISH_ADDR = 16'h1000;
     localparam RESULT_ADDR = 16'h0100;
@@ -17,7 +17,8 @@ module test_cpu();
         .a(a),
         .d(d),
         .n_oe(n_oe),
-        .n_we(n_we));
+        .n_we(n_we),
+        .n_rdy(1'b0));
 
     reg [7:0] ram [0:65535];
 

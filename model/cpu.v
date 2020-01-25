@@ -1,11 +1,12 @@
 `timescale 1ns/1ns
-module cpu(clk, n_rst, a, d, n_oe, n_we);
+module cpu(clk, n_rst, a, d, n_oe, n_we, n_rdy);
     input clk;
     input n_rst;
     output [15:0] a;
     inout [7:0] d;
     output n_oe;
     output n_we;
+    input n_rdy;
 
     wire n_clk = ~clk;
 
@@ -132,5 +133,6 @@ module cpu(clk, n_rst, a, d, n_oe, n_we);
                 .clk(clk),
                 .n_rst(n_rst),
                 .ir(ir_out),
-                .flags(flags_out));
+                .flags(flags_out),
+                .n_mem_rdy(n_rdy));
 endmodule
