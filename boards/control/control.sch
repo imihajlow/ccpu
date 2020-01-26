@@ -1754,41 +1754,6 @@ Wire Wire Line
 Text Label 12700 5750 0    50   ~ 0
 condition_result
 $Comp
-L Device:LED D2
-U 1 1 600FD3DA
-P 6050 5650
-F 0 "D2" H 6050 5500 50  0000 C CNN
-F 1 "LED" H 6043 5775 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 6050 5650 50  0001 C CNN
-F 3 "~" H 6050 5650 50  0001 C CNN
-	1    6050 5650
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R R2
-U 1 1 600FF980
-P 6350 5650
-F 0 "R2" V 6500 5650 50  0000 C CNN
-F 1 "LED" V 6600 5650 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 6280 5650 50  0001 C CNN
-F 3 "~" H 6350 5650 50  0001 C CNN
-	1    6350 5650
-	0    1    1    0   
-$EndComp
-$Comp
-L power:VCC #PWR026
-U 1 1 601003F3
-P 6500 5650
-F 0 "#PWR026" H 6500 5500 50  0001 C CNN
-F 1 "VCC" V 6517 5778 50  0000 L CNN
-F 2 "" H 6500 5650 50  0001 C CNN
-F 3 "" H 6500 5650 50  0001 C CNN
-	1    6500 5650
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	5550 5650 5900 5650
-$Comp
 L Device:LED D1
 U 1 1 601051FA
 P 2950 5650
@@ -1997,41 +1962,86 @@ F 3 "" H 3850 9050 50  0001 C CNN
 	1    3850 9050
 	1    0    0    -1  
 $EndComp
-Wire Bus Line
-	3750 2050 3750 2650
-Wire Bus Line
-	3750 1150 3750 1950
 $Comp
-L missing:AT28C256-PLCC32 U?
+L missing:AT28C256-PLCC32 U6
 U 1 1 60136676
 P 7650 2600
-F 0 "U?" H 8050 1750 50  0000 C CNN
+F 0 "U6" H 8050 1750 50  0000 C CNN
 F 1 "AT28C256-PLCC32" H 8350 1650 50  0000 C CNN
-F 2 "" H 7900 2950 50  0001 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 7900 2950 50  0001 C CNN
 F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 7900 2950 50  0001 C CNN
 	1    7650 2600
 	1    0    0    -1  
 $EndComp
 $Comp
-L missing:AT28C256-PLCC32 U?
+L missing:AT28C256-PLCC32 U7
 U 1 1 60139786
 P 10150 2600
-F 0 "U?" H 10550 1750 50  0000 C CNN
+F 0 "U7" H 10550 1750 50  0000 C CNN
 F 1 "AT28C256-PLCC32" H 10850 1650 50  0000 C CNN
-F 2 "" H 10400 2950 50  0001 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 10400 2950 50  0001 C CNN
 F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 10400 2950 50  0001 C CNN
 	1    10150 2600
 	1    0    0    -1  
 $EndComp
 $Comp
-L missing:AT28C256-PLCC32 U?
+L missing:AT28C256-PLCC32 U8
 U 1 1 6013B3C2
 P 12400 2600
-F 0 "U?" H 12800 1750 50  0000 C CNN
+F 0 "U8" H 12800 1750 50  0000 C CNN
 F 1 "AT28C256-PLCC32" H 13100 1650 50  0000 C CNN
-F 2 "" H 12650 2950 50  0001 C CNN
+F 2 "missing:PLCC-32_SMD_Socket" H 12650 2950 50  0001 C CNN
 F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf" H 12650 2950 50  0001 C CNN
 	1    12400 2600
 	1    0    0    -1  
 $EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 6026AC94
+P 850 650
+F 0 "H2" H 950 696 50  0000 L CNN
+F 1 "MountingHole" H 950 605 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 850 650 50  0001 C CNN
+F 3 "~" H 850 650 50  0001 C CNN
+	1    850  650 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 6026B403
+P 15150 750
+F 0 "H3" H 15250 796 50  0000 L CNN
+F 1 "MountingHole" H 15250 705 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 15150 750 50  0001 C CNN
+F 3 "~" H 15150 750 50  0001 C CNN
+	1    15150 750 
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H4
+U 1 1 6026B9D0
+P 15150 9550
+F 0 "H4" H 15250 9596 50  0000 L CNN
+F 1 "MountingHole" H 15250 9505 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 15150 9550 50  0001 C CNN
+F 3 "~" H 15150 9550 50  0001 C CNN
+	1    15150 9550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 6026C0CF
+P 750 11000
+F 0 "H1" H 850 11046 50  0000 L CNN
+F 1 "MountingHole" H 850 10955 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 750 11000 50  0001 C CNN
+F 3 "~" H 750 11000 50  0001 C CNN
+	1    750  11000
+	1    0    0    -1  
+$EndComp
+NoConn ~ 5550 5650
+Wire Bus Line
+	3750 2050 3750 2650
+Wire Bus Line
+	3750 1150 3750 1950
 $EndSCHEMATC

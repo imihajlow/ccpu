@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 22)
+    (drawings 23)
     (tracks 970)
     (zones 0)
     (modules 81)
@@ -3752,6 +3752,18 @@
     )
   )
 
+  (dimension 11 (width 0.15) (layer Cmts.User)
+    (gr_text "11.000 mm" (at 194.5 45.7) (layer Cmts.User)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (feature1 (pts (xy 200 62) (xy 200 46.413579)))
+    (feature2 (pts (xy 189 62) (xy 189 46.413579)))
+    (crossbar (pts (xy 189 47) (xy 200 47)))
+    (arrow1a (pts (xy 200 47) (xy 198.873496 47.586421)))
+    (arrow1b (pts (xy 200 47) (xy 198.873496 46.413579)))
+    (arrow2a (pts (xy 189 47) (xy 190.126504 47.586421)))
+    (arrow2b (pts (xy 189 47) (xy 190.126504 46.413579)))
+  )
   (gr_text OE (at 196 74) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )

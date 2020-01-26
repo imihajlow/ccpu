@@ -243,16 +243,6 @@ Wire Wire Line
 	5550 3200 5650 3200
 Wire Wire Line
 	5650 3300 5550 3300
-Wire Bus Line
-	4800 3700 4800 3850
-Wire Bus Line
-	4800 2450 4800 3550
-Wire Bus Line
-	6950 2450 6950 3400
-Wire Bus Line
-	4800 3850 4800 4800
-Wire Bus Line
-	6950 3500 6950 4800
 $Comp
 L power:PWR_FLAG #FLG01
 U 1 1 5FFEED9A
@@ -330,4 +320,14 @@ F 3 "" H 8200 3800 50  0001 C CNN
 	1    8200 3800
 	1    0    0    -1  
 $EndComp
+Wire Bus Line
+	4800 3700 4800 3850
+Wire Bus Line
+	4800 2450 4800 3550
+Wire Bus Line
+	6950 2450 6950 3400
+Wire Bus Line
+	4800 3850 4800 4800
+Wire Bus Line
+	6950 3500 6950 4800
 $EndSCHEMATC
