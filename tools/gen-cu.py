@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 bits = 15
 
-def encode_address(ir, clk, condition_result, n_mem_rdy, cycle):
-    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 11) | (cycle << 10)
+def encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2):
+    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 11) | (cycle << 10) | (s1 << 12) | (s2 << 13)
 
 def encode_a(n_oe_mem, n_we_mem, n_oe_d_di, inc_ip, addr_dp, we_ir):
     return n_oe_mem | (n_we_mem << 1) | (n_oe_d_di << 2) | (inc_ip << 3) | (addr_dp << 4) | (we_ir << 5)
 
-def encode_b(n_oe_pl_alu, n_oe_ph_alu, n_oe_b_alu, n_oe_zero_alu, n_oe_a_d, n_oe_b_d, n_we_flags):
-    return n_oe_pl_alu | (n_oe_ph_alu << 1) | (n_oe_b_alu << 2) | (n_oe_zero_alu << 3) | (n_oe_a_d << 4) | (n_oe_b_d << 5) | (n_we_flags << 6)
+def encode_b(n_oe_pl_alu, n_oe_ph_alu, n_oe_b_alu, n_oe_a_d, n_oe_b_d, n_we_flags, s1_d, s2_d):
+    return n_oe_pl_alu | (n_oe_ph_alu << 1) | (n_oe_b_alu << 2) | (n_oe_a_d << 3) | (n_oe_b_d << 4) | (n_we_flags << 5) | (s1_d << 6) | (s2_d << 7)
 
 def encode_c(n_oe_alu_di, n_reset_cycle, swap_p, n_we_pl, n_we_ph, we_a, we_b):
     return n_oe_alu_di | (n_reset_cycle << 1) | (swap_p << 2) | (n_we_pl << 3) | (n_we_ph << 4) | (we_a << 5) | (we_b << 6)
@@ -148,11 +148,13 @@ def main():
             for condition_result in range(2):
                 for n_mem_rdy in range(2):
                     for cycle in range(2):
-                            address = encode_address(ir, bool(clk), bool(condition_result), bool(n_mem_rdy), bool(cycle))
-                            r = get(ir, clk, condition_result, n_mem_rdy, cycle)
-                            part_a[address] = encode_a(r["n_oe_mem"], r["n_we_mem"], r["n_oe_d_di"], r["inc_ip"], r["addr_dp"], r["we_ir"])
-                            part_b[address] = encode_b(r["n_oe_pl_alu"], r["n_oe_ph_alu"], r["n_oe_b_alu"], r["n_oe_zero_alu"], r["n_oe_a_d"], r["n_oe_b_d"], r["n_we_flags"])
-                            part_c[address] = encode_c(r["n_oe_alu_di"], r["n_reset_cycle"], r["swap_p"], r["n_we_pl"], r["n_we_ph"], r["we_a"], r["we_b"])
+                        for s1 in range(2):
+                            for s2 in range(2):
+                                address = encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2)
+                                r = get(ir, clk, condition_result, n_mem_rdy, cycle)
+                                part_a[address] = encode_a(r["n_oe_mem"], r["n_we_mem"], r["n_oe_d_di"], r["inc_ip"], r["addr_dp"], r["we_ir"])
+                                part_b[address] = encode_b(r["n_oe_pl_alu"], r["n_oe_ph_alu"], r["n_oe_b_alu"], r["n_oe_a_d"], r["n_oe_b_d"], r["n_we_flags"], 0, 0)
+                                part_c[address] = encode_c(r["n_oe_alu_di"], r["n_reset_cycle"], r["swap_p"], r["n_we_pl"], r["n_we_ph"], r["we_a"], r["we_b"])
     write_file("cu_a.mem", part_a)
     write_file("cu_b.mem", part_b)
     write_file("cu_c.mem", part_c)

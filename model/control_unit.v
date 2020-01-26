@@ -15,7 +15,6 @@ module control_unit(
             n_oe_pl_alu,
             n_oe_ph_alu,
             n_oe_b_alu,
-            n_oe_zero_alu,
             n_oe_a_d,
             n_oe_b_d,
             n_we_flags,
@@ -44,7 +43,7 @@ module control_unit(
 
     output wire n_we_pl, n_we_ph; // latch registers from DI on negedge clk, active low
     output wire we_a, we_b; // latch registers from DI on negedge clk, active high
-    output wire n_oe_pl_alu, n_oe_ph_alu, n_oe_b_alu, n_oe_zero_alu; // drive ALU B input with register values
+    output wire n_oe_pl_alu, n_oe_ph_alu, n_oe_b_alu; // drive ALU B input with register values
     output wire n_oe_a_d, n_oe_b_d; // drive external D bus with a or b
 
     output wire n_we_flags; // latch flags on negedge clk
@@ -99,6 +98,22 @@ module control_unit(
         .n_cd(n_rst),
         .n_sd(1'b1));
 
+    wire s1, s2;
+    wire s1_d, s2_d;
+    d_ff_7474 ff_s1(
+        .q(s1),
+        .d(s1_d),
+        .cp(clk),
+        .n_cd(n_rst),
+        .n_sd(1'b1));
+
+    d_ff_7474 ff_s2(
+        .q(s2),
+        .d(s2_d),
+        .cp(clk),
+        .n_cd(n_rst),
+        .n_sd(1'b1));
+
     wire condition_result;
     wire [1:0] flag = ir[1:0];
 
@@ -118,7 +133,7 @@ module control_unit(
     assign #10 cr_23 = cr_vec[2] & cr_vec[3];
     assign #10 condition_result = cr_01 & cr_23;
 
-    wire [14:0] rom_addr = {3'b000, n_mem_rdy, cycle, condition_result, clk, ir};
+    wire [14:0] rom_addr = {1'b0, s2, s1, n_mem_rdy, cycle, condition_result, clk, ir};
     wire [7:0] d_a;
     rom_28c256 #(.FILENAME("cu_a.mem")) rom_a(
         .a(rom_addr),
@@ -135,7 +150,7 @@ module control_unit(
         .n_oe(1'b0),
         .n_cs(1'b0)
         );
-    assign {n_we_flags, n_oe_b_d, n_oe_a_d, n_oe_zero_alu, n_oe_b_alu, n_oe_ph_alu, n_oe_pl_alu} = d_b[6:0];
+    assign {s2_d, s1_d, n_we_flags, n_oe_b_d, n_oe_a_d, n_oe_b_alu, n_oe_ph_alu, n_oe_pl_alu} = d_b[6:0];
 
     wire [7:0] d_c;
     rom_28c256 #(.FILENAME("cu_c.mem")) rom_c(

@@ -107,7 +107,7 @@ module cpu(clk, n_rst, a, d, n_oe, n_we, n_rdy);
     wire n_oe_d_di;
     assign d_int = n_oe_d_di ? 8'bz : d;
 
-    wire n_zero_to_alu_oe;
+    wire n_zero_to_alu_oe = ~(n_pl_to_alu_oe & n_ph_to_alu_oe & n_b_to_alu_oe); // fake pull-down
     assign alu_b = n_zero_to_alu_oe ? 8'bz : 8'b0;
 
     control_unit cu(
@@ -125,7 +125,6 @@ module cpu(clk, n_rst, a, d, n_oe, n_we, n_rdy);
                 .n_oe_pl_alu(n_pl_to_alu_oe),
                 .n_oe_ph_alu(n_ph_to_alu_oe),
                 .n_oe_b_alu(n_b_to_alu_oe),
-                .n_oe_zero_alu(n_zero_to_alu_oe),
                 .n_oe_a_d(n_a_to_d_oe),
                 .n_oe_b_d(n_b_to_d_oe),
                 .n_we_flags(n_flags_we),
