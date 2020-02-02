@@ -2278,7 +2278,7 @@
     (tags "mounting hole 3.2mm no annular m3 din965")
     (path /5F1D725A)
     (attr virtual)
-    (fp_text reference He (at 0 -3.8) (layer F.SilkS) hide
+    (fp_text reference H4 (at 0 -3.8) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value MountingHole (at 0 3.8) (layer F.Fab) hide
