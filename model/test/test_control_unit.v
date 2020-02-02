@@ -84,7 +84,7 @@ module test_control_unit();
         flags = 4'b0000;
         n_mem_rdy = 1'b0;
 
-        ir = 8'bxxxxxxxx;
+        ir = 8'b00000000;
 
         #1
         assert_short_circuit();
