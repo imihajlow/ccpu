@@ -1,0 +1,16 @@
+/* https://wavedrom.com/editor.html */
+{signal: [
+  {name: 'A', wave: '34..3x', data: "IP DP IP+1"},
+  {name: 'D', wave: 'xz3.zx', data: "x"},
+  {name: 'n_oe', wave: '01..0x'},
+  {name: 'n_we', wave: '1.01.x'},
+  {},
+  {name: "n_cs", wave: '10..1x'},
+  {},
+  {name: 'DB', wave: '3.4.3x', data: "irrelevant relevant irrelevant"},
+  {name: 'R/W', wave: '0....x'},
+  {name: 'E', wave: '0.10.x'}
+],
+  head: {text: "LCD write operation"},
+  config: {hscale: 3}
+}
