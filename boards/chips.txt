@@ -11,5 +11,5 @@ d flip-flop: -74
 
 OS102011MS2QN1 - switch
 
-KP-2012EC - red LED (20 mA, 2 V) - (5 mA, 1.9 V) - 620 Ohm
-KP-2012CGCK - green LED (20 mA, 2.1 V) - (5 mA, 1.95 V) - 600 Ohm
+KP-2012EC - red LED (20 mA, 2 V) - (5 mA, 1.9 V)
+KP-2012CGCK - green LED (20 mA, 2.1 V) - (5 mA, 1.95 V)

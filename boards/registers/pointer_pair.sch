@@ -40,34 +40,34 @@ S 6450 1450 1100 1200
 U 5E066B0D
 F0 "reg_a" 50
 F1 "pointer_reg.sch" 50
-F2 "clk" I L 6450 1500 50 
-F3 "~rst" I L 6450 1600 50 
-F4 "di[0..7]" I L 6450 1800 50 
-F5 "~oe_addr" I L 6450 1950 50 
-F6 "cnt" I L 6450 2100 50 
-F7 "~we_l" I L 6450 2250 50 
-F8 "~we_h" I L 6450 2350 50 
-F9 "~oe_dh" I L 6450 2450 50 
-F10 "~oe_dl" I L 6450 2550 50 
-F11 "a_out[0..15]" I R 7550 1650 50 
-F12 "d_out[0..7]" I R 7550 1750 50 
+F2 "clk" I L 6450 1500 50
+F3 "~rst" I L 6450 1600 50
+F4 "di[0..7]" I L 6450 1800 50
+F5 "~oe_addr" I L 6450 1950 50
+F6 "cnt" I L 6450 2100 50
+F7 "~we_l" I L 6450 2250 50
+F8 "~we_h" I L 6450 2350 50
+F9 "~oe_dh" I L 6450 2450 50
+F10 "~oe_dl" I L 6450 2550 50
+F11 "a_out[0..15]" I R 7550 1650 50
+F12 "d_out[0..7]" I R 7550 1750 50
 $EndSheet
 $Sheet
 S 6450 4600 1100 1200
 U 5E5C90D9
 F0 "reg_b" 50
 F1 "pointer_reg.sch" 50
-F2 "clk" I L 6450 4650 50 
-F3 "~rst" I L 6450 4750 50 
-F4 "di[0..7]" I L 6450 4950 50 
-F5 "~oe_addr" I L 6450 5100 50 
-F6 "cnt" I L 6450 5250 50 
-F7 "~we_l" I L 6450 5400 50 
-F8 "~we_h" I L 6450 5500 50 
-F9 "~oe_dh" I L 6450 5600 50 
-F10 "~oe_dl" I L 6450 5700 50 
-F11 "a_out[0..15]" I R 7550 4800 50 
-F12 "d_out[0..7]" I R 7550 4900 50 
+F2 "clk" I L 6450 4650 50
+F3 "~rst" I L 6450 4750 50
+F4 "di[0..7]" I L 6450 4950 50
+F5 "~oe_addr" I L 6450 5100 50
+F6 "cnt" I L 6450 5250 50
+F7 "~we_l" I L 6450 5400 50
+F8 "~we_h" I L 6450 5500 50
+F9 "~oe_dh" I L 6450 5600 50
+F10 "~oe_dl" I L 6450 5700 50
+F11 "a_out[0..15]" I R 7550 4800 50
+F12 "d_out[0..7]" I R 7550 4900 50
 $EndSheet
 Wire Wire Line
 	1400 3000 1750 3000
@@ -86,7 +86,7 @@ F 1 "74ACT32" H 5450 5584 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5450 5350 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5450 5350 50  0001 C CNN
 	1    5450 5350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U7
@@ -97,7 +97,7 @@ F 1 "74ACT32" H 5450 6134 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5450 5900 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5450 5900 50  0001 C CNN
 	2    5450 5900
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U7
@@ -108,7 +108,7 @@ F 1 "74ACT32" H 5450 6684 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5450 6450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5450 6450 50  0001 C CNN
 	3    5450 6450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U7
@@ -119,7 +119,7 @@ F 1 "74ACT32" H 5450 7284 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5450 7050 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5450 7050 50  0001 C CNN
 	4    5450 7050
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U8
@@ -130,7 +130,7 @@ F 1 "74ACT32" H 9230 4405 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 9000 4450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 9000 4450 50  0001 C CNN
 	5    9000 4450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	5750 5350 6200 5350
@@ -179,7 +179,7 @@ F 1 "74ACT32" H 5500 2484 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5500 2250 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5500 2250 50  0001 C CNN
 	1    5500 2250
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U8
@@ -190,7 +190,7 @@ F 1 "74ACT32" H 5500 3034 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5500 2800 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5500 2800 50  0001 C CNN
 	2    5500 2800
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U8
@@ -201,7 +201,7 @@ F 1 "74ACT32" H 5500 3584 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5500 3350 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5500 3350 50  0001 C CNN
 	3    5500 3350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U8
@@ -212,7 +212,7 @@ F 1 "74ACT32" H 5500 4184 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5500 3950 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 5500 3950 50  0001 C CNN
 	4    5500 3950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	4850 4050 5200 4050
@@ -319,7 +319,7 @@ F 1 "GND" H 9005 4777 50  0000 C CNN
 F 2 "" H 9000 4950 50  0001 C CNN
 F 3 "" H 9000 4950 50  0001 C CNN
 	1    9000 4950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR046
@@ -330,7 +330,7 @@ F 1 "VCC" H 9017 4123 50  0000 C CNN
 F 2 "" H 9000 3950 50  0001 C CNN
 F 3 "" H 9000 3950 50  0001 C CNN
 	1    9000 3950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS32 U7
@@ -341,7 +341,7 @@ F 1 "74ACT32" H 8480 4405 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8250 4450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8250 4450 50  0001 C CNN
 	5    8250 4450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR045
@@ -352,7 +352,7 @@ F 1 "GND" H 8255 4777 50  0000 C CNN
 F 2 "" H 8250 4950 50  0001 C CNN
 F 3 "" H 8250 4950 50  0001 C CNN
 	1    8250 4950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR044
@@ -363,7 +363,7 @@ F 1 "VCC" H 8267 4123 50  0000 C CNN
 F 2 "" H 8250 3950 50  0001 C CNN
 F 3 "" H 8250 3950 50  0001 C CNN
 	1    8250 3950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS08 U6
@@ -374,7 +374,7 @@ F 1 "74ACT08" H 4000 3384 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 4000 3150 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 4000 3150 50  0001 C CNN
 	1    4000 3150
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	1400 2550 3550 2550
@@ -405,7 +405,7 @@ F 1 "74ACT08" H 4050 5384 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 4050 5150 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 4050 5150 50  0001 C CNN
 	2    4050 5150
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	3550 3050 3550 5050
@@ -492,7 +492,7 @@ F 1 "0.1u" H 9650 2450 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 9638 2500 50  0001 C CNN
 F 3 "~" H 9600 2650 50  0001 C CNN
 	1    9600 2650
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR049
@@ -503,7 +503,7 @@ F 1 "GND" H 9605 2627 50  0000 C CNN
 F 2 "" H 9600 2800 50  0001 C CNN
 F 3 "" H 9600 2800 50  0001 C CNN
 	1    9600 2800
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR048
@@ -514,29 +514,29 @@ F 1 "VCC" H 9617 2673 50  0000 C CNN
 F 2 "" H 9600 2500 50  0001 C CNN
 F 3 "" H 9600 2500 50  0001 C CNN
 	1    9600 2500
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L Device:LED D13
 U 1 1 5E6D3003
 P 3900 6600
 F 0 "D13" H 3950 6700 50  0000 C CNN
-F 1 "LED" H 3950 6800 50  0000 C CNN
+F 1 "KP-2012EC" H 3950 6800 50  0000 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 3900 6600 50  0001 C CNN
 F 3 "~" H 3900 6600 50  0001 C CNN
 	1    3900 6600
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R29
 U 1 1 5E6D51CF
 P 4200 6600
 F 0 "R29" V 4300 6550 50  0000 C CNN
-F 1 "LED" V 4400 6550 50  0000 C CNN
+F 1 "620" V 4400 6550 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4130 6600 50  0001 C CNN
 F 3 "~" H 4200 6600 50  0001 C CNN
 	1    4200 6600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:VCC #PWR043
@@ -547,7 +547,7 @@ F 1 "VCC" V 3768 6727 50  0000 L CNN
 F 2 "" H 3750 6600 50  0001 C CNN
 F 3 "" H 3750 6600 50  0001 C CNN
 	1    3750 6600
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	3000 6400 3100 6400
@@ -567,7 +567,7 @@ F 1 "74ACT08" H 9980 4405 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 9750 4450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 9750 4450 50  0001 C CNN
 	5    9750 4450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR051
@@ -578,7 +578,7 @@ F 1 "GND" H 9755 4777 50  0000 C CNN
 F 2 "" H 9750 4950 50  0001 C CNN
 F 3 "" H 9750 4950 50  0001 C CNN
 	1    9750 4950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR050
@@ -589,7 +589,7 @@ F 1 "VCC" H 9767 4123 50  0000 C CNN
 F 2 "" H 9750 3950 50  0001 C CNN
 F 3 "" H 9750 3950 50  0001 C CNN
 	1    9750 3950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Text HLabel 1400 2100 0    50   Input ~ 0
 addr_dp
@@ -602,7 +602,7 @@ F 1 "74ACT86" H 2700 6634 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 2700 6400 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 2700 6400 50  0001 C CNN
 	1    2700 6400
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	1750 3000 1750 3750
@@ -615,7 +615,7 @@ F 1 "74ACT86" H 2650 4084 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 2650 3850 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 2650 3850 50  0001 C CNN
 	2    2650 3850
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	2400 6300 1750 6300
@@ -631,7 +631,7 @@ F 1 "VCC" V 2418 6627 50  0000 L CNN
 F 2 "" H 2400 6500 50  0001 C CNN
 F 3 "" H 2400 6500 50  0001 C CNN
 	1    2400 6500
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 $Comp
 L 74xx:74HC86 U5
@@ -642,7 +642,7 @@ F 1 "74ACT86" H 2650 4784 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 2650 4550 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 2650 4550 50  0001 C CNN
 	3    2650 4550
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	2950 3850 4450 3850
@@ -684,7 +684,7 @@ F 1 "74ACT86" H 10780 4405 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 10550 4450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 10550 4450 50  0001 C CNN
 	5    10550 4450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR053
@@ -695,7 +695,7 @@ F 1 "GND" H 10555 4777 50  0000 C CNN
 F 2 "" H 10550 4950 50  0001 C CNN
 F 3 "" H 10550 4950 50  0001 C CNN
 	1    10550 4950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR052
@@ -706,7 +706,7 @@ F 1 "VCC" H 10567 4123 50  0000 C CNN
 F 2 "" H 10550 3950 50  0001 C CNN
 F 3 "" H 10550 3950 50  0001 C CNN
 	1    10550 3950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS08 U6
@@ -716,8 +716,8 @@ F 0 "U6" H 9900 1275 50  0000 C CNN
 F 1 "74ACT08" H 9900 1184 50  0000 C CNN
 F 2 "" H 9900 950 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 9900 950 50  0001 C CNN
-	3    9900 950 
-	1    0    0    -1  
+	3    9900 950
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS08 U6
@@ -728,7 +728,7 @@ F 1 "74ACT08" H 9900 1734 50  0000 C CNN
 F 2 "" H 9900 1500 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 9900 1500 50  0001 C CNN
 	4    9900 1500
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR0125
@@ -738,8 +738,8 @@ F 0 "#PWR0125" H 9600 600 50  0001 C CNN
 F 1 "GND" H 9605 677 50  0000 C CNN
 F 2 "" H 9600 850 50  0001 C CNN
 F 3 "" H 9600 850 50  0001 C CNN
-	1    9600 850 
-	0    1    1    0   
+	1    9600 850
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR0130
@@ -750,7 +750,7 @@ F 1 "GND" H 9605 877 50  0000 C CNN
 F 2 "" H 9600 1050 50  0001 C CNN
 F 3 "" H 9600 1050 50  0001 C CNN
 	1    9600 1050
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR0131
@@ -761,7 +761,7 @@ F 1 "GND" H 9605 1227 50  0000 C CNN
 F 2 "" H 9600 1400 50  0001 C CNN
 F 3 "" H 9600 1400 50  0001 C CNN
 	1    9600 1400
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR0132
@@ -772,9 +772,9 @@ F 1 "GND" H 9605 1427 50  0000 C CNN
 F 2 "" H 9600 1600 50  0001 C CNN
 F 3 "" H 9600 1600 50  0001 C CNN
 	1    9600 1600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
-NoConn ~ 10200 950 
+NoConn ~ 10200 950
 NoConn ~ 10200 1500
 $Comp
 L 74xx:74LS86 U5
@@ -785,7 +785,7 @@ F 1 "74ACT86" H 9900 2284 50  0000 C CNN
 F 2 "" H 9900 2050 50  0001 C CNN
 F 3 "74xx/74ls86.pdf" H 9900 2050 50  0001 C CNN
 	4    9900 2050
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR?
@@ -796,7 +796,7 @@ F 1 "GND" H 9605 1977 50  0000 C CNN
 F 2 "" H 9600 2150 50  0001 C CNN
 F 3 "" H 9600 2150 50  0001 C CNN
 	1    9600 2150
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR?
@@ -807,7 +807,7 @@ F 1 "GND" H 9605 1777 50  0000 C CNN
 F 2 "" H 9600 1950 50  0001 C CNN
 F 3 "" H 9600 1950 50  0001 C CNN
 	1    9600 1950
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 NoConn ~ 10200 2050
 $EndSCHEMATC

@@ -18,18 +18,18 @@ S 11300 1050 1250 1900
 U 5E0666E8
 F0 "pointer_pair" 50
 F1 "pointer_pair.sch" 50
-F2 "clk" I L 11300 1150 50 
-F3 "~rst" I L 11300 1250 50 
-F4 "di[0..7]" I L 11300 1500 50 
-F5 "~oe_dh" I L 11300 2100 50 
-F6 "~oe_dl" I L 11300 2200 50 
-F7 "cnt" I L 11300 2800 50 
-F8 "~we_h" I L 11300 2300 50 
-F9 "~we_l" I L 11300 2400 50 
-F10 "selector" I L 11300 2600 50 
-F11 "addr_out[0..15]" T R 12550 1350 50 
-F12 "data_out[0..7]" T R 12550 1450 50 
-F13 "addr_dp" I L 11300 1900 50 
+F2 "clk" I L 11300 1150 50
+F3 "~rst" I L 11300 1250 50
+F4 "di[0..7]" I L 11300 1500 50
+F5 "~oe_dh" I L 11300 2100 50
+F6 "~oe_dl" I L 11300 2200 50
+F7 "cnt" I L 11300 2800 50
+F8 "~we_h" I L 11300 2300 50
+F9 "~we_l" I L 11300 2400 50
+F10 "selector" I L 11300 2600 50
+F11 "addr_out[0..15]" T R 12550 1350 50
+F12 "data_out[0..7]" T R 12550 1450 50
+F13 "addr_dp" I L 11300 1900 50
 $EndSheet
 Wire Bus Line
 	11300 1500 11050 1500
@@ -50,7 +50,7 @@ F 1 "74AC273" H 3800 3500 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 3350 4150 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 3350 4150 50  0001 C CNN
 	1    3350 4150
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74HC244 U2
@@ -61,7 +61,7 @@ F 1 "74ACT244" H 3650 900 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 3350 1550 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 3350 1550 50  0001 C CNN
 	1    3350 1550
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Text Notes 3400 4400 2    50   ~ 0
 IR
@@ -152,22 +152,22 @@ L Device:LED D1
 U 1 1 5E702470
 P 4950 5100
 F 0 "D1" H 4100 5100 50  0000 C CNN
-F 1 "LED" H 4943 4936 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 4936 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5100 50  0001 C CNN
 F 3 "~" H 4950 5100 50  0001 C CNN
 	1    4950 5100
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R9
 U 1 1 5E70339D
 P 5250 5100
 F 0 "R9" V 5250 5850 50  0000 C CNN
-F 1 "LED" V 5250 6050 50  0000 C CNN
+F 1 "620" V 5250 6050 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5100 50  0001 C CNN
 F 3 "~" H 5250 5100 50  0001 C CNN
 	1    5250 5100
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR020
@@ -178,7 +178,7 @@ F 1 "GND" V 5405 4972 50  0000 R CNN
 F 2 "" H 5400 5100 50  0001 C CNN
 F 3 "" H 5400 5100 50  0001 C CNN
 	1    5400 5100
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5100 4500 5100
@@ -187,22 +187,22 @@ L Device:LED D2
 U 1 1 5E707A95
 P 4950 5200
 F 0 "D2" H 4100 5200 50  0000 C CNN
-F 1 "LED" H 4943 5036 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5036 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5200 50  0001 C CNN
 F 3 "~" H 4950 5200 50  0001 C CNN
 	1    4950 5200
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R10
 U 1 1 5E707A9B
 P 5250 5200
 F 0 "R10" V 5250 5950 50  0000 C CNN
-F 1 "LED" V 5250 6150 50  0000 C CNN
+F 1 "620" V 5250 6150 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5200 50  0001 C CNN
 F 3 "~" H 5250 5200 50  0001 C CNN
 	1    5250 5200
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR021
@@ -213,7 +213,7 @@ F 1 "GND" V 5405 5072 50  0000 R CNN
 F 2 "" H 5400 5200 50  0001 C CNN
 F 3 "" H 5400 5200 50  0001 C CNN
 	1    5400 5200
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5200 4500 5200
@@ -222,22 +222,22 @@ L Device:LED D3
 U 1 1 5E70866C
 P 4950 5300
 F 0 "D3" H 4100 5300 50  0000 C CNN
-F 1 "LED" H 4943 5136 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5136 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5300 50  0001 C CNN
 F 3 "~" H 4950 5300 50  0001 C CNN
 	1    4950 5300
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R11
 U 1 1 5E708672
 P 5250 5300
 F 0 "R11" V 5250 6050 50  0000 C CNN
-F 1 "LED" V 5250 6250 50  0000 C CNN
+F 1 "620" V 5250 6250 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5300 50  0001 C CNN
 F 3 "~" H 5250 5300 50  0001 C CNN
 	1    5250 5300
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR022
@@ -248,7 +248,7 @@ F 1 "GND" V 5405 5172 50  0000 R CNN
 F 2 "" H 5400 5300 50  0001 C CNN
 F 3 "" H 5400 5300 50  0001 C CNN
 	1    5400 5300
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5300 4500 5300
@@ -257,22 +257,22 @@ L Device:LED D4
 U 1 1 5E708CE1
 P 4950 5400
 F 0 "D4" H 4100 5400 50  0000 C CNN
-F 1 "LED" H 4943 5236 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5236 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5400 50  0001 C CNN
 F 3 "~" H 4950 5400 50  0001 C CNN
 	1    4950 5400
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R12
 U 1 1 5E708CE7
 P 5250 5400
 F 0 "R12" V 5250 6150 50  0000 C CNN
-F 1 "LED" V 5250 6350 50  0000 C CNN
+F 1 "620" V 5250 6350 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5400 50  0001 C CNN
 F 3 "~" H 5250 5400 50  0001 C CNN
 	1    5250 5400
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR023
@@ -283,7 +283,7 @@ F 1 "GND" V 5405 5272 50  0000 R CNN
 F 2 "" H 5400 5400 50  0001 C CNN
 F 3 "" H 5400 5400 50  0001 C CNN
 	1    5400 5400
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5400 4500 5400
@@ -292,22 +292,22 @@ L Device:LED D5
 U 1 1 5E708EF7
 P 4950 5500
 F 0 "D5" H 4100 5500 50  0000 C CNN
-F 1 "LED" H 4943 5336 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5336 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5500 50  0001 C CNN
 F 3 "~" H 4950 5500 50  0001 C CNN
 	1    4950 5500
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R13
 U 1 1 5E708EFD
 P 5250 5500
 F 0 "R13" V 5250 6250 50  0000 C CNN
-F 1 "LED" V 5250 6450 50  0000 C CNN
+F 1 "620" V 5250 6450 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5500 50  0001 C CNN
 F 3 "~" H 5250 5500 50  0001 C CNN
 	1    5250 5500
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR024
@@ -318,7 +318,7 @@ F 1 "GND" V 5405 5372 50  0000 R CNN
 F 2 "" H 5400 5500 50  0001 C CNN
 F 3 "" H 5400 5500 50  0001 C CNN
 	1    5400 5500
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5500 4500 5500
@@ -327,22 +327,22 @@ L Device:LED D6
 U 1 1 5E709531
 P 4950 5600
 F 0 "D6" H 4100 5600 50  0000 C CNN
-F 1 "LED" H 4943 5436 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5436 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5600 50  0001 C CNN
 F 3 "~" H 4950 5600 50  0001 C CNN
 	1    4950 5600
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R14
 U 1 1 5E709537
 P 5250 5600
 F 0 "R14" V 5250 6350 50  0000 C CNN
-F 1 "LED" V 5250 6550 50  0000 C CNN
+F 1 "620" V 5250 6550 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5600 50  0001 C CNN
 F 3 "~" H 5250 5600 50  0001 C CNN
 	1    5250 5600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR025
@@ -353,7 +353,7 @@ F 1 "GND" V 5405 5472 50  0000 R CNN
 F 2 "" H 5400 5600 50  0001 C CNN
 F 3 "" H 5400 5600 50  0001 C CNN
 	1    5400 5600
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5600 4500 5600
@@ -362,22 +362,22 @@ L Device:LED D7
 U 1 1 5E709752
 P 4950 5700
 F 0 "D7" H 4100 5700 50  0000 C CNN
-F 1 "LED" H 4943 5536 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5536 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5700 50  0001 C CNN
 F 3 "~" H 4950 5700 50  0001 C CNN
 	1    4950 5700
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R15
 U 1 1 5E709758
 P 5250 5700
 F 0 "R15" V 5250 6450 50  0000 C CNN
-F 1 "LED" V 5250 6650 50  0000 C CNN
+F 1 "620" V 5250 6650 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5700 50  0001 C CNN
 F 3 "~" H 5250 5700 50  0001 C CNN
 	1    5250 5700
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR026
@@ -388,7 +388,7 @@ F 1 "GND" V 5405 5572 50  0000 R CNN
 F 2 "" H 5400 5700 50  0001 C CNN
 F 3 "" H 5400 5700 50  0001 C CNN
 	1    5400 5700
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5700 4500 5700
@@ -397,22 +397,22 @@ L Device:LED D8
 U 1 1 5E709E9D
 P 4950 5800
 F 0 "D8" H 4100 5800 50  0000 C CNN
-F 1 "LED" H 4943 5636 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 5636 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 5800 50  0001 C CNN
 F 3 "~" H 4950 5800 50  0001 C CNN
 	1    4950 5800
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R16
 U 1 1 5E709EA3
 P 5250 5800
 F 0 "R16" V 5250 6550 50  0000 C CNN
-F 1 "LED" V 5250 6750 50  0000 C CNN
+F 1 "620" V 5250 6750 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 5800 50  0001 C CNN
 F 3 "~" H 5250 5800 50  0001 C CNN
 	1    5250 5800
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR027
@@ -423,7 +423,7 @@ F 1 "GND" V 5405 5672 50  0000 R CNN
 F 2 "" H 5400 5800 50  0001 C CNN
 F 3 "" H 5400 5800 50  0001 C CNN
 	1    5400 5800
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 5800 4500 5800
@@ -438,7 +438,7 @@ F 1 "GND" H 3355 4777 50  0000 C CNN
 F 2 "" H 3350 4950 50  0001 C CNN
 F 3 "" H 3350 4950 50  0001 C CNN
 	1    3350 4950
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR014
@@ -449,7 +449,7 @@ F 1 "VCC" H 3367 3523 50  0000 C CNN
 F 2 "" H 3350 3350 50  0001 C CNN
 F 3 "" H 3350 3350 50  0001 C CNN
 	1    3350 3350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	11300 1150 11050 1150
@@ -560,7 +560,7 @@ d6
 Text Label 2500 4350 0    50   ~ 0
 d7
 Entry Wire Line
-	4350 1050 4450 950 
+	4350 1050 4450 950
 Entry Wire Line
 	4350 1150 4450 1050
 Entry Wire Line
@@ -610,8 +610,8 @@ F 0 "#PWR012" H 3350 600 50  0001 C CNN
 F 1 "VCC" H 3367 923 50  0000 C CNN
 F 2 "" H 3350 750 50  0001 C CNN
 F 3 "" H 3350 750 50  0001 C CNN
-	1    3350 750 
-	1    0    0    -1  
+	1    3350 750
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR013
@@ -622,7 +622,7 @@ F 1 "GND" H 3355 2177 50  0000 C CNN
 F 2 "" H 3350 2350 50  0001 C CNN
 F 3 "" H 3350 2350 50  0001 C CNN
 	1    3350 2350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	2850 4650 2750 4650
@@ -637,7 +637,7 @@ F 1 "74ACT08" H 2100 5584 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 2100 5350 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 2100 5350 50  0001 C CNN
 	1    2100 5350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	2400 5350 2600 5350
@@ -658,13 +658,13 @@ S 11300 4900 1250 1300
 U 5E7CA397
 F0 "gp_reg_b" 50
 F1 "gp_reg.sch" 50
-F2 "w_clk" I L 11300 5050 50 
-F3 "~rst" I L 11300 5150 50 
-F4 "~oea" I L 11300 5350 50 
-F5 "~oeb" I L 11300 5450 50 
-F6 "di[0..7]" I L 11300 5650 50 
-F7 "doa[0..7]" T R 12550 5150 50 
-F8 "dob[0..7]" T R 12550 5950 50 
+F2 "w_clk" I L 11300 5050 50
+F3 "~rst" I L 11300 5150 50
+F4 "~oea" I L 11300 5350 50
+F5 "~oeb" I L 11300 5450 50
+F6 "di[0..7]" I L 11300 5650 50
+F7 "doa[0..7]" T R 12550 5150 50
+F8 "dob[0..7]" T R 12550 5950 50
 $EndSheet
 $Comp
 L 74xx:74LS08 U1
@@ -675,7 +675,7 @@ F 1 "74ACT08" H 10300 3684 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10300 3450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 10300 3450 50  0001 C CNN
 	2    10300 3450
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS08 U1
@@ -686,7 +686,7 @@ F 1 "74ACT08" H 10300 5284 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10300 5050 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 10300 5050 50  0001 C CNN
 	3    10300 5050
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	10600 3450 11300 3450
@@ -759,7 +759,7 @@ F 1 "10k" V 12550 6100 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 6700 50  0001 C CNN
 F 3 "~" H 12550 6700 50  0001 C CNN
 	1    12550 6700
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR032
@@ -770,7 +770,7 @@ F 1 "GND" V 12400 6550 50  0000 R CNN
 F 2 "" H 12400 6700 50  0001 C CNN
 F 3 "" H 12400 6700 50  0001 C CNN
 	1    12400 6700
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 6700 13200 6600
@@ -787,7 +787,7 @@ F 1 "10k" V 12550 6250 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 6850 50  0001 C CNN
 F 3 "~" H 12550 6850 50  0001 C CNN
 	1    12550 6850
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR033
@@ -798,7 +798,7 @@ F 1 "GND" V 12400 6700 50  0000 R CNN
 F 2 "" H 12400 6850 50  0001 C CNN
 F 3 "" H 12400 6850 50  0001 C CNN
 	1    12400 6850
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 6850 13200 6750
@@ -815,7 +815,7 @@ F 1 "10k" V 12550 6400 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7000 50  0001 C CNN
 F 3 "~" H 12550 7000 50  0001 C CNN
 	1    12550 7000
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR034
@@ -826,7 +826,7 @@ F 1 "GND" V 12400 6850 50  0000 R CNN
 F 2 "" H 12400 7000 50  0001 C CNN
 F 3 "" H 12400 7000 50  0001 C CNN
 	1    12400 7000
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7000 13200 6900
@@ -843,7 +843,7 @@ F 1 "10k" V 12550 6550 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7150 50  0001 C CNN
 F 3 "~" H 12550 7150 50  0001 C CNN
 	1    12550 7150
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR035
@@ -854,7 +854,7 @@ F 1 "GND" V 12400 7000 50  0000 R CNN
 F 2 "" H 12400 7150 50  0001 C CNN
 F 3 "" H 12400 7150 50  0001 C CNN
 	1    12400 7150
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7150 13200 7050
@@ -871,7 +871,7 @@ F 1 "10k" V 12550 6700 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7300 50  0001 C CNN
 F 3 "~" H 12550 7300 50  0001 C CNN
 	1    12550 7300
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR036
@@ -882,7 +882,7 @@ F 1 "GND" V 12400 7150 50  0000 R CNN
 F 2 "" H 12400 7300 50  0001 C CNN
 F 3 "" H 12400 7300 50  0001 C CNN
 	1    12400 7300
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7300 13200 7200
@@ -899,7 +899,7 @@ F 1 "10k" V 12550 6850 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7450 50  0001 C CNN
 F 3 "~" H 12550 7450 50  0001 C CNN
 	1    12550 7450
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR037
@@ -910,7 +910,7 @@ F 1 "GND" V 12400 7300 50  0000 R CNN
 F 2 "" H 12400 7450 50  0001 C CNN
 F 3 "" H 12400 7450 50  0001 C CNN
 	1    12400 7450
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7450 13200 7350
@@ -925,7 +925,7 @@ F 1 "10k" V 12550 7000 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7600 50  0001 C CNN
 F 3 "~" H 12550 7600 50  0001 C CNN
 	1    12550 7600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR038
@@ -936,7 +936,7 @@ F 1 "GND" V 12400 7450 50  0000 R CNN
 F 2 "" H 12400 7600 50  0001 C CNN
 F 3 "" H 12400 7600 50  0001 C CNN
 	1    12400 7600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7600 13200 7500
@@ -953,7 +953,7 @@ F 1 "10k" V 12550 7150 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 12480 7750 50  0001 C CNN
 F 3 "~" H 12550 7750 50  0001 C CNN
 	1    12550 7750
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR039
@@ -964,7 +964,7 @@ F 1 "GND" V 12400 7600 50  0000 R CNN
 F 2 "" H 12400 7750 50  0001 C CNN
 F 3 "" H 12400 7750 50  0001 C CNN
 	1    12400 7750
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Entry Wire Line
 	13100 7750 13200 7650
@@ -985,7 +985,7 @@ F 1 "GND" H 3355 7427 50  0000 C CNN
 F 2 "" H 3350 7600 50  0001 C CNN
 F 3 "" H 3350 7600 50  0001 C CNN
 	1    3350 7600
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR016
@@ -996,7 +996,7 @@ F 1 "VCC" H 3367 6173 50  0000 C CNN
 F 2 "" H 3350 6000 50  0001 C CNN
 F 3 "" H 3350 6000 50  0001 C CNN
 	1    3350 6000
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Text Notes 3400 7100 0    50   ~ 0
 FLAGS
@@ -1013,7 +1013,7 @@ F 1 "GND" V 2605 6822 50  0000 R CNN
 F 2 "" H 2600 6950 50  0001 C CNN
 F 3 "" H 2600 6950 50  0001 C CNN
 	1    2600 6950
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 Wire Wire Line
 	2850 6900 2600 6900
@@ -1096,22 +1096,22 @@ L Device:LED D9
 U 1 1 5E8A9198
 P 4950 7300
 F 0 "D9" H 4100 7300 50  0000 C CNN
-F 1 "LED" H 4943 7136 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 7136 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 7300 50  0001 C CNN
 F 3 "~" H 4950 7300 50  0001 C CNN
 	1    4950 7300
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R17
 U 1 1 5E8A919E
 P 5250 7300
 F 0 "R17" V 5250 8050 50  0000 C CNN
-F 1 "LED" V 5250 8250 50  0000 C CNN
+F 1 "620" V 5250 8250 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 7300 50  0001 C CNN
 F 3 "~" H 5250 7300 50  0001 C CNN
 	1    5250 7300
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR028
@@ -1122,7 +1122,7 @@ F 1 "GND" V 5405 7172 50  0000 R CNN
 F 2 "" H 5400 7300 50  0001 C CNN
 F 3 "" H 5400 7300 50  0001 C CNN
 	1    5400 7300
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 7300 4500 7300
@@ -1131,22 +1131,22 @@ L Device:LED D10
 U 1 1 5E8A91AB
 P 4950 7400
 F 0 "D10" H 4100 7400 50  0000 C CNN
-F 1 "LED" H 4943 7236 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 7236 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 7400 50  0001 C CNN
 F 3 "~" H 4950 7400 50  0001 C CNN
 	1    4950 7400
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R18
 U 1 1 5E8A91B1
 P 5250 7400
 F 0 "R18" V 5250 8150 50  0000 C CNN
-F 1 "LED" V 5250 8350 50  0000 C CNN
+F 1 "620" V 5250 8350 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 7400 50  0001 C CNN
 F 3 "~" H 5250 7400 50  0001 C CNN
 	1    5250 7400
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR029
@@ -1157,7 +1157,7 @@ F 1 "GND" V 5405 7272 50  0000 R CNN
 F 2 "" H 5400 7400 50  0001 C CNN
 F 3 "" H 5400 7400 50  0001 C CNN
 	1    5400 7400
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 7400 4500 7400
@@ -1166,22 +1166,22 @@ L Device:LED D11
 U 1 1 5E8A91BE
 P 4950 7500
 F 0 "D11" H 4100 7500 50  0000 C CNN
-F 1 "LED" H 4943 7336 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 7336 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 7500 50  0001 C CNN
 F 3 "~" H 4950 7500 50  0001 C CNN
 	1    4950 7500
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R19
 U 1 1 5E8A91C4
 P 5250 7500
 F 0 "R19" V 5250 8250 50  0000 C CNN
-F 1 "LED" V 5250 8450 50  0000 C CNN
+F 1 "620" V 5250 8450 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 7500 50  0001 C CNN
 F 3 "~" H 5250 7500 50  0001 C CNN
 	1    5250 7500
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR030
@@ -1192,7 +1192,7 @@ F 1 "GND" V 5405 7372 50  0000 R CNN
 F 2 "" H 5400 7500 50  0001 C CNN
 F 3 "" H 5400 7500 50  0001 C CNN
 	1    5400 7500
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 7500 4500 7500
@@ -1201,22 +1201,22 @@ L Device:LED D12
 U 1 1 5E8A91D1
 P 4950 7600
 F 0 "D12" H 4100 7600 50  0000 C CNN
-F 1 "LED" H 4943 7436 50  0001 C CNN
+F 1 "KP-2012EC" H 4943 7436 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 4950 7600 50  0001 C CNN
 F 3 "~" H 4950 7600 50  0001 C CNN
 	1    4950 7600
-	-1   0    0    1   
+	-1   0    0    1
 $EndComp
 $Comp
 L Device:R R20
 U 1 1 5E8A91D7
 P 5250 7600
 F 0 "R20" V 5250 8350 50  0000 C CNN
-F 1 "LED" V 5250 8550 50  0000 C CNN
+F 1 "620" V 5250 8550 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 5180 7600 50  0001 C CNN
 F 3 "~" H 5250 7600 50  0001 C CNN
 	1    5250 7600
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR031
@@ -1227,7 +1227,7 @@ F 1 "GND" V 5405 7472 50  0000 R CNN
 F 2 "" H 5400 7600 50  0001 C CNN
 F 3 "" H 5400 7600 50  0001 C CNN
 	1    5400 7600
-	0    -1   -1   0   
+	0    -1   -1   0
 $EndComp
 Wire Wire Line
 	4800 7600 4500 7600
@@ -1254,7 +1254,7 @@ F 1 "74ACT08" H 1230 10455 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 1000 10500 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 1000 10500 50  0001 C CNN
 	5    1000 10500
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR04
@@ -1265,7 +1265,7 @@ F 1 "GND" H 1005 10827 50  0000 C CNN
 F 2 "" H 1000 11000 50  0001 C CNN
 F 3 "" H 1000 11000 50  0001 C CNN
 	1    1000 11000
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR03
@@ -1276,7 +1276,7 @@ F 1 "VCC" H 1017 10173 50  0000 C CNN
 F 2 "" H 1000 10000 50  0001 C CNN
 F 3 "" H 1000 10000 50  0001 C CNN
 	1    1000 10000
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L Device:C C3
@@ -1287,7 +1287,7 @@ F 1 "0.1u" H 2965 5105 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 2888 5000 50  0001 C CNN
 F 3 "~" H 2850 5150 50  0001 C CNN
 	1    2850 5150
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR010
@@ -1298,7 +1298,7 @@ F 1 "VCC" H 2867 5173 50  0000 C CNN
 F 2 "" H 2850 5000 50  0001 C CNN
 F 3 "" H 2850 5000 50  0001 C CNN
 	1    2850 5000
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR011
@@ -1309,7 +1309,7 @@ F 1 "GND" H 2855 5127 50  0000 C CNN
 F 2 "" H 2850 5300 50  0001 C CNN
 F 3 "" H 2850 5300 50  0001 C CNN
 	1    2850 5300
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L Device:C C4
@@ -1320,7 +1320,7 @@ F 1 "0.1u" H 4115 2155 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 4038 2050 50  0001 C CNN
 F 3 "~" H 4000 2200 50  0001 C CNN
 	1    4000 2200
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:VCC #PWR018
@@ -1331,7 +1331,7 @@ F 1 "VCC" H 4017 2223 50  0000 C CNN
 F 2 "" H 4000 2050 50  0001 C CNN
 F 3 "" H 4000 2050 50  0001 C CNN
 	1    4000 2050
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR019
@@ -1342,21 +1342,21 @@ F 1 "GND" H 4005 2177 50  0000 C CNN
 F 2 "" H 4000 2350 50  0001 C CNN
 F 3 "" H 4000 2350 50  0001 C CNN
 	1    4000 2350
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Sheet
-S 14400 4250 900  800 
+S 14400 4250 900  800
 U 5E9B4830
 F0 "alu" 50
 F1 "alu.sch" 50
-F2 "a[0..7]" I L 14400 4350 50 
-F3 "b[0..7]" I L 14400 4450 50 
-F4 "op[0..3]" I L 14400 4550 50 
-F5 "~oe" I L 14400 4750 50 
-F6 "carry_in" I L 14400 4850 50 
-F7 "invert" I L 14400 4950 50 
-F8 "result[0..7]" T R 15300 4350 50 
-F9 "flags[0..3]" O R 15300 4450 50 
+F2 "a[0..7]" I L 14400 4350 50
+F3 "b[0..7]" I L 14400 4450 50
+F4 "op[0..3]" I L 14400 4550 50
+F5 "~oe" I L 14400 4750 50
+F6 "carry_in" I L 14400 4850 50
+F7 "invert" I L 14400 4950 50
+F8 "result[0..7]" T R 15300 4350 50
+F9 "flags[0..3]" O R 15300 4450 50
 $EndSheet
 Wire Bus Line
 	13200 5950 13200 4450
@@ -1393,12 +1393,12 @@ S 11300 3300 1250 1300
 U 5E9FD18D
 F0 "gp_reg_a" 50
 F1 "gp_reg_a.sch" 50
-F2 "w_clk" I L 11300 3450 50 
-F3 "~rst" I L 11300 3550 50 
-F4 "di[0..7]" I L 11300 4050 50 
-F5 "doa[0..7]" T R 12550 3550 50 
-F6 "dob[0..7]" T R 12550 4350 50 
-F7 "~oea" I L 11300 3750 50 
+F2 "w_clk" I L 11300 3450 50
+F3 "~rst" I L 11300 3550 50
+F4 "di[0..7]" I L 11300 4050 50
+F5 "doa[0..7]" T R 12550 3550 50
+F6 "dob[0..7]" T R 12550 4350 50
+F7 "~oea" I L 11300 3750 50
 $EndSheet
 Wire Bus Line
 	12750 3550 12550 3550
@@ -1409,29 +1409,29 @@ S 7450 3100 1150 2000
 U 5EA8B32C
 F0 "control_unit" 50
 F1 "control_unit.sch" 50
-F2 "clk" I L 7450 3250 50 
-F3 "~rst" I L 7450 3350 50 
-F4 "ir[0..7]" I L 7450 3450 50 
-F5 "flags[0..3]" I L 7450 3550 50 
-F6 "~mem_rdy" I L 7450 3650 50 
-F7 "~oe_mem" O R 8600 3250 50 
-F8 "~we_mem" O R 8600 3350 50 
-F9 "~oe_d_di" O R 8600 3450 50 
-F10 "we_ir" O R 8600 3550 50 
-F11 "inc_ip" O R 8600 3650 50 
-F12 "addr_dp" O R 8600 3750 50 
-F13 "~we_pl" O R 8600 3950 50 
-F14 "~we_ph" O R 8600 4050 50 
-F15 "we_a" O R 8600 4150 50 
-F16 "we_b" O R 8600 4250 50 
-F17 "~oe_ph_alu" O R 8600 4350 50 
-F18 "~oe_pl_alu" O R 8600 4450 50 
-F19 "~oe_a_d" O R 8600 4650 50 
-F20 "~oe_b_d" O R 8600 4750 50 
-F21 "~we_flags" O R 8600 4850 50 
-F22 "~oe_alu" O R 8600 4950 50 
-F23 "~oe_b_alu" O R 8600 4550 50 
-F24 "p_selector" O R 8600 3850 50 
+F2 "clk" I L 7450 3250 50
+F3 "~rst" I L 7450 3350 50
+F4 "ir[0..7]" I L 7450 3450 50
+F5 "flags[0..3]" I L 7450 3550 50
+F6 "~mem_rdy" I L 7450 3650 50
+F7 "~oe_mem" O R 8600 3250 50
+F8 "~we_mem" O R 8600 3350 50
+F9 "~oe_d_di" O R 8600 3450 50
+F10 "we_ir" O R 8600 3550 50
+F11 "inc_ip" O R 8600 3650 50
+F12 "addr_dp" O R 8600 3750 50
+F13 "~we_pl" O R 8600 3950 50
+F14 "~we_ph" O R 8600 4050 50
+F15 "we_a" O R 8600 4150 50
+F16 "we_b" O R 8600 4250 50
+F17 "~oe_ph_alu" O R 8600 4350 50
+F18 "~oe_pl_alu" O R 8600 4450 50
+F19 "~oe_a_d" O R 8600 4650 50
+F20 "~oe_b_d" O R 8600 4750 50
+F21 "~we_flags" O R 8600 4850 50
+F22 "~oe_alu" O R 8600 4950 50
+F23 "~oe_b_alu" O R 8600 4550 50
+F24 "p_selector" O R 8600 3850 50
 $EndSheet
 Wire Wire Line
 	7450 3250 7300 3250
@@ -1536,13 +1536,13 @@ S 7500 7450 1000 1000
 U 5EC337E5
 F0 "cpu_interface" 50
 F1 "cpu_interface.sch" 50
-F2 "a[0..15]" I L 7500 7550 50 
-F3 "d[0..7]" B L 7500 7700 50 
-F4 "~oe" I L 7500 7850 50 
-F5 "~we" I L 7500 7950 50 
-F6 "~rdy" O L 7500 8050 50 
-F7 "clk" I L 7500 8200 50 
-F8 "~rst" I L 7500 8300 50 
+F2 "a[0..15]" I L 7500 7550 50
+F3 "d[0..7]" B L 7500 7700 50
+F4 "~oe" I L 7500 7850 50
+F5 "~we" I L 7500 7950 50
+F6 "~rdy" O L 7500 8050 50
+F7 "clk" I L 7500 8200 50
+F8 "~rst" I L 7500 8300 50
 $EndSheet
 Wire Bus Line
 	7500 7550 7350 7550
@@ -1573,13 +1573,13 @@ Text Label 7350 7850 2    50   ~ 0
 Text Label 7350 7950 2    50   ~ 0
 ~we
 $Sheet
-S 7500 950  550  600 
+S 7500 950  550  600
 U 5EF05415
 F0 "pwr_and_clk" 50
 F1 "pwr_and_clk.sch" 50
-F2 "clk" O R 8050 1100 50 
-F3 "~rst" O R 8050 1450 50 
-F4 "~clk" O R 8050 1200 50 
+F2 "clk" O R 8050 1100 50
+F3 "~rst" O R 8050 1450 50
+F4 "~clk" O R 8050 1200 50
 $EndSheet
 Wire Wire Line
 	8050 1100 8150 1100
@@ -1647,8 +1647,8 @@ F 0 "H1" H 800 796 50  0000 L CNN
 F 1 "MountingHole" H 800 705 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 700 750 50  0001 C CNN
 F 3 "~" H 700 750 50  0001 C CNN
-	1    700  750 
-	1    0    0    -1  
+	1    700  750
+	1    0    0    -1
 $EndComp
 $Comp
 L Mechanical:MountingHole H4
@@ -1658,8 +1658,8 @@ F 0 "H4" H 15500 746 50  0000 L CNN
 F 1 "MountingHole" H 15500 655 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 15400 700 50  0001 C CNN
 F 3 "~" H 15400 700 50  0001 C CNN
-	1    15400 700 
-	1    0    0    -1  
+	1    15400 700
+	1    0    0    -1
 $EndComp
 $Comp
 L Mechanical:MountingHole H2
@@ -1670,7 +1670,7 @@ F 1 "MountingHole" H 950 9355 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 850 9400 50  0001 C CNN
 F 3 "~" H 850 9400 50  0001 C CNN
 	1    850  9400
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L Mechanical:MountingHole H3
@@ -1681,7 +1681,7 @@ F 1 "MountingHole" H 15450 9455 50  0000 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965" H 15350 9500 50  0001 C CNN
 F 3 "~" H 15350 9500 50  0001 C CNN
 	1    15350 9500
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 Wire Wire Line
 	3850 1050 4350 1050
@@ -1708,7 +1708,7 @@ F 1 "74ACT161" H 3650 6150 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 3350 6800 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS161" H 3350 6800 50  0001 C CNN
 	1    3350 6800
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L 74xx:74LS08 U1
@@ -1719,7 +1719,7 @@ F 1 "74ACT08" H 2650 10834 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 2650 10600 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 2650 10600 50  0001 C CNN
 	4    2650 10600
-	1    0    0    -1  
+	1    0    0    -1
 $EndComp
 $Comp
 L power:GND #PWR08
@@ -1730,7 +1730,7 @@ F 1 "GND" H 2355 10327 50  0000 C CNN
 F 2 "" H 2350 10500 50  0001 C CNN
 F 3 "" H 2350 10500 50  0001 C CNN
 	1    2350 10500
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 $Comp
 L power:GND #PWR09
@@ -1741,7 +1741,7 @@ F 1 "GND" H 2355 10527 50  0000 C CNN
 F 2 "" H 2350 10700 50  0001 C CNN
 F 3 "" H 2350 10700 50  0001 C CNN
 	1    2350 10700
-	0    1    1    0   
+	0    1    1    0
 $EndComp
 NoConn ~ 2950 10600
 Wire Bus Line

@@ -1,0 +1,22 @@
+Registers board
+    IR: red
+    A: red
+    B: red
+    P1: red
+    P2: red
+    Flags: red
+    P sel: red
+Control board:
+    signals: red
+    states: green
+ALU board:
+    OP: green
+    A: green
+    B: green
+    Flags: red
+    R: red
+    oe: green
+IO board:
+    A: red
+    D: red
+    state: green
