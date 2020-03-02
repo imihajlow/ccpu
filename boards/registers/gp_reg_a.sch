@@ -27,15 +27,15 @@ $Comp
 L 74xx:74HC244 U?
 U 1 1 5EA6BD49
 P 7250 1700
-AR Path="/5E73B7F6/5EA6BD49" Ref="U?"  Part="1"
-AR Path="/5E7CA397/5EA6BD49" Ref="U?"  Part="1"
-AR Path="/5E9FD18D/5EA6BD49" Ref="U29"  Part="1"
+AR Path="/5E73B7F6/5EA6BD49" Ref="U?"  Part="1" 
+AR Path="/5E7CA397/5EA6BD49" Ref="U?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BD49" Ref="U29"  Part="1" 
 F 0 "U29" H 7650 1150 50  0000 C CNN
-F 1 "74ACT244" H 7550 1050 50  0000 C CNN
+F 1 "SN74ACT244PW" H 7550 1050 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7250 1700 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 7250 1700 50  0001 C CNN
 	1    7250 1700
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 Entry Wire Line
 	6400 1300 6500 1200
@@ -105,29 +105,29 @@ $Comp
 L power:GND #PWR?
 U 1 1 5EA6BD77
 P 7250 2500
-AR Path="/5E73B7F6/5EA6BD77" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BD77" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BD77" Ref="#PWR0187"  Part="1"
+AR Path="/5E73B7F6/5EA6BD77" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BD77" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BD77" Ref="#PWR0187"  Part="1" 
 F 0 "#PWR0187" H 7250 2250 50  0001 C CNN
 F 1 "GND" H 7255 2327 50  0000 C CNN
 F 2 "" H 7250 2500 50  0001 C CNN
 F 3 "" H 7250 2500 50  0001 C CNN
 	1    7250 2500
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L power:VCC #PWR?
 U 1 1 5EA6BD7D
 P 7250 900
-AR Path="/5E73B7F6/5EA6BD7D" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BD7D" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BD7D" Ref="#PWR0186"  Part="1"
+AR Path="/5E73B7F6/5EA6BD7D" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BD7D" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BD7D" Ref="#PWR0186"  Part="1" 
 F 0 "#PWR0186" H 7250 750 50  0001 C CNN
 F 1 "VCC" H 7267 1073 50  0000 C CNN
 F 2 "" H 7250 900 50  0001 C CNN
 F 3 "" H 7250 900 50  0001 C CNN
-	1    7250 900
-	1    0    0    -1
+	1    7250 900 
+	1    0    0    -1  
 $EndComp
 Entry Wire Line
 	6400 3500 6500 3400
@@ -217,15 +217,15 @@ $Comp
 L 74xx:74HCT273 U?
 U 1 1 5EA6BDD0
 P 4750 1700
-AR Path="/5E73B7F6/5EA6BDD0" Ref="U?"  Part="1"
-AR Path="/5E7CA397/5EA6BDD0" Ref="U?"  Part="1"
-AR Path="/5E9FD18D/5EA6BDD0" Ref="U28"  Part="1"
+AR Path="/5E73B7F6/5EA6BDD0" Ref="U?"  Part="1" 
+AR Path="/5E7CA397/5EA6BDD0" Ref="U?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BDD0" Ref="U28"  Part="1" 
 F 0 "U28" H 5150 1150 50  0000 C CNN
-F 1 "74AC273" H 5100 1050 50  0000 C CNN
+F 1 "MC74AC273DTR2G" H 5100 1050 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 4750 1700 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 4750 1700 50  0001 C CNN
 	1    4750 1700
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 Entry Wire Line
 	5450 1200 5550 1100
@@ -276,34 +276,34 @@ d6
 Text Label 5300 1900 0    50   ~ 0
 d7
 Wire Bus Line
-	5550 900  6400 900
+	5550 900  6400 900 
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BDEF
 P 4750 2500
-AR Path="/5E73B7F6/5EA6BDEF" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BDEF" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BDEF" Ref="#PWR0185"  Part="1"
+AR Path="/5E73B7F6/5EA6BDEF" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BDEF" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BDEF" Ref="#PWR0185"  Part="1" 
 F 0 "#PWR0185" H 4750 2250 50  0001 C CNN
 F 1 "GND" H 4755 2327 50  0000 C CNN
 F 2 "" H 4750 2500 50  0001 C CNN
 F 3 "" H 4750 2500 50  0001 C CNN
 	1    4750 2500
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L power:VCC #PWR?
 U 1 1 5EA6BDF5
 P 4750 900
-AR Path="/5E73B7F6/5EA6BDF5" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BDF5" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BDF5" Ref="#PWR0184"  Part="1"
+AR Path="/5E73B7F6/5EA6BDF5" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BDF5" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BDF5" Ref="#PWR0184"  Part="1" 
 F 0 "#PWR0184" H 4750 750 50  0001 C CNN
 F 1 "VCC" H 4767 1073 50  0000 C CNN
 F 2 "" H 4750 900 50  0001 C CNN
 F 3 "" H 4750 900 50  0001 C CNN
-	1    4750 900
-	1    0    0    -1
+	1    4750 900 
+	1    0    0    -1  
 $EndComp
 Entry Wire Line
 	5450 3300 5550 3200
@@ -357,337 +357,337 @@ $Comp
 L Device:LED D?
 U 1 1 5EA6BE13
 P 5100 3300
-AR Path="/5E73B7F6/5EA6BE13" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE13" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE13" Ref="D54"  Part="1"
+AR Path="/5E73B7F6/5EA6BE13" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE13" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE13" Ref="D54"  Part="1" 
 F 0 "D54" H 4150 3300 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3425 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3300 50  0001 C CNN
 F 3 "~" H 5100 3300 50  0001 C CNN
 	1    5100 3300
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE19
 P 4800 3300
-AR Path="/5E73B7F6/5EA6BE19" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE19" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE19" Ref="R150"  Part="1"
+AR Path="/5E73B7F6/5EA6BE19" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE19" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE19" Ref="R150"  Part="1" 
 F 0 "R150" V 4800 2100 50  0000 C CNN
 F 1 "620" V 4800 2450 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3300 50  0001 C CNN
 F 3 "~" H 4800 3300 50  0001 C CNN
 	1    4800 3300
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE1F
 P 4650 3300
-AR Path="/5E73B7F6/5EA6BE1F" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE1F" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE1F" Ref="#PWR0176"  Part="1"
+AR Path="/5E73B7F6/5EA6BE1F" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE1F" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE1F" Ref="#PWR0176"  Part="1" 
 F 0 "#PWR0176" H 4650 3050 50  0001 C CNN
 F 1 "GND" V 4655 3172 50  0000 R CNN
 F 2 "" H 4650 3300 50  0001 C CNN
 F 3 "" H 4650 3300 50  0001 C CNN
 	1    4650 3300
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE25
 P 5100 3400
-AR Path="/5E73B7F6/5EA6BE25" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE25" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE25" Ref="D55"  Part="1"
+AR Path="/5E73B7F6/5EA6BE25" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE25" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE25" Ref="D55"  Part="1" 
 F 0 "D55" H 4150 3400 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3525 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3400 50  0001 C CNN
 F 3 "~" H 5100 3400 50  0001 C CNN
 	1    5100 3400
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE2B
 P 4800 3400
-AR Path="/5E73B7F6/5EA6BE2B" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE2B" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE2B" Ref="R151"  Part="1"
+AR Path="/5E73B7F6/5EA6BE2B" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE2B" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE2B" Ref="R151"  Part="1" 
 F 0 "R151" V 4800 2200 50  0000 C CNN
 F 1 "620" V 4800 2550 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3400 50  0001 C CNN
 F 3 "~" H 4800 3400 50  0001 C CNN
 	1    4800 3400
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE31
 P 4650 3400
-AR Path="/5E73B7F6/5EA6BE31" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE31" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE31" Ref="#PWR0177"  Part="1"
+AR Path="/5E73B7F6/5EA6BE31" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE31" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE31" Ref="#PWR0177"  Part="1" 
 F 0 "#PWR0177" H 4650 3150 50  0001 C CNN
 F 1 "GND" V 4655 3272 50  0000 R CNN
 F 2 "" H 4650 3400 50  0001 C CNN
 F 3 "" H 4650 3400 50  0001 C CNN
 	1    4650 3400
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE37
 P 5100 3500
-AR Path="/5E73B7F6/5EA6BE37" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE37" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE37" Ref="D56"  Part="1"
+AR Path="/5E73B7F6/5EA6BE37" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE37" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE37" Ref="D56"  Part="1" 
 F 0 "D56" H 4150 3500 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3625 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3500 50  0001 C CNN
 F 3 "~" H 5100 3500 50  0001 C CNN
 	1    5100 3500
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE3D
 P 4800 3500
-AR Path="/5E73B7F6/5EA6BE3D" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE3D" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE3D" Ref="R152"  Part="1"
+AR Path="/5E73B7F6/5EA6BE3D" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE3D" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE3D" Ref="R152"  Part="1" 
 F 0 "R152" V 4800 2300 50  0000 C CNN
 F 1 "620" V 4800 2650 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3500 50  0001 C CNN
 F 3 "~" H 4800 3500 50  0001 C CNN
 	1    4800 3500
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE43
 P 4650 3500
-AR Path="/5E73B7F6/5EA6BE43" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE43" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE43" Ref="#PWR0178"  Part="1"
+AR Path="/5E73B7F6/5EA6BE43" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE43" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE43" Ref="#PWR0178"  Part="1" 
 F 0 "#PWR0178" H 4650 3250 50  0001 C CNN
 F 1 "GND" V 4655 3372 50  0000 R CNN
 F 2 "" H 4650 3500 50  0001 C CNN
 F 3 "" H 4650 3500 50  0001 C CNN
 	1    4650 3500
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE49
 P 5100 3600
-AR Path="/5E73B7F6/5EA6BE49" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE49" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE49" Ref="D57"  Part="1"
+AR Path="/5E73B7F6/5EA6BE49" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE49" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE49" Ref="D57"  Part="1" 
 F 0 "D57" H 4150 3600 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3725 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3600 50  0001 C CNN
 F 3 "~" H 5100 3600 50  0001 C CNN
 	1    5100 3600
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE4F
 P 4800 3600
-AR Path="/5E73B7F6/5EA6BE4F" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE4F" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE4F" Ref="R153"  Part="1"
+AR Path="/5E73B7F6/5EA6BE4F" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE4F" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE4F" Ref="R153"  Part="1" 
 F 0 "R153" V 4800 2400 50  0000 C CNN
 F 1 "620" V 4800 2750 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3600 50  0001 C CNN
 F 3 "~" H 4800 3600 50  0001 C CNN
 	1    4800 3600
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE55
 P 4650 3600
-AR Path="/5E73B7F6/5EA6BE55" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE55" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE55" Ref="#PWR0179"  Part="1"
+AR Path="/5E73B7F6/5EA6BE55" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE55" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE55" Ref="#PWR0179"  Part="1" 
 F 0 "#PWR0179" H 4650 3350 50  0001 C CNN
 F 1 "GND" V 4655 3472 50  0000 R CNN
 F 2 "" H 4650 3600 50  0001 C CNN
 F 3 "" H 4650 3600 50  0001 C CNN
 	1    4650 3600
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE5B
 P 5100 3700
-AR Path="/5E73B7F6/5EA6BE5B" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE5B" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE5B" Ref="D58"  Part="1"
+AR Path="/5E73B7F6/5EA6BE5B" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE5B" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE5B" Ref="D58"  Part="1" 
 F 0 "D58" H 4150 3700 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3825 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3700 50  0001 C CNN
 F 3 "~" H 5100 3700 50  0001 C CNN
 	1    5100 3700
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE61
 P 4800 3700
-AR Path="/5E73B7F6/5EA6BE61" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE61" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE61" Ref="R154"  Part="1"
+AR Path="/5E73B7F6/5EA6BE61" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE61" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE61" Ref="R154"  Part="1" 
 F 0 "R154" V 4800 2500 50  0000 C CNN
 F 1 "620" V 4800 2850 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3700 50  0001 C CNN
 F 3 "~" H 4800 3700 50  0001 C CNN
 	1    4800 3700
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE67
 P 4650 3700
-AR Path="/5E73B7F6/5EA6BE67" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE67" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE67" Ref="#PWR0180"  Part="1"
+AR Path="/5E73B7F6/5EA6BE67" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE67" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE67" Ref="#PWR0180"  Part="1" 
 F 0 "#PWR0180" H 4650 3450 50  0001 C CNN
 F 1 "GND" V 4655 3572 50  0000 R CNN
 F 2 "" H 4650 3700 50  0001 C CNN
 F 3 "" H 4650 3700 50  0001 C CNN
 	1    4650 3700
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE6D
 P 5100 3800
-AR Path="/5E73B7F6/5EA6BE6D" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE6D" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE6D" Ref="D59"  Part="1"
+AR Path="/5E73B7F6/5EA6BE6D" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE6D" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE6D" Ref="D59"  Part="1" 
 F 0 "D59" H 4150 3800 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 3925 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3800 50  0001 C CNN
 F 3 "~" H 5100 3800 50  0001 C CNN
 	1    5100 3800
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE73
 P 4800 3800
-AR Path="/5E73B7F6/5EA6BE73" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE73" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE73" Ref="R155"  Part="1"
+AR Path="/5E73B7F6/5EA6BE73" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE73" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE73" Ref="R155"  Part="1" 
 F 0 "R155" V 4800 2600 50  0000 C CNN
 F 1 "620" V 4800 2950 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3800 50  0001 C CNN
 F 3 "~" H 4800 3800 50  0001 C CNN
 	1    4800 3800
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE79
 P 4650 3800
-AR Path="/5E73B7F6/5EA6BE79" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE79" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE79" Ref="#PWR0181"  Part="1"
+AR Path="/5E73B7F6/5EA6BE79" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE79" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE79" Ref="#PWR0181"  Part="1" 
 F 0 "#PWR0181" H 4650 3550 50  0001 C CNN
 F 1 "GND" V 4655 3672 50  0000 R CNN
 F 2 "" H 4650 3800 50  0001 C CNN
 F 3 "" H 4650 3800 50  0001 C CNN
 	1    4650 3800
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE7F
 P 5100 3900
-AR Path="/5E73B7F6/5EA6BE7F" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE7F" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE7F" Ref="D60"  Part="1"
+AR Path="/5E73B7F6/5EA6BE7F" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE7F" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE7F" Ref="D60"  Part="1" 
 F 0 "D60" H 4150 3900 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 4025 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 3900 50  0001 C CNN
 F 3 "~" H 5100 3900 50  0001 C CNN
 	1    5100 3900
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE85
 P 4800 3900
-AR Path="/5E73B7F6/5EA6BE85" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE85" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE85" Ref="R156"  Part="1"
+AR Path="/5E73B7F6/5EA6BE85" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE85" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE85" Ref="R156"  Part="1" 
 F 0 "R156" V 4800 2700 50  0000 C CNN
 F 1 "620" V 4800 3050 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 3900 50  0001 C CNN
 F 3 "~" H 4800 3900 50  0001 C CNN
 	1    4800 3900
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE8B
 P 4650 3900
-AR Path="/5E73B7F6/5EA6BE8B" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE8B" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE8B" Ref="#PWR0182"  Part="1"
+AR Path="/5E73B7F6/5EA6BE8B" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE8B" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE8B" Ref="#PWR0182"  Part="1" 
 F 0 "#PWR0182" H 4650 3650 50  0001 C CNN
 F 1 "GND" V 4655 3772 50  0000 R CNN
 F 2 "" H 4650 3900 50  0001 C CNN
 F 3 "" H 4650 3900 50  0001 C CNN
 	1    4650 3900
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L Device:LED D?
 U 1 1 5EA6BE91
 P 5100 4000
-AR Path="/5E73B7F6/5EA6BE91" Ref="D?"  Part="1"
-AR Path="/5E7CA397/5EA6BE91" Ref="D?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE91" Ref="D61"  Part="1"
+AR Path="/5E73B7F6/5EA6BE91" Ref="D?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE91" Ref="D?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE91" Ref="D61"  Part="1" 
 F 0 "D61" H 4150 4000 50  0000 C CNN
 F 1 "KP-2012EC" H 5093 4125 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 5100 4000 50  0001 C CNN
 F 3 "~" H 5100 4000 50  0001 C CNN
 	1    5100 4000
-	1    0    0    -1
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R?
 U 1 1 5EA6BE97
 P 4800 4000
-AR Path="/5E73B7F6/5EA6BE97" Ref="R?"  Part="1"
-AR Path="/5E7CA397/5EA6BE97" Ref="R?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE97" Ref="R157"  Part="1"
+AR Path="/5E73B7F6/5EA6BE97" Ref="R?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE97" Ref="R?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE97" Ref="R157"  Part="1" 
 F 0 "R157" V 4800 2800 50  0000 C CNN
 F 1 "620" V 4800 3150 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4730 4000 50  0001 C CNN
 F 3 "~" H 4800 4000 50  0001 C CNN
 	1    4800 4000
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BE9D
 P 4650 4000
-AR Path="/5E73B7F6/5EA6BE9D" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BE9D" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BE9D" Ref="#PWR0183"  Part="1"
+AR Path="/5E73B7F6/5EA6BE9D" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BE9D" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BE9D" Ref="#PWR0183"  Part="1" 
 F 0 "#PWR0183" H 4650 3750 50  0001 C CNN
 F 1 "GND" V 4655 3872 50  0000 R CNN
 F 2 "" H 4650 4000 50  0001 C CNN
 F 3 "" H 4650 4000 50  0001 C CNN
 	1    4650 4000
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 Text Notes 4900 4200 0    50   ~ 0
 5 mA each
@@ -756,43 +756,43 @@ $Comp
 L Device:C C?
 U 1 1 5EA6BEEB
 P 4050 2400
-AR Path="/5E73B7F6/5EA6BEEB" Ref="C?"  Part="1"
-AR Path="/5E7CA397/5EA6BEEB" Ref="C?"  Part="1"
-AR Path="/5E9FD18D/5EA6BEEB" Ref="C28"  Part="1"
+AR Path="/5E73B7F6/5EA6BEEB" Ref="C?"  Part="1" 
+AR Path="/5E7CA397/5EA6BEEB" Ref="C?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BEEB" Ref="C28"  Part="1" 
 F 0 "C28" H 4165 2446 50  0000 L CNN
 F 1 "0.1u" H 4165 2355 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 4088 2250 50  0001 C CNN
 F 3 "~" H 4050 2400 50  0001 C CNN
 	1    4050 2400
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:GND #PWR?
 U 1 1 5EA6BEF1
 P 3900 2400
-AR Path="/5E73B7F6/5EA6BEF1" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BEF1" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BEF1" Ref="#PWR0174"  Part="1"
+AR Path="/5E73B7F6/5EA6BEF1" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BEF1" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BEF1" Ref="#PWR0174"  Part="1" 
 F 0 "#PWR0174" H 3900 2150 50  0001 C CNN
 F 1 "GND" H 3905 2227 50  0000 C CNN
 F 2 "" H 3900 2400 50  0001 C CNN
 F 3 "" H 3900 2400 50  0001 C CNN
 	1    3900 2400
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 $Comp
 L power:VCC #PWR?
 U 1 1 5EA6BEF7
 P 4200 2400
-AR Path="/5E73B7F6/5EA6BEF7" Ref="#PWR?"  Part="1"
-AR Path="/5E7CA397/5EA6BEF7" Ref="#PWR?"  Part="1"
-AR Path="/5E9FD18D/5EA6BEF7" Ref="#PWR0175"  Part="1"
+AR Path="/5E73B7F6/5EA6BEF7" Ref="#PWR?"  Part="1" 
+AR Path="/5E7CA397/5EA6BEF7" Ref="#PWR?"  Part="1" 
+AR Path="/5E9FD18D/5EA6BEF7" Ref="#PWR0175"  Part="1" 
 F 0 "#PWR0175" H 4200 2250 50  0001 C CNN
 F 1 "VCC" H 4217 2573 50  0000 C CNN
 F 2 "" H 4200 2400 50  0001 C CNN
 F 3 "" H 4200 2400 50  0001 C CNN
 	1    4200 2400
-	0    1    1    0
+	0    1    1    0   
 $EndComp
 Text HLabel 1650 2800 0    50   Input ~ 0
 ~oea

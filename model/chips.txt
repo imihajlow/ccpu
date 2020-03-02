@@ -1,12 +1,18 @@
-8-bit register -273 (clear, no z, no we)
-counter/register: -161(4 bit, load, carry, clear, no z)
+8-bit register -273 (clear, no z, no we) MC74AC273DTR2G
+counter/register: -161(4 bit, load, carry, clear, no z) MC74ACT161DG
 
-z-buffer: -244
+z-buffer: -244 SN74ACT244PW
 RAM: 62c256
-dual 4 to 1 selector: -153
-d flip-flop: -74
+d flip-flop: -74 SN74ACT74D
 
-610126249121 + SSW-113-02-G-D-RA - 26 pin
+AND: -08 SN74ACT08PW
+NAND: -00 74ACT00MTCX
+OR: -32 SN74ACT32PW
+NOR: -02 MC74ACT02DTR2G
+XOR: -86 MC74ACT86DG
+Schmitt inv: -14 74ACT14MTCX
+Demux 1-4: -139 MC74ACT139DG
+
 61304021021 + SSW-120-02-G-D-RA - 40 pin
 
 OS102011MS2QN1 - switch
