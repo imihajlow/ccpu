@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /Users/ivan/projects/ccpu/boards/alu/alu.sch)
-    (date "2020 March 02, Monday 14:31:46")
+    (date "2020 March 02, Monday 16:50:56")
     (tool "Eeschema (5.1.5-0-10_14)")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -34,7 +34,7 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 5FC2EA77))
     (comp (ref U5)
-      (value 74ACT02)
+      (value MC74ACT02DTR2G)
       (footprint Package_SO:TSSOP-14_4.4x5mm_P0.65mm)
       (datasheet http://www.ti.com/lit/gpn/sn74ls02)
       (libsource (lib 74xx) (part 74LS02) (description "quad 2-input NOR gate"))
@@ -587,7 +587,7 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 60199147))
     (comp (ref J1)
-      (value ALU)
+      (value 61304021021)
       (footprint Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Horizontal)
       (datasheet ~)
       (libsource (lib Connector_Generic) (part Conn_02x20_Odd_Even) (description "Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"))
