@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 28)
+    (drawings 29)
     (tracks 5700)
     (zones 0)
     (modules 192)
@@ -9444,6 +9444,9 @@
     )
   )
 
+  (gr_text + (at 178.9 59.2) (layer F.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
   (gr_text "P sel" (at 178.5 105) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
