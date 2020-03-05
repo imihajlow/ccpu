@@ -9,3 +9,6 @@
 *-bak
 *.bck
 _autosave*
+*.csv
+*.xml
+*.zip
