@@ -1,6 +1,6 @@
-*
+model/**/*
 !/**/
-!*.*
+!model/**/*.*
 .*
 *.hex
 *.vcd
@@ -12,3 +12,11 @@ _autosave*
 *.csv
 *.xml
 *.zip
+*.net
+*.000
+*.xml
+*.csv
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+fp-info-cache
