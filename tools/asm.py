@@ -258,27 +258,37 @@ def assemble(lines):
             raise AssemblyError(i + 1, e)
     return result
 
-def save(data, file):
-    for i,x in enumerate(data):
-        if x is None:
-            file.write("xx")
-        else:
-            file.write("{:02X}".format(x))
-        if i % 16 == 15:
-            file.write("\n")
-        else:
-            file.write(" ")
+def save(data, filename, type, full, filler):
+    mode = "wb" if type == "bin" else "w"
+    with open(filename, mode) as file:
+        if type == "hex":
+            for i,x in enumerate(data[0:65536 if full else 32768]):
+                if x is None:
+                    file.write("xx")
+                else:
+                    file.write("{:02X}".format(x))
+                if i % 16 == 15:
+                    file.write("\n")
+                else:
+                    file.write(" ")
+        elif type == "bin":
+            ba = bytearray(filler if x is None else x for x in data[0:65536 if full else 32768])
+            file.write(ba)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Assembler')
-    parser.add_argument('-o', metavar="RESULT", type=argparse.FileType("w"), required=True, help='output file name')
+    parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
+    parser.add_argument('--type', choices=["hex", "bin"], default="bin", help='output file type (default: bin)')
+    parser.add_argument('--filler', type=int, default=0, help="value to fill uninitialized memory (bin output type only)")
+    parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
     parser.add_argument('file', type=argparse.FileType("r"), help='input file name')
     args = parser.parse_args()
 
     try:
         lines = args.file.readlines()
         result = assemble(lines)
-        save(result, args.o)
+        save(result, args.o, args.type, args.full, args.filler)
     except AssemblyError as e:
         print(e)
         sys.exit(1)

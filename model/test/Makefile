@@ -53,4 +53,4 @@ cu_b.mem: cu_a.mem
 cu_c.mem: cu_a.mem
 
 %.hex: %.asm ../../tools/asm.py
-	../../tools/asm.py -o $@ $<
+	../../tools/asm.py --type=hex --full -o $@ $<

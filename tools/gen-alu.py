@@ -151,7 +151,7 @@ def get_result_hi(a, b, op, invert, from_other, carry_in):
         to_other = a & 1
     return r, carry_out, to_other, overflow_out
 
-def write_file(filename, array):
+def write_hex(filename, array):
     with open(filename, "w") as f:
         for i,x in enumerate(array):
             f.write("{:02x}".format(x))
@@ -159,6 +159,11 @@ def write_file(filename, array):
                 f.write("\n")
             else:
                 f.write(" ")
+
+def write_bin(filename, array):
+    with open(filename, "wb") as f:
+        ba = bytearray(array)
+        f.write(ba)
 
 def main():
     lo = [0] * (2 ** bits)
@@ -176,8 +181,10 @@ def main():
                             data_hi = encode_result(r_hi, carry_hi, to_other_hi, overflow)
                             lo[address] = data_lo
                             hi[address] = data_hi
-    write_file("alu_lo.mem", lo)
-    write_file("alu_hi.mem", hi)
+    write_hex("alu_lo.mem", lo)
+    write_hex("alu_hi.mem", hi)
+    write_bin("alu_lo.bin", lo)
+    write_bin("alu_hi.bin", hi)
 
 if __name__ == '__main__':
     main()

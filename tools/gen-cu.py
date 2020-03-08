@@ -13,7 +13,7 @@ def encode_b(n_oe_pl_alu, n_oe_ph_alu, n_oe_b_alu, n_oe_a_d, n_oe_b_d, n_we_flag
 def encode_c(n_oe_alu_di, n_reset_cycle, swap_p, n_we_pl, n_we_ph, we_a, we_b):
     return n_oe_alu_di | (n_reset_cycle << 1) | (swap_p << 2) | (n_we_pl << 3) | (n_we_ph << 4) | (we_a << 5) | (we_b << 6)
 
-def write_file(filename, array):
+def write_hex(filename, array):
     with open(filename, "w") as f:
         for i,x in enumerate(array):
             f.write("{:02x}".format(x))
@@ -21,6 +21,11 @@ def write_file(filename, array):
                 f.write("\n")
             else:
                 f.write(" ")
+
+def write_bin(filename, array):
+    with open(filename, "wb") as f:
+        ba = bytearray(array)
+        f.write(ba)
 
 def set_oe_alu(ir, r):
     n = ir & 0x03
@@ -155,9 +160,12 @@ def main():
                                 part_a[address] = encode_a(r["n_oe_mem"], r["n_we_mem"], r["n_oe_d_di"], r["inc_ip"], r["addr_dp"], r["we_ir"])
                                 part_b[address] = encode_b(r["n_oe_pl_alu"], r["n_oe_ph_alu"], r["n_oe_b_alu"], r["n_oe_a_d"], r["n_oe_b_d"], r["n_we_flags"], 0, 0)
                                 part_c[address] = encode_c(r["n_oe_alu_di"], r["n_reset_cycle"], r["swap_p"], r["n_we_pl"], r["n_we_ph"], r["we_a"], r["we_b"])
-    write_file("cu_a.mem", part_a)
-    write_file("cu_b.mem", part_b)
-    write_file("cu_c.mem", part_c)
+    write_hex("cu_a.mem", part_a)
+    write_hex("cu_b.mem", part_b)
+    write_hex("cu_c.mem", part_c)
+    write_bin("cu_a.bin", part_a)
+    write_bin("cu_b.bin", part_b)
+    write_bin("cu_c.bin", part_c)
 
 if __name__ == '__main__':
     main()
