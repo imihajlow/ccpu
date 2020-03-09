@@ -256,7 +256,7 @@ def assemble(lines):
             ip = updateIp(ip, op, args)
         except BaseException as e:
             raise AssemblyError(i + 1, e)
-    return result
+    return result, labels
 
 def save(data, filename, type, full, filler):
     mode = "wb" if type == "bin" else "w"
@@ -275,20 +275,26 @@ def save(data, filename, type, full, filler):
             ba = bytearray(filler if x is None else x for x in data[0:65536 if full else 32768])
             file.write(ba)
 
+def saveLabels(file, labels):
+    if file is not None:
+        for label in labels:
+            file.write("{} = 0x{:04x}\n".format(label, labels[label]))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Assembler')
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
     parser.add_argument('--type', choices=["hex", "bin"], default="bin", help='output file type (default: bin)')
     parser.add_argument('--filler', type=int, default=0, help="value to fill uninitialized memory (bin output type only)")
+    parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
     parser.add_argument('file', type=argparse.FileType("r"), help='input file name')
     args = parser.parse_args()
 
     try:
         lines = args.file.readlines()
-        result = assemble(lines)
-        save(result, args.o, args.type, args.full, args.filler)
+        code, labels = assemble(lines)
+        save(code, args.o, args.type, args.full, args.filler)
+        saveLabels(args.m, labels)
     except AssemblyError as e:
         print(e)
         sys.exit(1)
