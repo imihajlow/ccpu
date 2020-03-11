@@ -4,6 +4,7 @@ import re
 import sys
 import readline
 from machine import Machine
+from memory import Memory
 
 def load(file):
     ba = file.read()
@@ -22,12 +23,82 @@ def loadLabels(file):
     return labels
 
 def loop(program, labels):
-    m = Machine(program)
+    rlabels = {labels[k]: k for k in labels}
+    labelAddresses = sorted(rlabels.keys())
+    memory = Memory(program)
+    memory.setVerbose(True)
+    m = Machine(memory)
+    newState = True
     while True:
-        m.printState()
+        if newState:
+            la = 0
+            for address in labelAddresses:
+                if address > m.ip:
+                    break
+                la = address
+            if la in rlabels:
+                print("{} + 0x{:X}:".format(rlabels[la], m.ip - la))
+            m.printState()
+            newState = False
         line = input("> ")
-        m.step()
-
+        tokens = line.split(' ')
+        cmd = tokens[0]
+        if cmd == 's' or cmd == 'step' or cmd == '':
+            m.step()
+            newState = True
+        elif cmd == 'r' or cmd == 'run' or cmd == 'u' or cmd == 'until':
+            until = None
+            if cmd[0] == 'u':
+                until = eval(tokens[1], labels)
+            reason, number = m.run(until)
+            newState = True
+            print("{} {} reached".format(reason, number))
+        elif cmd == 'b' or cmd == 'break':
+            try:
+                address = m.ip
+                if len(tokens) > 1:
+                    address = eval(tokens[1], labels)
+                n = m.addBreakpoint(address)
+                print("Breakpoint {} at 0x{:04X}".format(n, address))
+            except NameError as e:
+                print("Unknown label")
+        elif cmd == 'w' or cmd == 'watch':
+            try:
+                address = eval(tokens[1], labels)
+                n = memory.watch(address)
+                print("Watchpoint {} at 0x{:04X}".format(n, address))
+            except NameError as e:
+                print("Unknown label")
+        elif cmd == 'p' or cmd == 'print':
+            fmt = "b"
+            addr = tokens[1]
+            if len(tokens) > 2:
+                fmt = tokens[1]
+                addr = tokens[2]
+            addr = eval(addr, labels)
+            memory.printValue(addr, fmt)
+        elif cmd == 's' or cmd == 'set':
+            fmt = "b"
+            addr = tokens[1]
+            value = tokens[2]
+            if len(tokens) > 3:
+                fmt = tokens[1]
+                addr = tokens[2]
+                value = tokens[3]
+            addr = eval(addr, labels)
+            value = int(value)
+            memory.set(addr, value & 0xff, False)
+            if fmt != "b":
+                memory.set(addr + 1, (value >> 8) & 0xff, False)
+                if fmt != "w":
+                    memory.set(addr + 2, (value >> 16) & 0xff, False)
+                    memory.set(addr + 3, (value >> 24) & 0xff, False)
+                    if fmt != "d":
+                        memory.set(addr + 4, (value >> 32) & 0xff, False)
+                        memory.set(addr + 5, (value >> 40) & 0xff, False)
+                        memory.set(addr + 6, (value >> 48) & 0xff, False)
+                        memory.set(addr + 7, (value >> 56) & 0xff, False)
+            print("Set [0x{:04X}] <- {}".format(addr, value))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')

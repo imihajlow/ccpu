@@ -53,12 +53,87 @@ def getFlagName(b):
     f = getFlag(b)
     return "ZCSO"[f]
 
-def alu(op, a, b):
-    return a + b, True, False, False, False
+def getOverflow(r, a, b, is_sum):
+    r_bit = bool(r & 8)
+    a_bit = bool(a & 8)
+    b_bit = bool(b & 8)
+    if not is_sum:
+        b_bit = not b_bit
+    if a_bit == b_bit:
+        return a_bit != r_bit
+    else:
+        return False
+
+def alu(op, a, b, carry_in, inverse):
+    if inverse:
+        a,b = b,a
+    result = 0
+    carry = False
+    ovf = False
+
+    if op == 'ADD':
+        result = a + b
+        carry = result > 255
+        result = result & 0xff
+        ovf = getOverflow(result, a, b, True)
+    elif op == 'SUB':
+        result = a - b
+        carry = result < 0
+        result = result & 0xff
+        ovf = getOverflow(result, a, b, False)
+    elif op == 'ADC':
+        result = a + b + (1 if carry_in else 0)
+        carry = result > 255
+        result = result & 0xff
+        ovf = getOverflow(result, a, b, True)
+    elif op == 'SBB':
+        result = a - b - (1 if carry_in else 0)
+        carry = result < 0
+        result = result & 0xff
+        ovf = getOverflow(result, a, b, False)
+    elif op == 'INC':
+        result = a + 1
+        carry = result > 255
+        result = result & 0xff
+        ovf = getOverflow(result, a, 1, True)
+    elif op == 'DEC':
+        result = a - 1
+        carry = result < 0
+        result = result & 0xff
+        ovf = getOverflow(result, a, 1, False)
+    elif op == 'SHL':
+        result = a << 1
+        carry = result > 255
+        result = result & 0xff
+    elif op == 'NEG':
+        result = (-a) & 0xff
+    elif op == 'MOV':
+        result = b
+    elif op == 'NOT':
+        result = (~a) & 0xff
+    elif op == 'EXP':
+        result = 0xff if carry_in else 0
+    elif op == 'AND':
+        result = a & b
+    elif op == 'OR':
+        result = a | b
+    elif op == 'XOR':
+        result = a ^ b
+    elif op == 'SHR':
+        result = a >> 1
+        carry = bool(a & 1)
+    elif op == 'SAR':
+        result = a / 2
+        carry = bool(a & 1)
+    else:
+        raise ValueError("Invalid ALU: {}".format(op))
+    zero = result == 0
+    sign = bool(result & 0x80)
+    return result, zero, carry, sign, ovf
 
 class Machine:
-    def __init__(self, rom):
-        self.memory = rom + [0] * (65536 - len(rom))
+    def __init__(self, memory):
+        self.memory = memory
         self.ip = 0
         self.p = 0
         self.a = 0
@@ -67,15 +142,16 @@ class Machine:
         self.s = 0
         self.c = 0
         self.o = 0
+        self.breakpoints = []
 
     def disasm(self, addr):
-        b = self.memory[addr]
+        b = self.memory.get(addr)
         if isAlu(b):
-            inverse = (b & 0x04) == 0x04
+            inverse = bool(b & 0x04)
             op = getAluOp(b)
-            dest = getDestName(b, inverse)
+            dest = getDestName(b, not inverse)
             if inverse:
-                return "{} {}, {}".format(op, dest, "0" if dest == "A" else "A")
+                return "{}_ {}, A".format(op, dest)
             else:
                 return "{} A, {}".format(op, dest)
         elif isLd(b):
@@ -86,7 +162,7 @@ class Machine:
             return "ST {}".format(src)
         elif isLdi(b):
             dest = getDestName(b)
-            return "LDI {}, 0x{:02X}".format(dest, self.memory[addr + 1])
+            return "LDI {}, 0x{:02X}".format(dest, self.memory.get(addr + 1))
         elif isJmp(b):
             return "JMP"
         elif isJc(b):
@@ -123,13 +199,17 @@ class Machine:
         elif f == 3:
             return self.o
 
+    def addBreakpoint(self, address):
+        self.breakpoints += [address]
+        return len(self.breakpoints) - 1
+
     def step(self):
-        b = self.memory[self.ip]
+        b = self.memory.get(self.ip)
         if isAlu(b):
-            inverse = (b & 0x04) == 0x04
+            inverse = bool(b & 0x04)
             op = getAluOp(b)
             dest = getDest(b)
-            result, self.z, self.c, self.s, self.o = alu(op, self.a, self.__getRegister(dest, True))
+            result, self.z, self.c, self.s, self.o = alu(op, self.a, self.__getRegister(dest, not inverse), self.c, inverse)
             if inverse:
                 self.__assignRegister(dest, result)
             else:
@@ -137,15 +217,15 @@ class Machine:
             self.ip += 1
         elif isLd(b):
             dest = getDest(b)
-            self.__assignRegister(dest, self.memory[self.p])
+            self.__assignRegister(dest, self.memory.get(self.p))
             self.ip += 1
         elif isSt(b):
             src = getSrc(b)
-            self.memory[self.p] = self.__getRegister(src)
+            self.memory.set(self.p, self.__getRegister(src))
             self.ip += 1
         elif isLdi(b):
             dest = getDest(b)
-            self.__assignRegister(dest, self.memory[self.ip + 1])
+            self.__assignRegister(dest, self.memory.get(self.ip + 1))
             self.ip += 2
         elif isJmp(b):
             self.ip, self.p = self.p, self.ip + 1
@@ -158,3 +238,16 @@ class Machine:
                 self.ip += 1
         else:
             raise ValueError("Invalid instruction 0x{:02X}".format(b))
+
+    def run(self, until=None):
+        # if len(self.breakpoints) == 0:
+        #     print("Not running without a breakpoint")
+        self.memory.clearReachedWatch()
+        while self.ip not in self.breakpoints and self.memory.getReachedWatch() is None and (until is None or self.ip != until):
+            self.step()
+        if self.memory.getReachedWatch() is not None:
+            return "watch", self.memory.getReachedWatch()
+        elif until is not None and self.ip == until:
+            return "until", until
+        else:
+            return "break", self.breakpoints.index(self.ip)
