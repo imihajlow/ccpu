@@ -40,7 +40,10 @@ def loop(program, labels):
                 print("{} + 0x{:X}:".format(rlabels[la], m.ip - la))
             m.printState()
             newState = False
-        line = input("> ")
+        try:
+            line = input("> ")
+        except EOFError:
+            return
         tokens = line.split(' ')
         cmd = tokens[0]
         if cmd == 's' or cmd == 'step' or cmd == '':
@@ -52,7 +55,7 @@ def loop(program, labels):
                 until = eval(tokens[1], labels)
             reason, number = m.run(until)
             newState = True
-            print("{} {} reached".format(reason, number))
+            print("{} {}".format(reason, number))
         elif cmd == 'b' or cmd == 'break':
             try:
                 address = m.ip
@@ -67,7 +70,7 @@ def loop(program, labels):
                 address = eval(tokens[1], labels)
                 n = memory.watch(address)
                 print("Watchpoint {} at 0x{:04X}".format(n, address))
-            except NameError as e:
+            except NameError:
                 print("Unknown label")
         elif cmd == 'p' or cmd == 'print':
             fmt = "b"
@@ -75,8 +78,11 @@ def loop(program, labels):
             if len(tokens) > 2:
                 fmt = tokens[1]
                 addr = tokens[2]
-            addr = eval(addr, labels)
-            memory.printValue(addr, fmt)
+            try:
+                addr = eval(addr, labels)
+                memory.printValue(addr, fmt)
+            except NameError:
+                print("Unknown label")
         elif cmd == 's' or cmd == 'set':
             fmt = "b"
             addr = tokens[1]
@@ -85,7 +91,10 @@ def loop(program, labels):
                 fmt = tokens[1]
                 addr = tokens[2]
                 value = tokens[3]
-            addr = eval(addr, labels)
+            try:
+                addr = eval(addr, labels)
+            except NameError:
+                print("Unknown label")
             value = int(value)
             memory.set(addr, value & 0xff, False)
             if fmt != "b":

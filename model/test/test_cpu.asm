@@ -112,3 +112,6 @@ sample: dw      100 * 100  ; checked by the testbench
 
         .offset 0x1000
 finish:
+        ldi     ph, hi(finish)
+        ldi     pl, lo(finish)
+        jmp

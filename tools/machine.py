@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+import signal
+
+class DelayedKeyboardInterrupt:
+    def __enter__(self):
+        self.signal_received = False
+        self.old_handler = signal.signal(signal.SIGINT, self.handler)
+
+    def handler(self, sig, frame):
+        self.signal_received = (sig, frame)
+
+    def __exit__(self, type, value, traceback):
+        signal.signal(signal.SIGINT, self.old_handler)
+        if self.signal_received:
+            self.old_handler(*self.signal_received)
 
 def isAlu(b):
     return (b & 0x80) == 0
@@ -54,9 +68,9 @@ def getFlagName(b):
     return "ZCSO"[f]
 
 def getOverflow(r, a, b, is_sum):
-    r_bit = bool(r & 8)
-    a_bit = bool(a & 8)
-    b_bit = bool(b & 8)
+    r_bit = bool(r & 0x80)
+    a_bit = bool(a & 0x80)
+    b_bit = bool(b & 0x80)
     if not is_sum:
         b_bit = not b_bit
     if a_bit == b_bit:
@@ -131,6 +145,9 @@ def alu(op, a, b, carry_in, inverse):
     sign = bool(result & 0x80)
     return result, zero, carry, sign, ovf
 
+def isSingleArgAlu(op):
+    return op in ["INC", "DEC", "SHL", "SHR", "NEG", "NOT", "EXP", "SAR"]
+
 class Machine:
     def __init__(self, memory):
         self.memory = memory
@@ -149,9 +166,13 @@ class Machine:
         if isAlu(b):
             inverse = bool(b & 0x04)
             op = getAluOp(b)
+            singleArg = isSingleArgAlu(op)
             dest = getDestName(b, not inverse)
             if inverse:
-                return "{}_ {}, A".format(op, dest)
+                if singleArg:
+                    return "{} {}".format(op, dest)
+                else:
+                    return "{} {}, A".format(op, dest)
             else:
                 return "{} A, {}".format(op, dest)
         elif isLd(b):
@@ -199,6 +220,9 @@ class Machine:
         elif f == 3:
             return self.o
 
+    def __incIp(self, v):
+        self.ip = (self.ip + v) & 0xffff
+
     def addBreakpoint(self, address):
         self.breakpoints += [address]
         return len(self.breakpoints) - 1
@@ -214,37 +238,39 @@ class Machine:
                 self.__assignRegister(dest, result)
             else:
                 self.a = result
-            self.ip += 1
+            self.__incIp(1)
         elif isLd(b):
             dest = getDest(b)
             self.__assignRegister(dest, self.memory.get(self.p))
-            self.ip += 1
+            self.__incIp(1)
         elif isSt(b):
             src = getSrc(b)
             self.memory.set(self.p, self.__getRegister(src))
-            self.ip += 1
+            self.__incIp(1)
         elif isLdi(b):
             dest = getDest(b)
             self.__assignRegister(dest, self.memory.get(self.ip + 1))
-            self.ip += 2
+            self.__incIp(2)
         elif isJmp(b):
-            self.ip, self.p = self.p, self.ip + 1
+            self.__incIp(1)
+            self.ip, self.p = self.p, self.ip
         elif isJc(b):
             flag = getFlag(b)
-            inverse = (b & 0x04) == 0x04
+            inverse = bool(b & 0x04)
+            self.__incIp(1)
             if self.__getFlag(flag) != inverse:
-                self.ip, self.p = self.p, self.ip + 1
-            else:
-                self.ip += 1
+                self.ip, self.p = self.p, self.ip
         else:
             raise ValueError("Invalid instruction 0x{:02X}".format(b))
 
     def run(self, until=None):
-        # if len(self.breakpoints) == 0:
-        #     print("Not running without a breakpoint")
         self.memory.clearReachedWatch()
-        while self.ip not in self.breakpoints and self.memory.getReachedWatch() is None and (until is None or self.ip != until):
-            self.step()
+        try:
+            while self.ip not in self.breakpoints and self.memory.getReachedWatch() is None and (until is None or self.ip != until):
+                with DelayedKeyboardInterrupt():
+                    self.step()
+        except KeyboardInterrupt:
+            return "interrupted", self.ip
         if self.memory.getReachedWatch() is not None:
             return "watch", self.memory.getReachedWatch()
         elif until is not None and self.ip == until:
