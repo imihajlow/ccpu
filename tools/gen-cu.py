@@ -83,8 +83,10 @@ def get(ir, clk, condition_result, n_mem_rdy, cycle):
     if ir & 0x80 == 0:
         # ALU operation
         # 0oooordd
+        op = ir >> 3
         inverse = ir & 0x04 != 0
-        r["n_we_flags"] = 0
+        if op != 0x08 # MOV
+            r["n_we_flags"] = 0
         r["n_oe_alu_di"] = 0
 
         set_oe_alu(ir, r)

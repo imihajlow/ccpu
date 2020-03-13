@@ -54,7 +54,7 @@ Eight instructions take one operand:
 * `SHR` - right shift by 1, zero extend. The least significant bit is shifted into C.
 * `SAR` - right shift by 1, sign extend. The least significant bit is shifted into C.
 
-All arithmetics instructions (including `MOV`) set the flags accordingly.
+All arithmetics instructions (excluding `MOV`) set the flags accordingly.
 
 ## Jumps
 

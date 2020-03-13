@@ -9,11 +9,14 @@ class Memory:
         self.verbose = False
         self.watches = []
         self.reachedWatch = None
+        self.protectRom = True
 
     def setVerbose(self, verbose):
         self.verbose = verbose
 
     def set(self, address, value, watch=True):
+        if address < 0x8000 and self.protectRom:
+            return
         if self.verbose:
             print("[0x{:04X}] <- 0x{:02X}".format(address, value))
         self.memory[address] = value

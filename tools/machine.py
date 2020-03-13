@@ -233,7 +233,9 @@ class Machine:
             inverse = bool(b & 0x04)
             op = getAluOp(b)
             dest = getDest(b)
-            result, self.z, self.c, self.s, self.o = alu(op, self.a, self.__getRegister(dest, not inverse), self.c, inverse)
+            result, z, c, s, o = alu(op, self.a, self.__getRegister(dest, not inverse), self.c, inverse)
+            if op != "MOV":
+                self.z, self.c, self.s, self.o = z, c, s, o
             if inverse:
                 self.__assignRegister(dest, result)
             else:
