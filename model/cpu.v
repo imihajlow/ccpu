@@ -1,6 +1,6 @@
 `timescale 1ns/1ns
-module cpu(clk, n_rst, a, d, n_oe, n_we, n_rdy);
-    input clk;
+module cpu(clk_in, n_rst, a, d, n_oe, n_we, n_rdy);
+    input clk_in;
     input n_rst;
     output [15:0] a;
     inout [7:0] d;
@@ -8,7 +8,9 @@ module cpu(clk, n_rst, a, d, n_oe, n_we, n_rdy);
     output n_we;
     input n_rdy;
 
-    wire n_clk = ~clk;
+    wire n_clk = ~clk_in;
+    wire clk;
+    assign #10 clk = ~n_clk;
 
     wire [7:0] ir_out;
     wire we_ir;

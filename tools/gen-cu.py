@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 bits = 15
 
-def encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2):
-    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 11) | (cycle << 10) | (s1 << 12) | (s2 << 13)
+def encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2, a14):
+    return ir | (clk << 8) | (condition_result << 9) | (n_mem_rdy << 11) | (cycle << 10) | (s1 << 12) | (s2 << 13) | (a14 << 14)
 
 def encode_a(n_oe_mem, n_we_mem, n_oe_d_di, inc_ip, addr_dp, we_ir):
     return n_oe_mem | (n_we_mem << 1) | (n_oe_d_di << 2) | (inc_ip << 3) | (addr_dp << 4) | (we_ir << 5)
@@ -85,7 +85,7 @@ def get(ir, clk, condition_result, n_mem_rdy, cycle):
         # 0oooordd
         op = ir >> 3
         inverse = ir & 0x04 != 0
-        if op != 0x08 # MOV
+        if op != 0x08: # MOV
             r["n_we_flags"] = 0
         r["n_oe_alu_di"] = 0
 
@@ -157,11 +157,12 @@ def main():
                     for cycle in range(2):
                         for s1 in range(2):
                             for s2 in range(2):
-                                address = encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2)
-                                r = get(ir, clk, condition_result, n_mem_rdy, cycle)
-                                part_a[address] = encode_a(r["n_oe_mem"], r["n_we_mem"], r["n_oe_d_di"], r["inc_ip"], r["addr_dp"], r["we_ir"])
-                                part_b[address] = encode_b(r["n_oe_pl_alu"], r["n_oe_ph_alu"], r["n_oe_b_alu"], r["n_oe_a_d"], r["n_oe_b_d"], r["n_we_flags"], 0, 0)
-                                part_c[address] = encode_c(r["n_oe_alu_di"], r["n_reset_cycle"], r["swap_p"], r["n_we_pl"], r["n_we_ph"], r["we_a"], r["we_b"])
+                                for a14 in range(2):
+                                    address = encode_address(ir, clk, condition_result, n_mem_rdy, cycle, s1, s2, a14)
+                                    r = get(ir, clk, condition_result, n_mem_rdy, cycle)
+                                    part_a[address] = encode_a(r["n_oe_mem"], r["n_we_mem"], r["n_oe_d_di"], r["inc_ip"], r["addr_dp"], r["we_ir"])
+                                    part_b[address] = encode_b(r["n_oe_pl_alu"], r["n_oe_ph_alu"], r["n_oe_b_alu"], r["n_oe_a_d"], r["n_oe_b_d"], r["n_we_flags"], 0, 0)
+                                    part_c[address] = encode_c(r["n_oe_alu_di"], r["n_reset_cycle"], r["swap_p"], r["n_we_pl"], r["n_we_ph"], r["we_a"], r["we_b"])
     write_hex("cu_a.mem", part_a)
     write_hex("cu_b.mem", part_b)
     write_hex("cu_c.mem", part_c)

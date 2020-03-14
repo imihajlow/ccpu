@@ -12,7 +12,7 @@ module test_cpu();
     wire n_we;
 
     cpu inst(
-        .clk(clk),
+        .clk_in(clk),
         .n_rst(n_rst),
         .a(a),
         .d(d),
