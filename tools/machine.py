@@ -21,7 +21,7 @@ def isLd(b):
     return (b & 0xF0) == 0x80
 
 def isSt(b):
-    return (b & 0xF0) == 0xb0
+    return (b & 0xF0) == 0x90
 
 def isLdi(b):
     return (b & 0xF0) == 0xa0

@@ -16,7 +16,7 @@ module cpu(clk_in, n_rst, a, d, n_oe, n_we, n_rdy);
     wire we_ir;
 
     wire ir_w_clk;
-    assign #10 ir_w_clk = clk & we_ir; // 74act08 AND gate
+    assign #10 ir_w_clk = n_clk & we_ir; // 74act08 AND gate
 
     register_74273 reg_ir(
             .q(ir_out),

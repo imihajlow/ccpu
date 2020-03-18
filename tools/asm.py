@@ -169,7 +169,7 @@ def encode(op, args, labels):
     elif op == 'st':
         if args != 'a' and args != 'b':
             raise ValueError("Invalid register for ST: {}. Only A or B are allowed".format(args))
-        return [0xb0 | encodeSrc(args)]
+        return [0x90 | encodeSrc(args)]
     elif op == 'ldi':
         m = re.match(r"(a|b|pl|ph)\s*,\s*\b(.+)", args)
         if m is None:

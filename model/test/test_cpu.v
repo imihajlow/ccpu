@@ -61,7 +61,7 @@ module test_cpu();
         $dumpvars;
         $readmemh("test_cpu.hex", ram);
         n_rst = 1'b0;
-        clk = 1'b0;
+        clk = 1'b1;
         dump_memory();
 
         #1 n_rst = 1'b1;
@@ -81,8 +81,8 @@ module test_cpu();
                 $display("Result check OK");
                 $finish;
             end
-            clk = 1'b1;
-            #1 clk = 1'b0;
+            clk = 1'b0;
+            #1 clk = 1'b1;
         end
         #1
 
