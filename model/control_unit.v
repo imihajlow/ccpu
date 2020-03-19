@@ -76,9 +76,6 @@ module control_unit(
     assign #10 n_clk = clk ^ 1'b1; // 74x86 XOR gate
 
     wire n_is_alu = ir[7];
-    wire is_jmp = ir[6];
-    wire is_2cy = ir[5];
-    wire is_sto = ir[4];
 
     wire cycle;
     wire n_cycle;
@@ -93,7 +90,7 @@ module control_unit(
     wire supercycle;
     wire n_supercycle;
     wire n_rst_supercycle;
-    assign n_rst_supercycle = n_rst & n_is_alu & is_2cy;
+    assign n_rst_supercycle = n_rst & op_ldi;
     d_ff_7474 ff_supercycle(
         .q(supercycle),
         .n_q(n_supercycle),
@@ -145,8 +142,14 @@ module control_unit(
     assign #10 flag_set = cr_01 & cr_23;
     assign #10 condition_result = flag_set ^ ir[2];
 
+    wire op_alu = ~n_is_alu;
+    wire op_ld = ir[7:4] == 4'b1000;
+    wire op_ldi = ir[7:4] == 4'b1010;
+    wire op_st = ir[7:4] == 4'b1001;
+    wire op_jmp = ir[7:4] == 4'b1100;
+
     // n_oe_mem is always low, except cycle 1 of ST
-    assign n_oe_mem = n_is_alu & is_sto & cycle;
+    assign n_oe_mem = op_st & cycle;
 
     // n_we_mem is always high, except high clk on cycle 1 of st
     assign n_we_mem = ~n_oe_mem | n_we_cycle;
@@ -154,19 +157,18 @@ module control_unit(
     // n_oe_d_di is low in two cases:
     // - LD: cycle 1
     // - LDI: supercycle 1, cycle 0
-    assign n_oe_d_di = ~n_is_alu | is_jmp | is_sto | ~((is_2cy & supercycle & n_cycle) | (~is_2cy & cycle));
+    assign n_oe_d_di = ~((op_ld & cycle) | (op_ldi & supercycle & n_cycle));
 
     assign we_ir = n_cycle & n_supercycle;
 
     assign inc_ip = cycle;
 
     // addr_dp is 1 on cycle 1 of LD or ST
-    assign addr_dp = cycle & n_is_alu & ~is_jmp & ~is_2cy;
+    assign addr_dp = cycle & (op_ld | op_st);
 
+    assign swap_p = op_jmp & (condition_result | ir[3]) & cycle;
 
-    assign swap_p = n_is_alu & is_jmp & (condition_result | ir[3]) & cycle;
-
-    wire n_we_x = ~((~n_is_alu & ir[2] & cycle) | (n_is_alu & ~is_jmp & ~is_sto & ~is_2cy & cycle) | (n_is_alu & is_2cy & supercycle & n_cycle));
+    wire n_we_x = ~(op_alu & ir[2] & cycle) & n_oe_d_di;
     wire n_we_a;
     wire n_we_b;
     decoder_74139 dec_n_we_reg(
@@ -192,7 +194,7 @@ module control_unit(
 
     assign n_oe_alu_di = n_is_alu | n_cycle;
 
-    wire n_oe_reg_d = ~(n_is_alu & is_sto & cycle);
+    wire n_oe_reg_d = ~(op_st & cycle);
     wire [3:0] n_decoded_oe_reg_d;
     decoder_74139 dec_n_oe_reg_d(
            .n_o(n_decoded_oe_reg_d),
