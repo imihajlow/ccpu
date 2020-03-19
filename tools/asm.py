@@ -79,6 +79,8 @@ def updateIp(ip, op, args):
         return ip + 1
     elif op == 'ldi':
         return ip + 2
+    elif op == 'nop':
+        return ip + 1
 
 def encodeSrc(reg):
     if reg == 'a' or reg == '0':
@@ -169,19 +171,19 @@ def encode(op, args, labels):
     elif op == 'st':
         if args != 'a' and args != 'b':
             raise ValueError("Invalid register for ST: {}. Only A or B are allowed".format(args))
-        return [0x90 | encodeSrc(args)]
+        return [0xa0 | encodeSrc(args)]
     elif op == 'ldi':
         m = re.match(r"(a|b|pl|ph)\s*,\s*\b(.+)", args)
         if m is None:
             raise ValueError("Invalid operands: {} {}".format(op, args))
         reg = m.group(1)
         value = m.group(2)
-        return [0xa0 | encodeSrc(reg), evalExpression(value, labels) & 0xff]
+        return [0xc0 | encodeSrc(reg), evalExpression(value, labels) & 0xff]
     elif op[0] == 'j':
         if args:
             raise ValueError("Unexpected arguments for jump instruction")
         if op == 'jmp':
-            return [0xC8]
+            return [0xe8]
         else:
             if not (2 <= len(op) <= 3):
                 raise ValueError("Invalid instruction {}".format(op))
@@ -189,7 +191,9 @@ def encode(op, args, labels):
                 raise ValueError("Invalid instruction {}".format(op))
             inverse = len(op) == 3
             flag = op[2] if inverse else op[1]
-            return [0xc0 | (4 if inverse else 0) | encodeFlag(flag)]
+            return [0xe0 | (4 if inverse else 0) | encodeFlag(flag)]
+    elif op == 'nop':
+        return [0xff]
     elif op == 'db':
         return [evalExpression(args, labels) & 0xff]
     elif op == 'dw':

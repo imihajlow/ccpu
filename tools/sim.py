@@ -108,6 +108,11 @@ def loop(program, labels):
                         memory.set(addr + 6, (value >> 48) & 0xff, False)
                         memory.set(addr + 7, (value >> 56) & 0xff, False)
             print("Set [0x{:04X}] <- {}".format(addr, value))
+        elif cmd == 'protect_rom':
+            if len(tokens) > 1:
+                value = bool(int(tokens[1]))
+                memory.protectRom = value
+            print("ROM write protection is {}".format("ON" if memory.protectRom else "OFF"))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')

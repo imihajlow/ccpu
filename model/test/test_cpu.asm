@@ -1,5 +1,7 @@
         ldi     ph, hi(mul)
         ldi     pl, lo(mul)
+        nop
+        nop
         jmp
 
         ldi     ph, hi(finish)

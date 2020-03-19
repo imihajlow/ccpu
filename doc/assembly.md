@@ -74,7 +74,7 @@ Jump instructions do not modify the flags. If the condition for a conditional ju
 
 ## No operation (NOP)
 
-There is no dedicated NOP instruction. Pure no operation is not possible. The maximum which can be achieved is an instruction which changes the flags, but not the register values, for example `ADD A, 0`
+The `NOP` instruction has a binary opcode pattern of 111x11xx (0xFF is one of the possible opcodes). It works as a conditional jump with an always-false condition.
 
 # Assembly language
 

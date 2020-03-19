@@ -18,19 +18,22 @@ def isAlu(b):
     return (b & 0x80) == 0
 
 def isLd(b):
-    return (b & 0xF0) == 0x80
+    return (b & 0xE0) == 0x80
 
 def isSt(b):
-    return (b & 0xF0) == 0x90
+    return (b & 0xE0) == 0xa0
 
 def isLdi(b):
-    return (b & 0xF0) == 0xa0
+    return (b & 0xE0) == 0xc0
 
 def isJc(b):
-    return (b & 0xF8) == 0xc0
+    return (b & 0xE8) == 0xe0
 
 def isJmp(b):
-    return (b & 0xF8) == 0xc8
+    return (b & 0xEC) == 0xE8
+
+def isNop(b):
+    return (b & 0xEC) == 0xEC
 
 def getDest(b):
     return b & 0x03
@@ -189,6 +192,8 @@ class Machine:
         elif isJc(b):
             inverse = (b & 0x04) == 0x04
             return "J{}{}".format("N" if inverse else "", getFlagName(b))
+        elif isNop(b):
+            return "NOP"
         else:
             return "WTF (0x{:02X})".format(b)
 
@@ -262,6 +267,8 @@ class Machine:
             self.__incIp(1)
             if self.__getFlag(flag) != inverse:
                 self.ip, self.p = self.p, self.ip
+        elif isNop(b):
+            self.__incIp(1)
         else:
             raise ValueError("Invalid instruction 0x{:02X}".format(b))
 
