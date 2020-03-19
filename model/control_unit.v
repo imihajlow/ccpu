@@ -112,6 +112,18 @@ module control_unit(
         .n_cd(n_rst),
         .n_sd(1'b1));
 
+    wire we_cycle;
+    wire n_we_cycle;
+    wire n_clear_we_cycle = n_rst | n_clk;
+    wire n_set_we_cycle = n_rst | clk;
+    d_ff_7474 ff_we_cycle(
+        .q(we_cycle),
+        .n_q(n_we_cycle),
+        .d(n_we_cycle),
+        .cp(n_clk),
+        .n_cd(n_clear_we_cycle),
+        .n_sd(n_set_we_cycle));
+
     wire condition_result;
     wire flag_set;
     wire [1:0] index = ir[1:0];
@@ -137,7 +149,7 @@ module control_unit(
     assign n_oe_mem = n_is_alu & is_sto & cycle;
 
     // n_we_mem is always high, except high clk on cycle 1 of st
-    assign n_we_mem = ~(n_oe_mem & clk);
+    assign n_we_mem = ~n_oe_mem | n_we_cycle;
 
     // n_oe_d_di is low in two cases:
     // - LD: cycle 1
