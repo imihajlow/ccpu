@@ -74,7 +74,7 @@ module control_unit(
     // 4: store or load
 
     wire n_clk;
-    assign #10 n_clk = clk ^ 1'b1; // 74x86 XOR gate
+    assign #10 n_clk = ~clk; // 74x04 inverter
 
     wire n_is_alu = ir[7];
 
@@ -90,8 +90,7 @@ module control_unit(
 
     wire supercycle;
     wire n_supercycle;
-    wire n_rst_supercycle;
-    assign n_rst_supercycle = n_rst & ~n_op_ldi;
+    wire #10 n_rst_supercycle = n_rst & op_ldi; // 74x08 AND gate
     d_ff_7474 ff_supercycle(
         .q(supercycle),
         .n_q(n_supercycle),
@@ -101,8 +100,7 @@ module control_unit(
         .n_sd(1'b1));
 
     wire swap_p; // swap IP and DP on negedge clk
-    wire ff_p_selector_d;
-    assign #10 ff_p_selector_d = swap_p ^ p_selector; // 74x86 XOR gate
+    wire #10 ff_p_selector_d = swap_p ^ p_selector; // 74x86 XOR gate
     d_ff_7474 ff_p_selector(
         .q(p_selector),
         .d(ff_p_selector_d),
@@ -112,8 +110,8 @@ module control_unit(
 
     wire we_cycle;
     wire n_we_cycle;
-    wire n_clear_we_cycle = n_rst | n_clk;
-    wire n_set_we_cycle = n_rst | clk;
+    wire #10 n_clear_we_cycle = n_rst | n_clk; // 74x32 OR gate
+    wire #10 n_set_we_cycle = n_rst | clk; // 74x32 OR gate
     d_ff_7474 ff_we_cycle(
         .q(we_cycle),
         .n_q(n_we_cycle),
@@ -136,68 +134,74 @@ module control_unit(
     wire #10 cr_01 = cr_vec[0] & cr_vec[1];
     wire #10 cr_23 = cr_vec[2] & cr_vec[3];
     wire #10 flag_set = cr_01 & cr_23;
-    wire #10 condition_result = flag_set ^ ir[2];
+    wire #10 condition_result = flag_set ^ ir[2]; // 74x86 XOR gate
 
-    wire #10 op_alu = ~n_is_alu;
+    wire #10 op_alu = ~n_is_alu; // 74x04 inverter
     wire n_op_ld;
     wire n_op_st;
     wire n_op_ldi;
     wire n_op_jmp;
 
+    wire #10 op_ldi = ~n_op_ldi; // 74x04 inverter
+    wire #10 op_jmp = ~n_op_jmp; // 74x04 inverter
+
     decoder_74139 dec_op(
         .n_o({n_op_jmp, n_op_ldi, n_op_st, n_op_ld}),
         .a(ir[6:5]),
-        .n_e(~ir[7])
+        .n_e(op_alu)
         );
 
     // n_oe_mem is always low, except cycle 1 of ST
-    assign n_oe_mem = ~(n_op_st | n_cycle);
+    assign #10 n_oe_mem = ~(n_op_st | n_cycle); // 74x00 NAND
 
     // n_we_mem is always high, except high clk on cycle 1 of st
-    assign n_we_mem = ~n_oe_mem | n_we_cycle;
+    assign #10 n_we_mem = ~(n_oe_mem & we_cycle); // 74x00 NAND
+
+    assign #10 we_ir = n_cycle & n_supercycle;
 
     // n_oe_d_di is low in two cases:
     // - LD: cycle 1
     // - LDI: supercycle 1, cycle 0
     // assign n_oe_d_di = (n_op_ld | n_cycle) & (n_op_ldi | ~(supercycle & n_cycle));
-    assign #30 n_oe_d_di = (n_op_ld & cycle) | (n_op_ldi & n_cycle) | (n_op_ld & n_supercycle) | (n_cycle & n_supercycle); // 3 levels of logic gates
+    wire #20 n_oe_d_di_a = (n_op_ld & cycle) | (n_op_ldi & n_cycle); // 2x 74x08 AND + 1x 74x32 OR
+    wire #10 n_op_ld_and_n_supercycle = n_op_ld & n_supercycle; // 74x08 AND
+    wire #10 n_oe_d_di_b = n_op_ld_and_n_supercycle | we_ir; // 74x32 OR
+    assign #10 n_oe_d_di = n_oe_d_di_a | n_oe_d_di_b; // 74x32 OR
 
-    assign #10 we_ir = n_cycle & n_supercycle; // TODO put into n_oe_d_di
 
     assign inc_ip = cycle;
 
     // addr_dp is 1 on cycle 1 of LD or ST
-    assign addr_dp = cycle & ~(n_op_ld & n_op_st);
+    wire #10 op_ld_or_st = ~(n_op_ld & n_op_st); // 74x00 NAND
+    assign #10 addr_dp = cycle & op_ld_or_st; // 74x08 AND
 
-    assign swap_p = ~n_op_jmp & condition_result & cycle;
+    wire #10 jmp_and_result = op_jmp & condition_result; // 74x08 AND
+    assign #10 swap_p = jmp_and_result & cycle; // 74x08 AND
 
-    wire n_we_x = ~(op_alu & ir[2] & cycle) & n_oe_d_di;
+    assign #10 n_oe_alu_di = ~(op_alu & cycle); // 74x00 NAND
+    wire [3:0] n_decoded_oe_reg_alu;
+    decoder_74139 dec_n_oe_reg_alu(
+           .n_o(n_decoded_oe_reg_alu),
+           .a(index),
+           .n_e(n_oe_alu_di));
+    assign n_oe_pl_alu = n_decoded_oe_reg_alu[2];
+    assign n_oe_ph_alu = n_decoded_oe_reg_alu[3];
+    assign n_oe_b_alu = n_decoded_oe_reg_alu[1];
+
+    wire #10 n_ir2 = ~ir[2]; // 74x04 inverter
+    wire #10 n_oe_alu_di_or_n_ir2 = n_oe_alu_di | n_ir2; // 74x32 OR
+    wire #10 n_oe_alu_di_or_ir2 = n_oe_alu_di | ir[2]; // 74x32 OR
+    wire #10 n_we_x = n_oe_alu_di_or_n_ir2 & n_oe_d_di; // 74x08 AND
     wire n_we_a;
     wire n_we_b;
     decoder_74139 dec_n_we_reg(
            .n_o({n_we_ph, n_we_pl, n_we_b, n_we_a}),
            .a(index),
            .n_e(n_we_x));
-    assign we_a = ~n_we_a | (~n_is_alu & ~ir[2] & cycle);
-    assign we_b = ~n_we_b;
+    assign #10 we_a = ~(n_we_a & n_oe_alu_di_or_ir2); // 74x00 NAND
+    assign #10 we_b = ~n_we_b; // 74x04 inverter
 
-    wire n_oe_reg_alu = n_is_alu | n_cycle;
-    wire [3:0] n_decoded_oe_reg_alu;
-    decoder_74139 dec_n_oe_reg_alu(
-           .n_o(n_decoded_oe_reg_alu),
-           .a(index),
-           .n_e(n_oe_reg_alu));
-    assign n_oe_pl_alu = n_decoded_oe_reg_alu[2];
-    assign n_oe_ph_alu = n_decoded_oe_reg_alu[3];
-    assign n_oe_b_alu = n_decoded_oe_reg_alu[1];
-
-    // n_we_flags is low for ALU operations except MOV (1000)
-    wire [3:0] alu_op = ir[6:3];
-    assign n_we_flags = n_is_alu | (alu_op == 4'b1000) | n_cycle;
-
-    assign n_oe_alu_di = n_is_alu | n_cycle;
-
-    wire n_oe_reg_d = n_op_st | n_cycle;
+    wire #10 n_oe_reg_d = n_op_st | n_cycle; // 74x32 OR
     wire [3:0] n_decoded_oe_reg_d;
     decoder_74139 dec_n_oe_reg_d(
            .n_o(n_decoded_oe_reg_d),
@@ -205,4 +209,17 @@ module control_unit(
            .n_e(n_oe_reg_d));
     assign n_oe_a_d = n_decoded_oe_reg_d[0];
     assign n_oe_b_d = n_decoded_oe_reg_d[1];
+
+    // n_we_flags is low for ALU operations except MOV (1000)
+    wire [3:0] alu_op = ir[6:3];
+    wire [3:0] n_dec_mov_o;
+    decoder_74139 dec_mov(
+           .n_o(n_dec_mov_o),
+           .a(alu_op[3:2]),
+           .n_e(alu_op[1]));
+    wire #10 n_is_mov = n_dec_mov_o[2] | alu_op[0]; // 74x32 OR
+    wire #10 is_mov_or_n_cycle = ~(n_is_mov & cycle); // 74x00 NAND
+    assign #10 n_we_flags = n_is_alu | is_mov_or_n_cycle; // 74x32 OR
+
+
 endmodule
