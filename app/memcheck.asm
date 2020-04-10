@@ -1,3 +1,4 @@
+    nop
     ldi b, 0x80
     ldi a, 0x00
 loop:
@@ -207,6 +208,8 @@ loop:
     ldi ph, hi(loop)
     ldi pl, lo(loop)
     jmp
+
+.offset 0x400
 fail:
     ldi ph, hi(fail)
     ldi pl, lo(fail)

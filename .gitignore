@@ -21,5 +21,6 @@ _autosave*
 *-save.kicad_pcb
 fp-info-cache
 *.bin
+*.rom
 *.map
 __pycache__
