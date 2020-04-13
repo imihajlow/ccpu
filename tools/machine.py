@@ -277,6 +277,8 @@ class Machine:
     def run(self, until=None):
         self.memory.clearReachedWatch()
         try:
+            with DelayedKeyboardInterrupt():
+                self.step()
             while self.ip not in self.breakpoints and self.memory.getReachedWatch() is None and (until is None or self.ip != until):
                 with DelayedKeyboardInterrupt():
                     self.step()

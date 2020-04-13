@@ -4,13 +4,15 @@ WATCH_READ = 1
 WATCH_WRITE = 2
 
 class Memory:
-    def __init__(self, rom):
+    def __init__(self, rom, keyboard, display):
         self.memory = rom + [0] * (65536 - len(rom))
         self.verbose = False
         self.watches = []
         self.reachedWatch = None
         self.protectRom = True
         self.emulateIo = True
+        self.keyboard = keyboard
+        self.display = display
 
     def setVerbose(self, verbose):
         self.verbose = verbose
@@ -19,6 +21,13 @@ class Memory:
         if address < 0x8000 and self.protectRom:
             return
         if address >= 0xf000 and self.emulateIo:
+            if not bool(address & 0x2) and self.keyboard is not None:
+                self.keyboard.write(value)
+            if bool(address & 0x2) and self.display is not None:
+                if bool(address & 1):
+                    self.display.writeData(value)
+                else:
+                    self.display.writeCmd(value)
             if self.verbose:
                 if bool(address & 0x2):
                     print("LCD {} <- 0x{:02X}".format("data" if bool(address & 1) else "ctrl", value))
@@ -34,6 +43,8 @@ class Memory:
     def get(self, address):
         self.__checkWatch(address, WATCH_READ)
         if address >= 0xf000 and self.emulateIo:
+            if not bool(address & 0x2) and self.keyboard is not None:
+                return self.keyboard.read()
             return 0x00
         return self.memory[address]
 

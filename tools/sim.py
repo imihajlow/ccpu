@@ -5,6 +5,8 @@ import sys
 import readline
 from machine import Machine
 from memory import Memory
+from keyboard import Keyboard
+from lcd16x2 import Display
 
 def load(file):
     ba = file.read()
@@ -25,8 +27,10 @@ def loadLabels(file):
 def loop(program, labels):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
-    memory = Memory(program)
-    memory.setVerbose(True)
+    keyboard = Keyboard()
+    display = Display()
+    memory = Memory(program, keyboard, display)
+    memory.setVerbose(False)
     m = Machine(memory)
     newState = True
     while True:
@@ -56,6 +60,8 @@ def loop(program, labels):
             reason, number = m.run(until)
             newState = True
             print("{} {}".format(reason, number))
+            display.print()
+            display.resetText()
         elif cmd == 'b' or cmd == 'break':
             try:
                 address = m.ip
@@ -113,6 +119,17 @@ def loop(program, labels):
                 value = bool(int(tokens[1]))
                 memory.protectRom = value
             print("ROM write protection is {}".format("ON" if memory.protectRom else "OFF"))
+        elif cmd == 'press':
+            if len(tokens) == 3:
+                row = int(tokens[1])
+                col = int(tokens[2])
+                keyboard.press(row, col)
+                print("Pressed {},{}".format(row, col))
+            elif len(tokens) == 1:
+                keyboard.release()
+                print("Released")
+            else:
+                print("Either two args or no args")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')
