@@ -10,12 +10,20 @@ class Memory:
         self.watches = []
         self.reachedWatch = None
         self.protectRom = True
+        self.emulateIo = True
 
     def setVerbose(self, verbose):
         self.verbose = verbose
 
     def set(self, address, value, watch=True):
         if address < 0x8000 and self.protectRom:
+            return
+        if address >= 0xf000 and self.emulateIo:
+            if self.verbose:
+                if bool(address & 0x2):
+                    print("LCD {} <- 0x{:02X}".format("data" if bool(address & 1) else "ctrl", value))
+                else:
+                    print("Keyboard <- 0x{:02X}".format(value))
             return
         if self.verbose:
             print("[0x{:04X}] <- 0x{:02X}".format(address, value))
@@ -25,6 +33,8 @@ class Memory:
 
     def get(self, address):
         self.__checkWatch(address, WATCH_READ)
+        if address >= 0xf000 and self.emulateIo:
+            return 0x00
         return self.memory[address]
 
     def printValue(self, address, fmt):

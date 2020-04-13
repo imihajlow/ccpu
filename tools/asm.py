@@ -75,6 +75,8 @@ def updateIp(ip, op, args):
         return ip + 4
     elif op == 'dq':
         return ip + 8
+    elif op == 'ascii':
+        return ip + len(eval(args))
     elif op == 'ld' or op == 'st' or isJump(op) or isAlu(op):
         return ip + 1
     elif op == 'ldi':
@@ -206,9 +208,12 @@ def encode(op, args, labels):
         v = evalExpression(args, labels)
         return [v & 0xff, (v >> 8) & 0xff, (v >> 16) & 0xff, (v >> 24) & 0xff,\
             (v >> 32) & 0xff, (v >> 40) & 0xff, (v >> 48) & 0xff, (v >> 56) & 0xff]
+    elif op == 'ascii':
+        v = evalExpression(args, labels)
+        return [ord(c) for c in v]
 
 def assemble(lines):
-    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-*/><, \t]*[a-z()0-9_+\-*/><,]))?)?(?:\s*;.*)?$", re.I)
+    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-*/><, \t\"']*[a-z()0-9_+\-*/><,\"']))?)?(?:\s*;.*)?$", re.I)
     ip = 0
     labels = {}
     result = [None] * 65536

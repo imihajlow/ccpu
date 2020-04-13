@@ -163,6 +163,7 @@ class Machine:
         self.c = 0
         self.o = 0
         self.breakpoints = []
+        self.time = 0
 
     def disasm(self, addr):
         b = self.memory.get(addr)
@@ -198,7 +199,7 @@ class Machine:
             return "WTF (0x{:02X})".format(b)
 
     def printState(self):
-        print("IP={:04X} P={:04X} A={:02X} B={:02X} F=[{}{}{}{}]    {}".format(self.ip, self.p, self.a, self.b, \
+        print("T={:06} IP={:04X} P={:04X} A={:02X} B={:02X} F=[{}{}{}{}]    {}".format(self.time, self.ip, self.p, self.a, self.b, \
                                      "Z" if self.z else " ", "S" if self.s else " ", "C" if self.c else " ", "O" if self.o else " ",\
                                      self.disasm(self.ip)))
 
@@ -227,6 +228,7 @@ class Machine:
 
     def __incIp(self, v):
         self.ip = (self.ip + v) & 0xffff
+        self.time = self.time + v * 2
 
     def addBreakpoint(self, address):
         self.breakpoints += [address]

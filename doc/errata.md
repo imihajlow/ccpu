@@ -1,7 +1,6 @@
 # Control unit rev. 1
 Doesn't work at all: because of undefined transition states of ROM outputs random values are written into IR, A, and B.
 
-
 # Registers rev. 1
 
 ## Clock phase
@@ -9,6 +8,9 @@ To work with control unit rev. 2, registers rev. 1 should be modified: pin 1 of 
 
 ## Clock ringing
 The CLK line rings a lot which causes total unpredictable mayhem. To overcome ringing, cut the track coming from pin 6 of U34 on the back side of the board under the chip and solder a 47 Ohm resistor into the gap. The resistor will damp parasitic oscillations.
+
+## First instruction
+Normally after reset the first instruction is not executed because of rewiring the clock phase (clock starts from 0, should start from 1 to begin a valid instruction cycle).
 
 # ROM
 All ROM chips used in ALU rev. 1, IO rev. 1, control unit rev. 1 have data pins D6 and D7 swapped. To workaround, use `tools/flip67.py` on the firmware files before flashing.
@@ -21,4 +23,5 @@ The schematic of this board has an error: the n_oe_mem signal should be generate
 4. Solder pins 11 and 10 of U16 together.
 5. Solder a wire to connect pin 9 of U16 and pin 2 of U4 (n_cycle signal).
 6. Solder a wire to connect pin 8 of U16 and pins 1 and 2 of U9 (oe_mem).
+
 As a result, U9A will be used as an inverter, U16C as an OR gate and U16D as a repeater to make soldering easier.
