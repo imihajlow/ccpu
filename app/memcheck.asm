@@ -1,4 +1,6 @@
+.section text
     nop
+start:
     ldi b, 0x80
     ldi a, 0x00
 loop:
@@ -208,9 +210,21 @@ loop:
     ldi ph, hi(loop)
     ldi pl, lo(loop)
     jmp
-
-.offset 0x400
 fail:
-    ldi ph, hi(fail)
-    ldi pl, lo(fail)
+    ; check if failed address is 0xff00 and repeat the loop
+    ldi ph, hi(error)
+    ldi pl, lo(error)
+    add a, 0
+    jnz
+    ldi a, 0xf0
+    sub b, a
+    jnz
+    ldi ph, hi(start)
+    ldi pl, lo(start)
+    jmp
+
+.align 0x400
+error:
+    ldi ph, hi(error)
+    ldi pl, lo(error)
     jmp

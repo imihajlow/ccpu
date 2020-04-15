@@ -1,3 +1,4 @@
+.section text
     nop
 loop:
     ldi pl, lo(fail)
@@ -49,7 +50,7 @@ loop:
     jmp
 
 
-    .offset 0x400
+    .align 0x400
 fail:
     ldi pl, lo(fail)
     ldi ph, hi(fail)

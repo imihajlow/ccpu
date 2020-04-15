@@ -24,3 +24,5 @@ fp-info-cache
 *.rom
 *.map
 __pycache__
+*.pyc
+*.o

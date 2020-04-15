@@ -79,13 +79,17 @@ The `NOP` instruction has a binary opcode pattern of 111x11xx (0xFF is one of th
 # Assembly language
 
 There are few assembly directives:
-* `.init` - begin the initialized section.
-* `.noinit` - begin the uninitialized section. These two directives are useful in ROM file generation which has some labels in an uninitialized RAM space.
-* `.offset X` - set the current code address.
+* `.const name = value` - define a constant
+* `.global name` - declare a symbol global (imported)
+* `.section name` - start a section. Currently linker supports three sections: `init` (internal use for code placed at the beginning), `text` (ROM contents) and `data` (RAM).
 * `.align X` - align the address by X.
 
 There are two pseudo-functions, `lo(x)` and `hi(x)`, which take first and second bytes of `x`.
 
 `db`, `dw`, `dd`, and `dq` pseudo-instructions output 1, 2, 4 and 8 bytes of data.
+
+`res` reserves n bytes and initializes them with zeroes.
+
+`ascii` outputs an ascii string as a byte sequence. Use of characters above 7bit ASCII is not supported.
 
 Python expressions are allowed for any numeric constants.

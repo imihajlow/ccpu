@@ -1,3 +1,4 @@
+.section text
     nop
     mov a, 0
 loop:
@@ -21,8 +22,10 @@ loop:
     ldi ph, hi(loop)
     jmp
 
-    .offset 0x400
+    .align 0x400
 fail:
     ldi pl, lo(fail)
     ldi ph, hi(fail)
     jmp
+
+.const lcd_ctrl = 0xf002
