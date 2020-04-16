@@ -1,3 +1,4 @@
+.section text
         ldi     ph, hi(mul)
         ldi     pl, lo(mul)
         nop
@@ -104,15 +105,15 @@ mul_a:  db      100
 mul_b:  dw      100
 mul_i:  db      0
 
-        .offset 0x100
+        .align 0x100
 result:
 mul_result:
         dw  0
 
-        .offset 0x200
+        .align 0x200
 sample: dw      100 * 100  ; checked by the testbench
 
-        .offset 0x1000
+        .align 0x1000
 finish:
         ldi     ph, hi(finish)
         ldi     pl, lo(finish)

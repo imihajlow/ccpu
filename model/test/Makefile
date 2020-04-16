@@ -46,4 +46,5 @@ alu_lo.mem: ../../tools/gen-alu.py
 alu_hi.mem: alu_lo.mem
 
 %.hex: %.asm ../../tools/asm.py
-	../../tools/asm.py --type=hex --full -o $@ $<
+	../../tools/asm.py -o $(@:.hex=.o) $<
+	../../tools/link.py --type=hex --full -o $@ $(@:.hex=.o)
