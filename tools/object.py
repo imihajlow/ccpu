@@ -41,6 +41,7 @@ class Object:
     def __init__(self):
         self.name = ""
         self.globalSymbols = []
+        self.exportSymbols = []
         self.sections = []
         self.consts = {}
         self.__allocated = False
@@ -49,6 +50,7 @@ class Object:
     def toDict(self):
         return {
             "globalSymbols": self.globalSymbols,
+            "exportSymbols": self.exportSymbols,
             "sections": [s.toDict() for s in self.sections],
             "consts": self.consts
         }
@@ -58,6 +60,7 @@ class Object:
         o = Object()
         o.name = name
         o.globalSymbols = d["globalSymbols"]
+        o.exportSymbols = d["exportSymbols"]
         o.sections = [Section.fromDict(s) for s in d["sections"]]
         o.consts = d["consts"]
         return o
@@ -79,16 +82,25 @@ class Object:
         self.__curSectionIndex += 1
 
     def defineLabel(self, name):
-        for s in self.sections:
-            if name in s.labels:
-                raise ValueError("Label redifinition: {}".format(name))
+        self.__checkRedefinition(name)
         self.sections[self.__curSectionIndex].defineLabel(name)
 
     def defineConstant(self, name, value):
         self.consts[name] = value
 
     def declareGlobal(self, name):
+        self.__checkRedefinition(name)
         self.globalSymbols += [name]
+
+    def declareExport(self, name):
+        for s in self.sections:
+            if name in s.labels:
+                self.exportSymbols += [name]
+                return
+        if name in self.consts:
+            self.exportSymbols += [name]
+            return
+        raise ValueError("Label is not defined: {}".format(name))
 
     def allocate(self):
         for s in self.sections:
@@ -101,3 +113,20 @@ class Object:
 
     def placeExpression(self, offset, x):
         self.sections[self.__curSectionIndex].placeExpression(offset, x)
+
+    def getMockGlobals(self):
+        return {l: 0 for l in self.globalSymbols}
+
+    def getMockLocals(self):
+        result = dict()
+        for s in self.sections:
+            result.update((l, 0) for l in s.labels)
+        result.update(self.consts)
+        return result
+
+    def __checkRedefinition(self, name):
+        for s in self.sections:
+            if name in s.labels:
+                raise ValueError("Label redifinition: {}".format(name))
+        if name in self.globalSymbols:
+            raise ValueError("Label redifinition: {}".format(name))

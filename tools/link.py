@@ -2,6 +2,7 @@
 import argparse
 import json
 import re
+import sys
 from object import Object
 from expression import evaluate
 import layout
@@ -49,34 +50,41 @@ def link(objects):
                         raise LinkerError("64k overflow", o, s)
         print("Segment {}: {} bytes (0x{:04X}-0x{:04X})".format(segment["name"], ip - segBegin, segBegin, ip))
     # assign global symbol values
-    globalSymbolValues = {}
+    exportedSymbolValues = {}
     for o in objects:
-        for s in o.sections:
-            for label in s.labels:
-                if label in globalSymbols:
-                    if label in globalSymbolValues:
+        for label in o.exportSymbols:
+            found = False
+            for s in o.sections:
+                if label in s.labels:
+                    if label in exportedSymbolValues:
                         raise LinkerError("global symbol `{}' redifinition".format(label), o, s)
-                    globalSymbolValues[label] = s.offset + s.labels[label]
-        for label in o.consts:
-            if label in globalSymbols:
-                if label in globalSymbolValues:
+                    exportedSymbolValues[label] = s.offset + s.labels[label]
+                    found = True
+            if label in o.consts:
+                if label in exportedSymbolValues:
                     raise LinkerError("global symbol `{}' redifinition".format(label), o)
-                globalSymbolValues[label] = o.consts[label]
+                exportedSymbolValues[label] = o.consts[label]
+                found = True
+            if not found:
+                raise LinkerError("symbol `{}' is exported, but not defined".format(label), o)
     # assign local symbol values and evaluate references
-    symbolMap = globalSymbolValues.copy()
+    symbolMap = exportedSymbolValues.copy()
     for o in objects:
+        for sym in o.globalSymbols:
+            if sym not in exportedSymbolValues:
+                raise LinkerError("unresolved external symbol `{}'".format(sym), o)
         localSymbolValues = {}
         for s in o.sections:
             for label in s.labels:
                 value = s.offset + s.labels[label]
                 localSymbolValues[label] = value
-                if label not in globalSymbols:
+                if label not in o.exportSymbols:
                     symbolMap["{}_{}".format(o.name, label)] = value
         localSymbolValues.update(o.consts)
         for s in o.sections:
             for offs,expr in s.refs:
                 try:
-                    value = evaluate(expr, globalSymbolValues, localSymbolValues)
+                    value = evaluate(expr, exportedSymbolValues, localSymbolValues)
                     s.text[offs] = value & 255
                 except BaseException as e:
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
@@ -128,8 +136,12 @@ if __name__ == '__main__':
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
-    objects = [load(filename) for filename in args.file]
-    symbolMap = link(objects)
-    rom = createRom(objects)
-    save(rom, args.o, args.type, args.full, args.filler)
-    saveLabels(args.m, symbolMap)
+    try:
+        objects = [load(filename) for filename in args.file]
+        symbolMap = link(objects)
+        rom = createRom(objects)
+        save(rom, args.o, args.type, args.full, args.filler)
+        saveLabels(args.m, symbolMap)
+    except LinkerError as e:
+        sys.stderr.write(str(e) + "\n")
+        sys.exit(1)

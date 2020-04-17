@@ -1,3 +1,11 @@
+.export lcd_control
+.export lcd_data
+.export display_init
+.export display_print
+.export display_set_address
+.export display_print_arg
+.export display_set_address_arg
+
 .const lcd_control = 0xf002
 .const lcd_data = 0xf003
 

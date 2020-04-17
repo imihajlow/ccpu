@@ -129,7 +129,13 @@ def encodeAlu(op):
         return 15
     raise ValueError("Wrong instruction: {}".format(op))
 
-def evalExpression(value):
+def evalExpression(value, obj):
+    # check if the expression is correct
+    try:
+        evaluate(value, obj.getMockGlobals(), obj.getMockLocals())
+    except BaseException as e:
+        raise ValueError(str(e))
+    # evaluate without labels
     try:
         return evaluate(value), None
     except NameError as e:
@@ -150,7 +156,7 @@ def encodeFlag(f):
         raise ValueError("Wrong jump condition: {}".format(f))
 
 # TODO use consts here for expressions?
-def encode(op, args):
+def encode(op, args, obj):
     if isAlu(op):
         singleArg = isSingleArg(op)
         m = re.match(r"(a|b|ph|pl)\s*(?:,\s*(a|b|ph|pl|0))?", args)
@@ -175,7 +181,7 @@ def encode(op, args):
             raise ValueError("Invalid operands: {} {}".format(op, args))
         reg = m.group(1)
         value = m.group(2)
-        static, dynamic = evalExpression(value)
+        static, dynamic = evalExpression(value, obj)
         if dynamic is None:
             return [0xc0 | encodeSrc(reg), static & 0xff], []
         else:
@@ -196,25 +202,25 @@ def encode(op, args):
     elif op == 'nop':
         return [0xff], []
     elif op == 'db':
-        static, dynamic = evalExpression(args)
+        static, dynamic = evalExpression(args, obj)
         if dynamic is None:
             return [static & 0xff], []
         else:
             return [0], [(0, dynamic)]
     elif op == 'dw':
-        v, dynamic = evalExpression(args)
+        v, dynamic = evalExpression(args, obj)
         if dynamic is None:
             return [v & 0xff, (v >> 8) & 0xff], []
         else:
             return [0, 0], [(0, dynamic), (1, "({}) >> 8".format(dynamic))]
     elif op == 'dd':
-        v, dynamic = evalExpression(args)
+        v, dynamic = evalExpression(args, obj)
         if dynamic is None:
             return [(v >> (8 * i)) & 0xff for i in range(4)], []
         else:
             return [0] * 4, [(i, "({}) >> {}".format(dynamic, 8 * i)) for i in range(4)]
     elif op == 'dq':
-        v, dynamic = evalExpression(args)
+        v, dynamic = evalExpression(args, obj)
         if dynamic is None:
             return [(v >> (8 * i)) & 0xff for i in range(8)], []
         else:
@@ -252,6 +258,8 @@ def assemble(lines):
                 result.defineConstant(name, eval(value, {"__builtins__": {}}))
             elif op == '.global':
                 result.declareGlobal(args)
+            elif op == '.export':
+                pass
             else:
                 result.advance(updateIp(op, args))
         except ValueError as e:
@@ -268,18 +276,15 @@ def assemble(lines):
             if op is None:
                 continue
             op = op.lower()
-            if op == '.section':
-                result.beginSection(args, 0)
-            elif op == '.align':
-                result.align(int(args, 0))
-            elif op == '.offset':
-                pass
-            elif op == '.const':
-                pass
-            elif op == '.global':
-                pass
+            if op[0] == '.':
+                if op == '.section':
+                    result.beginSection(args, 0)
+                elif op == '.align':
+                    result.align(int(args, 0))
+                elif op == '.export':
+                    result.declareExport(args)
             else:
-                text, refs = encode(op, args)
+                text, refs = encode(op, args, result)
                 result.placeValue(text)
                 for offset, ref in refs:
                     result.placeExpression(offset, ref)
