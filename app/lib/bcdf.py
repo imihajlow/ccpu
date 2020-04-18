@@ -9,6 +9,40 @@ class Bcdf:
 		return "{}{}.{}e{}".format("+" if not self.sign else "-", self.man[0], "".join(str(x) for x in self.man[1:]), self.exp)
 
 	def print(self, width):
+		effWidth = width
+		if self.sign:
+			effWidth -= 1
+		normalForm = False
+		# exp >= 0: the dot must fit or be just beyond the right side
+		if self.exp >= 0:
+			normalForm = self.exp < effWidth
+		else:
+			# exp < 0: the most significant digit must fit
+			# 0.001
+			normalForm = self.exp - 1 + effWidth > 0
+		if not normalForm:
+			for x in self.print_e(width):
+				yield x
+			return
+		if self.sign:
+			yield '-'
+		noDot = self.exp == effWidth - 1
+		if not noDot:
+			effWidth -= 1
+		i = 0
+		if self.exp < 0:
+			i = self.exp
+		while effWidth > 0:
+			if i == self.exp + 1:
+				yield '.'
+			if i >= 0 and i < 14:
+				yield chr(ord('0') + self.man[i])
+			else:
+				yield '0'
+			i += 1
+			effWidth -= 1
+
+	def print_e(self, width):
 		# either 123.456 or 1.352325e+111
 		# min width: -1e+127 - 7 char
 		expLength = 1
@@ -165,8 +199,8 @@ if __name__ == '__main__':
 
 	a = Bcdf()
 	b = Bcdf()
-	a.exp = -99
-	a.sign = True
+	a.exp = -10
+	a.sign = False
 	a.man[0] = 1
 	a.man[1] = 5
 

@@ -249,6 +249,183 @@ display_print_bcdf:
     inc pl
     st b
 
+    ; check if normal form fits
+    ldi pl, lo(display_print_bcdf_width)
+    ldi ph, hi(display_print_bcdf_width)
+    ld b
+    ldi pl, lo(display_print_bcdf_arg + 0) ; sign
+    ldi ph, hi(display_print_bcdf_arg + 0)
+    ld a
+    add a, 0
+    ldi pl, lo(display_print_bcdf_check_pos)
+    ldi ph, hi(display_print_bcdf_check_pos)
+    jz ; sign == 0
+    dec b
+display_print_bcdf_check_pos:
+    ; b = effective_width
+    ldi pl, lo(display_print_bcdf_arg + 1) ; exp
+    ldi ph, hi(display_print_bcdf_arg + 1)
+    ld a
+    ; a = exp
+    add a, 0
+    ldi pl, lo(display_print_bcdf_check_pos_neg)
+    ldi ph, hi(display_print_bcdf_check_pos_neg)
+    js ; exp < 0
+    ; exp is >= 0
+    sub a, b
+    ldi pl, lo(display_print_bcdf_e_form)
+    ldi ph, hi(display_print_bcdf_e_form)
+    jns ; exp > effective_width
+    jz ; exp == effective_width
+    ldi pl, lo(display_print_bcdf_nf)
+    ldi ph, hi(display_print_bcdf_nf)
+    jmp
+display_print_bcdf_check_pos_neg:
+    ; b = effective_width
+    ; a = exp, a < 0
+    dec a
+    add a, b
+    ldi pl, lo(display_print_bcdf_e_form)
+    ldi ph, hi(display_print_bcdf_e_form)
+    js ; exp - 1 + effective_width < 0
+    jz ; exp - 1 + effective_width == 0
+
+display_print_bcdf_nf:
+    ; display in normal form
+    ; b = effective_width
+    ldi pl, lo(display_print_bcdf_arg + 0) ; sign
+    ldi ph, hi(display_print_bcdf_arg + 0)
+    ld a
+    add a, 0
+    ldi pl, lo(display_print_bcdf_nf_no_sign)
+    ldi ph, hi(display_print_bcdf_nf_no_sign)
+    jz
+
+    ldi a, ord('-')
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st a
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+display_print_bcdf_nf_no_sign:
+    ; b = effective_width
+    ldi pl, lo(display_print_bcdf_arg + 1) ; exp
+    ldi ph, hi(display_print_bcdf_arg + 1)
+    ld a
+    sub a, b
+    inc a
+    ; a = exp - effective_width + 1
+    ldi pl, lo(display_print_bcdf_nf_no_dot)
+    ldi ph, hi(display_print_bcdf_nf_no_dot)
+    jz
+    dec b ; the dot takes one place
+display_print_bcdf_nf_no_dot:
+    ; b = effective_width
+
+    ; if exp is negative, start i from exp
+    ; else start from 0
+    ldi pl, lo(display_print_bcdf_arg + 1) ; exp
+    ldi ph, hi(display_print_bcdf_arg + 1)
+    ld a
+    add a, 0
+    ; a = exp
+    ldi pl, lo(display_print_bcdf_nf_i_ready)
+    ldi ph, hi(display_print_bcdf_nf_i_ready)
+    js ; exp < 0
+    mov a, 0
+display_print_bcdf_nf_i_ready:
+    ; a = i
+    ; b = effective_width
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    st b
+display_print_bcdf_nf_loop:
+    ; a = i
+
+    ; if i == exp + 1 display '.'
+    ldi pl, lo(display_print_bcdf_arg + 1) ; exp
+    ldi ph, hi(display_print_bcdf_arg + 1)
+    ld b
+    inc b
+    sub b, a
+    ldi pl, lo(display_print_bcdf_nf_loop_no_dot)
+    ldi ph, hi(display_print_bcdf_nf_loop_no_dot)
+    jnz ; exp + 1 - i != 0
+
+    ldi b, ord('.')
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st b
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+display_print_bcdf_nf_loop_no_dot:
+
+    ; if i < 0 or i >= 14 display '0'
+    ldi pl, lo(display_print_bcdf_nf_loop_zero)
+    ldi ph, hi(display_print_bcdf_nf_loop_zero)
+    add a, 0
+    js ; i < 0
+    ldi b, 14
+    sub b, a
+    js ; 14 < i
+    jz ; 14 == i
+
+    ; display man[i]
+    ldi ph, hi(display_print_bcdf_arg)
+    ldi pl, lo(display_print_bcdf_arg + 2) ; mantissa
+    add pl, a
+    ld b
+    ; b - digit
+    mov pl, a
+    ldi a, ord('0')
+    add b, a
+    ; b - char
+    mov a, pl
+
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st b
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+    ldi pl, lo(display_print_bcdf_nf_loop_end)
+    ldi ph, hi(display_print_bcdf_nf_loop_end)
+    jmp
+
+display_print_bcdf_nf_loop_zero:
+    ldi b, ord('0')
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st b
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+display_print_bcdf_nf_loop_end:
+    ; i += 1
+    inc a
+    ; tmp -= 1
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    ld b
+    dec b
+    st b
+    ldi pl, lo(display_print_bcdf_nf_loop)
+    ldi ph, hi(display_print_bcdf_nf_loop)
+    jnz ; tmp != 0
+
+    ; end of normal form display
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
+    jmp
+
+display_print_bcdf_e_form:
+    ; display in e-form
     ; compute width reduction
     ldi pl, lo(display_print_bcdf_width)
     ldi ph, hi(display_print_bcdf_width)
