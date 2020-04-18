@@ -2,10 +2,10 @@ all: calc.rom io_test.rom
 
 .SECONDARY: calc.bin io_test.bin
 
-calc.bin: calc.o lib/display.o lib/keyboard.o
+calc.bin: calc.o lib/display.o lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-io_test.bin: io_test.o lib/display.o lib/keyboard.o
+io_test.bin: io_test.o lib/display.o lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm

@@ -8,6 +8,51 @@ class Bcdf:
 	def __str__(self):
 		return "{}{}.{}e{}".format("+" if not self.sign else "-", self.man[0], "".join(str(x) for x in self.man[1:]), self.exp)
 
+	def print(self, width):
+		# either 123.456 or 1.352325e+111
+		# min width: -1e+127 - 7 char
+		expLength = 1
+		if self.exp < 0:
+			if self.exp <= -10:
+				expLength += 1
+			if self.exp <= -100:
+				expLength += 1
+		else:
+			if self.exp >= 10:
+				expLength += 1
+			if self.exp >= 100:
+				expLength += 1
+		width -= 3 + expLength
+		if self.sign:
+			yield '-'
+			width -= 1
+		yield chr(ord('0') + self.man[0])
+		if width != 0:
+			yield '.'
+			width -= 1
+		i = 1
+		while width != 0:
+			yield chr(ord('0') + self.man[i])
+			i += 1
+			width -= 1
+		yield 'e'
+		exp = self.exp
+		if exp >= 0:
+			yield '+'
+		else:
+			yield '-'
+			exp = -exp
+		large = False
+		if exp >= 100:
+			yield '1'
+			exp -= 100
+			large = True
+		d, m = divmod10(exp)
+		if d > 0 or large:
+			yield chr(ord('0') + d)
+		yield chr(ord('0') + m)
+
+
 def divmod10(a):
 	return divmod(a, 10)
 
@@ -120,7 +165,8 @@ if __name__ == '__main__':
 
 	a = Bcdf()
 	b = Bcdf()
-	a.exp = 0
+	a.exp = -99
+	a.sign = True
 	a.man[0] = 1
 	a.man[1] = 5
 
@@ -132,3 +178,7 @@ if __name__ == '__main__':
 	print(b)
 	print(bcdfSub(a,b))
 	print(bcdfSub(b,a))
+
+	print()
+	for i in range(7, 17):
+		print("".join(a.print(i)))

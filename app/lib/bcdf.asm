@@ -37,7 +37,7 @@ bcdf_sum:
 
     ldi pl, lo(bcdf_sum_a + sign)
     ldi ph, hi(bcdf_sum_a + sign)
-    ldi a
+    ld a
 
     ldi pl, lo(bcdf_sum_ret)
     ldi ph, hi(bcdf_sum_ret)
@@ -56,6 +56,11 @@ bcdf_sum:
 	; divmod10 - divide by 10
 	; argument: divmod10_arg (byte)
 	; result: divmod10_div (byte), divmod10_mod (byte)
+    .export divmod10
+    .export divmod10_arg
+    .export divmod10_div
+    .export divmod10_mod
+
 	.section data
 divmod10_arg: res 1
 divmod10_div: res 1

@@ -1,37 +1,45 @@
-.global display_init
-.global display_print
-.global display_print_byte
-.global display_print_arg
-.global display_set_address
-.global display_set_address_arg
-.global keyboard_wait_key_released
-.global keyboard_wait_key_released_result
+    .global display_init
+    .global display_print
+    .global display_print_byte
+    .global display_print_arg
+    .global display_set_address
+    .global display_set_address_arg
+    .global keyboard_wait_key_released
+    .global keyboard_wait_key_released_result
 
-.global key_ent
-.global key_right
-.global key_0
-.global key_left
-.global key_esc
-.global key_9
-.global key_8
-.global key_7
-.global key_down
-.global key_6
-.global key_5
-.global key_4
-.global key_up
-.global key_3
-.global key_2
-.global key_1
-.global key_star
-.global key_hash
-.global key_f2
-.global key_f1
+    .global key_ent
+    .global key_right
+    .global key_0
+    .global key_left
+    .global key_esc
+    .global key_9
+    .global key_8
+    .global key_7
+    .global key_down
+    .global key_6
+    .global key_5
+    .global key_4
+    .global key_up
+    .global key_3
+    .global key_2
+    .global key_1
+    .global key_star
+    .global key_hash
+    .global key_f2
+    .global key_f1
 
-.global keyboard_key_digit_map
+    .global keyboard_key_digit_map
 
-.section text
+    .global display_print_bcdf
+    .global display_print_bcdf_arg
+    .global display_print_bcdf_width
+
+    .section text
     nop
+
+    ; ldi pl, lo(test)
+    ; ldi ph, hi(test)
+    ; jmp
 
     ldi pl, lo(display_init)
     ldi ph, hi(display_init)
@@ -50,16 +58,20 @@
     ldi ph, hi(display_print)
     jmp
 
-    ldi pl, lo(display_set_address_arg)
-    ldi ph, hi(display_set_address_arg)
-    ldi a, 0x40 ; second line, first character
-    st a
-
     ldi pl, lo(number_string + 16)
     ldi ph, hi(number_string + 16)
     mov a, 0
     st a
 init:
+    ldi pl, lo(display_set_address_arg)
+    ldi ph, hi(display_set_address_arg)
+    ldi a, 0x40 ; second line, first character
+    st a
+
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp
+
     mov a, 0
     ldi pl, lo(number_input_position)
     ldi ph, hi(number_input_position)
@@ -168,6 +180,12 @@ digit_input_retry:
     ldi ph, hi(dot_entered)
     jz
 
+    ldi b, key_ent
+    sub b, a
+    ldi pl, lo(input_finish)
+    ldi ph, hi(input_finish)
+    jz
+
     ldi pl, lo(keyboard_key_digit_map)
     ldi ph, hi(keyboard_key_digit_map)
     add pl, a
@@ -225,6 +243,38 @@ dot_entered:
     jmp
 
 input_finish:
+    ldi pl, lo(display_print_bcdf_width)
+    ldi ph, hi(display_print_bcdf_width)
+    ldi b, 16
+    st b
+
+    ldi a, 15
+a_copy_loop:
+    ldi ph, hi(bcdf_a)
+    ldi pl, lo(bcdf_a)
+    add pl, a
+    ld b
+    ldi ph, hi(display_print_bcdf_arg)
+    ldi pl, lo(display_print_bcdf_arg)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(a_copy_loop)
+    ldi ph, hi(a_copy_loop)
+    jnc
+
+    ldi pl, lo(display_set_address_arg)
+    ldi ph, hi(display_set_address_arg)
+    ldi a, 0
+    st a
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp
+
+    ldi pl, lo(display_print_bcdf)
+    ldi ph, hi(display_print_bcdf)
+    jmp
+
     ldi pl, lo(init)
     ldi ph, hi(init)
     jmp
@@ -381,6 +431,56 @@ display_entered_number_end:
     mov pl, a
     jmp
 
+
+test:
+    ldi pl, lo(display_print_bcdf_width)
+    ldi ph, hi(display_print_bcdf_width)
+    ldi b, 16
+    st b
+
+    ldi a, 15
+copy_loop:
+    ldi ph, hi(test_bcdf)
+    ldi pl, lo(test_bcdf)
+    add pl, a
+    ld b
+    ldi ph, hi(display_print_bcdf_arg)
+    ldi pl, lo(display_print_bcdf_arg)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(copy_loop)
+    ldi ph, hi(copy_loop)
+    jnc
+
+    ldi pl, lo(display_print_bcdf)
+    ldi ph, hi(display_print_bcdf)
+    jmp
+
+    .export finish
+finish:
+    ldi pl, lo(finish)
+    ldi ph, hi(finish)
+    jmp
+
+    .align 16
+test_bcdf:
+    db 0x0 ; sign
+    db -1 ; exp
+    db 1
+    db 2
+    db 3
+    db 4
+    db 5
+    db 6
+    db 7
+    db 8
+    db 9
+    db 0
+    db 1
+    db 2
+    db 3
+    db 4
 
 hello_string:
     ascii "Hello, world"
