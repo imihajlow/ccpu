@@ -2,6 +2,7 @@
 .export lcd_data
 .export display_init
 .export display_print
+.export display_print_byte
 .export display_set_address
 .export display_print_arg
 .export display_set_address_arg
@@ -25,7 +26,9 @@ display_init:
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
     st a
-    inc pl ; assuming no overflow
+    inc pl
+    mov a, 0
+    adc ph, a
     st b
 
     ldi pl, lo(delay_100ms)
@@ -64,14 +67,17 @@ display_init:
     ldi ph, hi(delay_60us)
     jmp
 
+display_finish: ; a common return label
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
-    ld a
-    inc pl
     ld b
-    mov pl, a
-    mov a, b
+    inc pl
+    mov a, 0
+    adc ph, a
+    ld a
     mov ph, a
+    mov a, b
+    mov pl, a
     jmp
 
 ; display_print_arg - string address
@@ -82,7 +88,9 @@ display_print:
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
     st a
-    inc pl ; assuming no overflow
+    inc pl
+    mov a, 0
+    adc ph, a
     st b
 
 display_print_loop:
@@ -99,8 +107,8 @@ display_print_loop:
     ; P - char address
     ld a
     add a, 0
-    ldi pl, lo(display_print_finish)
-    ldi ph, hi(display_print_finish)
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
     jz
 
     ldi pl, lo(lcd_data)
@@ -128,17 +136,59 @@ display_print_loop:
     ldi ph, hi(display_print_loop)
     jmp
 
-display_print_finish:
+display_print_byte:
+    mov a, ph
+    mov b, a
+    mov a, pl
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
-    ld a
+    st a
     inc pl
+    mov a, 0
+    adc ph, a
+    st b
+
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ld a
+    shr a
+    shr a
+    shr a
+    shr a
+    ldi pl, lo(hex_map)
+    add pl, a
+    mov a, 0
+    ldi ph, hi(hex_map)
+    adc ph, a
     ld b
-    mov pl, a
-    mov a, b
-    mov ph, a
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st b
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
     jmp
 
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ld a
+    ldi b, 0x0f
+    and a, b
+    ldi pl, lo(hex_map)
+    add pl, a
+    mov a, 0
+    ldi ph, hi(hex_map)
+    adc ph, a
+    ld b
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st b
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
+    jmp
 
 display_set_address:
     mov a, ph
@@ -147,7 +197,9 @@ display_set_address:
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
     st a
-    inc pl ; assuming no overflow
+    inc pl
+    mov a, 0
+    adc ph, a
     st b
 
     ldi pl, lo(display_set_address_arg)
@@ -162,16 +214,9 @@ display_set_address:
     ldi ph, hi(delay_60us)
     jmp
 
-    ldi pl, lo(display_return)
-    ldi ph, hi(display_return)
-    ld a
-    inc pl
-    ld b
-    mov pl, a
-    mov a, b
-    mov ph, a
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
     jmp
-
 
 
 ; one nop - 2 clock cycles, 6.6 uS
@@ -260,3 +305,6 @@ delay_60us:
     nop
     nop
     jmp
+
+hex_map:
+    ascii '0123456789ABCDEF'
