@@ -29,6 +29,8 @@
     .export key_f2
     .export key_f1
 
+    .export keyboard_key_digit_map
+
 ; wait until a key is released
 ; the key code (byte) is returned in keyboard_wait_key_released_result
     .export keyboard_wait_key_released
@@ -156,8 +158,6 @@ keyboard_wait_key_released__wait_release:
     ldi pl, lo(col_map)
     ldi ph, hi(col_map)
     add pl, a
-    mov a, 0
-    adc ph, a
     ld b
     ; b - col index
     ldi pl, lo(tmp)
@@ -184,6 +184,7 @@ keyboard_wait_key_released__wait_release:
     jmp
 
 ; mapping from a col mask to a col index: lower index has priority
+    .align 16 ; guarantees no ph overflow
 col_map:
     db 0 ; 0
     db 0 ; 1
@@ -201,6 +202,30 @@ col_map:
     db 0 ; 13
     db 1 ; 14
     db 0 ; 15
+
+; Mapping from a key code to a digit. Keys which are not digits are 0xff
+    .align 32 ; guarantees no ph overflow
+keyboard_key_digit_map:
+    db 0xff
+    db 0xff
+    db 0
+    db 0xff
+    db 0xff
+    db 9
+    db 8
+    db 7
+    db 0xff
+    db 6
+    db 5
+    db 4
+    db 0xff
+    db 3
+    db 2
+    db 1
+    db 0xff
+    db 0xff
+    db 0xff
+    db 0xff
 
     .section data
 keyboard_ret: res 2

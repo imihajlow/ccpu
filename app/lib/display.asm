@@ -12,9 +12,11 @@
 
 .section data
 
+    .align 2
 display_return: res 2
 display_print_arg: res 2
 display_set_address_arg: res 1
+    .align 2
 delay_return: res 2
 
 .section text
@@ -27,8 +29,6 @@ display_init:
     ldi ph, hi(display_return)
     st a
     inc pl
-    mov a, 0
-    adc ph, a
     st b
 
     ldi pl, lo(delay_100ms)
@@ -72,8 +72,6 @@ display_finish: ; a common return label
     ldi ph, hi(display_return)
     ld b
     inc pl
-    mov a, 0
-    adc ph, a
     ld a
     mov ph, a
     mov a, b
@@ -89,8 +87,6 @@ display_print:
     ldi ph, hi(display_return)
     st a
     inc pl
-    mov a, 0
-    adc ph, a
     st b
 
 display_print_loop:
@@ -198,8 +194,6 @@ display_set_address:
     ldi ph, hi(display_return)
     st a
     inc pl
-    mov a, 0
-    adc ph, a
     st b
 
     ldi pl, lo(display_set_address_arg)
@@ -228,7 +222,7 @@ delay_5ms:
     ldi pl, lo(delay_return)
     ldi ph, hi(delay_return)
     st a
-    inc pl ; assuming no overflow
+    inc pl
     st b
 
     ldi a, 63
@@ -262,7 +256,7 @@ delay_100ms:
     ldi pl, lo(delay_return)
     ldi ph, hi(delay_return)
     st a
-    inc pl ; assuming no overflow
+    inc pl
     st b
 
     ldi a, 5

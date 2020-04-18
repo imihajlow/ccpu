@@ -4,8 +4,8 @@
 	; Byte 1: sign (0x00 - positive, 0xff - negative)
 	; Bytes 2-15: mantissa decimal digits
 
-.const exponent = 0
-.const sign = 1
+.const sign = 0
+.const exponent = 1
 .const mantissa = 2
 
 	; bcdf_sum - sum two bcdf numbers

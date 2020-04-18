@@ -176,7 +176,7 @@ def encode(op, args, obj):
             raise ValueError("Invalid register for ST: {}. Only A or B are allowed".format(args))
         return [0xa0 | encodeSrc(args)], []
     elif op == 'ldi':
-        m = re.match(r"(a|b|pl|ph)\s*,\s*\b(.+)", args)
+        m = re.match(r"(a|b|pl|ph)\s*,\s*(\S.*)", args)
         if m is None:
             raise ValueError("Invalid operands: {} {}".format(op, args))
         reg = m.group(1)
@@ -235,7 +235,7 @@ def encode(op, args, obj):
 
 def assemble(lines):
     result = Object()
-    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"']*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
+    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"'.]*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
     for i,l in enumerate(lines):
         line = l.strip()
         try:
