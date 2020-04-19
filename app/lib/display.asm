@@ -461,25 +461,22 @@ display_print_bcdf_positive:
     ; exp < 0
     neg a
 display_print_bcdf_exp_positive:
-    ldi pl, 11
+    ldi pl, 10
     sub a, pl
     ldi pl, lo(display_print_bcdf_exp_length_done)
     ldi ph, hi(display_print_bcdf_exp_length_done)
-    js
+    js ; a < 10
     ; exp >= 10
-    ; a = exp - 11
+    ; a = exp - 10
     dec b ; second exp digit
     ldi pl, 90
-    sub a, pl ; exp - 101
+    sub a, pl ; exp - 100
     ldi pl, lo(display_print_bcdf_exp_length_done)
-    js
+    js ; exp < 100
     ; exp >= 100
     dec b ; third exp digit
 display_print_bcdf_exp_length_done:
     ; b = width (non-mandatory)
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
-    st b
 
     ; always output first digit
     ldi pl, lo(display_print_bcdf_arg + 2) ; man

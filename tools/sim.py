@@ -130,6 +130,13 @@ def loop(program, labels):
                 print("Released")
             else:
                 print("Either two args or no args")
+        elif cmd == 'mem_verbose':
+            if len(tokens) != 2:
+                print("one arg is required")
+            else:
+                v = bool(tokens[1])
+                memory.setVerbose(v)
+                print("Memory verbose = {}".format(str(v)))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')

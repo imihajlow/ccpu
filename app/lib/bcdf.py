@@ -99,10 +99,12 @@ def bcdfNormalize(a):
 	if a.exp - delta < -128:
 		delta = a.exp + 128
 	a.exp = a.exp - delta
-	for i in range(14 - delta):
-		a.man[i] = a.man[i + delta]
-	for i in range(14 - delta, 14):
-		a.man[i] = 0
+	for i in range(14):
+		f = i + delta
+		if f < 14:
+			a.man[i] = a.man[f]
+		else:
+			a.man[i] = 0
 
 
 def bcdfAdd(a, b):
@@ -180,7 +182,7 @@ if __name__ == '__main__':
 	b.man[13] = 9
 	b.exp = -127
 	bcdfNormalize(b)
-	print(b)
+	print("normalize:", b)
 
 	a = Bcdf()
 	b = Bcdf()

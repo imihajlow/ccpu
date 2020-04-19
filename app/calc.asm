@@ -34,6 +34,9 @@
     .global display_print_bcdf_arg
     .global display_print_bcdf_width
 
+    .global bcdf_normalize
+    .global bcdf_normalize_arg
+
     .section text
     nop
 
@@ -245,13 +248,32 @@ dot_entered:
 input_finish:
     ldi pl, lo(display_print_bcdf_width)
     ldi ph, hi(display_print_bcdf_width)
-    ldi b, 16
+    ldi b, 8
     st b
 
     ldi a, 15
-a_copy_loop:
+normalize_a_copy_loop:
     ldi ph, hi(bcdf_a)
     ldi pl, lo(bcdf_a)
+    add pl, a
+    ld b
+    ldi ph, hi(bcdf_normalize_arg)
+    ldi pl, lo(bcdf_normalize_arg)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(normalize_a_copy_loop)
+    ldi ph, hi(normalize_a_copy_loop)
+    jnc
+
+    ldi pl, lo(bcdf_normalize)
+    ldi ph, hi(bcdf_normalize)
+    jmp
+
+    ldi a, 15
+a_copy_loop:
+    ldi ph, hi(bcdf_normalize_arg)
+    ldi pl, lo(bcdf_normalize_arg)
     add pl, a
     ld b
     ldi ph, hi(display_print_bcdf_arg)
@@ -457,6 +479,49 @@ copy_loop:
     ldi ph, hi(display_print_bcdf)
     jmp
 
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp
+
+    ldi a, 15
+copy_normalize:
+    ldi ph, hi(test_bcdf)
+    ldi pl, lo(test_bcdf)
+    add pl, a
+    ld b
+    ldi ph, hi(bcdf_normalize_arg)
+    ldi pl, lo(bcdf_normalize_arg)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(copy_normalize)
+    ldi ph, hi(copy_normalize)
+    jnc
+
+    ldi pl, lo(bcdf_normalize)
+    ldi ph, hi(bcdf_normalize)
+    jmp
+
+    ldi a, 15
+copy_normalized:
+    ldi ph, hi(bcdf_normalize_arg)
+    ldi pl, lo(bcdf_normalize_arg)
+    add pl, a
+    ld b
+    ldi ph, hi(display_print_bcdf_arg)
+    ldi pl, lo(display_print_bcdf_arg)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(copy_normalized)
+    ldi ph, hi(copy_normalized)
+    jnc
+
+    ldi pl, lo(display_print_bcdf)
+    ldi ph, hi(display_print_bcdf)
+    jmp
+
+
     .export finish
 finish:
     ldi pl, lo(finish)
@@ -465,11 +530,11 @@ finish:
 
     .align 16
 test_bcdf:
-    db 0x0 ; sign
-    db -1 ; exp
-    db 1
-    db 2
-    db 3
+    db 0xff ; sign
+    db 100 ; exp
+    db 0
+    db 0
+    db 0
     db 4
     db 5
     db 6
@@ -483,7 +548,7 @@ test_bcdf:
     db 4
 
 hello_string:
-    ascii "Hello, world"
+    ascii "Hello"
     db 0
 
     .section data
