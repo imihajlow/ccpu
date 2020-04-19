@@ -11,10 +11,19 @@
     .export bcdf_op_b
     .export bcdf_op_r
 
+    ; bcdf_sub - subtract two numbers
+    ; arguments: bcdf_op_a and bcdf_op_b
+    ; result: bcdf_op_r (= a - b)
+    ; note: arguments are destroyed
+    .export bcdf_sub
+
     .global divmod10
     .global divmod10_arg
     .global divmod10_div
     .global divmod10_mod
+
+    .global bcdf_normalize
+    .global bcdf_normalize_arg
 
     .section data
     .align 16
@@ -23,7 +32,9 @@ bcdf_op_b: res 16
 bcdf_op_r: res 16
 
 ret_addr: res 2
-carry: res 1
+borrow:
+carry:
+    res 1
 exp_diff: res 1
 index: res 1
 
@@ -47,8 +58,8 @@ bcdf_add:
     ld b
 
     sub a, b
-    ldi pl, lo(a_sign_eq)
-    ldi ph, hi(a_sign_eq)
+    ldi pl, lo(a_begin)
+    ldi ph, hi(a_begin)
     jz ; a.sign == b.sign
 
     ; if signs are different, subtract
@@ -59,7 +70,7 @@ bcdf_add:
     ldi pl, lo(s_begin)
     ldi ph, hi(s_begin)
     jmp
-a_sign_eq:
+a_begin:
     ; r.sign := b.sign
     ldi pl, lo(bcdf_op_r + 0) ; sign
     ldi ph, hi(bcdf_op_r + 0)
@@ -114,7 +125,16 @@ a_a_exp_greater:
     ldi ph, hi(carry)
     st a
 
-    ; i := 0
+    ; r.exp := a.exp
+    ldi pl, lo(bcdf_op_a + 1) ; exp
+    ldi ph, hi(bcdf_op_a + 1)
+    ld a
+    ldi pl, lo(bcdf_op_r + 1) ; exp
+    ldi ph, hi(bcdf_op_r + 1)
+    st a
+
+
+    ; i := 13
     ldi a, 13
 a_loop:
     ; a = i
@@ -288,6 +308,7 @@ a_inf:
     ldi ph, hi(finish)
     jmp
 
+; =============================================================================
 bcdf_sub:
     mov a, pl
     mov b, a
@@ -298,9 +319,271 @@ bcdf_sub:
     inc pl
     st a
 
+    ldi pl, lo(bcdf_op_a + 0) ; sign
+    ldi ph, hi(bcdf_op_a + 0)
+    ld a
+
+    ldi pl, lo(bcdf_op_b + 0) ; sign
+    ldi ph, hi(bcdf_op_b + 0)
+    ld b
+
+    sub a, b
+    ldi pl, lo(s_begin)
+    ldi ph, hi(s_begin)
+    jz ; a.sign == b.sign
+
+    ; if signs are different, add
+    not b
+    ldi pl, lo(bcdf_op_b + 0) ; sign
+    ldi ph, hi(bcdf_op_b + 0)
+    st b
+    ldi pl, lo(a_begin)
+    ldi ph, hi(a_begin)
+    jmp
 
 s_begin:
+    ; r.sign := a.sign
+    ldi pl, lo(bcdf_op_a + 0) ; sign
+    ldi ph, hi(bcdf_op_a + 0)
+    ld a
+    ldi pl, lo(bcdf_normalize_arg + 0) ; sign
+    ldi ph, hi(bcdf_normalize_arg + 0)
+    st a
 
+    ; a.exp - b.exp
+    ldi pl, lo(bcdf_op_a + 1) ; exp
+    ldi ph, hi(bcdf_op_a + 1)
+    ld a
+    ldi pl, lo(bcdf_op_b + 1) ; exp
+    ldi ph, hi(bcdf_op_b + 1)
+    ld b
+    sub a, b
+    ldi pl, lo(s_diff_too_big)
+    ldi ph, hi(s_diff_too_big)
+    jo
+    ldi pl, lo(s_swap)
+    ldi ph, hi(s_swap)
+    js ; a.exp < b.exp
+    ldi pl, lo(s_ops_ready)
+    ldi ph, hi(s_ops_ready)
+    jnz ; a.exp > b.exp
+
+    ; a.exp == b.exp
+    mov a, 0
+s_cmp_loop:
+    ; a = i
+    ldi pl, lo(bcdf_op_a + 2) ; mantissa
+    ldi ph, hi(bcdf_op_a + 2)
+    add pl, a
+    ld b
+    ldi pl, lo(bcdf_op_b + 2) ; mantissa
+    ldi ph, hi(bcdf_op_b + 2)
+    add pl, a
+    ld pl
+    ; a = i
+    ; b = a.man[i]
+    ; pl = b.man[i]
+    mov ph, a
+    mov a, pl
+    sub b, a
+    mov a, ph
+    ; a = i
+    ; b = a.man[i] - b.man[i]
+    ldi pl, lo(s_swap)
+    ldi ph, hi(s_swap)
+    js ; a.man[i] < b.man[i]
+    ldi pl, lo(s_compute_exp_diff)
+    ldi ph, hi(s_compute_exp_diff)
+    jnz ; a.man[i] > b.man[i]
+
+    inc a
+    ldi b, 14
+    sub b, a
+    ldi pl, lo(s_cmp_loop)
+    ldi ph, hi(s_cmp_loop)
+    jnz ; i != 14
+
+    ; a == b
+    ldi pl, lo(s_compute_exp_diff)
+    ldi ph, hi(s_compute_exp_diff)
+    jmp
+
+s_swap:
+    ; a.exp < b.exp
+    ; r.sign = ~r.sign
+    ldi pl, lo(bcdf_normalize_arg + 0) ; sign
+    ldi ph, hi(bcdf_normalize_arg + 0)
+    ld a
+    not a
+    st a
+    ; swap a and b
+    ldi pl, lo(swap_a_b)
+    ldi ph, hi(swap_a_b)
+    jmp
+s_compute_exp_diff:
+    ; a := a.exp - b.exp
+    ldi pl, lo(bcdf_op_a + 1) ; exp
+    ldi ph, hi(bcdf_op_a + 1)
+    ld a
+    ldi pl, lo(bcdf_op_b + 1) ; exp
+    ldi ph, hi(bcdf_op_b + 1)
+    ld b
+    sub a, b
+s_ops_ready:
+    ; a = a.exp - b.exp
+    ; exp_diff := a
+    ldi pl, lo(exp_diff)
+    ldi ph, hi(exp_diff)
+    st a
+
+    ; borrow := 1
+    ldi b, 1
+    ldi pl, lo(borrow)
+    ldi ph, hi(borrow)
+    st b
+
+    ; r.exp := a.exp
+    ldi pl, lo(bcdf_op_a + 1) ; exp
+    ldi ph, hi(bcdf_op_a + 1)
+    ld a
+    ldi pl, lo(bcdf_normalize_arg + 1) ; exp
+    ldi ph, hi(bcdf_normalize_arg + 1)
+    st a
+
+    ; i := 13
+    ldi a, 13
+s_loop:
+    ; a = i
+    ldi pl, lo(bcdf_op_a + 2) ; mantissa
+    ldi ph, hi(bcdf_op_a + 2)
+    add pl, a
+    ld b
+    ; a = i
+    ; b = a.man[i]
+    mov pl, a
+    ldi a, 10 - 1
+    add b, a
+    mov a, pl
+    ; a = i
+    ; b = a.man[i] + 10 - 1
+    ldi pl, lo(borrow)
+    ldi ph, hi(borrow)
+    ld pl
+    mov ph, a
+    mov a, pl
+    add b, a
+    mov a, ph
+    ; a = i
+    ; b = a.man[i] + 10 - 1 + borrow
+
+    ldi pl, lo(index)
+    ldi ph, hi(index)
+    st a
+    ldi pl, lo(exp_diff)
+    ldi ph, hi(exp_diff)
+    ld pl
+    sub a, pl
+    ; a = i - exp_diff
+    ldi pl, lo(s_divide)
+    ldi ph, hi(s_divide)
+    js ; i - exp_diff < 0
+
+    ; b := b - b.man[a]
+    ldi pl, lo(bcdf_op_b + 2) ; man
+    ldi ph, hi(bcdf_op_b + 2)
+    add pl, a
+    ld a
+    sub b, a
+    ; b = a.man[i] + 10 - 1 + borrow - b.man[i - exp_diff]
+s_divide:
+    ; b = difference
+    ldi pl, lo(divmod10_arg)
+    ldi ph, hi(divmod10_arg)
+    st b
+    ldi pl, lo(divmod10)
+    ldi ph, hi(divmod10)
+    jmp
+
+    ; borrow := div
+    ldi pl, lo(divmod10_div)
+    ldi ph, hi(divmod10_div)
+    ld a
+    ldi pl, lo(borrow)
+    ldi ph, hi(borrow)
+    st a
+
+    ; r.man[i] := mod
+    ldi pl, lo(index)
+    ldi ph, hi(index)
+    ld a
+    ldi pl, lo(divmod10_mod)
+    ldi ph, hi(divmod10_mod)
+    ld b
+    ldi pl, lo(bcdf_normalize_arg + 2) ; mantissa
+    ldi ph, hi(bcdf_normalize_arg + 2)
+    add pl, a
+    st b
+
+    dec a
+    ldi pl, lo(s_loop)
+    ldi ph, hi(s_loop)
+    jnc
+
+    ; normalize result
+    ldi pl, lo(bcdf_normalize)
+    ldi ph, hi(bcdf_normalize)
+    jmp
+
+    ; copy into actual result
+    ldi a, 15
+s_copy_loop:
+    ldi pl, lo(bcdf_normalize_arg)
+    ldi ph, hi(bcdf_normalize_arg)
+    add pl, a
+    ld b
+    ldi pl, lo(bcdf_op_r)
+    ldi ph, hi(bcdf_op_r)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(s_copy_loop)
+    ldi ph, hi(s_copy_loop)
+    jnc
+    ldi pl, lo(finish)
+    ldi ph, hi(finish)
+    jmp
+
+s_diff_too_big:
+    ; flags = a.exp - b.exp
+    ldi a, 15 ; i for the loop
+    ldi pl, lo(a_return_a_loop)
+    ldi ph, hi(a_return_a_loop)
+    js ; (a.exp - b.exp) % 256 > 127
+
+    ; b.exp >> a.exp
+    ; return -b
+    dec a
+s_return_b_loop:
+    ldi pl, lo(bcdf_op_b + 1) ; don't copy the sign
+    ldi ph, hi(bcdf_op_b + 1)
+    add pl, a
+    ld b
+    ldi pl, lo(bcdf_op_r + 1)
+    ldi ph, hi(bcdf_op_r + 1)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(s_return_b_loop)
+    ldi ph, hi(s_return_b_loop)
+    jnc
+
+    ldi pl, lo(bcdf_op_b + 0) ; sign
+    ldi ph, hi(bcdf_op_b + 0)
+    ld a
+    not a
+    ldi pl, lo(bcdf_op_r + 0) ; sign
+    ldi ph, hi(bcdf_op_r + 0)
+    st a
     ldi pl, lo(finish)
     ldi ph, hi(finish)
     jmp

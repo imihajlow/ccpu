@@ -153,6 +153,7 @@ def bcdfSub(a, b):
 				r.sign = not r.sign
 				break
 	borrow = 1
+	r.exp = a.exp
 	for i in reversed(range(14)):
 		d = a.man[i] + 10 - 1 + borrow
 		bi = i - expDiff
@@ -202,7 +203,7 @@ if __name__ == '__main__':
 
 	a = Bcdf()
 	b = Bcdf()
-	a.exp = -10
+	a.exp = 6
 	a.sign = False
 	a.man[0] = 1
 	a.man[1] = 5
