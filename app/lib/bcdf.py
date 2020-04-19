@@ -136,6 +136,7 @@ def bcdfAdd(a, b):
 def bcdfSub(a, b):
 	if a.sign != b.sign:
 		b.sign = not b.sign
+		return bcdfAdd(a, b)
 	r = Bcdf()
 	expDiff = a.exp - b.exp
 	r.sign = a.sign

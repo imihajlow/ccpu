@@ -37,12 +37,17 @@
     .global bcdf_normalize
     .global bcdf_normalize_arg
 
+    .global bcdf_add
+    .global bcdf_op_a
+    .global bcdf_op_b
+    .global bcdf_op_r
+
     .section text
     nop
 
-    ; ldi pl, lo(test)
-    ; ldi ph, hi(test)
-    ; jmp
+    ldi pl, lo(test)
+    ldi ph, hi(test)
+    jmp
 
     ldi pl, lo(display_init)
     ldi ph, hi(display_init)
@@ -461,9 +466,43 @@ test:
     st b
 
     ldi a, 15
-copy_loop:
-    ldi ph, hi(test_bcdf)
-    ldi pl, lo(test_bcdf)
+copy_loop_a:
+    ldi ph, hi(test_bcdf_a)
+    ldi pl, lo(test_bcdf_a)
+    add pl, a
+    ld b
+    ldi ph, hi(bcdf_op_a)
+    ldi pl, lo(bcdf_op_a)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(copy_loop_a)
+    ldi ph, hi(copy_loop_a)
+    jnc
+
+    ldi a, 15
+copy_loop_b:
+    ldi ph, hi(test_bcdf_b)
+    ldi pl, lo(test_bcdf_b)
+    add pl, a
+    ld b
+    ldi ph, hi(bcdf_op_b)
+    ldi pl, lo(bcdf_op_b)
+    add pl, a
+    st b
+    dec a
+    ldi pl, lo(copy_loop_b)
+    ldi ph, hi(copy_loop_b)
+    jnc
+
+    ldi pl, lo(bcdf_add)
+    ldi ph, hi(bcdf_add)
+    jmp
+
+    ldi a, 15
+copy_loop_r:
+    ldi ph, hi(bcdf_op_r)
+    ldi pl, lo(bcdf_op_r)
     add pl, a
     ld b
     ldi ph, hi(display_print_bcdf_arg)
@@ -471,56 +510,13 @@ copy_loop:
     add pl, a
     st b
     dec a
-    ldi pl, lo(copy_loop)
-    ldi ph, hi(copy_loop)
+    ldi pl, lo(copy_loop_r)
+    ldi ph, hi(copy_loop_r)
     jnc
 
     ldi pl, lo(display_print_bcdf)
     ldi ph, hi(display_print_bcdf)
     jmp
-
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
-    jmp
-
-    ldi a, 15
-copy_normalize:
-    ldi ph, hi(test_bcdf)
-    ldi pl, lo(test_bcdf)
-    add pl, a
-    ld b
-    ldi ph, hi(bcdf_normalize_arg)
-    ldi pl, lo(bcdf_normalize_arg)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(copy_normalize)
-    ldi ph, hi(copy_normalize)
-    jnc
-
-    ldi pl, lo(bcdf_normalize)
-    ldi ph, hi(bcdf_normalize)
-    jmp
-
-    ldi a, 15
-copy_normalized:
-    ldi ph, hi(bcdf_normalize_arg)
-    ldi pl, lo(bcdf_normalize_arg)
-    add pl, a
-    ld b
-    ldi ph, hi(display_print_bcdf_arg)
-    ldi pl, lo(display_print_bcdf_arg)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(copy_normalized)
-    ldi ph, hi(copy_normalized)
-    jnc
-
-    ldi pl, lo(display_print_bcdf)
-    ldi ph, hi(display_print_bcdf)
-    jmp
-
 
     .export finish
 finish:
@@ -529,24 +525,41 @@ finish:
     jmp
 
     .align 16
-test_bcdf:
-    db 0xff ; sign
-    db 100 ; exp
-    db 0
-    db 0
-    db 0
-    db 4
-    db 5
+test_bcdf_a:
+    db 0x0 ; sign
+    db -100 ; exp
     db 6
-    db 7
-    db 8
-    db 9
+    db 5
     db 0
-    db 1
-    db 2
-    db 3
-    db 4
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
 
+test_bcdf_b:
+    db 0x0 ; sign
+    db 100 ; exp
+    db 4
+    db 6
+    db 3
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
+    db 0
 hello_string:
     ascii "Hello"
     db 0
