@@ -91,11 +91,9 @@ display_init:
 display_finish: ; a common return label
     ldi pl, lo(display_return)
     ldi ph, hi(display_return)
-    ld b
-    inc pl
     ld a
-    mov ph, a
-    mov a, b
+    inc pl
+    ld ph
     mov pl, a
     jmp
 
@@ -695,10 +693,8 @@ delay_5ms_loop: ; 24 clock cycles
     ldi ph, hi(delay_return)
     ld a
     inc pl
-    ld b
+    ld ph
     mov pl, a
-    mov a, b
-    mov ph, a
     jmp
 
 ; ~30000 cycles
@@ -731,10 +727,8 @@ delay_100ms_loop: ; 24 clock cycles
     ldi ph, hi(delay_return)
     ld a
     inc pl
-    ld b
+    ld ph
     mov pl, a
-    mov a, b
-    mov ph, a
     jmp
 
 ; ~18 cycles

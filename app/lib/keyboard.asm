@@ -173,13 +173,9 @@ keyboard_wait_key_released__wait_release:
     ; return
     ldi pl, lo(keyboard_ret)
     ldi ph, hi(keyboard_ret)
-    ld b
-    mov a, 0
-    inc pl
-    adc ph, a
     ld a
-    mov ph, a
-    mov a, b
+    inc pl
+    ld ph
     mov pl, a
     jmp
 
@@ -228,5 +224,6 @@ keyboard_key_digit_map:
     db 0xff
 
     .section data
+    .align 2
 keyboard_ret: res 2
 tmp: res 1

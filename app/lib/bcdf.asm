@@ -202,11 +202,9 @@ bcdf_normalize_copy_loop_finish:
 bcdf_normalize_finish:
     ldi pl, lo(bcdf_normalize_ret)
     ldi ph, hi(bcdf_normalize_ret)
-    ld b
-    inc pl
     ld a
-    mov ph, a
-    mov a, b
+    inc pl
+    ld ph
     mov pl, a
     jmp
 
@@ -267,13 +265,9 @@ divmod10_finish:
 
     ldi pl, lo(divmod10_ret)
     ldi ph, hi(divmod10_ret)
-    ld b
-    mov a, 0
-    inc pl
-    adc ph, a
     ld a
-    mov ph, a
-    mov a, b
+    inc pl
+    ld ph
     mov pl, a
 	jmp
 
