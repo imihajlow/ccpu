@@ -409,8 +409,8 @@ s_cmp_loop:
     jmp
 
 s_swap:
-    ; a.exp < b.exp
-    ; r.sign = ~r.sign
+    ; a < b
+    ; r.sign := ~r.sign
     ldi pl, lo(bcdf_normalize_arg + 0) ; sign
     ldi ph, hi(bcdf_normalize_arg + 0)
     ld a
@@ -420,6 +420,21 @@ s_swap:
     ldi pl, lo(swap_a_b)
     ldi ph, hi(swap_a_b)
     jmp
+
+    ; a.sign := ~a.sign
+    ldi pl, lo(bcdf_op_a + 0) ; sign
+    ldi ph, hi(bcdf_op_a + 0)
+    ld a
+    not a
+    st a
+    ; b.sign := ~b.sign
+    ldi pl, lo(bcdf_op_b + 0) ; sign
+    ldi ph, hi(bcdf_op_b + 0)
+    ld a
+    not a
+    st a
+
+
 s_compute_exp_diff:
     ; a := a.exp - b.exp
     ldi pl, lo(bcdf_op_a + 1) ; exp
@@ -435,6 +450,34 @@ s_ops_ready:
     ldi pl, lo(exp_diff)
     ldi ph, hi(exp_diff)
     st a
+
+    ; check if a == 0
+    ldi a, 13
+s_check_zero_loop:
+    ; a = i
+    ldi pl, lo(bcdf_op_a + 2) ; mantissa
+    ldi ph, hi(bcdf_op_a + 2)
+    add pl, a
+    ld b
+    mov pl, a
+    mov a, 0
+    add a, b
+    mov a, pl
+    ldi pl, lo(s_not_zero)
+    ldi ph, hi(s_not_zero)
+    jnz ; a.man[i] != 0
+    dec a
+    ldi pl, lo(s_check_zero_loop)
+    ldi ph, hi(s_check_zero_loop)
+    jnc ; i >= 0
+
+    ; a is zero => return -b
+    ldi a, 14 ; needed for s_return_b_loop
+    ldi pl, lo(s_return_b_loop)
+    ldi ph, hi(s_return_b_loop)
+    jmp
+
+s_not_zero:
 
     ; borrow := 1
     ldi b, 1
@@ -584,6 +627,7 @@ s_return_b_loop:
     ldi pl, lo(bcdf_op_r + 0) ; sign
     ldi ph, hi(bcdf_op_r + 0)
     st a
+
     ldi pl, lo(finish)
     ldi ph, hi(finish)
     jmp

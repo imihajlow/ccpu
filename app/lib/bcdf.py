@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import copy
+
 class Bcdf:
 	def __init__(self):
 		self.exp = 0
@@ -7,6 +9,13 @@ class Bcdf:
 
 	def __str__(self):
 		return "{}{}.{}e{}".format("+" if not self.sign else "-", self.man[0], "".join(str(x) for x in self.man[1:]), self.exp)
+
+	def copy(self):
+		r = Bcdf()
+		r.exp = self.exp
+		r.sign = self.sign
+		r.man = copy.copy(self.man)
+		return r
 
 	def print(self, width):
 		effWidth = width
@@ -143,7 +152,10 @@ def bcdfSub(a, b):
 	if expDiff < 0:
 		a,b = b,a
 		expDiff = -expDiff
-		r.sign = not r.sign
+		a.sign = not a.sign
+		b.sign = not b.sign
+		r.sign = a.sign
+		print("swap")
 	elif expDiff == 0:
 		for i in range(14):
 			if a.man[i] > b.man[i]:
@@ -152,6 +164,11 @@ def bcdfSub(a, b):
 				a,b = b,a
 				r.sign = not r.sign
 				break
+	if not any(a.man): # a == 0
+		print("a == 0")
+		r = b.copy()
+		r.sign = not r.sign
+		return r
 	borrow = 1
 	r.exp = a.exp
 	for i in reversed(range(14)):

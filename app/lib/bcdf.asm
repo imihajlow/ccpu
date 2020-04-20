@@ -1,8 +1,8 @@
-	; Binary-coded decimal float
-	; Coding:
-	; Byte 0: exponent (signed)
-	; Byte 1: sign (0x00 - positive, 0xff - negative)
-	; Bytes 2-15: mantissa decimal digits
+    ; Binary-coded decimal float
+    ; Coding:
+    ; Byte 0: exponent (signed)
+    ; Byte 1: sign (0x00 - positive, 0xff - negative)
+    ; Bytes 2-15: mantissa decimal digits
 
 .const sign = 0
 .const exponent = 1
@@ -13,13 +13,13 @@
     .export bcdf_normalize
     .export bcdf_normalize_arg
 
-	; bcdf_sum - sum two bcdf numbers
-	; arguments: bcdf_sum_a, bcdf_sum_b
-	; result: bcdf_sum_r
-	.export bcdf_sum
-	.export bcdf_sum_a
-	.export bcdf_sum_b
-	.export bcdf_sum_r
+    ; bcdf_sum - sum two bcdf numbers
+    ; arguments: bcdf_sum_a, bcdf_sum_b
+    ; result: bcdf_sum_r
+    .export bcdf_sum
+    .export bcdf_sum_a
+    .export bcdf_sum_b
+    .export bcdf_sum_r
 
     ; divmod10 - divide by 10
     ; argument: divmod10_arg (byte)
@@ -29,16 +29,16 @@
     .export divmod10_div
     .export divmod10_mod
 
-	.section data
+    .section data
     .align 16
 bcdf_sum_a: res 16
 bcdf_sum_b: res 16
 bcdf_sum_r: res 16
 bcdf_sum_ret: res 2
 
-	.section text
+    .section text
 bcdf_sum:
-	mov a, ph
+    mov a, ph
     mov b, a
     mov a, pl
     ldi pl, lo(bcdf_sum_ret)
@@ -59,7 +59,7 @@ bcdf_sum:
     mov ph, a
     mov a, b
     mov pl, a
-	jmp
+    jmp
 
     .section data
     .align 16
@@ -208,14 +208,14 @@ bcdf_normalize_finish:
     mov pl, a
     jmp
 
-	.section data
+    .section data
 divmod10_arg: res 1
 divmod10_div: res 1
 divmod10_mod: res 1
 
 divmod10_ret: res 2
 
-	.section text
+    .section text
 divmod10:
     mov a, ph
     mov b, a
@@ -229,7 +229,7 @@ divmod10:
     st b
 
     ; div = 0
-	ldi pl, lo(divmod10_div)
+    ldi pl, lo(divmod10_div)
     ldi ph, hi(divmod10_div)
     st a
 
@@ -258,10 +258,10 @@ divmod10_loop:
     jmp
 
 divmod10_finish:
-	add b, a ; b - mod
-	ldi pl, lo(divmod10_mod)
-	ldi ph, hi(divmod10_mod)
-	st b
+    add b, a ; b - mod
+    ldi pl, lo(divmod10_mod)
+    ldi ph, hi(divmod10_mod)
+    st b
 
     ldi pl, lo(divmod10_ret)
     ldi ph, hi(divmod10_ret)
@@ -269,5 +269,5 @@ divmod10_finish:
     inc pl
     ld ph
     mov pl, a
-	jmp
+    jmp
 
