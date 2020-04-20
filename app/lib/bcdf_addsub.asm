@@ -1,7 +1,3 @@
-    .const sign = 0
-    .const exponent = 1
-    .const mantissa = 2
-
     ; bcdf_add - add two numbers
     ; arguments: bcdf_op_a and bcdf_op_b
     ; result: bcdf_op_r

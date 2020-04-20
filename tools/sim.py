@@ -24,7 +24,7 @@ def loadLabels(file):
         labels[m.group(1)] = int(m.group(2), 16)
     return labels
 
-def loop(program, labels):
+def loop(program, labels, initialCommand):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
     keyboard = Keyboard()
@@ -44,10 +44,15 @@ def loop(program, labels):
                 print("{} + 0x{:X}:".format(rlabels[la], m.ip - la))
             m.printState()
             newState = False
-        try:
-            line = input("> ")
-        except EOFError:
-            return
+        line = ""
+        if initialCommand is not None:
+            line = initialCommand
+            initialCommand = None
+        else:
+            try:
+                line = input("> ")
+            except EOFError:
+                return
         tokens = line.split(' ')
         cmd = tokens[0]
         if cmd == 's' or cmd == 'step' or cmd == '':
@@ -140,6 +145,7 @@ def loop(program, labels):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')
+    parser.add_argument('-c', metavar="COMMAND", help='simulator command to execute at start')
     parser.add_argument('file', type=argparse.FileType("rb"), help='program file')
     parser.add_argument('mapfile', type=argparse.FileType("r"), help='label map file')
     args = parser.parse_args()
@@ -147,7 +153,7 @@ if __name__ == "__main__":
     # try:
     program = load(args.file)
     labels = loadLabels(args.mapfile)
-    loop(program, labels)
+    loop(program, labels, args.c)
     # except Exception as e:
     #     print(e)
     #     sys.exit(1)

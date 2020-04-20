@@ -46,10 +46,6 @@
     .section text
     nop
 
-    ; ldi pl, lo(test)
-    ; ldi ph, hi(test)
-    ; jmp
-
     ldi pl, lo(display_init)
     ldi ph, hi(display_init)
     jmp
@@ -500,109 +496,6 @@ display_entered_number_end:
     mov pl, a
     jmp
 
-; =====================================================
-
-test:
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
-    ldi b, 16
-    st b
-
-    ldi a, 15
-copy_loop_a:
-    ldi ph, hi(test_bcdf_a)
-    ldi pl, lo(test_bcdf_a)
-    add pl, a
-    ld b
-    ldi ph, hi(bcdf_op_a)
-    ldi pl, lo(bcdf_op_a)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(copy_loop_a)
-    ldi ph, hi(copy_loop_a)
-    jnc
-
-    ldi a, 15
-copy_loop_b:
-    ldi ph, hi(test_bcdf_b)
-    ldi pl, lo(test_bcdf_b)
-    add pl, a
-    ld b
-    ldi ph, hi(bcdf_op_b)
-    ldi pl, lo(bcdf_op_b)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(copy_loop_b)
-    ldi ph, hi(copy_loop_b)
-    jnc
-
-    ldi pl, lo(bcdf_sub)
-    ldi ph, hi(bcdf_sub)
-    jmp
-
-    ldi a, 15
-copy_loop_r:
-    ldi ph, hi(bcdf_op_r)
-    ldi pl, lo(bcdf_op_r)
-    add pl, a
-    ld b
-    ldi ph, hi(display_print_bcdf_arg)
-    ldi pl, lo(display_print_bcdf_arg)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(copy_loop_r)
-    ldi ph, hi(copy_loop_r)
-    jnc
-
-    ldi pl, lo(display_print_bcdf)
-    ldi ph, hi(display_print_bcdf)
-    jmp
-
-    .export finish
-finish:
-    ldi pl, lo(finish)
-    ldi ph, hi(finish)
-    jmp
-
-    .align 16
-test_bcdf_a:
-    db 0x0 ; sign
-    db -100 ; exp
-    db 2
-    db 5
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-
-test_bcdf_b:
-    db 0x0 ; sign
-    db 100 ; exp
-    db 4
-    db 6
-    db 3
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
-    db 0
 hello_string:
     ascii "Hello"
     db 0

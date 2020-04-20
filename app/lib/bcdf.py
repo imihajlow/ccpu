@@ -181,21 +181,43 @@ def bcdfSub(a, b):
 	bcdfNormalize(r)
 	return r
 
+def bcdfMul(a, b):
+	r = Bcdf()
+	for i in range(14):
+		for j in range(a.man[i]):
+			r = bcdfAdd(r, b.copy())
+		b.exp -= 1
+		if b.exp < -128:
+			break
+	r.exp += a.exp
+	if r.exp > 127:
+		# inf
+		r.exp = 127
+		r.man[0] = 1
+	if r.exp < -128:
+		# zero
+		r.exp = 0
+		r.man = [0]*14
+	r.sign ^= a.sign
+	return r
+
 
 if __name__ == '__main__':
 	a = Bcdf()
+	a.sign = True
 	a.exp = 0
-	a.man[0] = 1
-	a.man[1] = 5
+	a.man[0] = 0
+	a.man[1] = 0
 
 	b = Bcdf()
-	b.exp = 0
-	b.man[0] = 9
-	b.man[1] = 7
-	b.man[2] = 6
+	b.exp = 1
+	b.sign = False
+	b.man[0] = 3
+	b.man[1] = 0
+	b.man[2] = 0
 	print(a)
 	print(b)
-	print(bcdfAdd(b,a))
+	print(bcdfAdd(a, b))
 
 	b.man[0] = 0
 	b.man[13] = 9
@@ -237,3 +259,16 @@ if __name__ == '__main__':
 	print()
 	for i in range(7, 17):
 		print("".join(a.print(i)))
+
+	print()
+	print("multiply")
+	a = Bcdf()
+	b = Bcdf()
+	a.exp = 2
+	a.sign = False
+	a.man[0] = 5
+
+	b.exp = 120
+	b.sign = True
+	b.man[0] = 6
+	print(bcdfMul(a,b))
