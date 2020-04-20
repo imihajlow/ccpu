@@ -79,8 +79,9 @@ The `NOP` instruction has a binary opcode pattern of 111x11xx (0xFF is one of th
 # Assembly language
 
 There are few assembly directives:
-* `.const name = value` - define a constant
-* `.global name` - declare a symbol global (imported)
+* `.const name = value` - define a constant.
+* `.global name` - declare a symbol global (imported).
+* `.export name` - export a symbol to make it visible for `.global`.
 * `.section name` - start a section. Currently linker supports three sections: `init` (internal use for code placed at the beginning), `text` (ROM contents) and `data` (RAM).
 * `.align X` - align the address by X.
 
