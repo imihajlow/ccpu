@@ -184,6 +184,7 @@ init:
     ldi pl, lo(display_set_address_arg)
     ldi ph, hi(display_set_address_arg)
     ldi a, 15 ; first line, last char
+    st a
     ldi pl, lo(display_set_address)
     ldi ph, hi(display_set_address)
     jmp
@@ -628,7 +629,7 @@ hello_string:
     db 0
 
 op_prompt:
-    ascii "op?             "
+    ascii "OP?             "
     db 0
 
     .section data
