@@ -1,14 +1,12 @@
     ; bcdf_mul - multiply two numbers
-    ; arguments: bcdf_mul_a and bcdf_mul_b
+    ; arguments: bcdf_op_a and bcdf_op_b
     ; result: bcdf_op_r
     .export bcdf_mul
-    .export bcdf_mul_a
-    .export bcdf_mul_b
+    .global bcdf_op_a
+    .global bcdf_op_b
     .global bcdf_op_r
 
     .global bcdf_add
-    .global bcdf_op_a
-    .global bcdf_op_b
 
     .section data
     .align 16
@@ -43,6 +41,33 @@ loop_init_r:
         ldi pl, lo(loop_init_r)
         ldi ph, hi(loop_init_r)
         jnc
+
+    ; bcdf_op_a => bcdf_mul_a
+    ; bcdf_op_b => bcdf_mul_b
+    ldi a, 15
+loop_copy_args:
+        ldi pl, lo(bcdf_op_a)
+        ldi ph, hi(bcdf_op_a)
+        add pl, a
+        ld b
+        ldi pl, lo(bcdf_mul_a)
+        ldi ph, hi(bcdf_mul_a)
+        add pl, a
+        st b
+
+        ldi pl, lo(bcdf_op_b)
+        ldi ph, hi(bcdf_op_b)
+        add pl, a
+        ld b
+        ldi pl, lo(bcdf_mul_b)
+        ldi ph, hi(bcdf_mul_b)
+        add pl, a
+        st b
+
+        dec a
+        ldi pl, lo(loop_copy_args)
+        ldi ph, hi(loop_copy_args)
+        jnc ; a >= 0
 
     mov a, 0
 loop_man:

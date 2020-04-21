@@ -43,6 +43,8 @@
     .global bcdf_op_b
     .global bcdf_op_r
 
+    .global bcdf_mul
+
     .section text
     nop
 
@@ -55,27 +57,148 @@
     mov a, 0
     st a
 
+    ldi pl, lo(op_null_term)
+    ldi ph, hi(op_null_term)
+    st a
+
     ldi pl, lo(display_print_bcdf_width)
     ldi ph, hi(display_print_bcdf_width)
-    ldi b, 8
+    ldi b, 14
     st b
 
     ldi a, 15
     ldi b, 0
 r_init_loop:
-    ldi pl, lo(bcdf_op_r)
-    ldi ph, hi(bcdf_op_r)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(r_init_loop)
-    ldi ph, hi(r_init_loop)
-    jnc
+        ldi pl, lo(bcdf_op_r)
+        ldi ph, hi(bcdf_op_r)
+        add pl, a
+        st b
+        dec a
+        ldi pl, lo(r_init_loop)
+        ldi ph, hi(r_init_loop)
+        jnc
 
     ldi pl, lo(display_result)
     ldi ph, hi(display_result)
     jmp
+input_op:
+    ldi pl, lo(display_set_address_arg)
+    ldi ph, hi(display_set_address_arg)
+    ldi a, 0x40 ; second line, first character
+    st a
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp
+
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ldi a, lo(op_prompt)
+    st a
+    inc pl
+    ldi a, hi(op_prompt)
+    st a
+    ldi pl, lo(display_print)
+    ldi ph, hi(display_print)
+    jmp
+input_op_loop:
+    ldi pl, lo(keyboard_wait_key_released)
+    ldi ph, hi(keyboard_wait_key_released)
+    jmp
+
+    ldi pl, lo(keyboard_wait_key_released_result)
+    ldi ph, hi(keyboard_wait_key_released_result)
+    ld a
+
+    ldi b, key_up ; up = plus
+    sub b, a
+    ldi pl, lo(op_add)
+    ldi ph, hi(op_add)
+    jz
+
+    ldi b, key_down ; down = minus
+    sub b, a
+    ldi pl, lo(op_sub)
+    ldi ph, hi(op_sub)
+    jz
+
+    ldi b, key_star ; star = mul
+    sub b, a
+    ldi pl, lo(op_mul)
+    ldi ph, hi(op_mul)
+    jz
+
+    ldi pl, lo(input_op_loop)
+    ldi ph, hi(input_op_loop)
+    jmp
+op_add:
+    ldi pl, lo(op)
+    ldi ph, hi(op)
+    ldi a, ord('+')
+    st a
+
+    ldi pl, lo(p_op)
+    ldi ph, hi(p_op)
+    ldi a, lo(bcdf_add)
+    st a
+    inc pl
+    ldi a, hi(bcdf_add)
+    st a
+
+    ldi pl, lo(init)
+    ldi ph, hi(init)
+    jmp
+op_sub:
+    ldi pl, lo(op)
+    ldi ph, hi(op)
+    ldi a, ord('-')
+    st a
+
+    ldi pl, lo(p_op)
+    ldi ph, hi(p_op)
+    ldi a, lo(bcdf_sub)
+    st a
+    inc pl
+    ldi a, hi(bcdf_sub)
+    st a
+
+    ldi pl, lo(init)
+    ldi ph, hi(init)
+    jmp
+op_mul:
+    ldi pl, lo(op)
+    ldi ph, hi(op)
+    ldi a, ord('*')
+    st a
+
+    ldi pl, lo(p_op)
+    ldi ph, hi(p_op)
+    ldi a, lo(bcdf_mul)
+    st a
+    inc pl
+    ldi a, hi(bcdf_mul)
+    st a
+
+
 init:
+    ; display op
+    ldi pl, lo(display_set_address_arg)
+    ldi ph, hi(display_set_address_arg)
+    ldi a, 15 ; first line, last char
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp
+
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ldi a, lo(op)
+    st a
+    inc pl
+    ldi a, hi(op)
+    st b
+    ldi pl, lo(display_print)
+    ldi ph, hi(display_print)
+    jmp
+
     ldi pl, lo(display_set_address_arg)
     ldi ph, hi(display_set_address_arg)
     ldi a, 0x40 ; second line, first character
@@ -96,16 +219,16 @@ init:
 
     ldi b, 15
 init_number_loop:
-    ldi pl, lo(bcdf_a)
-    ldi ph, hi(bcdf_a)
-    mov a, b
-    add pl, a
-    mov a, 0
-    st a
-    dec b
-    ldi pl, lo(init_number_loop)
-    ldi ph, hi(init_number_loop)
-    jnc
+        ldi pl, lo(bcdf_a)
+        ldi ph, hi(bcdf_a)
+        mov a, b
+        add pl, a
+        mov a, 0
+        st a
+        dec b
+        ldi pl, lo(init_number_loop)
+        ldi ph, hi(init_number_loop)
+        jnc
 
     ldi pl, lo(bcdf_a + 1) ; exp
     ldi ph, hi(bcdf_a + 1)
@@ -277,59 +400,63 @@ normalize_a_copy_loop:
     ldi ph, hi(bcdf_normalize)
     jmp
 
-    ; copy the normalized number into op_b
+    ; copy the normalized number into bcdf_op_b
     ldi a, 15
 b_copy_loop:
-    ldi ph, hi(bcdf_normalize_arg)
-    ldi pl, lo(bcdf_normalize_arg)
-    add pl, a
-    ld b
-    ldi ph, hi(bcdf_op_b)
-    ldi pl, lo(bcdf_op_b)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(b_copy_loop)
-    ldi ph, hi(b_copy_loop)
-    jnc
+        ldi ph, hi(bcdf_normalize_arg)
+        ldi pl, lo(bcdf_normalize_arg)
+        add pl, a
+        ld b
+        ldi ph, hi(bcdf_op_b)
+        ldi pl, lo(bcdf_op_b)
+        add pl, a
+        st b
+        dec a
+        ldi pl, lo(b_copy_loop)
+        ldi ph, hi(b_copy_loop)
+        jnc
 
-    ; copy the previous result into op_a
+    ; copy the previous result into bcdf_op_a
     ldi a, 15
 a_copy_loop:
-    ldi ph, hi(bcdf_op_r)
-    ldi pl, lo(bcdf_op_r)
-    add pl, a
-    ld b
-    ldi ph, hi(bcdf_op_a)
-    ldi pl, lo(bcdf_op_a)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(a_copy_loop)
-    ldi ph, hi(a_copy_loop)
-    jnc
+        ldi ph, hi(bcdf_op_r)
+        ldi pl, lo(bcdf_op_r)
+        add pl, a
+        ld b
+        ldi ph, hi(bcdf_op_a)
+        ldi pl, lo(bcdf_op_a)
+        add pl, a
+        st b
+        dec a
+        ldi pl, lo(a_copy_loop)
+        ldi ph, hi(a_copy_loop)
+        jnc
 
-    ; add the numbers
-    ldi pl, lo(bcdf_add)
-    ldi ph, hi(bcdf_add)
+    ; call *p_op
+    ldi pl, lo(p_op)
+    ldi ph, hi(p_op)
+    ld a
+    inc pl
+    ld ph
+    mov pl, a
     jmp
 
 display_result:
     ; display addition result
     ldi a, 15
 result_copy_loop:
-    ldi ph, hi(bcdf_op_r)
-    ldi pl, lo(bcdf_op_r)
-    add pl, a
-    ld b
-    ldi ph, hi(display_print_bcdf_arg)
-    ldi pl, lo(display_print_bcdf_arg)
-    add pl, a
-    st b
-    dec a
-    ldi pl, lo(result_copy_loop)
-    ldi ph, hi(result_copy_loop)
-    jnc
+        ldi ph, hi(bcdf_op_r)
+        ldi pl, lo(bcdf_op_r)
+        add pl, a
+        ld b
+        ldi ph, hi(display_print_bcdf_arg)
+        ldi pl, lo(display_print_bcdf_arg)
+        add pl, a
+        st b
+        dec a
+        ldi pl, lo(result_copy_loop)
+        ldi ph, hi(result_copy_loop)
+        jnc
 
     ldi pl, lo(display_set_address_arg)
     ldi ph, hi(display_set_address_arg)
@@ -343,8 +470,8 @@ result_copy_loop:
     ldi ph, hi(display_print_bcdf)
     jmp
 
-    ldi pl, lo(init)
-    ldi ph, hi(init)
+    ldi pl, lo(input_op)
+    ldi ph, hi(input_op)
     jmp
 
 display_entered_number:
@@ -500,6 +627,10 @@ hello_string:
     ascii "Hello"
     db 0
 
+op_prompt:
+    ascii "op?             "
+    db 0
+
     .section data
     .align 16
 number_string: res 17
@@ -508,6 +639,9 @@ tmp: res 1
 bcdf_a: res 16
 number_input_position: res 1
 is_dot_entered: res 1
+op: res 1
+op_null_term: res 1
     .align 2
 ret: res 2
+p_op: res 2
 

@@ -40,8 +40,6 @@
     .global bcdf_add
     .global bcdf_sub
     .global bcdf_mul
-    .global bcdf_mul_a
-    .global bcdf_mul_b
     .global bcdf_op_a
     .global bcdf_op_b
     .global bcdf_op_r
@@ -60,8 +58,8 @@ copy_loop_a:
     ldi pl, lo(test_bcdf_a)
     add pl, a
     ld b
-    ldi ph, hi(bcdf_mul_a)
-    ldi pl, lo(bcdf_mul_a)
+    ldi ph, hi(bcdf_op_a)
+    ldi pl, lo(bcdf_op_a)
     add pl, a
     st b
     dec a
@@ -75,8 +73,8 @@ copy_loop_b:
     ldi pl, lo(test_bcdf_b)
     add pl, a
     ld b
-    ldi ph, hi(bcdf_mul_b)
-    ldi pl, lo(bcdf_mul_b)
+    ldi ph, hi(bcdf_op_b)
+    ldi pl, lo(bcdf_op_b)
     add pl, a
     st b
     dec a
@@ -115,7 +113,7 @@ finish:
 
     .align 16
 test_bcdf_a:
-    db 0xff ; sign
+    db 0x0 ; sign
     db 0 ; exp
     db 2
     db 5
