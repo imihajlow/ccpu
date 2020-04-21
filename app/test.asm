@@ -101,8 +101,33 @@ copy_loop_r:
     ldi ph, hi(copy_loop_r)
     jnc
 
+    ; print the result with different width
+    ldi pl, lo(display_print_bcdf_width)
+    ldi ph, hi(display_print_bcdf_width)
+    ldi a, 6
+    st a
+display_loop:
+    ldi pl, lo(display_print_bcdf_width)
+    ldi ph, hi(display_print_bcdf_width)
+    ld a
+    inc a
+    st a
+    ldi b, 16
+    sub b, a
+    ldi pl, lo(finish)
+    ldi ph, hi(finish)
+    js ; 16 < width
+
+    ldi pl, lo(display_set_address)
+    ldi ph, hi(display_set_address)
+    jmp ; cause newline in the simulator
+
     ldi pl, lo(display_print_bcdf)
     ldi ph, hi(display_print_bcdf)
+    jmp
+
+    ldi pl, lo(display_loop)
+    ldi ph, hi(display_loop)
     jmp
 
     .export finish
@@ -113,10 +138,10 @@ finish:
 
     .align 16
 test_bcdf_a:
-    db 0x0 ; sign
+    db 0xFF ; sign
     db 0 ; exp
-    db 2
-    db 5
+    db 1
+    db 0
     db 0
     db 0
     db 0
@@ -132,8 +157,8 @@ test_bcdf_a:
     db 0
 
 test_bcdf_b:
-    db 0xff ; sign
-    db 0 ; exp
+    db 0x0 ; sign
+    db 6 ; exp
     db 1
     db 5
     db 0

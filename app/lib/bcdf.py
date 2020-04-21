@@ -35,19 +35,22 @@ class Bcdf:
 			return
 		if self.sign:
 			yield '-'
-		noDot = self.exp == effWidth - 1
-		if not noDot:
-			effWidth -= 1
 		i = 0
 		if self.exp < 0:
 			i = self.exp
 		while effWidth > 0:
 			if i == self.exp + 1:
 				yield '.'
-			if i >= 0 and i < 14:
-				yield chr(ord('0') + self.man[i])
 			else:
-				yield '0'
+				j = 0
+				if i < self.exp + 1:
+					j = i
+				else:
+					j = i - 1
+				if j >= 0 and j < 14:
+					yield chr(ord('0') + self.man[j])
+				else:
+					yield '0'
 			i += 1
 			effWidth -= 1
 
@@ -256,9 +259,13 @@ if __name__ == '__main__':
 	print(bcdfSub(a,b))
 	print(bcdfSub(b,a))
 
+	a.exp = 6
+	a.sign = False
+	a.man[0] = 1
+	a.man[1] = 5
 	print()
 	for i in range(7, 17):
-		print("".join(a.print(i)))
+		print("'{}'".format("".join(a.print(i))))
 
 	print()
 	print("multiply")

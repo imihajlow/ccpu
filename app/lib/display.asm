@@ -309,18 +309,6 @@ display_print_bcdf_nf:
 
 display_print_bcdf_nf_no_sign:
     ; b = effective_width
-    ldi pl, lo(display_print_bcdf_arg + 1) ; exp
-    ldi ph, hi(display_print_bcdf_arg + 1)
-    ld a
-    sub a, b
-    inc a
-    ; a = exp - effective_width + 1
-    ldi pl, lo(display_print_bcdf_nf_no_dot)
-    ldi ph, hi(display_print_bcdf_nf_no_dot)
-    jz
-    dec b ; the dot takes one place
-display_print_bcdf_nf_no_dot:
-    ; b = effective_width
 
     ; if exp is negative, start i from exp
     ; else start from 0
@@ -360,24 +348,40 @@ display_print_bcdf_nf_loop:
     ldi ph, hi(delay_60us)
     jmp
 
-display_print_bcdf_nf_loop_no_dot:
+    ldi pl, lo(display_print_bcdf_nf_loop_end)
+    ldi ph, hi(display_print_bcdf_nf_loop_end)
+    jmp
 
-    ; if i < 0 or i >= 14 display '0'
+display_print_bcdf_nf_loop_no_dot:
+    ; a = i
+    ; flags = exp + 1 - i (nz)
+    mov b, a
+    ldi pl, lo(display_print_bcdf_nf_loop_before_dot)
+    ldi ph, hi(display_print_bcdf_nf_loop_before_dot)
+    jns ; exp + 1 - i > 0
+    dec a
+display_print_bcdf_nf_loop_before_dot:
+    ; b = i
+    ; a = j
+
+    ; if j < 0 or j >= 14 display '0'
+    ldi pl, 14
+    sub pl, a
     ldi pl, lo(display_print_bcdf_nf_loop_zero)
     ldi ph, hi(display_print_bcdf_nf_loop_zero)
+    js ; 14 < j
+    jz ; 14 == j
     add a, 0
-    js ; i < 0
-    ldi b, 14
-    sub b, a
-    js ; 14 < i
-    jz ; 14 == i
+    js ; j < 0
 
-    ; display man[i]
+    ; display man[j]
     ldi ph, hi(display_print_bcdf_arg)
     ldi pl, lo(display_print_bcdf_arg + 2) ; mantissa
     add pl, a
+    mov a, b
     ld b
     ; b - digit
+    ; a = i
     mov pl, a
     ldi a, ord('0')
     add b, a
@@ -396,6 +400,8 @@ display_print_bcdf_nf_loop_no_dot:
     jmp
 
 display_print_bcdf_nf_loop_zero:
+    ; b = i
+    mov a, b
     ldi b, ord('0')
     ldi pl, lo(lcd_data)
     ldi ph, hi(lcd_data)
