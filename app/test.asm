@@ -138,11 +138,11 @@ finish:
 
     .align 16
 test_bcdf_a:
-    db 0xFF ; sign
-    db 0 ; exp
+    db 0x0 ; sign
+    db 2 ; exp
     db 1
-    db 0
-    db 0
+    db 2
+    db 9
     db 0
     db 0
     db 0
@@ -158,9 +158,9 @@ test_bcdf_a:
 
 test_bcdf_b:
     db 0x0 ; sign
-    db 6 ; exp
+    db -1 ; exp
     db 1
-    db 5
+    db 0
     db 0
     db 0
     db 0

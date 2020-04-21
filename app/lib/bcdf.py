@@ -129,6 +129,9 @@ def bcdfAdd(a, b):
 	if expDiff < 0:
 		a,b = b,a
 		expDiff = -expDiff
+	if not any(a.man): # a == 0
+		r = b.copy()
+		return r
 	r.exp = a.exp
 	carry = 0
 	for i in reversed(range(14)):
@@ -207,15 +210,15 @@ def bcdfMul(a, b):
 
 if __name__ == '__main__':
 	a = Bcdf()
-	a.sign = True
-	a.exp = 0
+	a.sign = False
+	a.exp = 2
 	a.man[0] = 0
 	a.man[1] = 0
 
 	b = Bcdf()
-	b.exp = 1
+	b.exp = 0
 	b.sign = False
-	b.man[0] = 3
+	b.man[0] = 1
 	b.man[1] = 0
 	b.man[2] = 0
 	print(a)
@@ -271,11 +274,11 @@ if __name__ == '__main__':
 	print("multiply")
 	a = Bcdf()
 	b = Bcdf()
-	a.exp = 2
+	a.exp = 3
 	a.sign = False
-	a.man[0] = 5
+	a.man[0] = 1
 
-	b.exp = 120
-	b.sign = True
-	b.man[0] = 6
+	b.exp = -1
+	b.sign = False
+	b.man[0] = 1
 	print(bcdfMul(a,b))

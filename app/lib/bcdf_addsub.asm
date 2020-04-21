@@ -107,6 +107,30 @@ a_a_exp_greater:
     ldi ph, hi(exp_diff)
     st a
 
+    ldi a, 13
+a_check_a_zero_loop:
+    ldi pl, lo(bcdf_op_a + 2) ; man
+    ldi ph, hi(bcdf_op_a + 2)
+    add pl, a
+    mov b, a
+    ld a
+    add a, 0
+    ldi pl, lo(a_a_nonzero)
+    ldi ph, hi(a_a_nonzero)
+    jnz ; man[i] != 0
+    mov a, b
+    dec a
+    ldi pl, lo(a_check_a_zero_loop)
+    ldi ph, hi(a_check_a_zero_loop)
+    jnc ; i >= 0
+
+    ; a is zero, return b
+    ldi a, 15 ; needed for the loop
+    ldi pl, lo(a_return_b_loop)
+    ldi ph, hi(a_return_b_loop)
+    jmp
+
+a_a_nonzero:
     ; r.exp := a.exp
     ldi pl, lo(bcdf_op_a + 1) ; exp
     ldi ph, hi(bcdf_op_a + 1)
