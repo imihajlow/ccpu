@@ -516,11 +516,10 @@ display_entered_number:
     ldi pl, lo(bcdf_a + 0) ; sign
     ldi ph, hi(bcdf_a + 0)
     ld a
-    ldi b, 2
+    ldi b, ord('-') - ord(' ')
     and a, b
-    ldi b, ord('+')
-    ; b = '+', a = 2 if sign else 0
-    add b, a ; ord('-') == ord('+') + 2
+    ldi b, ord(' ')
+    add b, a
     ldi pl, lo(number_string + 0)
     ldi ph, hi(number_string + 0)
     st b
@@ -530,7 +529,10 @@ display_entered_number_loop:
     ; b - index (0..14)
     ;
     ; if b == exp + 1:
-    ;   s[b] = '.'
+    ;   if is_dot_entered:
+    ;       s[b] = '.'
+    ;   else:
+    ;       s[b] = ' '
     ; elif b < exp + 1:
     ;   s[b] = man[b] + ord('0')
     ; else:
@@ -584,12 +586,21 @@ display_entered_number_loop_b_gt_nip:
 
 display_entered_number_loop_b_eq_exp1:
     ; b == exp + 1
+    ldi pl, lo(is_dot_entered)
+    ldi ph, hi(is_dot_entered)
+    ld pl
+    ldi a, ord('.') - ord(' ')
+    and a, pl
+    ldi pl, ord(' ')
+    add a, pl
+    xor a, b
+    xor b, a
+    xor a, b
     ldi pl, lo(number_string + 1)
-    mov a, b
     add pl, a
     ldi ph, hi(number_string)
-    ldi a, ord('.')
-    st a
+    st b
+    mov b, a
     ldi pl, lo(display_entered_number_loop_end)
     ldi ph, hi(display_entered_number_loop_end)
     jmp
