@@ -1,6 +1,9 @@
     ; Init the display module. No arguments.
     .export display_init
 
+    ; Clear display. No arguments.
+    .export display_clear
+
     ; Output a null-terminated string
     ; display_print_arg - string address
     .export display_print
@@ -96,6 +99,29 @@ display_finish: ; a common return label
     ld ph
     mov pl, a
     jmp
+
+display_clear:
+    mov a, ph
+    mov b, a
+    mov a, pl
+    ldi pl, lo(display_return)
+    ldi ph, hi(display_return)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(lcd_control)
+    ldi ph, hi(lcd_control)
+    ldi a, 0x01 ; clear
+    st a
+    ldi pl, lo(delay_5ms)
+    ldi ph, hi(delay_5ms)
+    jmp
+
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
+    jmp
+
 
 ; display_print_arg - string address
 display_print:

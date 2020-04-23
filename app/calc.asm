@@ -1,4 +1,5 @@
     .global display_init
+    .global display_clear
     .global display_print
     .global display_print_byte
     .global display_print_arg
@@ -481,6 +482,10 @@ result_copy_loop:
         ldi pl, lo(result_copy_loop)
         ldi ph, hi(result_copy_loop)
         jnc
+
+    ldi pl, lo(display_clear)
+    ldi ph, hi(display_clear)
+    jmp
 
     ldi pl, lo(display_set_address_arg)
     ldi ph, hi(display_set_address_arg)
