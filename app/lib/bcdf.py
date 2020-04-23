@@ -207,6 +207,55 @@ def bcdfMul(a, b):
 	r.sign ^= a.sign
 	return r
 
+def bcdfCmp(a, b):
+	if a.exp < b.exp:
+		return -1
+	elif a.exp > b.exp:
+		return 1
+	for i in range(14):
+		if a.man[i] < b.man[i]:
+			return -1
+		elif a.man[i] > b.man[i]:
+			return 1
+	return 0
+
+def bcdfDiv(a, b):
+	r = Bcdf()
+	r.sign = a.sign ^ b.sign
+	r.exp = a.exp - b.exp
+	a.exp = 0
+	b.exp = a.exp
+	a.sign = False
+	b.sign = False
+
+	if not any(a.man):
+		r.exp = 0
+		r.man = [0] * 14
+		return r
+
+	while bcdfCmp(a, b) < 0:
+		a.exp += 1
+		r.exp -= 1
+		if r.exp < -128:
+			r.exp = 0
+			r.man = [0] * 14
+			return r
+	i = 0
+	while i < 14:
+		c = bcdfCmp(a, b)
+		if c == 0:
+			# a == b, final subtraction
+			r.man[i] += 1
+			return r
+		elif c < 0:
+			# a < b, shift
+			a.exp += 1
+			i += 1
+		elif c > 0:
+			# a > b, subtract
+			a = bcdfSub(a.copy(), b.copy())
+			r.man[i] += 1
+	return r
 
 if __name__ == '__main__':
 	a = Bcdf()
@@ -282,3 +331,19 @@ if __name__ == '__main__':
 	b.sign = False
 	b.man[0] = 1
 	print(bcdfMul(a,b))
+
+	print()
+	print("divide")
+	a = Bcdf()
+	b = Bcdf()
+	a.exp = 0
+	a.sign = False
+	a.man[0] = 1
+	a.man[1] = 0
+
+	b.exp = 0
+	b.sign = False
+	b.man[0] = 2
+	r = bcdfDiv(a,b)
+	print(r)
+

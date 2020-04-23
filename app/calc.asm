@@ -44,6 +44,7 @@
     .global bcdf_op_r
 
     .global bcdf_mul
+    .global bcdf_div
 
     .section text
     nop
@@ -127,6 +128,12 @@ input_op_loop:
     ldi ph, hi(op_mul)
     jz
 
+    ldi b, key_hash ; hash = div
+    sub b, a
+    ldi pl, lo(op_div)
+    ldi ph, hi(op_div)
+    jz
+
     ldi pl, lo(input_op_loop)
     ldi ph, hi(input_op_loop)
     jmp
@@ -178,6 +185,22 @@ op_mul:
     ldi a, hi(bcdf_mul)
     st a
 
+    ldi pl, lo(init)
+    ldi ph, hi(init)
+    jmp
+op_div:
+    ldi pl, lo(op)
+    ldi ph, hi(op)
+    ldi a, ord('/')
+    st a
+
+    ldi pl, lo(p_op)
+    ldi ph, hi(p_op)
+    ldi a, lo(bcdf_div)
+    st a
+    inc pl
+    ldi a, hi(bcdf_div)
+    st a
 
 init:
     ; display op

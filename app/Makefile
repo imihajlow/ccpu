@@ -6,10 +6,10 @@ all: calc.rom io_test.rom test.bin
 test: test.bin
 	../tools/sim.py test.bin test.map -c 'u finish'
 
-calc.bin: calc.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o
+calc.bin: calc.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-test.bin: test.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o
+test.bin: test.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 io_test.bin: io_test.o lib/display.o lib/keyboard.o lib/bcdf.o

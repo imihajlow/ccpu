@@ -40,6 +40,7 @@
     .global bcdf_add
     .global bcdf_sub
     .global bcdf_mul
+    .global bcdf_div
     .global bcdf_op_a
     .global bcdf_op_b
     .global bcdf_op_r
@@ -82,8 +83,8 @@ copy_loop_b:
     ldi ph, hi(copy_loop_b)
     jnc
 
-    ldi pl, lo(bcdf_mul)
-    ldi ph, hi(bcdf_mul)
+    ldi pl, lo(bcdf_div)
+    ldi ph, hi(bcdf_div)
     jmp
 
     ldi a, 15
@@ -139,10 +140,10 @@ finish:
     .align 16
 test_bcdf_a:
     db 0x0 ; sign
-    db 2 ; exp
+    db 0 ; exp
     db 1
-    db 2
-    db 9
+    db 0
+    db 0
     db 0
     db 0
     db 0
@@ -158,8 +159,8 @@ test_bcdf_a:
 
 test_bcdf_b:
     db 0x0 ; sign
-    db -1 ; exp
-    db 1
+    db 0 ; exp
+    db 7
     db 0
     db 0
     db 0

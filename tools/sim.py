@@ -86,12 +86,17 @@ def loop(program, labels, initialCommand):
         elif cmd == 'p' or cmd == 'print':
             fmt = "b"
             addr = tokens[1]
-            if len(tokens) > 2:
+            count = 1
+            if len(tokens) > 3:
+                count = int(tokens[1])
+                fmt = tokens[2]
+                addr = tokens[3]
+            elif len(tokens) > 2:
                 fmt = tokens[1]
                 addr = tokens[2]
             try:
                 addr = eval(addr, labels)
-                memory.printValue(addr, fmt)
+                memory.printValue(addr, fmt, count)
             except NameError:
                 print("Unknown label")
         elif cmd == 's' or cmd == 'set':
