@@ -55,20 +55,15 @@ def isSingleArg(op):
         op == 'shr' or \
         op == 'sar'
 
+def char2len(c):
+    return {"b": 1, "w": 2, "d": 4, "q": 8}[c]
+
 def updateIp(op, args):
     if op is None:
         return 0
     op = op.lower()
     if op == '' or op is None:
         return 0
-    elif op == 'db':
-        return 1
-    elif op == 'dw':
-        return 2
-    elif op == 'dd':
-        return 4
-    elif op == 'dq':
-        return 8
     elif op == 'ascii':
         return len(eval(args, {"__builtins__": {}}))
     elif op == 'ld' or op == 'st' or isJump(op) or isAlu(op):
@@ -79,6 +74,11 @@ def updateIp(op, args):
         return 1
     elif op == 'res':
         return eval(args, {"__builtins__": {}})
+    elif op[0] == 'd':
+        try:
+            return char2len(op[1]) * (args.count(',') + 1)
+        except KeyError:
+            raise ValueError("Invalid opcode: {}".format(op))
     else:
         raise ValueError("Invalid opcode: {}".format(op))
 
@@ -201,30 +201,22 @@ def encode(op, args, obj):
             return [0xe0 | (4 if inverse else 0) | encodeFlag(flag)], []
     elif op == 'nop':
         return [0xff], []
-    elif op == 'db':
-        static, dynamic = evalExpression(args, obj)
-        if dynamic is None:
-            return [static & 0xff], []
-        else:
-            return [0], [(0, dynamic)]
-    elif op == 'dw':
-        v, dynamic = evalExpression(args, obj)
-        if dynamic is None:
-            return [v & 0xff, (v >> 8) & 0xff], []
-        else:
-            return [0, 0], [(0, dynamic), (1, "({}) >> 8".format(dynamic))]
-    elif op == 'dd':
-        v, dynamic = evalExpression(args, obj)
-        if dynamic is None:
-            return [(v >> (8 * i)) & 0xff for i in range(4)], []
-        else:
-            return [0] * 4, [(i, "({}) >> {}".format(dynamic, 8 * i)) for i in range(4)]
-    elif op == 'dq':
-        v, dynamic = evalExpression(args, obj)
-        if dynamic is None:
-            return [(v >> (8 * i)) & 0xff for i in range(8)], []
-        else:
-            return [0] * 8, [(i, "({}) >> {}".format(dynamic, 8 * i)) for i in range(8)]
+    elif op[0] == 'd':
+        n = 0
+        try:
+            n = char2len(op[1])
+        except KeyError:
+            raise ValueError("Invalid opcode: {}".format(op))
+        s = []
+        d = []
+        for k,expr in enumerate(args.split(',')):
+            v, dynamic = evalExpression(expr, obj)
+            if dynamic is None:
+                s += [(v >> (8 * i)) & 0xff for i in range(n)]
+            else:
+                s += [0] * n
+                d += [(k * n + i, "({}) >> {}".format(dynamic, 8 * i)) for i in range(n)]
+        return s,d
     elif op == 'ascii':
         v = eval(args, {"__builtins__": {}})
         return [ord(c) for c in v], []
