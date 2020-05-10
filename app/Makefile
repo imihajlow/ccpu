@@ -12,7 +12,7 @@ test: test.bin
 ctest: ctest.bin
 	../tools/sim.py ctest.bin ctest.map -c 'break trap' -c 'run' -c 'p w pri'
 
-ctest.bin: ctest.o $(SMALLC_DIR)/crunccpulib.o trap.o
+ctest.bin: ctest.o $(SMALLC_DIR)/crunccpulib.o trap.o lib/c_display.o lib/display.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 calc.bin: calc.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o

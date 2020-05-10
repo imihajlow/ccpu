@@ -14,6 +14,10 @@ layout = [
         "init": False
     },
     {
+        "name": "bss",
+        "init": False
+    },
+    {
         "name": "stack",
         "end": 0xf000,
         "init": False
