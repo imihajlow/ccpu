@@ -1,0 +1,3 @@
+[submodule "tools/smallc"]
+	path = tools/smallc
+	url = https://github.com/imihajlow/SmallC-85.git

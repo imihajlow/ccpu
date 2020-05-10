@@ -1,4 +1,4 @@
-SMALLC_DIR=../../SmallC-85/smallC
+SMALLC_DIR=../tools/smallc/smallC
 SMALLC=$(SMALLC_DIR)/scc-ccpu
 
 all: calc.rom io_test.rom test.bin ctest.bin
