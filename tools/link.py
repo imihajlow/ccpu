@@ -31,6 +31,7 @@ def align(ip, alignment):
 def link(objects):
     ip = 0
     globalSymbols = set()
+    exportedSymbolValues = {}
     # place sections into segments and keep track of globals
     for segment in layout.layout:
         if segment["begin"] is not None:
@@ -48,9 +49,12 @@ def link(objects):
                         raise LinkerError("segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
                     if ip > 0xffff:
                         raise LinkerError("64k overflow", o, s)
+        if segment["end"] is not None:
+            ip = segment["end"]
         print("Segment {}: {} bytes (0x{:04X}-0x{:04X})".format(segment["name"], ip - segBegin, segBegin, ip))
+        exportedSymbolValues["__seg_{}_begin".format(segment["name"])] = segBegin
+        exportedSymbolValues["__seg_{}_end".format(segment["name"])] = ip
     # assign global symbol values
-    exportedSymbolValues = {}
     for o in objects:
         for label in o.exportSymbols:
             found = False

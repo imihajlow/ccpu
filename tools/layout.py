@@ -8,13 +8,19 @@ layout = [
     {
         "name": "text",
         "begin": None,
-        "end": 0x7fff,
+        "end": None,
         "init": True
     },
     {
         "name": "data",
         "begin": 0x8000,
-        "end": 0xefff,
+        "end": None,
+        "init": False
+    },
+    {
+        "name": "stack",
+        "begin": None,
+        "end": 0xf000,
         "init": False
     }
 ]

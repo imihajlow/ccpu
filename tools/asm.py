@@ -235,7 +235,7 @@ def encode(op, args, obj):
 
 def assemble(lines):
     result = Object()
-    r = re.compile(r"^\s*(?:(?P<label>[a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"'.?]*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
+    r = re.compile(r"^\s*(?:(?P<label>[_a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"'.?]*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
     for i,l in enumerate(lines):
         line = l.strip()
         try:
