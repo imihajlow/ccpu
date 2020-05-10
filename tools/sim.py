@@ -57,9 +57,10 @@ def loop(program, labels, initialCommand):
             m.printState()
             newState = False
         line = ""
-        if initialCommand is not None:
-            line = initialCommand
-            initialCommand = None
+        if initialCommand is not None and len(initialCommand) > 0:
+            line = initialCommand[0]
+            initialCommand = initialCommand[1:]
+            print("> {}".format(line))
         else:
             try:
                 line = input("> ")
@@ -162,7 +163,7 @@ def loop(program, labels, initialCommand):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')
-    parser.add_argument('-c', metavar="COMMAND", help='simulator command to execute at start')
+    parser.add_argument('-c', metavar="COMMAND", action="append", help='simulator command to execute at start (more than one -c is allosed)')
     parser.add_argument('file', type=argparse.FileType("rb"), help='program file')
     parser.add_argument('mapfile', type=argparse.FileType("r"), help='label map file')
     args = parser.parse_args()

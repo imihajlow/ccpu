@@ -10,7 +10,7 @@ test: test.bin
 	../tools/sim.py test.bin test.map -c 'u finish'
 
 ctest: ctest.bin
-	../tools/sim.py ctest.bin ctest.map -c 'u trap'
+	../tools/sim.py ctest.bin ctest.map -c 'break trap' -c 'run' -c 'p w pri'
 
 ctest.bin: ctest.o $(SMALLC_DIR)/crunccpulib.o trap.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
