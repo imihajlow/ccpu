@@ -26,3 +26,4 @@ fp-info-cache
 __pycache__
 *.pyc
 *.o
+*.s

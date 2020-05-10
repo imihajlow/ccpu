@@ -140,7 +140,7 @@ def alu(op, a, b, carry_in, inverse):
         result = a >> 1
         carry = bool(a & 1)
     elif op == 'SAR':
-        result = a / 2
+        result = (a >> 1) | (a & 0x80)
         carry = bool(a & 1)
     else:
         raise ValueError("Invalid ALU: {}".format(op))
