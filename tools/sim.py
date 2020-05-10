@@ -24,6 +24,18 @@ def loadLabels(file):
         labels[m.group(1)] = int(m.group(2), 16)
     return labels
 
+def lookupAddress(s, labels):
+    try:
+        # try evaluating
+        return eval(s, labels)
+    except NameError:
+        # try finding tokens[1] as a suffix of a label
+        for l in labels:
+            if l.endswith(s):
+                print("{} -> {}".format(s, l))
+                return labels[l]
+        raise
+
 def loop(program, labels, initialCommand):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
@@ -61,7 +73,7 @@ def loop(program, labels, initialCommand):
         elif cmd == 'r' or cmd == 'run' or cmd == 'u' or cmd == 'until':
             until = None
             if cmd[0] == 'u':
-                until = eval(tokens[1], labels)
+                until = lookupAddress(tokens[1], labels)
             reason, number = m.run(until)
             newState = True
             print("{} {}".format(reason, number))
@@ -71,14 +83,14 @@ def loop(program, labels, initialCommand):
             try:
                 address = m.ip
                 if len(tokens) > 1:
-                    address = eval(tokens[1], labels)
+                    address = lookupAddress(tokens[1], labels)
                 n = m.addBreakpoint(address)
                 print("Breakpoint {} at 0x{:04X}".format(n, address))
             except NameError as e:
                 print("Unknown label")
         elif cmd == 'w' or cmd == 'watch':
             try:
-                address = eval(tokens[1], labels)
+                address = lookupAddress(tokens[1], labels)
                 n = memory.watch(address)
                 print("Watchpoint {} at 0x{:04X}".format(n, address))
             except NameError:
@@ -95,7 +107,7 @@ def loop(program, labels, initialCommand):
                 fmt = tokens[1]
                 addr = tokens[2]
             try:
-                addr = eval(addr, labels)
+                addr = lookupAddress(addr, labels)
                 memory.printValue(addr, fmt, count)
             except NameError:
                 print("Unknown label")
@@ -108,7 +120,7 @@ def loop(program, labels, initialCommand):
                 addr = tokens[2]
                 value = tokens[3]
             try:
-                addr = eval(addr, labels)
+                addr = lookupAddress(addr, labels)
             except NameError:
                 print("Unknown label")
             value = int(value)
