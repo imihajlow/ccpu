@@ -1,0 +1,87 @@
+start: statement*
+
+?statement: assignment ";"
+    | declaration ";"
+    | block
+
+?block: "{" statement* "}"
+
+declaration: type IDENTIFIER -> decl_var
+    | type IDENTIFIER "=" expression -> def_var
+    | type IDENTIFIER "[" expression "]" -> decl_array
+
+?type: INT_TYPE -> int_type
+    | type "*" -> ptr
+
+assignment: value "=" expression
+
+?expression: lor
+
+?lor: land
+    | lor "||" land -> lor
+
+?land: bor
+    | land "&&" bor -> land
+
+?bor: bxor
+    | bor "|" bxor -> bor
+
+?bxor: band
+    | bxor "^" band -> bxor
+
+?band: eq
+    | band "&" eq -> band
+
+?eq: cmp
+    | eq "==" cmp -> eq
+    | eq "!=" cmp -> ne
+
+?cmp: shift
+    | cmp ">" shift -> gt
+    | cmp "<" shift -> lt
+    | cmp ">=" shift -> ge
+    | cmp "<=" shift -> le
+
+?shift: sum
+    | shift ">>" sum -> shr
+    | shift "<<" sum -> shl
+
+?sum: product
+    | sum "+" product -> add
+    | sum "-" product -> sub
+
+?product: neg
+    | product "*" neg -> mul
+    | product "/" neg -> div
+
+?neg: value
+    | "-" neg -> neg
+    | "!" neg -> lnot
+    | "~" neg -> bnot
+
+?value: subscript
+    | "&" value -> addr
+    | "*" value -> deref
+    | "(" expression ")"
+
+?subscript: number
+    | var
+    | subscript "[" expression "]" -> subscript
+
+var: IDENTIFIER
+
+IDENTIFIER: /[a-z_]\w*/i
+number: DEC_NUMBER -> n10
+    | HEX_NUMBER -> n16
+    | OCT_NUMBER -> n8
+    | BIN_NUMBER -> n2
+
+DEC_NUMBER: /[+-]?[1-9]\d*/
+HEX_NUMBER: /0x[0-9a-f]+/i
+OCT_NUMBER: /0[0-7]*/
+BIN_NUMBER: /0b[01]+/
+
+INT_TYPE: /[us](8|16)/
+
+%import common.WS_INLINE
+%ignore WS_INLINE
