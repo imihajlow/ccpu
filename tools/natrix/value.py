@@ -49,6 +49,9 @@ class Value:
             else:
                 raise ValueError("Undeclared variable {}".format(self._src))
 
+    def removeUnknown(self, newType):
+        return Value(self._type.removeUnknown(newType), self._level, self._src)
+
     def __str__(self):
         return "({}, {}, {})".format(self._type, self._level, self._src)
 

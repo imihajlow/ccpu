@@ -20,6 +20,10 @@ class Type(ABC):
     def removeUnknown(self, newType):
         pass
 
+    @abstractmethod
+    def isUnknown(self):
+        pass
+
     def deref(self):
         raise ValueError("Cannot dereference a non-pointer type")
 
@@ -51,6 +55,9 @@ class IntType(Type):
         else:
             return self
 
+    def isUnknown(self):
+        return False
+
     def __str__(self):
         return "{}{}".format("s" if self._sign else "u", self._size * 8)
 
@@ -78,6 +85,9 @@ class PtrType(Type):
 
     def removeUnknown(self, newType):
         return PtrType(self._t.removeUnknown(newType))
+
+    def isUnknown(self):
+        return self._t.isUnknown()
 
     def __str__(self):
         return str(self._t) + "*"
@@ -123,6 +133,9 @@ class UnknownType(Type):
 
     def removeUnknown(self, newType):
         return newType
+
+    def isUnknown(self):
+        return True
 
     def __str__(self):
         return "?"

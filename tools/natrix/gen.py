@@ -3,6 +3,7 @@ from exceptions import SemanticError
 from value import Value
 from type import Type
 import variable
+import code
 
 class Generator:
     def __init__(self):
@@ -24,8 +25,7 @@ class Generator:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
                         Value.variable(variable.getTempName(minTempVarIndex)), curFn)
-                # TODO type of result, compare types
-                myCode = "{} := {}({})\n".format(str(resultLoc), t.data, str(rv))
+                resultLoc, myCode = code.genUnary(t.data, resultLoc, rv)
                 return resultLoc, argCode + myCode
             elif len(ch) == 2:
                 hasFirstArg = False
@@ -47,8 +47,7 @@ class Generator:
                     rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
                         Value.variable(variable.getTempName(minTempVarIndex + indexIncrement)), curFn)
 
-                # TODO check types, type of result
-                myCode = "{} := {}({}, {})\n".format(str(resultLoc), t.data, str(rv1), str(rv2))
+                resultLoc, myCode = code.genBinary(t.data, resultLoc, rv1, rv2)
                 return resultLoc, argCode1 + argCode2 + myCode
             else:
                 raise ValueError("Too many children")
@@ -69,7 +68,7 @@ class Generator:
         elif t.data == 'def_var':
             type, name, r = t.children
             self.localVars[str(name)] = type
-            _, code = self.generateExpression(r, 0, Value.variable(type, variable.getLocalName("fn", str(name))), "fn")
+            _, code = self.generateExpression(r, 0, Value.variable(variable.getLocalName("fn", str(name)), type), "fn")
             return code
         elif t.data == 'start':
             return "".join(self.generateFunction(child) for child in t.children)
