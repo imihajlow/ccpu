@@ -28,7 +28,7 @@ class Generator:
         '''
         if isinstance(t, Value):
             src = t.resolveName(curFn, self.localVars, self.globalVars)
-            return code.genMove(resultLoc, src)
+            return code.genMove(resultLoc, src, True)
         else:
             ch = t.children
             if len(ch) == 1:
@@ -40,6 +40,16 @@ class Generator:
                     rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
                         Value.variable(variable.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = code.genUnary(t.data, resultLoc, rv)
+                return resultLoc, argCode + myCode
+            elif t.data == "type_cast":
+                if isinstance(ch[1], Value):
+                    argCode = ""
+                    rv = ch[1].resolveName(curFn, self.localVars, self.globalVars)
+                else:
+                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                    rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
+                        Value.variable(variable.getTempName(minTempVarIndex)), curFn)
+                resultLoc, myCode = code.genCast(resultLoc, ch[0], rv)
                 return resultLoc, argCode + myCode
             elif len(ch) == 2:
                 hasFirstArg = False
@@ -86,8 +96,14 @@ class Generator:
             if not l.isLValue():
                 raise ValueError("Cannot assign to an r-value")
             dest = l.resolveName(curFn, self.localVars, self.globalVars)
-            _, codeExpr = self.generateExpression(r, 0, dest, "fn")
-            return codeExpr
+            resultLoc, codeExpr = self.generateExpression(r, 0, dest, "fn")
+            if resultLoc == dest:
+                # already assigned where needed
+                return codeExpr
+            else:
+                # need to copy
+                _, codeMove = code.genMove(dest, resultLoc, False)
+                return codeExpr + codeMove
         elif l.data == 'deref':
             # case 2: dereferenced expression
             ptr = l.children[0]
@@ -96,7 +112,7 @@ class Generator:
                         Value.variable(variable.getTempName(0)), curFn)
             rvR, codeR = self.generateExpression(r, 1,
                         Value.variable(variable.getTempName(1)), curFn)
-            _, codePutIndirect = code.genPutIndirect(rvPtr, rvR)
+            codePutIndirect = code.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
         elif l.data == 'subscript':
             # case 3: array subscript
@@ -110,7 +126,7 @@ class Generator:
             rvOffset, codeOffset = code.genMulConst(Value.variable(variable.getTempName(0)), rvIndex, array.getType().deref().getSize())
             rvR, codeR = self.generateExpression(r, 1,
                         Value.variable(variable.getTempName(1)), curFn)
-            _, codePutIndirect = code.genPutIndirect(array, rvR, rvIndex)
+            codePutIndirect = code.genPutIndirect(array, rvR, rvIndex)
             return codeIndex + codeOffset + codeR + codePutIndirect
         else:
             raise RuntimeError("Unknown assignment case")
@@ -151,8 +167,8 @@ class Generator:
         elif t.data == 'def_var':
             type, name, r = t.children
             self.localVars[str(name)] = type
-            _, code = self.generateExpression(r, 0, Value.variable(variable.getLocalName(curFn, str(name)), type), curFn)
-            return code
+            dest = Value.variable(str(name))
+            return self.generateAssignment(dest, r, curFn)
         elif t.data == 'block':
             return "".join(self.generateStatement(child, curFn) for child in t.children)
         elif t.data == 'conditional':

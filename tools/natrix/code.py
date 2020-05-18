@@ -1,6 +1,6 @@
 from value import Value
 
-def genMove(resultLoc, srcLoc):
+def genMove(resultLoc, srcLoc, avoidCopy):
     # TODO if a copy can be avoided, avoid it and return srcLoc
     if srcLoc.getType().isUnknown():
         raise ValueError("Unknown source type")
@@ -11,7 +11,14 @@ def genMove(resultLoc, srcLoc):
     if srcLoc == resultLoc:
         return resultLoc, ""
     else:
-        return resultLoc, "{} = {}\n".format(resultLoc, srcLoc)
+        if avoidCopy:
+            return srcLoc, ""
+        else:
+            return resultLoc, "{} = {}\n".format(resultLoc, srcLoc)
+
+def genCast(resultLoc, t, srcLoc):
+    resultLoc = resultLoc.withType(t)
+    return resultLoc, "{} = cast<{}>({})\n".format(resultLoc, t, srcLoc)
 
 def genDeref(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
@@ -35,7 +42,9 @@ def genUnary(op, resultLoc, srcLoc):
 def genBinary(op, resultLoc, src1Loc, src2Loc):
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
         raise ValueError("Unknown source type")
-    if op == 'add':
+    if op == 'subscript':
+        return genSubscript(resultLoc, src1Loc, src2Loc)
+    elif op == 'add':
         return genAdd(resultLoc, src1Loc, src2Loc)
     else:
         if src1Loc.getType() != src2Loc.getType():
@@ -54,9 +63,9 @@ def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     if resultAddrLoc.getType().deref() != srcLoc.getType():
         raise ValueError("Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
     if offset == 0:
-        return resultAddrLoc, "*{} = {}\n".format(resultAddrLoc, srcLoc)
+        return "*{} = {}\n".format(resultAddrLoc, srcLoc)
     else:
-        return resultAddrLoc, "*({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
+        return "*({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
 
 def genInvCondJump(condLoc, label):
     '''
@@ -69,6 +78,23 @@ def genJump(label):
 
 def genLabel(label):
     return "{}:\n".format(label)
+
+def genSubscript(resultLoc, baseLoc, indexLoc):
+    if not indexLoc.getType().isInteger():
+        raise ValueError("Index must be an integer, got {}".format(indexLoc.getType()))
+    if not baseLoc.getType().isPointer():
+        raise ValueError("Subscript base must be a pointer, got {}".format(baseLoc.getType()))
+    resultType = baseLoc.getType().deref()
+    if baseLoc.getIndirLevel() == 0:
+        if indexLoc.getIndirLevel() == 0:
+            return Value(resultType, 1, "{} + {} * {}".format(baseLoc.getSource(), indexLoc.getSource(), resultType.getSize())), ""
+        else:
+            return resultLoc.removeUnknown(resultType), "{} = deref({} + [{}] * {})\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
+    else:
+        if indexLoc.getIndirLevel() == 0:
+            return resultLoc.removeUnknown(resultType), "{} = deref([{}] + {} * {}\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
+        else:
+            return resultLoc.removeUnknown(resultType), "{} = deref([{}] + [{}] * {}\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():

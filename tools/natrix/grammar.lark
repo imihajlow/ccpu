@@ -68,6 +68,7 @@ assignment: lvalue "=" expression
 ?value: lvalue
     | "&" value -> addr
     | "(" expression ")"
+    | "cast" "<" type ">" "(" expression ")" -> type_cast
 
 ?lvalue: subscript
     | "*" value -> deref

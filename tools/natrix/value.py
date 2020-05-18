@@ -26,10 +26,13 @@ class Value:
     def getType(self):
         return self._type
 
-    '''
-    Get level of indirection. Constants have level 0, plain variables level 1.
-    '''
+    def withType(self, t):
+        return Value(t, self._level, self._src)
+
     def getIndirLevel(self):
+        '''
+        Get level of indirection. Constants have level 0, plain variables level 1.
+        '''
         return self._level
 
     def getSource(self):
@@ -44,10 +47,10 @@ class Value:
         else:
             if self._src in localVars:
                 t = localVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level, variable.getLocalName(fn, self._src))
+                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), variable.getLocalName(fn, self._src))
             elif self._src in globalVars:
                 t = globalVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level, self._src)
+                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)
             else:
                 raise ValueError("Undeclared variable {}".format(self._src))
 

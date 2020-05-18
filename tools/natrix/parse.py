@@ -19,8 +19,9 @@ with open("test.na", "r") as cf:
 
 g = Generator()
 t = parse(code)
-t = ConstTransformer().transform(t)
+t = ConstTransformer(False).transform(t)
 t = TypeTransformer().transform(t)
+t = ConstTransformer(True).transform(t)
 t = ValueTransformer().transform(t)
 print(t.pretty())
 print(g.generateStart(t))

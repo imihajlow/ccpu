@@ -7,7 +7,7 @@ import exceptions
 def signExpand(t, value):
     if t.getSign():
         bits = t.getSize() * 8
-        sign = int(value & (1 << (bits - 1)))
+        sign = bool(value & (1 << (bits - 1)))
         if sign:
             mask = ~(~0 << bits)
             return -((~value + 1) & mask)
@@ -44,8 +44,22 @@ def unary(tree, op):
         sa = signExpand(a.getType(), a.getSource())
         return const(a.t, op(sa))
 
+def cast(v, oldType, newType):
+    if oldType.getSize() < newType.getSize() and newType.getSign():
+        bits = oldType.getSize() * 8
+        sign = bool(value & (1 << (bits - 1)))
+        if sign:
+            newBits = newType.getSize() * 8
+            hi = ~(~0 << (newBits - bits)) << bits
+            return hi | v
+    return v
+
+
 @v_args(tree = True)
 class ConstTransformer(Transformer):
+    def __init__(self, transformCasts):
+        self._transformCast = transformCasts
+
     @v_args(inline = True, meta = True, tree = False)
     def n10(self, meta, value):
         return const(IntType(True, 2), int(value, 10))
@@ -95,14 +109,14 @@ class ConstTransformer(Transformer):
         if isinstance(a, Tree) or isinstance(b, Tree):
             return tree
         else:
-            return const(IntType(False, 1), 1 if bool(a.value) or bool(b.value) else 0)
+            return const(IntType(False, 1), 1 if bool(a.getSource()) or bool(b.getSource()) else 0)
 
     def land(self, tree):
         a, b = tree.children
         if isinstance(a, Tree) or isinstance(b, Tree):
             return tree
         else:
-            return const(IntType(False, 1), 1 if bool(a.value) and bool(b.value) else 0)
+            return const(IntType(False, 1), 1 if bool(a.getSource()) and bool(b.getSource()) else 0)
 
     def bnot(self, tree):
         return unary(tree, operator.invert)
@@ -133,3 +147,11 @@ class ConstTransformer(Transformer):
 
     def ne(self, tree):
         return binary(tree, operator.ne, IntType(False, 1))
+
+    def type_cast(self, tree):
+        if not self._transformCast:
+            return tree
+        t, v = tree.children
+        if isinstance(v, Tree):
+            return tree
+        return const(t, cast(v.getSource(), v.getType(), t))

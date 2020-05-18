@@ -27,6 +27,12 @@ class Type(ABC):
     def isUnknown(self):
         pass
 
+    def getIndirectionOffset(self):
+        '''
+        This value is added to the indirection level of a value when the type is resolved
+        '''
+        return 0
+
     def deref(self):
         raise ValueError("Cannot dereference a non-pointer type")
 
@@ -118,6 +124,9 @@ class ArrayType(PtrType):
 
     def removeUnknown(self, newType):
         return ArrayType(self._t.removeUnknown(newType), self._n)
+
+    def getIndirectionOffset(self):
+        return -1
 
     def __str__(self):
         return str(self._t) + "[{}]".format(self._n)
