@@ -84,6 +84,6 @@ class ValueTransformer(Transformer):
             try:
                 return val.takeAddress()
             except ValueError as e:
-                raise SemanticError("input", t.line, str(e))
+                raise SemanticError(t.line, str(e))
         else:
             return t

@@ -11,6 +11,8 @@ class Generator:
         self.localVars = {}
         self.globalVars = {}
         self.labelIndex = 0
+        self.breakLabel = []
+        self.continueLabel = []
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -152,7 +154,11 @@ class Generator:
 
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
         rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(variable.getTempName(0), BoolType()), curFn)
+        self.breakLabel = [labelEnd] + self.breakLabel
+        self.continueLabel = [labelBegin] + self.continueLabel
         codeBody = self.generateStatement(body, curFn)
+        self.breakLabel = self.breakLabel[1:]
+        self.continueLabel = self.continueLabel[1:]
         return code.genLabel(labelBegin) + codeCond + code.genInvCondJump(rvCond, labelEnd)\
             + codeBody + code.genJump(labelBegin) + code.genLabel(labelEnd)
 
@@ -175,6 +181,14 @@ class Generator:
             return self.generateConditional(t.children[0], t.children[1], t.children[2] if len(t.children) == 3 else None, curFn)
         elif t.data == 'while_loop':
             return self.generateWhile(t.children[0], t.children[1], curFn)
+        elif t.data == 'break_statement':
+            if len(self.breakLabel) == 0:
+                raise SemanticError(t.line, "Not in a loop")
+            return code.genJump(self.breakLabel[0])
+        elif t.data == 'continue_statement':
+            if len(self.continueLabel) == 0:
+                raise SemanticError(t.line, "Not in a loop")
+            return code.genJump(self.continueLabel[0])
 
     def generateStart(self, t):
         if t.data == 'start':

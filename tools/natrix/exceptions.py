@@ -1,3 +1,3 @@
 class SemanticError(Exception):
-    def __init__(self, file, line, msg):
-        super().__init__("Error at {}:{}: {}".format(file,line,msg))
+    def __init__(self, line, msg):
+        super().__init__("Error at line {}: {}".format(line,msg))

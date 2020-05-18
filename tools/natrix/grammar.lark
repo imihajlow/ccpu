@@ -5,6 +5,8 @@ start: statement*
     | block
     | conditional
     | while_loop
+    | "break" ";" -> break_statement
+    | "continue" ";" -> continue_statement
 
 conditional: "if" "(" expression ")" statement ("else" statement)?
 

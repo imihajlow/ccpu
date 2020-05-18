@@ -180,4 +180,4 @@ class TypeTransformer(Transformer):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
-        raise SemanticError("input", t.line, "Array size must be a positive constant expression")
+        raise SemanticError(t.line, "Array size must be a positive constant expression")
