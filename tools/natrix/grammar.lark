@@ -3,6 +3,12 @@ start: statement*
 ?statement: assignment ";"
     | declaration ";"
     | block
+    | conditional
+    | while_loop
+
+conditional: "if" "(" expression ")" statement ("else" statement)?
+
+while_loop: "while" "(" expression ")" statement
 
 ?block: "{" statement* "}"
 
@@ -85,5 +91,5 @@ BIN_NUMBER: /0b[01]+/
 
 INT_TYPE: /[us](8|16)/
 
-%import common.WS_INLINE
-%ignore WS_INLINE
+%import common.WS
+%ignore WS

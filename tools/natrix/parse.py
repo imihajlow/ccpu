@@ -14,14 +14,13 @@ def parse(s):
 with open("grammar.lark", "r") as gf:
     parser = Lark(gf, propagate_positions=True)
 
-g = Generator()
-line = input()
-while len(line) > 0:
-    t = parse(line)
-    t = ConstTransformer().transform(t)
-    t = TypeTransformer().transform(t)
-    t = ValueTransformer().transform(t)
-    print(t.pretty())
-    print(g.generateFunction(t))
+with open("test.na", "r") as cf:
+	code = cf.read()
 
-    line = input()
+g = Generator()
+t = parse(code)
+t = ConstTransformer().transform(t)
+t = TypeTransformer().transform(t)
+t = ValueTransformer().transform(t)
+print(t.pretty())
+print(g.generateStart(t))

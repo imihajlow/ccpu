@@ -1,7 +1,7 @@
 from lark import Lark, Transformer, v_args, Tree
 from exceptions import SemanticError
 from value import Value
-from type import Type
+from type import Type, BoolType
 import variable
 import code
 
@@ -10,6 +10,12 @@ class Generator:
         self.maxTempVarIndex = 0
         self.localVars = {}
         self.globalVars = {}
+        self.labelIndex = 0
+
+    def allocLabel(self, comment):
+        i = self.labelIndex
+        self.labelIndex += 1
+        return "__gen_{}_{}".format(i, comment)
 
     def generateExpression(self, t, minTempVarIndex, resultLoc, curFn):
         '''
@@ -109,11 +115,35 @@ class Generator:
         else:
             raise RuntimeError("Unknown assignment case")
 
+    def generateConditional(self, cond, ifBody, elseBody, curFn):
+        labelEnd = self.allocLabel("if_end")
+        if elseBody is not None:
+            labelElse = self.allocLabel("if_else")
+        self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
+        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(variable.getTempName(0), BoolType()), curFn)
+        codeIf = self.generateStatement(ifBody, curFn)
+        if elseBody is not None:
+            codeElse = self.generateStatement(elseBody, curFn)
+        if elseBody is None:
+            return codeCond + code.genInvCondJump(rvCond, labelEnd) + codeIf + code.genLabel(labelEnd)
+        else:
+            return codeCond + code.genInvCondJump(rvCond, labelElse)\
+                + codeIf + code.genJump(labelEnd) + code.genLabel(labelElse) + codeElse + code.genLabel(labelEnd)
 
-    def generateFunction(self, t):
+    def generateWhile(self, cond, body, curFn):
+        labelBegin = self.allocLabel("while_begin")
+        labelEnd = self.allocLabel("while_end")
+
+        self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
+        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(variable.getTempName(0), BoolType()), curFn)
+        codeBody = self.generateStatement(body, curFn)
+        return code.genLabel(labelBegin) + codeCond + code.genInvCondJump(rvCond, labelEnd)\
+            + codeBody + code.genJump(labelBegin) + code.genLabel(labelEnd)
+
+    def generateStatement(self, t, curFn):
         if t.data == 'assignment':
             l, r = t.children
-            return self.generateAssignment(l, r, "fn")
+            return self.generateAssignment(l, r, curFn)
         elif t.data == 'decl_var':
             typ, nam = t.children
             self.localVars[str(nam)] = typ
@@ -121,11 +151,16 @@ class Generator:
         elif t.data == 'def_var':
             type, name, r = t.children
             self.localVars[str(name)] = type
-            _, code = self.generateExpression(r, 0, Value.variable(variable.getLocalName("fn", str(name)), type), "fn")
+            _, code = self.generateExpression(r, 0, Value.variable(variable.getLocalName(curFn, str(name)), type), curFn)
             return code
-        elif t.data == 'start':
-            return "".join(self.generateFunction(child) for child in t.children)
         elif t.data == 'block':
-            return "".join(self.generateFunction(child) for child in t.children)
+            return "".join(self.generateStatement(child, curFn) for child in t.children)
+        elif t.data == 'conditional':
+            return self.generateConditional(t.children[0], t.children[1], t.children[2] if len(t.children) == 3 else None, curFn)
+        elif t.data == 'while_loop':
+            return self.generateWhile(t.children[0], t.children[1], curFn)
 
+    def generateStart(self, t):
+        if t.data == 'start':
+            return "".join(self.generateStatement(child, "fn") for child in t.children)
 

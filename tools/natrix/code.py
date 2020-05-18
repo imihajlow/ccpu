@@ -58,6 +58,17 @@ def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     else:
         return resultAddrLoc, "*({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
 
+def genInvCondJump(condLoc, label):
+    '''
+    Jump if condLoc is 0
+    '''
+    return "jmp {} if {} == 0\n".format(label, condLoc)
+
+def genJump(label):
+    return "jmp {}\n".format(label)
+
+def genLabel(label):
+    return "{}:\n".format(label)
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():

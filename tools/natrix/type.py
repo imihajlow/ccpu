@@ -73,6 +73,10 @@ class IntType(Type):
         else:
             return False
 
+class BoolType(IntType):
+    def __init__(self):
+        super().__init__(False, 1)
+
 class PtrType(Type):
     def __init__(self, t):
         self._t = t
