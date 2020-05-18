@@ -13,7 +13,7 @@ declaration: type IDENTIFIER -> decl_var
 ?type: INT_TYPE -> int_type
     | type "*" -> ptr
 
-assignment: value "=" expression
+assignment: lvalue "=" expression
 
 ?expression: lor
 
@@ -59,14 +59,16 @@ assignment: value "=" expression
     | "!" neg -> lnot
     | "~" neg -> bnot
 
-?value: subscript
+?value: lvalue
     | "&" value -> addr
-    | "*" value -> deref
     | "(" expression ")"
+
+?lvalue: subscript
+    | "*" value -> deref
 
 ?subscript: number
     | var
-    | subscript "[" expression "]" -> subscript
+    | var "[" expression "]" -> subscript
 
 var: IDENTIFIER
 

@@ -1,15 +1,17 @@
 from lark import Transformer, v_args, Tree
-from type import UnknownType, PtrType
+from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import variable
 
 '''
 Value class
 5 -> Value(IntType(True, 2), 0, 5)
-s8 x;   x -> Value(IntType(True, 1), 1, Symbol("x"))
-        &x -> Value(PtrType(IntType(True, 1)), 0, Symbol("x"))
-s8 *p;  p -> Value(PtrType(IntType(True, 1)), 1, Symbol("p"))
-        *p -> Value(IntType(True, 1), 2, Symbol("p"))
+s8 x;       x -> Value(IntType(True, 1), 1, Symbol("x"))
+            &x -> Value(PtrType(IntType(True, 1)), 0, Symbol("x"))
+s8 *p;      p -> Value(PtrType(IntType(True, 1)), 1, Symbol("p"))
+            *p -> Value(IntType(True, 1), 2, Symbol("p"))
+s8 a[10];   p -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
+            p[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
 '''
 class Value:
     def __init__(self, type, indirLevel, src):
@@ -56,13 +58,16 @@ class Value:
         return "({}, {}, {})".format(self._type, self._level, self._src)
 
     def __eq__(self, other):
-        return self._type == other._type and self._level == other._level and self._src == other._src
+        return isinstance(other, Value) and self._type == other._type and self._level == other._level and self._src == other._src
 
     def takeAddress(self):
         if self._level > 0:
             return Value(PtrType(self._type), self._level - 1, self._src)
         else:
             raise ValueError("Cannot get address of this: {}".format(str(self)))
+
+    def isConst(self):
+        return self._level == 0 and isinstance(self._src, int)
 
 class ValueTransformer(Transformer):
     @v_args(inline = True)

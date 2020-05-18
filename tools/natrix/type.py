@@ -16,6 +16,9 @@ class Type(ABC):
     def isPointer(self):
         pass
 
+    def isInteger(self):
+        return False
+
     @abstractmethod
     def removeUnknown(self, newType):
         pass
@@ -48,6 +51,9 @@ class IntType(Type):
 
     def isPointer(self):
         return False
+
+    def isInteger(self):
+        return True
 
     def removeUnknown(self, newType):
         if newType != self:
