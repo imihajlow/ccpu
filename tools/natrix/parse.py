@@ -6,7 +6,20 @@ from callgraph import CallGraph
 from gen import Generator
 import operator
 import pseudocode
+import ccpucode
 
+def format(code):
+	result = []
+	for line in code.splitlines():
+		l = line.lstrip()
+		if l != '':
+			colon = l.find(':')
+			semicolon = l.find(';')
+			if colon >= 0 and (colon < semicolon or semicolon < 0):
+				result.append(l)
+			else:
+				result.append('\t' + l)
+	return "\n".join(result)
 
 parser = None
 
@@ -27,9 +40,5 @@ t = ValueTransformer().transform(t)
 print(t.pretty())
 cg = CallGraph()
 cg.visit(t)
-# cg.print()
-# for caller in "fghi":
-# 	for callee in "fghi":
-# 		print("{}: {} -> {}".format(caller, callee, cg.isRecursive(caller, callee)))
-g = Generator("test.na", cg, pseudocode)
-print(g.generate(t))
+g = Generator("test.na", cg, ccpucode)
+print(format(g.generate(t)))
