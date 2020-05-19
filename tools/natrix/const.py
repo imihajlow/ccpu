@@ -128,7 +128,7 @@ class ConstTransformer(Transformer):
         return binary(tree, operator.or_)
 
     def bxor(self, tree):
-        return binary(tree, operator.xor_)
+        return binary(tree, operator.xor)
 
     def lt(self, tree):
         return binary(tree, operator.lt, IntType(False, 1))
