@@ -21,7 +21,7 @@ class Generator:
     def allocLabel(self, comment):
         i = self.labelIndex
         self.labelIndex += 1
-        return "__gen_{}_{}".format(i, comment)
+        return labelname.getGenLabel(i, comment)
 
     def generateExpression(self, t, minTempVarIndex, resultLoc, curFn):
         '''

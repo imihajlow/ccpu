@@ -1,4 +1,5 @@
 from value import Value
+from type import BoolType
 import operator
 import labelname
 
@@ -313,6 +314,10 @@ def genBinary(op, resultLoc, src1Loc, src2Loc):
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "or", "or", "({}) | ({})", operator.or_)
     elif op == 'bxor':
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "xor", "xor", "({}) ^ ({})", operator.xor)
+    elif op == 'lor':
+        return _genBoolBinary(resultLoc, src1Loc, src2Loc, "or", "bool({}) or bool({})", lambda a,b: a or b)
+    elif op == 'land':
+        return _genBoolBinary(resultLoc, src1Loc, src2Loc, "and", "bool({}) and bool({})", lambda a,b: a and b)
     else:
         if src1Loc.getType() != src2Loc.getType():
             raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
@@ -437,8 +442,7 @@ def genLNot(resultLoc, srcLoc):
             ldi pl, lo({0})
             ldi ph, hi({0})
             ld b
-            ldi a, 1
-            sub b, a ; c = b == 0
+            dec b ; c = b == 0
             mov a, 0
             adc a, 0
         '''.format(srcLoc.getSource())
@@ -665,6 +669,70 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
                 inc pl
                 st a
             '''
+    return resultLoc, result
+
+def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
+    if resultLoc.getType().isUnknown():
+        resultLoc = resultLoc.removeUnknown(src1Loc.getType())
+    if resultLoc.getType() != src1Loc.getType():
+        raise ValueError("Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
+    if src1Loc.getType() != src2Loc.getType():
+        raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+    if src1Loc.getType() != BoolType():
+        raise ValueError("Bool type (u8) expected")
+    assert(resultLoc.getIndirLevel() == 1)
+    rs = resultLoc.getSource()
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    result = ''
+    if l1 == 0 and l2 == 0:
+        # const and const
+        if isinstance(s1, int) and isinstance(s2, int):
+            if constLambda(bool(s1), bool(s2)):
+                result += 'ldi a, 1\n'
+            else:
+                result += 'mov a, 0\n'
+        else:
+            result += 'ldi a, {}\n'.format(pyPattern.format(src1Loc, src2Loc))
+    elif l1 == 0 or l2 == 0:
+        # var and const
+        if l1 == 0:
+            s1, s2 = s2, s1
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            dec a
+            ldi a, 1
+            sbb a, 0
+            ldi b, int(bool({1}))
+            {2} a, b
+        '''.format(s1, s2, op)
+    else:
+        # var and var
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            dec a
+            ldi a, 1
+            sbb a, 0
+            mov b, a
+            ldi pl, lo({1})
+            ldi ph, hi({1})
+            ld a
+            dec a
+            ldi a, 1
+            sbb a, 0
+            {2} a, b
+        '''.format(s1, s2, op)
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        st a
+    '''.format(rs)
     return resultLoc, result
 
 def genAdd(resultLoc, src1Loc, src2Loc):
