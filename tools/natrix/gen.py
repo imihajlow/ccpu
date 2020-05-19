@@ -222,6 +222,11 @@ class Generator:
         elif t.data == 'assignment_function':
             call = t.children[1]
             return self.generateFunctionAssignment(t.children[0], str(call.children[0]), call.children[1:], curFn)
+        elif t.data == 'return_statement':
+            dest = Value.variable(labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
+            return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
+        elif t.data == 'empty_return_statement':
+            return self.backend.genReturn(curFn)
 
     def addFunctionDeclaration(self, attrs, type, name, args):
         f = Function(name, type, attrs, args)
@@ -240,7 +245,9 @@ class Generator:
             raise ValueError("Cannot define an imported function")
         self.localVars = {}
         self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
-        result = self.backend.genFunctionPrologue(name) + "".join(self.generateStatement(child, name) for child in body.children) + self.backend.genReturn(name)
+        result = self.backend.genFunctionPrologue(name)
+        result += "".join(self.generateStatement(child, name) for child in body.children)
+        result += self.backend.genReturn(name)
         f.localVars = self.localVars
         return result
 
