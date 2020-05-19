@@ -14,14 +14,15 @@ s8 a[10];   p -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
             p[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
 '''
 class Value:
-    def __init__(self, type, indirLevel, src):
+    def __init__(self, type, indirLevel, src, final=False):
         self._type = type
         self._level = indirLevel
         self._src = src
+        self._isFinal = final
 
     @staticmethod
-    def variable(name, type=UnknownType()):
-        return Value(type, 1, name)
+    def variable(name, type=UnknownType(), final=False):
+        return Value(type, 1, name, final)
 
     def getType(self):
         return self._type
@@ -41,13 +42,16 @@ class Value:
     def isLValue(self):
         return self._level > 0
 
-    def resolveName(self, fn, localVars, globalVars):
-        if isinstance(self._src, int):
+    def resolveName(self, fn, localVars, globalVars, paramVars):
+        if isinstance(self._src, int) or self._isFinal:
             return self
         else:
             if self._src in localVars:
                 t = localVars[self._src]
                 return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), variable.getLocalName(fn, self._src))
+            elif self._src in paramVars:
+                t, n = paramVars[self._src]
+                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), variable.getArgumentName(fn, n))
             elif self._src in globalVars:
                 t = globalVars[self._src]
                 return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)

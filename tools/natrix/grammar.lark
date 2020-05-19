@@ -1,6 +1,17 @@
-start: function_definition*
+start: (function_definition | forward_declaration)*
 
-function_definition: type IDENTIFIER "(" arg_declarations ")" function_body
+?forward_declaration: function_declaration ";"
+
+function_definition: function_declaration function_body
+
+function_declaration: attributes type IDENTIFIER "(" arg_declarations ")"
+
+attributes: attribute*
+
+?attribute: "import" -> attr_import
+    | "export" -> attr_export
+    | "traitor" -> attr_always_recursion
+
 
 arg_declarations: (arg_declaration ("," arg_declaration)*)?
 

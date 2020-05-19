@@ -1,7 +1,21 @@
 from value import Value
 
+def genFunctionPrologue(fn):
+    return genLabel(fn)
+
+def genReturn(fn):
+    return "return from {}\n".format(fn)
+
+def genCall(fn):
+    return "call {}\n".format(fn)
+
+def genPushLocals(fn):
+    return "push locals of {}\n".format(fn)
+
+def genPopLocals(fn):
+    return "pop locals of {}\n".format(fn)
+
 def genMove(resultLoc, srcLoc, avoidCopy):
-    # TODO if a copy can be avoided, avoid it and return srcLoc
     if srcLoc.getType().isUnknown():
         raise ValueError("Unknown source type")
     if resultLoc.getType().isUnknown():

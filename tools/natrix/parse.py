@@ -5,6 +5,7 @@ from value import ValueTransformer
 from callgraph import CallGraph
 from gen import Generator
 import operator
+import pseudocode
 
 
 parser = None
@@ -23,8 +24,12 @@ t = ConstTransformer(False).transform(t)
 t = TypeTransformer().transform(t)
 t = ConstTransformer(True).transform(t)
 t = ValueTransformer().transform(t)
+print(t.pretty())
 cg = CallGraph()
 cg.visit(t)
-g = Generator(cg)
-print(t.pretty())
+# cg.print()
+# for caller in "fghi":
+# 	for callee in "fghi":
+# 		print("{}: {} -> {}".format(caller, callee, cg.isRecursive(caller, callee)))
+g = Generator("test.na", cg, pseudocode)
 print(g.generateStart(t))

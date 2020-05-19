@@ -5,6 +5,43 @@ class CallGraph(Interpreter):
     def __init__(self):
         self._calls = {}
         self._curFn = ""
+        self._traitors = set()
+
+    def isRecursive(self, caller, callee):
+        ''' Returns True is caller can be reached following the graph starting from callee '''
+        visited = set(caller)
+        q = [callee]
+        while len(q) > 0:
+            v = q.pop()
+            if v == caller:
+                return True
+            if v in self._traitors:
+                return True
+            if v not in visited:
+                visited.add(v)
+                q = self._calls[v] + q
+        return False
+
+    @v_args(tree = True)
+    def function_definition(self, tree):
+        decl, body = tree.children
+        _, _, name, _ = decl.children
+        self.visit(decl)
+        self._enterFunction(str(name))
+        self.visit(body)
+        self._leaveFunction()
+
+    @v_args(tree = True)
+    def function_call(self, tree):
+        name = tree.children[0]
+        self._addCall(str(name))
+
+    @v_args(tree = True)
+    def function_declaration(self, tree):
+        attrs, _, name, _ = tree.children
+        for attr in attrs.children:
+            if attr.data == 'attr_always_recursion':
+                self._traitors.add(str(name))
 
     def _addCall(self, callee):
         self._calls[self._curFn] += [callee]
@@ -17,15 +54,3 @@ class CallGraph(Interpreter):
 
     def _leaveFunction(self):
         self._curFn = None
-
-    @v_args(tree = True)
-    def function_definition(self, tree):
-        type, name, args, body = tree.children
-        self._enterFunction(str(name))
-        self.visit_children(tree)
-        self._leaveFunction()
-
-    @v_args(tree = True)
-    def function_call(self, tree):
-        name = tree.children[0]
-        self._addCall(str(name))
