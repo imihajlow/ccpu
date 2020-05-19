@@ -2,6 +2,7 @@ from lark import Lark, Transformer, v_args, Tree
 from const import ConstTransformer
 from type import TypeTransformer
 from value import ValueTransformer
+from callgraph import CallGraph
 from gen import Generator
 import operator
 
@@ -17,11 +18,13 @@ with open("grammar.lark", "r") as gf:
 with open("test.na", "r") as cf:
 	code = cf.read()
 
-g = Generator()
 t = parse(code)
 t = ConstTransformer(False).transform(t)
 t = TypeTransformer().transform(t)
 t = ConstTransformer(True).transform(t)
 t = ValueTransformer().transform(t)
+cg = CallGraph()
+cg.visit(t)
+g = Generator(cg)
 print(t.pretty())
 print(g.generateStart(t))

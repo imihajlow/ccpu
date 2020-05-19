@@ -6,13 +6,14 @@ import variable
 import code
 
 class Generator:
-    def __init__(self):
+    def __init__(self, callgraph):
         self.maxTempVarIndex = 0
         self.localVars = {}
         self.globalVars = {}
         self.labelIndex = 0
         self.breakLabel = []
         self.continueLabel = []
+        self.callgraph = callgraph
 
     def allocLabel(self, comment):
         i = self.labelIndex

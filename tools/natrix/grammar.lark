@@ -1,4 +1,12 @@
-start: statement*
+start: function_definition*
+
+function_definition: type IDENTIFIER "(" arg_declarations ")" function_body
+
+arg_declarations: (arg_declaration ("," arg_declaration)*)?
+
+arg_declaration: type IDENTIFIER
+
+function_body: statement*
 
 ?statement: assignment ";"
     | declaration ";"
@@ -7,6 +15,9 @@ start: statement*
     | while_loop
     | "break" ";" -> break_statement
     | "continue" ";" -> continue_statement
+    | function_call ";"
+    | "return" ";" -> empty_return_statement
+    | "return" expression ";" -> return_statement
 
 conditional: "if" "(" expression ")" statement ("else" statement)?
 
@@ -22,6 +33,11 @@ declaration: type IDENTIFIER -> decl_var
     | type "*" -> ptr
 
 assignment: lvalue "=" expression
+    | lvalue "=" function_call -> assignment_function
+
+function_call: IDENTIFIER "(" _arguments? ")"
+
+_arguments: expression ("," expression)*
 
 ?expression: lor
 
