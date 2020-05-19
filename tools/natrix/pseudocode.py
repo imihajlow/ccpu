@@ -1,4 +1,23 @@
 from value import Value
+import labelname
+
+def startCodeSection():
+    return ".section text\n"
+
+def startBssSection():
+    return ".section bss\n"
+
+def dumpExports(exports):
+    return "".join(".export {}\n".format(s) for s in exports)
+
+def dumpImports(imports):
+    return "".join(".global {}\n".format(s) for s in imports)
+
+def reserve(label, size):
+    return "{}: res {}\n".format(label, min(2, size))
+
+def reserveTempVars(maxIndex):
+    return "".join(reserve(labelname.getTempName(i), 2) for i in range(maxIndex + 1))
 
 def genFunctionPrologue(fn):
     return genLabel(fn)

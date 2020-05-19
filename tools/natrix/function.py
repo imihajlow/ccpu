@@ -9,6 +9,7 @@ class Function:
 		self.isAlwaysRecursion = hasAttr(attrs, "attr_always_recursion")
 		self.args = [a.children[0] for a in args] # type
 		self.retType = retType
+		self.localVars = {}
 		if self.isExported and self.isImported:
 			raise ValueError("A function can't be exported and imported at the same time")
 

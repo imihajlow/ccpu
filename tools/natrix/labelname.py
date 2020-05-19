@@ -9,3 +9,12 @@ def getArgumentName(fn, index):
 
 def getReturnName(fn):
 	return "{}_ret".format(fn)
+
+def getReserveBeginLabel(fn):
+	return "__cc_{}_frame_begin".format(fn)
+
+def getReserveEndLabel(fn):
+	return "__cc_{}_frame_end".format(fn)
+
+def getReturnAddressLabel(fn):
+	return "__cc_{}_ret_addr".format(fn)

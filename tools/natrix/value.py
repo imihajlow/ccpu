@@ -1,7 +1,7 @@
 from lark import Transformer, v_args, Tree
 from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
-import variable
+import labelname
 
 '''
 Value class
@@ -48,10 +48,10 @@ class Value:
         else:
             if self._src in localVars:
                 t = localVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), variable.getLocalName(fn, self._src))
+                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src))
             elif self._src in paramVars:
                 t, n = paramVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), variable.getArgumentName(fn, n))
+                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n))
             elif self._src in globalVars:
                 t = globalVars[self._src]
                 return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)

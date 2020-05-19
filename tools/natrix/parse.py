@@ -32,4 +32,4 @@ cg.visit(t)
 # 	for callee in "fghi":
 # 		print("{}: {} -> {}".format(caller, callee, cg.isRecursive(caller, callee)))
 g = Generator("test.na", cg, pseudocode)
-print(g.generateStart(t))
+print(g.generate(t))

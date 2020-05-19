@@ -3,11 +3,11 @@ from exceptions import SemanticError
 from value import Value
 from type import Type, BoolType
 from function import Function
-import variable
+import labelname
 
 class Generator:
     def __init__(self, filename, callgraph, backend):
-        self.maxTempVarIndex = 0
+        self.maxTempVarIndex = -1
         self.paramVars = {} # name -> (type, index)
         self.localVars = {} # name -> type
         self.globalVars = {} # name -> type
@@ -44,7 +44,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(variable.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genUnary(t.data, resultLoc, rv)
                 return resultLoc, argCode + myCode
             elif t.data == "type_cast":
@@ -54,7 +54,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
-                        Value.variable(variable.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
                 return resultLoc, argCode + myCode
             elif len(ch) == 2:
@@ -65,7 +65,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(variable.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
                     hasFirstArg = True
 
                 if isinstance(ch[1], Value):
@@ -75,7 +75,7 @@ class Generator:
                     indexIncrement = 1 if hasFirstArg else 0
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
                     rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
-                        Value.variable(variable.getTempName(minTempVarIndex + indexIncrement)), curFn)
+                        Value.variable(labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
 
                 resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2)
                 return resultLoc, argCode1 + argCode2 + myCode
@@ -115,9 +115,9 @@ class Generator:
             ptr = l.children[0]
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
-                        Value.variable(variable.getTempName(0)), curFn)
+                        Value.variable(labelname.getTempName(0)), curFn)
             rvR, codeR = self.generateExpression(r, 1,
-                        Value.variable(variable.getTempName(1)), curFn)
+                        Value.variable(labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
         elif l.data == 'subscript':
@@ -128,10 +128,10 @@ class Generator:
                 raise ValueError("Subscripting a non-pointer type")
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvIndex, codeIndex = self.generateExpression(index, 0,
-                        Value.variable(variable.getTempName(0)), curFn)
-            rvOffset, codeOffset = self.backend.genMulConst(Value.variable(variable.getTempName(0)), rvIndex, array.getType().deref().getSize())
+                        Value.variable(labelname.getTempName(0)), curFn)
+            rvOffset, codeOffset = self.backend.genMulConst(Value.variable(labelname.getTempName(0)), rvIndex, array.getType().deref().getSize())
             rvR, codeR = self.generateExpression(r, 1,
-                        Value.variable(variable.getTempName(1)), curFn)
+                        Value.variable(labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(array, rvR, rvIndex)
             return codeIndex + codeOffset + codeR + codePutIndirect
         else:
@@ -142,7 +142,7 @@ class Generator:
         if elseBody is not None:
             labelElse = self.allocLabel("if_else")
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
-        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(variable.getTempName(0), BoolType()), curFn)
+        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(labelname.getTempName(0), BoolType()), curFn)
         codeIf = self.generateStatement(ifBody, curFn)
         if elseBody is not None:
             codeElse = self.generateStatement(elseBody, curFn)
@@ -157,7 +157,7 @@ class Generator:
         labelEnd = self.allocLabel("while_end")
 
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
-        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(variable.getTempName(0), BoolType()), curFn)
+        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(labelname.getTempName(0), BoolType()), curFn)
         self.breakLabel = [labelEnd] + self.breakLabel
         self.continueLabel = [labelBegin] + self.continueLabel
         codeBody = self.generateStatement(body, curFn)
@@ -174,7 +174,7 @@ class Generator:
             raise ValueError("Incorrect argument count for {}".format(name))
         result = ""
         for n, expr in enumerate(args):
-            result += self.generateAssignment(Value.variable(variable.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
+            result += self.generateAssignment(Value.variable(labelname.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
         isRecursive = self.callgraph.isRecursive(curFn, name)
         if isRecursive:
             result += self.backend.genPushLocals(curFn)
@@ -186,7 +186,7 @@ class Generator:
     def generateFunctionAssignment(self, dest, name, args, curFn):
         codeCall = self.generateFunctionCall(name, args, curFn)
         f = self.functions[name]
-        resultLoc = Value.variable(variable.getReturnName(name), f.retType, final=True)
+        resultLoc = Value.variable(labelname.getReturnName(name), f.retType, final=True)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
 
@@ -240,7 +240,9 @@ class Generator:
             raise ValueError("Cannot define an imported function")
         self.localVars = {}
         self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
-        return self.backend.genFunctionPrologue(name) + "".join(self.generateStatement(child, name) for child in body.children) + self.backend.genReturn(name)
+        result = self.backend.genFunctionPrologue(name) + "".join(self.generateStatement(child, name) for child in body.children) + self.backend.genReturn(name)
+        f.localVars = self.localVars
+        return result
 
     def generateToplevel(self, t):
         if t.data == 'function_definition':
@@ -254,4 +256,45 @@ class Generator:
     def generateStart(self, t):
         if t.data == 'start':
             return "".join(self.generateToplevel(child) for child in t.children)
+        else:
+            raise RuntimeError("Wrong root node")
 
+    def getImports(self):
+        for name in self.functions:
+            f = self.functions[name]
+            if f.isImported:
+                yield name
+                yield labelname.getReturnName(name)
+                for n in range(len(f.args)):
+                    yield labelname.getArgumentName(name, n)
+
+    def getExports(self):
+        for name in self.functions:
+            f = self.functions[name]
+            if f.isExported:
+                yield name
+                yield labelname.getReturnName(name)
+                for n in range(len(f.args)):
+                    yield labelname.getArgumentName(name, n)
+
+    def generateFunctionReserve(self, fn):
+        if fn.isImported:
+            return ""
+        result = self.backend.genLabel(labelname.getReserveBeginLabel(fn.name))
+        result += self.backend.reserve(labelname.getReturnAddressLabel(fn.name), 2)
+        result += self.backend.reserve(labelname.getReturnName(fn.name), 2)
+        result += "".join(self.backend.reserve(labelname.getArgumentName(fn.name, i), 2) for i in range(len(fn.args)))
+        result += "".join(self.backend.reserve(labelname.getLocalName(fn.name, v), 2) for v in fn.localVars)
+        result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
+        return result
+
+    def generateReserve(self):
+        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.functions[name]) for name in self.functions)
+
+    def generate(self, t):
+        execCode = self.generateStart(t)
+        importCode = self.backend.dumpImports(self.getImports())
+        exportCode = self.backend.dumpExports(self.getExports())
+        reserveCode = self.generateReserve()
+
+        return exportCode + importCode + self.backend.startCodeSection() + execCode + self.backend.startBssSection() + reserveCode
