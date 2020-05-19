@@ -19,6 +19,9 @@ class Type(ABC):
     def isInteger(self):
         return False
 
+    def getReserveSize(self):
+        return self.getSize()
+
     @abstractmethod
     def removeUnknown(self, newType):
         pass
@@ -127,6 +130,9 @@ class ArrayType(PtrType):
 
     def getIndirectionOffset(self):
         return -1
+
+    def getReserveSize(self):
+        return self._n * self.deref().getReserveSize()
 
     def __str__(self):
         return str(self._t) + "[{}]".format(self._n)

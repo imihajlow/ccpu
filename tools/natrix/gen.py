@@ -291,7 +291,7 @@ class Generator:
         result += self.backend.reserve(labelname.getReturnAddressLabel(fn.name), 2)
         result += self.backend.reserve(labelname.getReturnName(fn.name), 2)
         result += "".join(self.backend.reserve(labelname.getArgumentName(fn.name, i), 2) for i in range(len(fn.args)))
-        result += "".join(self.backend.reserve(labelname.getLocalName(fn.name, v), 2) for v in fn.localVars)
+        result += "".join(self.backend.reserveVar(labelname.getLocalName(fn.name, v), fn.localVars[v]) for v in fn.localVars)
         result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
         return result
 

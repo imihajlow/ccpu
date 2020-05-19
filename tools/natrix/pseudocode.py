@@ -1,6 +1,12 @@
 from value import Value
 import labelname
 
+def _align(x, a):
+    if x % a == 0:
+        return x
+    else:
+        return (x // a)  * a + a
+
 def startCodeSection():
     return ".section text\n"
 
@@ -18,6 +24,10 @@ def reserve(label, size):
 
 def reserveTempVars(maxIndex):
     return "".join(reserve(labelname.getTempName(i), 2) for i in range(maxIndex + 1))
+
+def reserveVar(label, type):
+    rs = _align(type.getReserveSize(), 2)
+    return "{}: res {}\n".format(label, rs)
 
 def genFunctionPrologue(fn):
     return genLabel(fn)
