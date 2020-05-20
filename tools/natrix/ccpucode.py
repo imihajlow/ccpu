@@ -690,26 +690,38 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):
-            if constLambda(bool(s1), bool(s2)):
-                result += 'ldi a, 1\n'
-            else:
-                result += 'mov a, 0\n'
+            return Value(BoolType(), 0, int(constLambda(bool(s1), bool(s2)))), result
         else:
-            result += 'ldi a, {}\n'.format(pyPattern.format(src1Loc, src2Loc))
+            return Value(BoolType(), 0, pyPattern.format(src1Loc, src2Loc)), result
     elif l1 == 0 or l2 == 0:
         # var and const
         if l1 == 0:
             s1, s2 = s2, s1
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-            dec a
-            ldi a, 1
-            sbb a, 0
-            ldi b, int(bool({1}))
-            {2} a, b
-        '''.format(s1, s2, op)
+            src1Loc, src2Loc = src2Loc, src1Loc
+        if isinstance(s2, int):
+            if op == 'or':
+                if s2 == 0:
+                    return src1Loc, ""
+                else:
+                    return Value(BoolType(), 0, 1), ""
+            elif op == 'and':
+                if s2 == 0:
+                    return Value(BoolType(), 0, 0), ""
+                else:
+                    return src1Loc, result
+            else:
+                raise RuntimeError("Unhandled binary boolean op: {}".format(op))
+        else:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld a
+                dec a
+                ldi a, 1
+                sbb a, 0
+                ldi b, int(bool({1}))
+                {2} a, b
+            '''.format(s1, s2, op)
     else:
         # var and var
         result += '''
