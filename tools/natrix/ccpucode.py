@@ -1000,8 +1000,8 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
     elif l2 == 0:
         # var and const
         if isinstance(s2, int):
-            l = _lo(s1)
-            h = _hi(s1)
+            l = _lo(s2)
+            h = _hi(s2)
         else:
             l = "lo({})".format(s2)
             h = "hi({})".format(s2)
@@ -1016,7 +1016,7 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
                 inc pl
                 sub b, a
                 ld pl
-                ldi a, {1}
+                ldi a, {0}
                 sbb pl, a
             '''.format(h)
         else:

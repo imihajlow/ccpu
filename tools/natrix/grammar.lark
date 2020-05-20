@@ -96,8 +96,8 @@ _arguments: expression ("," expression)*
 
 ?value: lvalue
     | "&" value -> addr
+    | "(" type ")" value -> type_cast
     | "(" expression ")"
-    | "cast" "<" type ">" "(" expression ")" -> type_cast
 
 ?lvalue: subscript
     | "*" value -> deref
