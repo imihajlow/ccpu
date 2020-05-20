@@ -327,10 +327,46 @@ def genInvCondJump(condLoc, label):
     '''
     Jump if condLoc is 0
     '''
-    return "jmp {} if {} == 0\n".format(label, condLoc)
+    if condLoc.getType() != BoolType():
+        raise ValueError("Should be a bool type (u8) for a condition, got {}".format(str(condLoc.getType())))
+    l = condLoc.getIndirLevel()
+    s = condLoc.getSource()
+    assert(l == 0 or l == 1)
+    result = '; jump if not {}\n'.format(condLoc)
+    if l == 0:
+        if isinstance(s, int):
+            if not bool(s):
+                result += '''
+                    ldi pl, lo({0})
+                    ldi ph, hi({0})
+                    jmp
+                '''.format(label)
+        else:
+            result += '''
+                ldi a, lo({0})
+                add a, 0
+                ldi pl, lo({1})
+                ldi ph, hi({1})
+                jz
+            '''.format(s, label)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            ldi pl, lo({1})
+            ldi ph, hi({1})
+            add a, 0
+            jz
+        '''.format(s, label)
+    return result
 
 def genJump(label):
-    return "jmp {}\n".format(label)
+    return '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jmp
+    '''.format(label)
 
 def genLabel(label):
     return "{}:\n".format(label)

@@ -20,4 +20,4 @@ def getReturnAddressLabel(fn):
 	return "__cc_{}_ret_addr".format(fn)
 
 def getGenLabel(n, comment):
-    return "__gen_{}_{}".format(i, comment)
+    return "__gen_{}_{}".format(n, comment)
