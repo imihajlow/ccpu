@@ -159,6 +159,7 @@ def genCast(resultLoc, t, srcLoc):
             if srcLoc.getType().getSign():
                 # sign expand
                 return resultLoc, '''
+                    ; widening cast, sign expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld a
@@ -170,6 +171,7 @@ def genCast(resultLoc, t, srcLoc):
             else:
                 # zero expand
                 return resultLoc, '''
+                    ; widening cast, zero expand
                     ldi pl, lo({0} + 1)
                     ldi ph, hi({0} + 1)
                     mov a, 0
@@ -192,6 +194,7 @@ def genCast(resultLoc, t, srcLoc):
             if srcLoc.getType().getSign():
                 # sign expand
                 result = '''
+                    ; widening cast, sign expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld a
@@ -206,6 +209,7 @@ def genCast(resultLoc, t, srcLoc):
             else:
                 # zero expand
                 result = '''
+                    ; widening cast, zero expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld a
@@ -219,27 +223,7 @@ def genCast(resultLoc, t, srcLoc):
             return resultLoc, result
         else:
             # same size or narrower
-            result = '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
-                '''.format(srcLoc.getSource())
-            if t.getSize() == 2:
-                result += '''
-                    inc pl
-                    ld b
-                '''
-            result +='''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-                '''.format(resultLoc.getSource())
-            if t.getSize() == 2:
-                result += '''
-                    inc pl
-                    st b
-                '''
-            return resultLoc, result
+            return srcLoc.withType(resultLoc.getType()), ""
 
 def genDeref(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
