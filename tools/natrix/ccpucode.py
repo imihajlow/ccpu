@@ -306,6 +306,8 @@ def genBinary(op, resultLoc, src1Loc, src2Loc):
         return genEq(resultLoc, src1Loc, src2Loc)
     elif op == 'ne':
         return genNe(resultLoc, src1Loc, src2Loc)
+    elif op in {'gt', 'ge', 'lt', 'le'}:
+        return genCmp(resultLoc, src1Loc, src2Loc, op)
     else:
         if src1Loc.getType() != src2Loc.getType():
             raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
@@ -953,6 +955,162 @@ def genNe(resultLoc, src1Loc, src2Loc):
         st a
     '''.format(rs)
     return resultLoc, result
+
+def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    t = src1Loc.getType()
+    isWord = t.getSize() == 2
+    result = '; compare unsigned {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    if l1 == 0 and l2 == 0:
+        # const and const
+        if isinstance(s1, int) and isinstance(s2, int):
+            return Value(BoolType(), 0, int(eval("{} {} {}".format(s1, op, s2), {}, {}))), result
+        else:
+            return Value(BoolType(), 0, "({}) {} ({})".format(s1, op, s2)), result
+    elif l1 == 0:
+        # const and var
+        if isinstance(s1, int):
+            l = _lo(s1)
+            h = _hi(s1)
+        else:
+            l = "lo({})".format(s1)
+            h = "hi({})".format(s1)
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            ldi b, {1}
+        '''.format(s2, l)
+        if isWord:
+            result += '''
+                inc pl
+                sub b, a
+                ld a
+                ldi pl, {1}
+                sbb pl, a
+            '''.format(h)
+        else:
+            result += 'sub b, a\n'
+            if op == 'le' or op == 'gt':
+                result += 'ldi pl, 0\n'
+    elif l2 == 0:
+        # var and const
+        if isinstance(s2, int):
+            l = _lo(s1)
+            h = _hi(s1)
+        else:
+            l = "lo({})".format(s2)
+            h = "hi({})".format(s2)
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+            ldi a, {1}
+        '''.format(s1, l)
+        if isWord:
+            result += '''
+                inc pl
+                sub b, a
+                ld pl
+                ldi a, {1}
+                sbb pl, a
+            '''.format(h)
+        else:
+            result += 'sub b, a\n'
+            if op == 'le' or op == 'gt':
+                result += 'ldi pl, 0\n'
+    else:
+        # var and var
+        if isWord:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+                ldi pl, lo({1})
+                ldi ph, hi({1})
+                ld a
+                inc pl
+                sub b, a
+                ld a
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
+                ld pl
+                sbb pl, a
+            '''.format(s1, s2)
+        else:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+                ldi pl, lo({1})
+                ldi ph, hi({1})
+                ld a
+                sub b, a
+            '''.format(s1, s2)
+            if op == 'le' or op == 'gt':
+                result += 'ldi pl, 0\n'
+    # C = carry flag
+    # Z = (b | pl) == 0
+    if op == 'lt':
+        # 1 if C
+        result += '''
+            mov a, 0
+            adc a, 0
+        '''
+    elif op == 'ge':
+        # 1 if !C
+        result += '''
+            ldi a, 1
+            sbb a, 0
+        '''
+    elif op == 'le':
+        # 1 if C or !(b | pl)
+        result += '''
+            exp ph ; ph = C (0xff or 0x00)
+            mov a, pl
+            or a, b
+            dec a ; C = Z
+            exp a ; a = Z (0xff or 0x00)
+            or a, ph ; a = C | Z (0xff or 0x00)
+            ldi b, 1
+            and a, b
+        '''
+    elif op == 'gt':
+        # 1 if !(C or Z)
+        result += '''
+            exp ph ; ph = C (0xff or 0x00)
+            mov a, pl
+            or a, b
+            dec a ; C = Z
+            exp a ; a = Z (0xff or 0x00)
+            or a, ph ; a = C | Z (0xff or 0x00)
+            not a
+            ldi b, 1
+            and a, b
+        '''
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        st a
+    '''.format(rs)
+    return resultLoc, result
+
+def genCmp(resultLoc, src1Loc, src2Loc, op):
+    assert(op in {"gt", "ge", "lt", "le"})
+    resultLoc = resultLoc.withType(BoolType())
+    assert(resultLoc.getIndirLevel() == 1)
+    if src1Loc.getType() != src2Loc.getType():
+        raise ValueError("Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+    t = src1Loc.getType()
+    assert(t.getSize() == 1 or t.getSize() == 2)
+    if t.getSign():
+        return _genCmpSigned(resultLoc, src1Loc, src2Loc, op)
+    else:
+        return _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op)
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
