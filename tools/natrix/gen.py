@@ -77,7 +77,7 @@ class Generator:
                     rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
                         Value.variable(labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
 
-                resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2)
+                resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
                 return resultLoc, argCode1 + argCode2 + myCode
             else:
                 raise ValueError("Too many children")

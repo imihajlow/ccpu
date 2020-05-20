@@ -2,6 +2,7 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
+import signed
 
 def _align(x, a):
     if x % a == 0:
@@ -283,7 +284,7 @@ def genUnary(op, resultLoc, srcLoc):
     else:
         raise RuntimeError("Unhandled unary op: {}".format(op))
 
-def genBinary(op, resultLoc, src1Loc, src2Loc):
+def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
         raise ValueError("Unknown source type")
     if op == 'subscript':
@@ -307,7 +308,7 @@ def genBinary(op, resultLoc, src1Loc, src2Loc):
     elif op == 'ne':
         return genNe(resultLoc, src1Loc, src2Loc)
     elif op in {'gt', 'ge', 'lt', 'le'}:
-        return genCmp(resultLoc, src1Loc, src2Loc, op)
+        return genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider)
     else:
         if src1Loc.getType() != src2Loc.getType():
             raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
@@ -956,22 +957,16 @@ def genNe(resultLoc, src1Loc, src2Loc):
     '''.format(rs)
     return resultLoc, result
 
-def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
+def _genCmpSub(src1Loc, src2Loc):
+    # subtract the values so that flags C, S, and O are set accordingly and (b | pl) is zero if the result is zero
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
-    rs = resultLoc.getSource()
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
     isWord = t.getSize() == 2
-    result = '; compare unsigned {} and {} ({})\n'.format(src1Loc, src2Loc, op)
-    if l1 == 0 and l2 == 0:
-        # const and const
-        if isinstance(s1, int) and isinstance(s2, int):
-            return Value(BoolType(), 0, int(eval("{} {} {}".format(s1, op, s2), {}, {}))), result
-        else:
-            return Value(BoolType(), 0, "({}) {} ({})".format(s1, op, s2)), result
-    elif l1 == 0:
+    result = ''
+    if l1 == 0:
         # const and var
         if isinstance(s1, int):
             l = _lo(s1)
@@ -1053,6 +1048,27 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
             '''.format(s1, s2)
             if op == 'le' or op == 'gt':
                 result += 'ldi pl, 0\n'
+    return result
+
+def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    t = src1Loc.getType()
+    isWord = t.getSize() == 2
+    result = '; compare unsigned {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    if l1 == 0 and l2 == 0:
+        # const and const
+        if isinstance(s1, int) and isinstance(s2, int):
+            pyop = {"gt": operator.gt, "lt": operator.lt, "ge": operator.ge, "le": operator.le}[op]
+            return Value(BoolType(), 0, int(pyop(s1, s2))), result
+        else:
+            pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
+            return Value(BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2)), result
+    else:
+        result += _genCmpSub(src1Loc, src2Loc)
     # C = carry flag
     # Z = (b | pl) == 0
     if op == 'lt':
@@ -1099,7 +1115,91 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
     '''.format(rs)
     return resultLoc, result
 
-def genCmp(resultLoc, src1Loc, src2Loc, op):
+def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    t = src1Loc.getType()
+    isWord = t.getSize() == 2
+    result = '; compare signed {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    if l1 == 0 and l2 == 0:
+        # const and const
+        if isinstance(s1, int) and isinstance(s2, int):
+            raise NotImplementedError("signed const comparison")
+        else:
+            raise NotImplementedError("signed const comparison")
+    else:
+        result += _genCmpSub(src1Loc, src2Loc)
+    # S, O - flags
+    # Z = (b | pl) == 0
+    labelO = labelProvider.allocLabel("o")
+    labelEnd = labelProvider.allocLabel("end")
+    if op == 'lt' or op == 'le':
+        # O != S => lt
+        result += '''
+            mov a, 0
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            jno
+            ldi pl, lo({1})
+            ldi ph, hi({1})
+            js ; O & S
+            inc a
+            jmp ; O & !S
+        {0}:ldi pl, lo({1})
+            ldi ph, hi({1})
+            jns ; !O & !S
+            inc a
+            ; !O & S
+        {1}:
+        '''.format(labelO, labelEnd)
+    elif op == 'ge' or op == 'gt':
+        # O == S => ge
+        result += '''
+            mov a, 0
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            jno
+            ldi pl, lo({1})
+            ldi ph, hi({1})
+            jns ; O & !S
+            inc a
+            jmp ; O & S
+        {0}:ldi pl, lo({1})
+            ldi ph, hi({1})
+            js ; !O & S
+            inc a
+            ; !O & S
+        {1}:
+        '''.format(labelO, labelEnd)
+    if op == 'le':
+        result += '''
+            or a, b
+            or a, pl
+            dec a
+            ldi a, 1
+            sbb a, 0
+        '''
+    elif op == 'gt':
+        result += '''
+            mov ph, a
+            mov a, pl
+            or a, b
+            dec a
+            ldi a, 1
+            sbb a, 0 ; a == 1 if !Z
+            and a, ph
+        '''
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        st a
+    '''.format(rs)
+    return resultLoc, result
+
+def genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(op in {"gt", "ge", "lt", "le"})
     resultLoc = resultLoc.withType(BoolType())
     assert(resultLoc.getIndirLevel() == 1)
@@ -1108,7 +1208,7 @@ def genCmp(resultLoc, src1Loc, src2Loc, op):
     t = src1Loc.getType()
     assert(t.getSize() == 1 or t.getSize() == 2)
     if t.getSign():
-        return _genCmpSigned(resultLoc, src1Loc, src2Loc, op)
+        return _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider)
     else:
         return _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op)
 
