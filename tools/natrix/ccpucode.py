@@ -621,11 +621,11 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
         '''.format(s1, s2, opLo)
         if isWord:
             result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
-                ldi pl, lo({1})
-                ldi ph, hi({1})
+                ldi pl, lo({1} + 1)
+                ldi ph, hi({1} + 1)
                 ld pl
                 {2} a, pl
             '''.format(s1, s2, opHi)
@@ -717,15 +717,70 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     '''.format(rs)
     return resultLoc, result
 
+def _genAddPtr(resultLoc, src1Loc, src2Loc):
+    if not src2Loc.getType().isInteger():
+        raise ValueError("Can only add ponters and integers, not pointers and other types")
+    if src2Loc.getType().getSize() != 2:
+        raise ValueError("Can only add a 16-bit integer to a pointer")
+    memberSize = src1Loc.getType().deref().getSize()
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    t = resultLoc.getType()
+    result = '; {} = {} + {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
+    if memberSize == 1:
+        # no multiplication, just add
+        loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "add", "adc", "({}) + ({})", operator.add)
+        return loc, result + code
+    elif memberSize == 2:
+        if src2Loc.getIndirLevel() == 0:
+            if isinstance(s2, int):
+                offset = s2 * 2
+            else:
+                offset = "({}) * 2".format(s2)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(t, 0, offset), "add", "adc", "({}) + ({})", operator.add)
+            return loc, result + code
+        else:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+                inc pl
+                ld a
+                shl a
+                shl b
+                adc a, 0
+                xor a, b
+                xor b, a
+                xor a, b
+                ldi pl, lo({1})
+                ldi ph, hi({1})
+                ld pl
+                add a, pl
+                ldi pl, lo({1} + 1)
+                ld pl
+                mov ph, a
+                mov a, pl
+                adc b, a
+                mov a, ph
+                ldi pl, lo({2})
+                ldi ph, hi({2})
+                st a
+                inc pl
+                st b
+            '''.format(s2, s1, rs)
+    else:
+        raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
+    return resultLoc, result
+
+
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
         raise ValueError("Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType().isPointer():
-        if not src2Loc.getType().isInteger():
-            raise ValueError("Can only add ponters and integers, not pointers and other types")
-        return resultLoc, "{} = {} + {} * {}\n".format(resultLoc, src1Loc, src2Loc, src1Loc.getType().deref().getSize())
+        return _genAddPtr(resultLoc, src1Loc, src2Loc)
     else:
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "add", "adc", "({}) + ({})", operator.add)
 
