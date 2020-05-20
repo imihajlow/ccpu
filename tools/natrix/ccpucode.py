@@ -385,7 +385,7 @@ def genBNot(resultLoc, srcLoc):
             c = ~c
         else:
             c = '~({})'.format(c) # Warning
-        result += _loadConst(t.getSize(), c)
+        return Value(t, 0, c), result
     else:
         # var
         result += '''
@@ -429,13 +429,8 @@ def genLNot(resultLoc, srcLoc):
         if isinstance(c, int):
             c = int(not bool(c))
         else:
-            c = '0 if bool({}) else 1'.format(c) # Warning
-        result += _loadConst(1, c)
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st b
-        '''.format(resultLoc.getSource())
+            c = 'int(not bool({}))'.format(c) # Warning
+        return Value(BoolType(), 0, c), result
     else:
         # var
         result += '''
@@ -472,7 +467,7 @@ def genNeg(resultLoc, srcLoc):
             c = -c & (0xff if t.getSize() == 1 else 0xffff)
         else:
             c = '-({})'.format(c) # Warning
-        result += _loadConst(t.getSize(), c)
+        return Value(t, 0, c), result
     else:
         # var
         result += '''
@@ -522,26 +517,17 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
     isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const + const
-        result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-        '''.format(rs)
         c1 = src1Loc.getSource()
         c2 = src2Loc.getSource()
         if isinstance(c1, int) and isinstance(c2, int):
             cr = constLambda(c1, c2)
-            l = _lo(cr)
-            h = _hi(cr)
-            result += 'ldi b, {}\n'.format(l)
             if isWord:
-                if h == 0:
-                    result += 'mov a, 0\n'
-                else:
-                    result += 'ldi a, {}\n'.format(h)
+                cr = cr & 0xffff
+            else:
+                cr = cr & 0xff
+            return Value(t, 0, cr), result
         else:
-            result += 'ldi b, lo({})\n'.format(pyPattern.format(c1, c2))
-            if isWord:
-                result += 'ldi a, hi({})\n'.format(pyPattern.format(c1, c2))
+            return Value(t, 0, pyPattern.format(c1, c2)), result
         result += 'st b\n'
         if isWord:
             result += '''
