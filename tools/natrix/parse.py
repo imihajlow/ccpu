@@ -6,7 +6,7 @@ from callgraph import CallGraph
 from gen import Generator
 import operator
 import pseudocode
-import ccpucode
+import ccpu.code
 
 def format(code):
 	result = []
@@ -40,5 +40,5 @@ t = ValueTransformer().transform(t)
 print(t.pretty())
 cg = CallGraph()
 cg.visit(t)
-g = Generator("test.na", cg, ccpucode)
+g = Generator("test.na", cg, ccpu.code)
 print(format(g.generate(t)))
