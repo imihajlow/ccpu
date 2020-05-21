@@ -1,0 +1,11 @@
+import s8 trap();
+
+s16 f() {
+    return 0xaabb;
+}
+
+export s8 main() {
+    s16 test_result = -2;
+    test_result = f();
+    trap();
+}

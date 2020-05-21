@@ -1,7 +1,7 @@
-SMALLC_DIR=../tools/smallc/smallC
-SMALLC=$(SMALLC_DIR)/scc-ccpu
+NATRIX_DIR=../tools/natrix
+NATRIX=$(NATRIX_DIR)/natrix.py
 
-all: calc.rom io_test.rom test.bin ctest.bin
+all: calc.rom io_test.rom test.bin natest.bin
 
 clean:
 	rm -f *.bin *.rom *.map *.s
@@ -13,10 +13,10 @@ clean:
 test: test.bin
 	../tools/sim.py test.bin test.map -c 'u finish'
 
-ctest: ctest.bin
-	../tools/sim.py ctest.bin ctest.map -c 'break trap' -c 'run' -c 'p w pri'
+natest: natest.bin
+	../tools/sim.py natest.bin natest.map -c 'break trap' -c 'run' -c 'p w test_result'
 
-ctest.bin: test/ctest.o $(SMALLC_DIR)/crunccpulib.o test/trap.o lib/c_display.o lib/display.o lib/bcdf.o
+natest.bin: test/natest.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 calc.bin: calc/calc.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
@@ -31,8 +31,8 @@ io_test.bin: test/io_test.o lib/display.o lib/keyboard.o lib/bcdf.o
 %.o: %.asm
 	../tools/asm.py -o $@ $^
 
-%.o: %.c
-	$(SMALLC) $^
+%.o: %.na
+	$(NATRIX) -o $(@:.o=.s) $^
 	../tools/asm.py -o $@ $(@:.o=.s)
 
 %.bin: %.o

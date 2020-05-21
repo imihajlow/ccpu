@@ -1,4 +1,5 @@
     .export trap
+    .export trap_ret
     .export fail
     .section text
 trap:
@@ -6,3 +7,5 @@ trap:
 
 fail:
     jmp
+    .section bss
+trap_ret: res 2

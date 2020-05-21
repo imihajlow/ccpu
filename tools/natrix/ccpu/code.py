@@ -29,8 +29,10 @@ def startCodeSection():
     return ".section text\n"
 
 def startBssSection():
-    return ".section bss\n"
-    return ".align 2\n"
+    return '''
+        .section bss
+        .align 2
+    '''
 
 def dumpExports(exports):
     return "".join(".export {}\n".format(s) for s in exports)
@@ -385,9 +387,3 @@ def genJump(label):
 
 def genLabel(label):
     return "{}:\n".format(label)
-
-def genMulConst(resultLoc, srcLoc, m):
-    resultLoc = resultLoc.removeUnknown(srcLoc.getType())
-    if resultLoc.getType() != srcLoc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
-    return resultLoc, "{} = {} * {}\n".format(resultLoc, srcLoc, m)

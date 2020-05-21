@@ -1,4 +1,9 @@
     .export __cc_r_sp
+    .export __cc_asr
+    .export __cc_asl
+    .export __cc_lsr
+    .export __cc_sh_val
+    .export __cc_sh_count
 
     .global __seg_stack_end ; provided by the linker
     .global main

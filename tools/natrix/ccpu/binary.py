@@ -46,7 +46,7 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
     assert(l2 == 0 or l2 == 1)
     t = resultLoc.getType()
     rs = resultLoc.getSource()
-    result = ""
+    result = "; {} = {} {}, {}\n".format(resultLoc, opLo, src1Loc, src2Loc)
     isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const + const
@@ -205,7 +205,7 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     s2 = src2Loc.getSource()
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
-    result = ''
+    result = '; {} = bool {} {}, {}\n'.format(resultLoc, op, src1Loc, src2Loc)
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):

@@ -19,7 +19,8 @@ class CallGraph(Interpreter):
                 return True
             if v not in visited:
                 visited.add(v)
-                q = self._calls[v] + q
+                if v in self._calls:
+                    q = self._calls[v] + q
         return False
 
     @v_args(tree = True)

@@ -13,7 +13,8 @@ def genDeref(resultLoc, srcLoc):
     t = resultLoc.getType()
     assert(0 < t.getSize() <= 2)
 
-    result = '''
+    result = '; {} = deref {}\n'.format(resultLoc, srcLoc)
+    result += '''
         ldi pl, lo({0})
         ldi ph, hi({0})
     '''.format(srcLoc.getSource())
@@ -70,7 +71,7 @@ def genBNot(resultLoc, srcLoc):
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
     t = srcLoc.getType()
-    result = ''
+    result = '; {} = ~{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
@@ -115,7 +116,7 @@ def genLNot(resultLoc, srcLoc):
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
-    result = ''
+    result = '; {} = !{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
@@ -152,7 +153,7 @@ def genNeg(resultLoc, srcLoc):
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
     t = srcLoc.getType()
-    result = ''
+    result = '; {} = -{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
