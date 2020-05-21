@@ -2,7 +2,7 @@
 import argparse
 import sys
 import os
-from lark import Lark, Transformer, v_args, Tree
+from lark import Lark, Transformer, v_args, Tree, LarkError
 from const import ConstTransformer
 from type import TypeTransformer
 from value import ValueTransformer
@@ -39,19 +39,21 @@ if __name__ == '__main__':
 
     code = args.file.read()
 
-    t = parser.parse(code)
-    t = ConstTransformer(False).transform(t)
-    t = TypeTransformer().transform(t)
-    t = ConstTransformer(True).transform(t)
-    t = ValueTransformer().transform(t)
-    t = SubscriptTransformer().transform(t)
-    if args.tree:
-        print(t.pretty())
-    cg = CallGraph()
-    cg.visit(t)
-    g = Generator(args.file.name, cg, ccpu.code)
     try:
+        t = parser.parse(code)
+        t = ConstTransformer(False).transform(t)
+        t = TypeTransformer().transform(t)
+        t = ConstTransformer(True).transform(t)
+        t = ValueTransformer().transform(t)
+        t = SubscriptTransformer().transform(t)
+        if args.tree:
+            print(t.pretty())
+        cg = CallGraph()
+        cg.visit(t)
+        g = Generator(args.file.name, cg, ccpu.code)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except SemanticError as e:
         sys.stderr.write("Error: {}:{}: {}\n".format(args.file.name, e.location, e.msg))
+    except LarkError as e:
+        sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
