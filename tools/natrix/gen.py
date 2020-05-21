@@ -120,20 +120,6 @@ class Generator:
                         Value.variable(labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
-        elif l.data == 'subscript':
-            # case 3: array subscript
-            array = l.children[0].resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
-            index = l.children[1]
-            if not array.getType().isPointer():
-                raise ValueError("Subscripting a non-pointer type")
-            self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
-            rvIndex, codeIndex = self.generateExpression(index, 0,
-                        Value.variable(labelname.getTempName(0)), curFn)
-            rvOffset, codeOffset = self.backend.genMulConst(Value.variable(labelname.getTempName(0)), rvIndex, array.getType().deref().getSize())
-            rvR, codeR = self.generateExpression(r, 1,
-                        Value.variable(labelname.getTempName(1)), curFn)
-            codePutIndirect = self.backend.genPutIndirect(array, rvR, rvIndex)
-            return codeIndex + codeOffset + codeR + codePutIndirect
         else:
             raise RuntimeError("Unknown assignment case")
 

@@ -2,6 +2,7 @@ from lark import Lark, Transformer, v_args, Tree
 from const import ConstTransformer
 from type import TypeTransformer
 from value import ValueTransformer
+from subscript import SubscriptTransformer
 from callgraph import CallGraph
 from gen import Generator
 import operator
@@ -37,6 +38,7 @@ t = ConstTransformer(False).transform(t)
 t = TypeTransformer().transform(t)
 t = ConstTransformer(True).transform(t)
 t = ValueTransformer().transform(t)
+t = SubscriptTransformer().transform(t)
 print(t.pretty())
 cg = CallGraph()
 cg.visit(t)

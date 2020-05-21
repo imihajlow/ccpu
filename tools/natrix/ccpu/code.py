@@ -239,17 +239,104 @@ def genCast(resultLoc, t, srcLoc):
             # same size or narrower
             return srcLoc.withType(resultLoc.getType()), ""
 
-def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
+def _loadP(loc, offset=0):
+    result = ''
+    if loc.getIndirLevel() == 0:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+        '''.format(loc.getSource())
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            inc pl
+            ld ph
+            mov pl, a
+        '''.format(loc.getSource())
+    if offset != 0:
+        l = _lo(offset)
+        h = _hi(offset)
+        result += '''
+            ldi a, {}
+            add pl, a
+        '''.format(l)
+        if h == 0:
+            result += 'mov a, 0\n'
+        else:
+            result += 'ldi a, {}\n'.format(h)
+        result += 'adc ph, a\n'
+    return result
+
+def _loadAB(loc):
+    result = ''
+    isWord = loc.getType().getSize() == 2
+    if loc.getIndirLevel() == 0:
+        result += 'ldi b, lo({})\n'.format(loc.getSource())
+        if isWord:
+            result += 'ldi a, hi({})\n'.format(loc.getSource())
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+        '''.format(loc.getSource())
+        if isWord:
+            result += '''
+                inc pl
+                ld a
+            '''
+    return result
+
+def _loadBLow(loc):
+    result = ''
+    if loc.getIndirLevel() == 0:
+        result += 'ldi b, lo({})\n'.format(loc.getSource())
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+        '''.format(loc.getSource())
+    return result
+
+def _loadBHi(loc):
+    result = ''
+    if loc.getIndirLevel() == 0:
+        result += 'ldi b, hi({})\n'.format(loc.getSource())
+    else:
+        result += '''
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
+            ld b
+        '''.format(loc.getSource())
+    return result
+
+def genPutIndirect(resultAddrLoc, srcLoc):
     if srcLoc.getType().isUnknown():
         raise ValueError("Unknown source type")
     if resultAddrLoc.getType().isUnknown():
         resultAddrLoc = resultAddrLoc.removeUnknown(srcLoc.getType())
     if resultAddrLoc.getType().deref() != srcLoc.getType():
         raise ValueError("Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
-    if offset == 0:
-        return "*{} = {}\n".format(resultAddrLoc, srcLoc)
+    t = srcLoc.getType()
+    isWord = t.getSize() == 2
+    s = srcLoc.getSource()
+    rs = resultAddrLoc.getSource()
+    result = "; *{} = {}\n".format(resultAddrLoc, srcLoc)
+    if not isWord:
+        result += _loadAB(srcLoc) # only b is used
+        result += _loadP(resultAddrLoc) # a is overwritten
+        result += 'st b\n'
     else:
-        return "*({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
+        result += _loadBLow(srcLoc)
+        result += _loadP(resultAddrLoc)
+        result += 'st b\n'
+        result += _loadBHi(srcLoc)
+        result += _loadP(resultAddrLoc, 1)
+        result += 'st b\n'
+    return result
 
 def genInvCondJump(condLoc, label):
     '''
@@ -298,23 +385,6 @@ def genJump(label):
 
 def genLabel(label):
     return "{}:\n".format(label)
-
-def genSubscript(resultLoc, baseLoc, indexLoc):
-    if not indexLoc.getType().isInteger():
-        raise ValueError("Index must be an integer, got {}".format(indexLoc.getType()))
-    if not baseLoc.getType().isPointer():
-        raise ValueError("Subscript base must be a pointer, got {}".format(baseLoc.getType()))
-    resultType = baseLoc.getType().deref()
-    if baseLoc.getIndirLevel() == 0:
-        if indexLoc.getIndirLevel() == 0:
-            return Value(resultType, 1, "{} + {} * {}".format(baseLoc.getSource(), indexLoc.getSource(), resultType.getSize())), ""
-        else:
-            return resultLoc.removeUnknown(resultType), "{} = deref({} + [{}] * {})\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
-    else:
-        if indexLoc.getIndirLevel() == 0:
-            return resultLoc.removeUnknown(resultType), "{} = deref([{}] + {} * {}\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
-        else:
-            return resultLoc.removeUnknown(resultType), "{} = deref([{}] + [{}] * {}\n".format(resultLoc, baseLoc, indexLoc, resultType.getSize())
 
 def genMulConst(resultLoc, srcLoc, m):
     resultLoc = resultLoc.removeUnknown(srcLoc.getType())

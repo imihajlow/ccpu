@@ -7,9 +7,7 @@ from .shift import genShift
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
         raise ValueError("Unknown source type")
-    if op == 'subscript':
-        return genSubscript(resultLoc, src1Loc, src2Loc)
-    elif op == 'add':
+    if op == 'add':
         return genAdd(resultLoc, src1Loc, src2Loc)
     elif op == 'sub':
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "sub", "sbb", "({}) - ({})", operator.sub)
