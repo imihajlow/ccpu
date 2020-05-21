@@ -3,6 +3,8 @@ from type import BoolType
 import operator
 import labelname
 from .shift import genShift
+from .common import *
+from .compare import *
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
@@ -78,14 +80,14 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             result += 'inc pl\n'
         c = src2Loc.getSource()
         if isinstance(c, int):
-            l = _lo(c)
+            l = lo(c)
             if l == 0:
                 result += 'mov a, 0\n'
             else:
                 result += 'ldi a, {}\n'.format(l)
             result += '{} b, a\n'.format(opLo)
             if isWord:
-                h = _hi(c)
+                h = hi(c)
                 result += '''
                     ld a
                     ldi pl, {}
@@ -123,11 +125,11 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             result += 'inc pl\n'
         c = src1Loc.getSource()
         if isinstance(c, int):
-            l = _lo(c)
+            l = lo(c)
             result += 'ldi b, {}\n'.format(l)
             result += '{} b, a\n'.format(opLo)
             if isWord:
-                h = _hi(c)
+                h = hi(c)
                 result += 'ld pl\n'
                 if h == 0:
                     result += 'mov a, 0\n'

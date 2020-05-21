@@ -2,6 +2,7 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
+from .common import *
 
 def _genEqNeCmp(src1Loc, src2Loc):
     '''
@@ -25,7 +26,7 @@ def _genEqNeCmp(src1Loc, src2Loc):
             ld b
         '''.format(s1)
         if isinstance(s2, int):
-            l = _lo(s2)
+            l = lo(s2)
             if l == 0:
                 result += 'mov a, 0\n'
             else:
@@ -39,7 +40,7 @@ def _genEqNeCmp(src1Loc, src2Loc):
                 ld pl
             '''
             if isinstance(s2, int):
-                h = _hi(s2)
+                h = hi(s2)
                 if h == 0:
                     result += 'mov a, 0\n'
                 else:
@@ -144,7 +145,7 @@ def genNe(resultLoc, src1Loc, src2Loc):
     '''.format(rs)
     return resultLoc, result
 
-def _genCmpSub(src1Loc, src2Loc):
+def _genCmpSub(src1Loc, src2Loc, op):
     # subtract the values so that flags C, S, and O are set accordingly and (b | pl) is zero if the result is zero
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
@@ -156,8 +157,8 @@ def _genCmpSub(src1Loc, src2Loc):
     if l1 == 0:
         # const and var
         if isinstance(s1, int):
-            l = _lo(s1)
-            h = _hi(s1)
+            l = lo(s1)
+            h = hi(s1)
         else:
             l = "lo({})".format(s1)
             h = "hi({})".format(s1)
@@ -182,8 +183,8 @@ def _genCmpSub(src1Loc, src2Loc):
     elif l2 == 0:
         # var and const
         if isinstance(s2, int):
-            l = _lo(s2)
-            h = _hi(s2)
+            l = lo(s2)
+            h = hi(s2)
         else:
             l = "lo({})".format(s2)
             h = "hi({})".format(s2)
@@ -255,7 +256,7 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
             pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
             return Value(BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2)), result
     else:
-        result += _genCmpSub(src1Loc, src2Loc)
+        result += _genCmpSub(src1Loc, src2Loc, op)
     # C = carry flag
     # Z = (b | pl) == 0
     if op == 'lt':
@@ -302,6 +303,214 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
     '''.format(rs)
     return resultLoc, result
 
+def _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    result = '; compare signed bytes {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    if l1 == 0:
+        result += 'ldi b, lo({})\n'.format(s1)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+        '''.format(s1)
+    if l2 == 0:
+        result += 'ldi a, lo({})\n'.format(s2)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+        '''.format(s2)
+    result += 'sub b, a\n'
+    labelEnd = labelProvider.allocLabel("cmp_end")
+    if op == 'lt' or op == 'gt':
+        # if equal, return 0
+        result += 'mov a, 0\n'
+    else:
+        # if equal, return 1
+        result += 'ldi a, 1\n'
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jz
+    '''.format(labelEnd)
+    labelO = labelProvider.allocLabel("cmp_no")
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jno
+    '''.format(labelO)
+    # O is set
+    result += 'shl b\n' # S -> C
+    if op == 'lt' or op == 'le':
+        # return !C
+        if op == 'lt':
+            result += 'ldi a, 1\n'
+        # else a is already 1
+        result += 'sbb a, 0'
+    else:
+        # return C
+        if op == 'ge':
+            result += 'mov a, 0\n'
+        # else a is already 0
+        result += 'adc a, 0\n'
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jmp
+    '''.format(labelEnd)
+    result += '''
+    {0}:
+        shl b
+    '''.format(labelO)
+    # O is clear
+    if op == 'gt' or op == 'ge':
+        # return !C
+        if op == 'gt':
+            result += 'ldi a, 1\n'
+        # else a is already 1
+        result += 'sbb a, 0\n'
+    else:
+        # return C
+        if op == 'le':
+            result += 'mov a, 0\n'
+        # else a is already 0
+        result += 'adc a, 0\n'
+    result += '{}:\n'.format(labelEnd)
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        st a
+    '''.format(rs)
+    return resultLoc, result
+
+def _genCmpSignedWord(resultLoc, src1Loc, src2Loc, op, labelProvider):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    result = '; compare signed words {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    if l1 == 0:
+        result += 'ldi b, hi({})\n'.format(s1)
+    else:
+        result += '''
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
+            ld b
+        '''.format(s1)
+    if l2 == 0:
+        result += 'ldi a, hi({})\n'.format(s2)
+    else:
+        result += '''
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
+            ld a
+        '''.format(s2)
+    result += 'sub b, a\n'
+    labelEnd = labelProvider.allocLabel("cmp_end")
+    labelCmpLo = labelProvider.allocLabel("cmp_lo")
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jz
+    '''.format(labelCmpLo)
+    # hi1 != hi2
+    labelO = labelProvider.allocLabel("cmp_no")
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jno
+    '''.format(labelO)
+    # O is set
+    result += 'shl b\n' # S -> C
+    if op == 'lt' or op == 'le':
+        # return !C
+        result += 'ldi a, 1\n'
+        result += 'sbb a, 0'
+    else:
+        # return C
+        result += 'mov a, 0\n'
+        result += 'adc a, 0\n'
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jmp
+    '''.format(labelEnd)
+    result += '''
+    {0}:
+        shl b
+    '''.format(labelO)
+    # O is clear
+    if op == 'gt' or op == 'ge':
+        # return !C
+        result += 'ldi a, 1\n'
+        result += 'sbb a, 0\n'
+    else:
+        # return C
+        result += 'mov a, 0\n'
+        result += 'adc a, 0\n'
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jmp
+    '''.format(labelEnd)
+    # hi1 == hi2 (= a)
+    result += '{}:\n'.format(labelCmpLo)
+    # if sign, compare low parts as unsigned
+    if l1 == 0:
+        result += 'ldi b, lo({})\n'.format(s1)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+        '''.format(s1)
+    if l2 == 0:
+        result += 'ldi a, lo({})\n'.format(s2)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+        '''.format(s2)
+    result += 'sub b, a\n'
+    if op == 'le' or op == 'ge':
+        # if equal, return 1
+        result += 'ldi a, 1\n'
+    else:
+        # if equal, return 0
+        result += 'mov a, 0\n'
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        jz
+    '''.format(labelEnd)
+    if op[0] == 'l':
+        # less, return C
+        if op == 'le':
+            result += 'mov a, 0\n'
+        # else a is already 0
+        result += 'adc a, 0\n'
+    else:
+        # greater, return !C
+        if op == 'gt':
+            result += 'ldi a, 1\n'
+        # else a is already 1
+        result += 'sbb a, 0\n'
+    result += '{}:\n'.format(labelEnd)
+    result += '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        st a
+    '''.format(rs)
+    return resultLoc, result
+
 def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
@@ -310,7 +519,6 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
     isWord = t.getSize() == 2
-    result = '; compare signed {} and {} ({})\n'.format(src1Loc, src2Loc, op)
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):
@@ -318,73 +526,10 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
         else:
             raise NotImplementedError("signed const comparison")
     else:
-        result += _genCmpSub(src1Loc, src2Loc)
-    # S, O - flags
-    # Z = (b | pl) == 0
-    labelO = labelProvider.allocLabel("o")
-    labelEnd = labelProvider.allocLabel("end")
-    if op == 'lt' or op == 'le':
-        # O != S => lt
-        result += '''
-            mov a, 0
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            jno
-            ldi pl, lo({1})
-            ldi ph, hi({1})
-            js ; O & S
-            inc a
-            jmp ; O & !S
-        {0}:ldi pl, lo({1})
-            ldi ph, hi({1})
-            jns ; !O & !S
-            inc a
-            ; !O & S
-        {1}:
-        '''.format(labelO, labelEnd)
-    elif op == 'ge' or op == 'gt':
-        # O == S => ge
-        result += '''
-            mov a, 0
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            jno
-            ldi pl, lo({1})
-            ldi ph, hi({1})
-            jns ; O & !S
-            inc a
-            jmp ; O & S
-        {0}:ldi pl, lo({1})
-            ldi ph, hi({1})
-            js ; !O & S
-            inc a
-            ; !O & S
-        {1}:
-        '''.format(labelO, labelEnd)
-    if op == 'le':
-        result += '''
-            or a, b
-            or a, pl
-            dec a
-            ldi a, 1
-            sbb a, 0
-        '''
-    elif op == 'gt':
-        result += '''
-            mov ph, a
-            mov a, pl
-            or a, b
-            dec a
-            ldi a, 1
-            sbb a, 0 ; a == 1 if !Z
-            and a, ph
-        '''
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st a
-    '''.format(rs)
-    return resultLoc, result
+        if not isWord:
+            return _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider)
+        else:
+            return _genCmpSignedWord(resultLoc, src1Loc, src2Loc, op, labelProvider)
 
 def genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(op in {"gt", "ge", "lt", "le"})

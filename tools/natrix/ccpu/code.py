@@ -6,24 +6,7 @@ from .compare import *
 from .binary import *
 from .unary import *
 from .shift import *
-
-def _align(x, a):
-    if x % a == 0:
-        return x
-    else:
-        return (x // a)  * a + a
-
-def _signExpandByte(x):
-    if x & 0x80:
-        return x | 0xff00
-    else:
-        return x
-
-def _hi(x):
-    return (x >> 8) & 0xff
-
-def _lo(x):
-    return x & 0xff
+from .common import *
 
 def startCodeSection():
     return ".section text\n"
@@ -57,7 +40,7 @@ def reserveTempVars(maxIndex):
     return "".join(reserve(labelname.getTempName(i), 2) for i in range(maxIndex + 1))
 
 def reserveVar(label, type):
-    rs = _align(type.getReserveSize(), 2)
+    rs = align(type.getReserveSize(), 2)
     return "{}: res {}\n".format(label, rs)
 
 def genFunctionPrologue(fn):
@@ -81,7 +64,6 @@ def genReturn(fn):
         ld ph
         mov pl, a
         jmp
-        ; ========================
         '''.format(labelname.getReturnAddressLabel(fn))
 
 def genCall(fn):
@@ -100,9 +82,9 @@ def genPopLocals(fn):
 def _loadConst(size, value):
     # load const into a:b
     if isinstance(value, int):
-        result = 'ldi b, {}\n'.format(_lo(value))
+        result = 'ldi b, {}\n'.format(lo(value))
         if size > 1:
-            h = _hi(value)
+            h = hi(value)
             if h == 0:
                 result += 'mov a, 0\n'
             else:
@@ -202,7 +184,7 @@ def genCast(resultLoc, t, srcLoc):
             # cast a constant
             if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(t, 0, _signExpandByte(srcLoc.getSource()), False))
+                return genMove(resultLoc, Value(t, 0, signExpandByte(srcLoc.getSource()), False))
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         if resultLoc.getType().getSize() > srcLoc.getType().getSize():
@@ -258,8 +240,8 @@ def _loadP(loc, offset=0):
             mov pl, a
         '''.format(loc.getSource())
     if offset != 0:
-        l = _lo(offset)
-        h = _hi(offset)
+        l = lo(offset)
+        h = hi(offset)
         result += '''
             ldi a, {}
             add pl, a
