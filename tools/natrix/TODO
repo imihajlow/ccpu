@@ -1,7 +1,7 @@
-Error reporting
 C preprocessor support
 Literals
 Global variables
 Struct
 Comments
 Assignments with binary operations (+=, etc)
+Integer literals with types

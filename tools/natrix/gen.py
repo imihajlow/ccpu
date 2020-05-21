@@ -3,6 +3,7 @@ from exceptions import SemanticError
 from value import Value
 from type import Type, BoolType
 from function import Function
+from location import Location
 import labelname
 
 class Generator:
@@ -44,7 +45,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genUnary(t.data, resultLoc, rv)
                 return resultLoc, argCode + myCode
             elif t.data == "type_cast":
@@ -54,7 +55,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
-                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
                 return resultLoc, argCode + myCode
             elif len(ch) == 2:
@@ -65,7 +66,7 @@ class Generator:
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(labelname.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
                     hasFirstArg = True
 
                 if isinstance(ch[1], Value):
@@ -75,12 +76,12 @@ class Generator:
                     indexIncrement = 1 if hasFirstArg else 0
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
                     rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
-                        Value.variable(labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
+                        Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
 
                 resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
                 return resultLoc, argCode1 + argCode2 + myCode
             else:
-                raise ValueError("Too many children")
+                raise RuntimeError("Too many children")
 
     def generateAssignment(self, l, r, curFn):
         '''
@@ -100,7 +101,7 @@ class Generator:
         if isinstance(l, Value):
             # case 1: simple variable
             if not l.isLValue():
-                raise ValueError("Cannot assign to an r-value")
+                raise SemanticError(l.getLocation(), "Cannot assign to an r-value")
             dest = l.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
             resultLoc, codeExpr = self.generateExpression(r, 0, dest, curFn)
             if resultLoc == dest:
@@ -115,9 +116,9 @@ class Generator:
             ptr = l.children[0]
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
-                        Value.variable(labelname.getTempName(0)), curFn)
+                        Value.variable(Location.fromAny(ptr), labelname.getTempName(0)), curFn)
             rvR, codeR = self.generateExpression(r, 1,
-                        Value.variable(labelname.getTempName(1)), curFn)
+                        Value.variable(Location.fromAny(r), labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
         else:
@@ -128,7 +129,8 @@ class Generator:
         if elseBody is not None:
             labelElse = self.allocLabel("if_else")
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
-        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(labelname.getTempName(0), BoolType()), curFn)
+        rvCond, codeCond = self.generateExpression(cond, 0,
+            Value.variable(Location.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
         codeIf = self.generateStatement(ifBody, curFn)
         if elseBody is not None:
             codeElse = self.generateStatement(elseBody, curFn)
@@ -143,7 +145,8 @@ class Generator:
         labelEnd = self.allocLabel("while_end")
 
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
-        rvCond, codeCond = self.generateExpression(cond, 0, Value.variable(labelname.getTempName(0), BoolType()), curFn)
+        rvCond, codeCond = self.generateExpression(cond, 0,
+            Value.variable(Location.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
         self.breakLabel = [labelEnd] + self.breakLabel
         self.continueLabel = [labelBegin] + self.continueLabel
         codeBody = self.generateStatement(body, curFn)
@@ -152,15 +155,16 @@ class Generator:
         return self.backend.genLabel(labelBegin) + codeCond + self.backend.genInvCondJump(rvCond, labelEnd)\
             + codeBody + self.backend.genJump(labelBegin) + self.backend.genLabel(labelEnd)
 
-    def generateFunctionCall(self, name, args, curFn):
+    def generateFunctionCall(self, location, name, args, curFn):
         if name not in self.functions:
-            raise ValueError("Undefined function: {}".format(name))
+            raise SemanticError(location, "Undefined function: {}".format(name))
         f = self.functions[name]
         if len(args) != len(f.args):
-            raise ValueError("Incorrect argument count for {}".format(name))
+            raise SemanticError(location, "Incorrect argument count for {}".format(name))
         result = ""
         for n, expr in enumerate(args):
-            result += self.generateAssignment(Value.variable(labelname.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
+            result += self.generateAssignment(
+                Value.variable(Location.fromAny(expr), labelname.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
         isRecursive = self.callgraph.isRecursive(curFn, name)
         if isRecursive:
             result += self.backend.genPushLocals(curFn)
@@ -169,10 +173,10 @@ class Generator:
             result += self.backend.genPopLocals(curFn)
         return result
 
-    def generateFunctionAssignment(self, dest, name, args, curFn):
-        codeCall = self.generateFunctionCall(name, args, curFn)
+    def generateFunctionAssignment(self, lloc, rloc, dest, name, args, curFn):
+        codeCall = self.generateFunctionCall(rloc, name, args, curFn)
         f = self.functions[name]
-        resultLoc = Value.variable(labelname.getReturnName(name), f.retType, final=True)
+        resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType, final=True)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
 
@@ -187,7 +191,7 @@ class Generator:
         elif t.data == 'def_var':
             type, name, r = t.children
             self.localVars[str(name)] = type
-            dest = Value.variable(str(name))
+            dest = Value.variable(Location.fromAny(name), str(name))
             return self.generateAssignment(dest, r, curFn)
         elif t.data == 'block':
             return "".join(self.generateStatement(child, curFn) for child in t.children)
@@ -204,20 +208,24 @@ class Generator:
                 raise SemanticError(t.line, "Not in a loop")
             return self.backend.genJump(self.continueLabel[0])
         elif t.data == 'function_call':
-            return self.generateFunctionCall(str(t.children[0]), t.children[1:], curFn)
+            return self.generateFunctionCall(Location.fromAny(t), str(t.children[0]), t.children[1:], curFn)
         elif t.data == 'assignment_function':
             call = t.children[1]
-            return self.generateFunctionAssignment(t.children[0], str(call.children[0]), call.children[1:], curFn)
+            return self.generateFunctionAssignment(Location.fromAny(t.children[0]), Location.fromAny(call),
+                t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
-            dest = Value.variable(labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
             return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
             return self.backend.genReturn(curFn)
 
-    def addFunctionDeclaration(self, attrs, type, name, args):
-        f = Function(name, type, attrs, args)
+    def addFunctionDeclaration(self, location, attrs, type, name, args):
+        try:
+            f = Function(name, type, attrs, args)
+        except ValueError as e:
+            raise SemanticError(location, str(e))
         if name in self.functions and f != self.functions[name]:
-            raise ValueError("Conflicting declarations of {}".format(name))
+            raise SemanticError(location, "Conflicting declarations of {}".format(name))
         self.functions[name] = f
         return f
 
@@ -226,9 +234,9 @@ class Generator:
         name = str(name)
         args = args.children
         attrs = attrs.children
-        f = self.addFunctionDeclaration(attrs, type, name, args)
+        f = self.addFunctionDeclaration(Location.fromAny(decl), attrs, type, name, args)
         if f.isImported:
-            raise ValueError("Cannot define an imported function")
+            raise SemanticError(Location.fromAny(decl), "Cannot define an imported function")
         self.localVars = {}
         self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
         result = self.backend.genFunctionPrologue(name)
@@ -243,7 +251,7 @@ class Generator:
             return self.generateFunctionDefinition(decl, body)
         elif t.data == 'function_declaration':
             attrs, type, name, args = t.children
-            self.addFunctionDeclaration(attrs.children, type, str(name), args.children)
+            self.addFunctionDeclaration(Location.fromAny(t), attrs.children, type, str(name), args.children)
             return ""
 
     def generateStart(self, t):

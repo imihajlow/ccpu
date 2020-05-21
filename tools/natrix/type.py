@@ -2,6 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from lark import Transformer, v_args, Tree
 from exceptions import SemanticError
+from location import Location
 
 class Type(ABC):
     @abstractmethod
@@ -175,7 +176,10 @@ class TypeTransformer(Transformer):
 
     @v_args(inline = True)
     def int_type(self, s):
-        return IntType.parse(s)
+        try:
+            return IntType.parse(s)
+        except ValueError as e:
+            raise SemanticError(Location.fromAny(t), str(e))
 
     @v_args(tree = True)
     def decl_array(self, t):
@@ -186,4 +190,4 @@ class TypeTransformer(Transformer):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
-        raise SemanticError(t.line, "Array size must be a positive constant expression")
+        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")

@@ -2,6 +2,7 @@ import operator
 from lark import Lark, Transformer, v_args, Tree
 from value import Value
 from type import IntType
+from location import Location
 import exceptions
 
 def signExpand(t, value):
@@ -16,9 +17,9 @@ def signExpand(t, value):
     else:
         return value
 
-def const(t, value):
+def _const(location, t, value):
     mask = ~(~0 << (t.getSize() * 8))
-    return Value(t, 0, int(value) & mask)
+    return Value(location, t, 0, int(value) & mask)
 
 def binary(tree, op, overrideType=None):
     a, b = tree.children
@@ -32,9 +33,9 @@ def binary(tree, op, overrideType=None):
                 newType = overrideType
             sa = signExpand(a.getType(), a.getSource())
             sb = signExpand(b.getType(), b.getSource())
-            return const(newType, op(sa, sb))
+            return _const(Location.fromAny(tree), newType, op(sa, sb))
         else:
-            raise exceptions.SemanticError("input", tree.line, "Incompatible types in an expression")
+            raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
 
 def unary(tree, op):
     a = tree.children[0]
@@ -42,7 +43,7 @@ def unary(tree, op):
         return tree
     else:
         sa = signExpand(a.getType(), a.getSource())
-        return const(a.t, op(sa))
+        return _const(Location.fromAny(tree), a.t, op(sa))
 
 def cast(v, oldType, newType):
     if oldType.getSize() < newType.getSize() and newType.getSign():
@@ -60,21 +61,21 @@ class ConstTransformer(Transformer):
     def __init__(self, transformCasts):
         self._transformCast = transformCasts
 
-    @v_args(inline = True, meta = True, tree = False)
-    def n10(self, meta, value):
-        return const(IntType(True, 2), int(value, 10))
+    def n10(self, t):
+        value = t.children[0]
+        return _const(Location.fromAny(t), IntType(True, 2), int(value, 10))
 
-    @v_args(inline = True, meta = True, tree = False)
-    def n16(self, meta, value):
-        return const(IntType(True, 2), int(value, 0))
+    def n16(self, t):
+        value = t.children[0]
+        return _const(Location.fromAny(t), IntType(True, 2), int(value, 0))
 
-    @v_args(inline = True, meta = True, tree = False)
-    def n8(self, meta, value):
-        return const(IntType(True, 2), int(value, 8))
+    def n8(self, t):
+        value = t.children[0]
+        return _const(Location.fromAny(t), IntType(True, 2), int(value, 8))
 
-    @v_args(inline = True, meta = True, tree = False)
-    def n2(self, meta, value):
-        return const(IntType(True, 2), int(value[2:], 2))
+    def n2(self, t):
+        value = t.children[0]
+        return _const(Location.fromAny(t), IntType(True, 2), int(value[2:], 2))
 
     def add(self, tree):
         return binary(tree, operator.add)
@@ -102,21 +103,21 @@ class ConstTransformer(Transformer):
         if isinstance(a, Tree):
             return tree
         else:
-            return const(IntType(False, 1), 1 if a == 0 else 0)
+            return _const(Location.fromAny(tree), IntType(False, 1), 1 if a == 0 else 0)
 
     def lor(self, tree):
         a, b = tree.children
         if isinstance(a, Tree) or isinstance(b, Tree):
             return tree
         else:
-            return const(IntType(False, 1), 1 if bool(a.getSource()) or bool(b.getSource()) else 0)
+            return _const(Location.fromAny(tree), IntType(False, 1), 1 if bool(a.getSource()) or bool(b.getSource()) else 0)
 
     def land(self, tree):
         a, b = tree.children
         if isinstance(a, Tree) or isinstance(b, Tree):
             return tree
         else:
-            return const(IntType(False, 1), 1 if bool(a.getSource()) and bool(b.getSource()) else 0)
+            return _const(Location.fromAny(tree), IntType(False, 1), 1 if bool(a.getSource()) and bool(b.getSource()) else 0)
 
     def bnot(self, tree):
         return unary(tree, operator.invert)
@@ -154,4 +155,4 @@ class ConstTransformer(Transformer):
         t, v = tree.children
         if isinstance(v, Tree):
             return tree
-        return const(t, cast(v.getSource(), v.getType(), t))
+        return _const(Location.fromAny(tree), t, cast(v.getSource(), v.getType(), t))

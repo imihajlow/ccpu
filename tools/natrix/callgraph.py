@@ -1,5 +1,7 @@
 from lark.visitors import Interpreter
 from lark import v_args
+from exceptions import SemanticError
+from location import Location
 
 class CallGraph(Interpreter):
     def __init__(self):
@@ -28,7 +30,10 @@ class CallGraph(Interpreter):
         decl, body = tree.children
         _, _, name, _ = decl.children
         self.visit(decl)
-        self._enterFunction(str(name))
+        try:
+            self._enterFunction(str(name))
+        except ValueError as e:
+            raise SemanticError(Location.fromAny(tree), str(e))
         self.visit(body)
         self._leaveFunction()
 

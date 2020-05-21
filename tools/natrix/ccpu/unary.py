@@ -2,12 +2,14 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
+from exceptions import SemanticError
 
 def genDeref(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType().deref())
     if srcLoc.getType().deref() != resultLoc.getType():
-        raise ValueError("Incompatible types for deref: {} and {}".format(srcLoc.getType().deref(), resultLoc.getType()))
+        raise SemanticError(srcLoc.getLocation(),
+            "Incompatible types for deref: {} and {}".format(srcLoc.getType().deref(), resultLoc.getType()))
     assert(srcLoc.getIndirLevel() <= 1)
 
     t = resultLoc.getType()
@@ -50,7 +52,7 @@ def genDeref(resultLoc, srcLoc):
 
 def genUnary(op, resultLoc, srcLoc):
     if srcLoc.getType().isUnknown():
-        raise ValueError("Unknown source type")
+        raise RuntimeError("Unknown source type")
     if op == 'deref':
         return genDeref(resultLoc, srcLoc)
     elif op == 'bnot':
@@ -67,7 +69,7 @@ def genBNot(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
     t = srcLoc.getType()
@@ -79,7 +81,7 @@ def genBNot(resultLoc, srcLoc):
             c = ~c
         else:
             c = '~({})'.format(c) # Warning
-        return Value(t, 0, c), result
+        return Value(srcLoc.getLocation(), t, 0, c), result
     else:
         # var
         result += '''
@@ -110,9 +112,9 @@ def genLNot(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if srcLoc.getType().getSize() != 1 or srcLoc.getType().getSign():
-        raise ValueError("Argument for `!' should be of type u8")
+        raise SemanticError(srcLoc.getLocation(), "Argument for `!' should be of type u8")
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
@@ -124,7 +126,7 @@ def genLNot(resultLoc, srcLoc):
             c = int(not bool(c))
         else:
             c = 'int(not bool({}))'.format(c) # Warning
-        return Value(BoolType(), 0, c), result
+        return Value(srcLoc.getLocation(), BoolType(), 0, c), result
     else:
         # var
         result += '''
@@ -146,9 +148,9 @@ def genNeg(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if not srcLoc.getType().getSign():
-        raise ValueError("Argument for unary `-' should be of a signed type")
+        raise SemanticError(srcLoc.getLocation(), "Argument for unary `-' should be of a signed type")
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
@@ -161,7 +163,7 @@ def genNeg(resultLoc, srcLoc):
             c = -c & (0xff if t.getSize() == 1 else 0xffff)
         else:
             c = '-({})'.format(c) # Warning
-        return Value(t, 0, c), result
+        return Value(srcLoc.getLocation(), t, 0, c), result
     else:
         # var
         result += '''

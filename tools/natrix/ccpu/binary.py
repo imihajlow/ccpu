@@ -5,10 +5,11 @@ import labelname
 from .shift import genShift
 from .common import *
 from .compare import *
+from exceptions import SemanticError
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
-        raise ValueError("Unknown source type")
+        raise RuntimeError("Unknown source type")
     if op == 'add':
         return genAdd(resultLoc, src1Loc, src2Loc)
     elif op == 'sub':
@@ -38,9 +39,11 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise ValueError("Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
+        raise SemanticError(resultLoc.getLocation(),
+            "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType() != src2Loc.getType():
-        raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+        raise SemanticError(resultLoc.getLocation(),
+            "Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     assert(resultLoc.getIndirLevel() == 1)
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
@@ -60,9 +63,9 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
                 cr = cr & 0xffff
             else:
                 cr = cr & 0xff
-            return Value(t, 0, cr), result
+            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, cr), result
         else:
-            return Value(t, 0, pyPattern.format(c1, c2)), result
+            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, pyPattern.format(c1, c2)), result
         result += 'st b\n'
         if isWord:
             result += '''
@@ -196,11 +199,14 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise ValueError("Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
+        raise SemanticError(resultLoc.getLocation(),
+            "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType() != src2Loc.getType():
-        raise ValueError("Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+        raise SemanticError(src1Loc.getLocation() - src2Loc.getLocation(),
+            "Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     if src1Loc.getType() != BoolType():
-        raise ValueError("Bool type (u8) expected")
+        raise SemanticError(src1Loc.getLocation(),
+            "Bool type (u8) expected")
     assert(resultLoc.getIndirLevel() == 1)
     rs = resultLoc.getSource()
     s1 = src1Loc.getSource()
@@ -208,12 +214,13 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     result = '; {} = bool {} {}, {}\n'.format(resultLoc, op, src1Loc, src2Loc)
+    loc = src1Loc.getLocation() - src2Loc.getLocation()
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(BoolType(), 0, int(constLambda(bool(s1), bool(s2)))), result
+            return Value(loc, BoolType(), 0, int(constLambda(bool(s1), bool(s2)))), result
         else:
-            return Value(BoolType(), 0, pyPattern.format(src1Loc, src2Loc)), result
+            return Value(loc, BoolType(), 0, pyPattern.format(src1Loc, src2Loc)), result
     elif l1 == 0 or l2 == 0:
         # var and const
         if l1 == 0:
@@ -224,10 +231,10 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
                 if s2 == 0:
                     return src1Loc, ""
                 else:
-                    return Value(BoolType(), 0, 1), ""
+                    return Value(loc, BoolType(), 0, 1), ""
             elif op == 'and':
                 if s2 == 0:
-                    return Value(BoolType(), 0, 0), ""
+                    return Value(loc, BoolType(), 0, 0), ""
                 else:
                     return src1Loc, result
             else:
@@ -270,9 +277,11 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
 
 def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
-        raise ValueError("Can only add ponters and integers, not pointers and other types")
+        raise SemanticError(src2Loc.getLocation(),
+            "Can only add ponters and integers, not pointers and other types")
     if src2Loc.getType().getSize() != 2:
-        raise ValueError("Can only add a 16-bit integer to a pointer")
+        raise SemanticError(src2Loc.getLocation(),
+            "Can only add a 16-bit integer to a pointer")
     memberSize = src1Loc.getType().deref().getSize()
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
@@ -285,11 +294,12 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
         return loc, result + code
     elif memberSize == 2:
         if src2Loc.getIndirLevel() == 0:
+            loc = src1Loc.getLocation() - src2Loc.getLocation()
             if isinstance(s2, int):
                 offset = s2 * 2
             else:
                 offset = "({}) * 2".format(s2)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(t, 0, offset), "add", "adc", "({}) + ({})", operator.add)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "add", "adc", "({}) + ({})", operator.add)
             return loc, result + code
         else:
             result += '''
@@ -328,7 +338,8 @@ def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise ValueError("Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
+        raise SemanticError(resultLoc.getLocation(),
+            "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType().isPointer():
         return _genAddPtr(resultLoc, src1Loc, src2Loc)
     else:

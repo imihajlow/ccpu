@@ -11,6 +11,7 @@ from callgraph import CallGraph
 from gen import Generator
 import operator
 import ccpu.code
+from exceptions import SemanticError
 
 def format(code):
     result = []
@@ -49,5 +50,8 @@ if __name__ == '__main__':
     cg = CallGraph()
     cg.visit(t)
     g = Generator(args.file.name, cg, ccpu.code)
-    args.o.write(format(g.generate(t)))
-    args.o.write("\n")
+    try:
+        args.o.write(format(g.generate(t)))
+        args.o.write("\n")
+    except SemanticError as e:
+        sys.stderr.write("Error: {}:{}: {}\n".format(args.file.name, e.location, e.msg))

@@ -2,14 +2,15 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
+from exceptions import SemanticError
 
 def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(resultLoc.getIndirLevel() == 1)
     t = src1Loc.getType()
     if not t.isInteger():
-        raise ValueError("Can only shift integers")
+        raise SemanticError(src1Loc.getLocation(), "Can only shift integers")
     if not src2Loc.getType().isInteger() or src2Loc.getType().getSign():
-        raise ValueError("Can only shift by unsigned integers")
+        raise SemanticError(src2Loc.getLocation(), "Can only shift by unsigned integers")
     resultLoc = resultLoc.withType(t)
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()

@@ -7,6 +7,7 @@ from .binary import *
 from .unary import *
 from .shift import *
 from .common import *
+from exceptions import SemanticError
 
 def startCodeSection():
     return ".section text\n"
@@ -97,11 +98,12 @@ def _loadConst(size, value):
 
 def genMove(resultLoc, srcLoc, avoidCopy):
     if srcLoc.getType().isUnknown():
-        raise ValueError("Unknown source type")
+        raise SemanticError(srcLoc.getLocation(), "Unknown source type")
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise ValueError("Incompatible types to assign: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(resultLoc.getLocation() - srcLoc.getLocation(),
+            "Incompatible types to assign: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if srcLoc == resultLoc:
         return resultLoc, ""
     else:
@@ -184,7 +186,7 @@ def genCast(resultLoc, t, srcLoc):
             # cast a constant
             if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(t, 0, signExpandByte(srcLoc.getSource()), False))
+                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource()), False))
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         if resultLoc.getType().getSize() > srcLoc.getType().getSize():
@@ -299,11 +301,12 @@ def _loadBHi(loc):
 
 def genPutIndirect(resultAddrLoc, srcLoc):
     if srcLoc.getType().isUnknown():
-        raise ValueError("Unknown source type")
+        raise SemanticError(srcLoc.getLocation(), "Unknown source type")
     if resultAddrLoc.getType().isUnknown():
         resultAddrLoc = resultAddrLoc.removeUnknown(srcLoc.getType())
     if resultAddrLoc.getType().deref() != srcLoc.getType():
-        raise ValueError("Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
+        raise SemanticError(resultLoc.getLocation() - srcLoc.getLocation(),
+            "Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
     t = srcLoc.getType()
     isWord = t.getSize() == 2
     s = srcLoc.getSource()
@@ -327,7 +330,7 @@ def genInvCondJump(condLoc, label):
     Jump if condLoc is 0
     '''
     if condLoc.getType() != BoolType():
-        raise ValueError("Should be a bool type (u8) for a condition, got {}".format(str(condLoc.getType())))
+        raise SemanticError(condLoc.getLocation(), "Should be a bool type (u8) for a condition, got {}".format(str(condLoc.getType())))
     l = condLoc.getIndirLevel()
     s = condLoc.getSource()
     assert(l == 0 or l == 1)

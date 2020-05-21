@@ -3,6 +3,7 @@ from type import BoolType
 import operator
 import labelname
 from .common import *
+from exceptions import SemanticError
 
 def _genEqNeCmp(src1Loc, src2Loc):
     '''
@@ -85,7 +86,7 @@ def genEq(resultLoc, src1Loc, src2Loc):
     resultLoc = resultLoc.withType(BoolType())
     assert(resultLoc.getIndirLevel() == 1)
     if src1Loc.getType() != src2Loc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+        raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
     assert(t.getSize() == 1 or t.getSize() == 2)
     s1 = src1Loc.getSource()
@@ -97,10 +98,11 @@ def genEq(resultLoc, src1Loc, src2Loc):
     result = '; {} == {}\n'.format(src1Loc, src2Loc)
     if l1 == 0 and l2 == 0:
         # const == const
+        loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(BoolType(), 0, int(s1 == s2)), result
+            return Value(loc, BoolType(), 0, int(s1 == s2)), result
         else:
-            return Value(BoolType(), 0, "int(({}) == ({}))".format(s1, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) == ({}))".format(s1, s2)), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
     result += '''
@@ -117,7 +119,7 @@ def genNe(resultLoc, src1Loc, src2Loc):
     resultLoc = resultLoc.withType(BoolType())
     assert(resultLoc.getIndirLevel() == 1)
     if src1Loc.getType() != src2Loc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+        raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
     assert(t.getSize() == 1 or t.getSize() == 2)
     s1 = src1Loc.getSource()
@@ -129,10 +131,11 @@ def genNe(resultLoc, src1Loc, src2Loc):
     result = '; {} == {}\n'.format(src1Loc, src2Loc)
     if l1 == 0 and l2 == 0:
         # const == const
+        loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(BoolType(), 0, int(s1 != s2)), result
+            return Value(loc, BoolType(), 0, int(s1 != s2)), result
         else:
-            return Value(BoolType(), 0, "int(({}) != ({}))".format(s1, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) != ({}))".format(s1, s2)), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
     result += '''
@@ -249,12 +252,13 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
     result = '; compare unsigned {} and {} ({})\n'.format(src1Loc, src2Loc, op)
     if l1 == 0 and l2 == 0:
         # const and const
+        loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
             pyop = {"gt": operator.gt, "lt": operator.lt, "ge": operator.ge, "le": operator.le}[op]
-            return Value(BoolType(), 0, int(pyop(s1, s2))), result
+            return Value(loc, BoolType(), 0, int(pyop(s1, s2))), result
         else:
             pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
-            return Value(BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2)), result
     else:
         result += _genCmpSub(src1Loc, src2Loc, op)
     # C = carry flag
@@ -536,7 +540,7 @@ def genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider):
     resultLoc = resultLoc.withType(BoolType())
     assert(resultLoc.getIndirLevel() == 1)
     if src1Loc.getType() != src2Loc.getType():
-        raise ValueError("Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
+        raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
     assert(t.getSize() == 1 or t.getSize() == 2)
     if t.getSign():

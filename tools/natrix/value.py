@@ -2,6 +2,7 @@ from lark import Transformer, v_args, Tree
 from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import labelname
+from location import Location
 
 '''
 Value class
@@ -14,21 +15,25 @@ s8 a[10];   p -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
             p[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
 '''
 class Value:
-    def __init__(self, type, indirLevel, src, final=False):
+    def __init__(self, location, type, indirLevel, src, final=False):
+        self._location = location
         self._type = type
         self._level = indirLevel
         self._src = src
         self._isFinal = final
 
     @staticmethod
-    def variable(name, type=UnknownType(), final=False):
-        return Value(type, 1, name, final)
+    def variable(location, name, type=UnknownType(), final=False):
+        return Value(location, type, 1, name, final)
+
+    def getLocation(self):
+        return self._location
 
     def getType(self):
         return self._type
 
     def withType(self, t):
-        return Value(t, self._level, self._src)
+        return Value(self._location, t, self._level, self._src)
 
     def getIndirLevel(self):
         '''
@@ -48,46 +53,44 @@ class Value:
         else:
             if self._src in localVars:
                 t = localVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src))
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src))
             elif self._src in paramVars:
                 t, n = paramVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n))
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n))
             elif self._src in globalVars:
                 t = globalVars[self._src]
-                return Value(self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)
             else:
-                raise ValueError("Undeclared variable {}".format(self._src))
+                raise SemanticError(self._location, "Undeclared variable {}".format(self._src))
 
     def removeUnknown(self, newType):
-        return Value(self._type.removeUnknown(newType), self._level, self._src)
+        return Value(self._location, self._type.removeUnknown(newType), self._level, self._src)
 
     def __str__(self):
-        return "({}, {}, {})".format(self._type, self._level, self._src)
+        return "({}, {}, {})@{}".format(self._type, self._level, self._src, str(self._location))
 
     def __eq__(self, other):
         return isinstance(other, Value) and self._type == other._type and self._level == other._level and self._src == other._src
 
-    def takeAddress(self):
+    def takeAddress(self, newLocation=None):
         if self._level > 0:
-            return Value(PtrType(self._type), self._level - 1, self._src)
+            return Value(self._location if newLocation is None else newLocation, PtrType(self._type), self._level - 1, self._src)
         else:
-            raise ValueError("Cannot get address of this: {}".format(str(self)))
+            raise SemanticError(self._location, "Cannot get address of this: {}".format(str(self)))
 
     def isConst(self):
         return self._level == 0 and isinstance(self._src, int)
 
 class ValueTransformer(Transformer):
-    @v_args(inline = True)
-    def var(self, sym):
-        return Value(UnknownType(), 1, str(sym))
+    @v_args(tree = True)
+    def var(self, t):
+        sym = t.children[0]
+        return Value(Location.fromAny(t), UnknownType(), 1, str(sym))
 
     @v_args(tree = True)
     def addr(self, t):
         val = t.children[0]
         if isinstance(val, Value):
-            try:
-                return val.takeAddress()
-            except ValueError as e:
-                raise SemanticError(t.line, str(e))
+            return val.takeAddress(Location.fromAny(t))
         else:
             return t
