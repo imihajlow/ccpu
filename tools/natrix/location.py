@@ -7,6 +7,9 @@ class Location:
         self._end_line = end_line
         self._end_column = end_column
 
+    def getLine(self):
+        return self._line
+
     @staticmethod
     def fromAny(t):
         if isinstance(t, Tree) or isinstance(t, Token):

@@ -1,4 +1,4 @@
-start: (function_definition | forward_declaration | gl_decl_var)*
+start: (cpp_line_info | function_definition | forward_declaration | gl_decl_var)*
 
 ?forward_declaration: function_declaration ";"
 
@@ -114,7 +114,6 @@ _arguments: expression ("," expression)*
 
 var: IDENTIFIER
 
-IDENTIFIER: /[a-z_]\w*/i
 number: DEC_NUMBER -> n10
     | HEX_NUMBER -> n16
     | OCT_NUMBER -> n8
@@ -122,6 +121,10 @@ number: DEC_NUMBER -> n10
 
 ?literal: ESCAPED_STRING -> string_literal
     | "{" expression ("," expression)* "}" -> array_literal
+
+cpp_line_info: "#" DEC_NUMBER ESCAPED_STRING (DEC_NUMBER)* NEWLINE
+
+IDENTIFIER: /[a-z_]\w*/i
 
 DEC_NUMBER: /[+-]?[1-9]\d*/
 HEX_NUMBER: /0x[0-9a-f]+/i

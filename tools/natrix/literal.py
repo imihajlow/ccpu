@@ -4,6 +4,30 @@ from location import Location
 from type import IntType, PtrType
 from value import Value
 
+def unescapeString(s):
+    s = s[1:-1]
+    escape = False
+    result = ""
+    for c in s:
+        if not escape:
+            if c == '\\':
+                escape = True
+            else:
+                if ord(c) > 127:
+                    raise ValueError("only 127 ASCII characters are supported")
+                result += c
+        else:
+            if c == '"':
+                result += c
+            elif c == 'n':
+                result += chr(10)
+            elif c == '\\':
+                result += c
+            else:
+                result += ['\\', c]
+            escape = False
+    return result
+
 class LiteralTransformer(Transformer):
     def __init__(self):
         self._index = 0
@@ -24,28 +48,14 @@ class LiteralTransformer(Transformer):
 
     @v_args(inline = True)
     def string_literal(self, lt):
-        s = str(lt)[1:-1]
-        result = []
-        escape = False
         loc = Location.fromAny(lt)
+        try:
+            s = unescapeString(str(lt))
+        except ValueError as e:
+            raise LiteralError(loc, str(e))
+        result = []
         for c in s:
-            if not escape:
-                if c == '\\':
-                    escape = True
-                else:
-                    if ord(c) > 127:
-                        raise LiteralError(loc, "only 127 ASCII characters are supported")
-                    result += [ord(c)]
-            else:
-                if c == '"':
-                    result += [ord(c)]
-                elif c == 'n':
-                    result += [10]
-                elif c == '\\':
-                    result += [ord(c)]
-                else:
-                    result += [ord('\\'), ord(c)]
-                escape = False
+            result += [ord(c)]
         result += [0]
         return self._addLiteral(loc, IntType(False, 1), result)
 

@@ -9,6 +9,7 @@ from value import ValueTransformer
 from subscript import SubscriptTransformer
 from literal import LiteralTransformer
 from compound import CompoundTransformer
+from lineinfo import LineInfoTransformer
 from callgraph import CallGraph
 from gen import Generator
 import operator
@@ -43,6 +44,13 @@ if __name__ == '__main__':
 
     try:
         t = parser.parse(code)
+    except LarkError as e:
+        sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
+        sys.exit(1)
+
+    lit = LineInfoTransformer(args.file.name)
+    t = lit.transform(t)
+    try:
         t = CompoundTransformer().transform(t)
         t = ConstTransformer(False).transform(t)
         t = TypeTransformer().transform(t)
@@ -60,7 +68,8 @@ if __name__ == '__main__':
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:
-        sys.stderr.write("Error: {}:{}: {}\n".format(args.file.name, e.location, e.msg))
+        file, line = lit.translateLocation(e.location)
+        sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.msg))
         sys.exit(1)
     except LarkError as e:
         sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
