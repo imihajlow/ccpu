@@ -8,6 +8,7 @@ from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
 from subscript import SubscriptTransformer
 from literal import LiteralTransformer
+from compound import CompoundTransformer
 from callgraph import CallGraph
 from gen import Generator
 import operator
@@ -42,6 +43,7 @@ if __name__ == '__main__':
 
     try:
         t = parser.parse(code)
+        t = CompoundTransformer().transform(t)
         t = ConstTransformer(False).transform(t)
         t = TypeTransformer().transform(t)
         t = ConstTransformer(True).transform(t)

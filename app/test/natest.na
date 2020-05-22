@@ -2,7 +2,6 @@ import s8 trap();
 
 export s8 main() {
     s16 test_result = -2;
-    u8 *s = "hello worl\"d";
-    s16 *a = {1, 2 + 2, (s16)((u8)2 + (u8)100)};
+    test_result += 5;
     trap();
 }

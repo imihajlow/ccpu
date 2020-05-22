@@ -45,6 +45,7 @@ declaration: type IDENTIFIER -> decl_var
 
 assignment: lvalue "=" expression
     | lvalue "=" function_call -> assignment_function
+    | lvalue COMPOUND_OPERATOR expression -> compound_assignment
 
 function_call: IDENTIFIER "(" _arguments? ")"
 
@@ -88,6 +89,7 @@ _arguments: expression ("," expression)*
 ?product: neg
     | product "*" neg -> mul
     | product "/" neg -> div
+    | product "%" neg -> mod
 
 ?neg: value
     | "-" neg -> neg
@@ -124,6 +126,8 @@ OCT_NUMBER: /0[0-7]*/
 BIN_NUMBER: /0b[01]+/
 
 INT_TYPE: /[us](8|16)/
+
+COMPOUND_OPERATOR: "+=" | "-=" | "*=" | "/=" | "%=" | ">>=" | "<<=" | "&=" | "|=" | "^=" | "&&=" | "||="
 
 %import common.WS
 %import common.ESCAPED_STRING
