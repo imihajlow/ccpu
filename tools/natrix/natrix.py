@@ -4,14 +4,15 @@ import sys
 import os
 from lark import Lark, Transformer, v_args, Tree, LarkError
 from const import ConstTransformer
-from type import TypeTransformer
+from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
 from subscript import SubscriptTransformer
+from literal import LiteralTransformer
 from callgraph import CallGraph
 from gen import Generator
 import operator
 import ccpu.code
-from exceptions import SemanticError
+from exceptions import NatrixError
 
 def format(code):
     result = []
@@ -45,15 +46,20 @@ if __name__ == '__main__':
         t = TypeTransformer().transform(t)
         t = ConstTransformer(True).transform(t)
         t = ValueTransformer().transform(t)
+        t = CastTransformer().transform(t)
+        lt = LiteralTransformer()
+        t = lt.transform(t)
         t = SubscriptTransformer().transform(t)
         if args.tree:
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(args.file.name, cg, ccpu.code)
+        g = Generator(args.file.name, cg, lt, ccpu.code)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
-    except SemanticError as e:
+    except NatrixError as e:
         sys.stderr.write("Error: {}:{}: {}\n".format(args.file.name, e.location, e.msg))
+        sys.exit(1)
     except LarkError as e:
         sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
+        sys.exit(1)

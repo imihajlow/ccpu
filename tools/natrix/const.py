@@ -48,7 +48,7 @@ def unary(tree, op):
 def cast(v, oldType, newType):
     if oldType.getSize() < newType.getSize() and newType.getSign():
         bits = oldType.getSize() * 8
-        sign = bool(value & (1 << (bits - 1)))
+        sign = bool(v & (1 << (bits - 1)))
         if sign:
             newBits = newType.getSize() * 8
             hi = ~(~0 << (newBits - bits)) << bits

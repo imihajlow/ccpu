@@ -191,3 +191,29 @@ class TypeTransformer(Transformer):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
         raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+
+class CastTransformer(Transformer):
+    @v_args(tree = True)
+    def type_cast(self, t):
+        type, v = t.children
+        from value import Value
+        if isinstance(v, Value) and v.getIndirLevel() == 0:
+            s = v.getSource()
+            # TODO type size > 2 when structs
+            if type.getSize() > v.getType().getSize():
+                # widening cast
+                if isinstance(s, int):
+                    if v.getType().getSign():
+                        s = s | (0xff00 if bool(s & 0x80) else 0)
+                else:
+                    if v.getType().getSign():
+                        s = "(({0}) | (0xff00 if bool(({0}) & 0x80) else 0))".format(s)
+            elif type.getSize() < v.getType().getSize():
+                # narrowing cast
+                if isinstance(s, int):
+                    s = s & 0xff
+                else:
+                    s = "lo({})".format(s)
+            return Value(Location.fromAny(t), type, 0, s)
+        else:
+            return t

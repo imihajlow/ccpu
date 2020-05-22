@@ -34,6 +34,17 @@ def _dumpRuntimeImports():
     .global __cc_sh_count
     """
 
+def dumpLiterals(lp):
+    result = '; literals:\n'
+    for label,t,v in lp.getLiterals():
+        size = t.getSize()
+        if size == 2:
+            result += '.align 2\n'
+        result += '{}:\n'.format(label)
+        # a literal can't be empty
+        result += '{} {}\n'.format("db" if size == 1 else "dw", ", ".join(str(x) for x in v))
+    return result
+
 def reserve(label, size):
     return "{}: res {}\n".format(label, min(2, size))
 

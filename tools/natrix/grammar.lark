@@ -103,6 +103,7 @@ _arguments: expression ("," expression)*
     | "*" value -> deref
 
 ?subscript: number
+    | literal
     | var
     | var "[" expression "]" -> subscript
 
@@ -114,6 +115,9 @@ number: DEC_NUMBER -> n10
     | OCT_NUMBER -> n8
     | BIN_NUMBER -> n2
 
+?literal: ESCAPED_STRING -> string_literal
+    | "{" expression ("," expression)* "}" -> array_literal
+
 DEC_NUMBER: /[+-]?[1-9]\d*/
 HEX_NUMBER: /0x[0-9a-f]+/i
 OCT_NUMBER: /0[0-7]*/
@@ -122,4 +126,5 @@ BIN_NUMBER: /0b[01]+/
 INT_TYPE: /[us](8|16)/
 
 %import common.WS
+%import common.ESCAPED_STRING
 %ignore WS

@@ -7,7 +7,7 @@ from location import Location
 import labelname
 
 class Generator:
-    def __init__(self, filename, callgraph, backend):
+    def __init__(self, filename, callgraph, literalPool, backend):
         self.maxTempVarIndex = -1
         self.paramVars = {} # name -> (type, index)
         self.localVars = {} # name -> type
@@ -18,6 +18,7 @@ class Generator:
         self.continueLabel = [] # stack
         self.callgraph = callgraph
         self.backend = backend
+        self.literalPool = literalPool
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -297,5 +298,6 @@ class Generator:
         importCode = self.backend.dumpImports(self.getImports())
         exportCode = self.backend.dumpExports(self.getExports())
         reserveCode = self.generateReserve()
+        literalsCode = self.backend.dumpLiterals(self.literalPool)
 
-        return exportCode + importCode + self.backend.startCodeSection() + execCode + self.backend.startBssSection() + reserveCode
+        return exportCode + importCode + self.backend.startCodeSection() + execCode + literalsCode + self.backend.startBssSection() + reserveCode
