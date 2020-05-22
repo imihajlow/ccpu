@@ -225,12 +225,12 @@ class Generator:
         elif t.data == 'empty_return_statement':
             return self.backend.genReturn(curFn)
 
-    def addFunctionDeclaration(self, location, attrs, type, name, args):
+    def addFunctionDeclaration(self, location, attrs, type, name, args, allowAttrOverride=False):
         try:
             f = Function(name, type, attrs, args)
         except ValueError as e:
             raise SemanticError(location, str(e))
-        if name in self.functions and f != self.functions[name]:
+        if name in self.functions and not f.equal(self.functions[name], allowAttrOverride):
             raise SemanticError(location, "conflicting declarations of {}".format(name))
         self.functions[name] = f
         return f
@@ -266,7 +266,7 @@ class Generator:
         name = str(name)
         args = args.children
         attrs = attrs.children
-        f = self.addFunctionDeclaration(Location.fromAny(decl), attrs, type, name, args)
+        f = self.addFunctionDeclaration(Location.fromAny(decl), attrs, type, name, args, True)
         if f.isImported:
             raise SemanticError(Location.fromAny(decl), "Cannot define an imported function")
         self.localVars = {}

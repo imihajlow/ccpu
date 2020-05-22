@@ -1,0 +1,15 @@
+#include "random.h"
+
+#define MULTIPLIER 16807
+#define INCREMENT 0
+
+u16 random_seed;
+
+export u8 srand(u16 seed) {
+    random_seed = seed;
+}
+
+export u16 rand(u16 top) {
+    random_seed = random_seed * MULTIPLIER + INCREMENT;
+    return random_seed % top;
+}
