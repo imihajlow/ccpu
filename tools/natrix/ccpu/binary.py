@@ -5,9 +5,12 @@ import labelname
 from .shift import genShift
 from .common import *
 from .compare import *
+from .mul import *
 from exceptions import SemanticError
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
+    if resultLoc.getIndirLevel() == 0:
+        raise RuntimeError("Result is a constant") # should never happen, assignments are handled separately
     if src1Loc.getType().isUnknown() or src2Loc.getType().isUnknown():
         raise RuntimeError("Unknown source type")
     if op == 'add':
@@ -32,6 +35,8 @@ def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
         return genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider)
     elif op in {'shl', 'shr'}:
         return genShift(resultLoc, src1Loc, src2Loc, op, labelProvider)
+    elif op == 'mul':
+        return genMul(resultLoc, src1Loc, src2Loc)
     else:
         raise RuntimeError("Unhandled binary op: {}".format(op))
 

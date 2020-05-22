@@ -1,18 +1,9 @@
-#include "test.h"
 import s8 trap();
-
-export s16 sum(s16 x) {
-    if (x == 0) {
-        return 0;
-    } else {
-        s16 sum_rest;
-        sum_rest = sum(x - 1);
-        return x + sum_rest;
-    }
-}
 
 export s8 main() {
     s16 test_result = -2;
-    test_result = sum(T);
+    u8 a = (u8)5;
+    u8 b = (u8)7;
+    test_result *= -5;
     trap();
 }

@@ -37,6 +37,11 @@ def _dumpRuntimeImports():
     .global __cc_pop
     .global __cc_from
     .global __cc_to
+    .global __cc_mul_word
+    .global __cc_mul_byte
+    .global __cc_r_r
+    .global __cc_r_a
+    .global __cc_r_b
     """
 
 def dumpLiterals(lp):
@@ -210,7 +215,7 @@ def genCast(resultLoc, t, srcLoc):
             # cast a constant
             if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource()), False))
+                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource()), False), True)
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         if resultLoc.getType().getSize() > srcLoc.getType().getSize():

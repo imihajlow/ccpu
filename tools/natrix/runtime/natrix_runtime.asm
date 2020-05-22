@@ -9,6 +9,11 @@
     .export __cc_pop
     .export __cc_from
     .export __cc_to
+    .export __cc_r_a
+    .export __cc_r_b
+    .export __cc_r_r
+    .export __cc_mul_byte
+    .export __cc_mul_word
 
     .global __seg_stack_end ; provided by the linker
     .global main
@@ -513,6 +518,153 @@ copy_loop:
         ldi ph, hi(copy_loop)
         jmp
 
+; multiply A and B, result into R
+__cc_mul_byte:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+; R := 0
+    ldi pl, lo(__cc_r_r)
+    ldi ph, hi(__cc_r_r)
+    mov a, 0
+    st a
+
+__cc_mul_byte_loop:
+    ; B >>= 1
+    ldi pl, lo(__cc_r_b)
+    ldi ph, hi(__cc_r_b)
+    ld a
+    shr a
+    st a
+    ldi pl, lo(__cc_mul_byte_added)
+    ldi ph, hi(__cc_mul_byte_added)
+    jnc ; no need to add
+    ; R += A
+    ldi pl, lo(__cc_r_a)
+    ldi ph, hi(__cc_r_a)
+    ld a
+    ldi pl, lo(__cc_r_r)
+    ld b
+    add b, a
+    st b
+__cc_mul_byte_added:
+    ; A <<= 1
+    ldi ph, hi(__cc_r_a)
+    ldi pl, lo(__cc_r_a)
+    ld a
+    shl a
+    st a
+
+    ; A | B == 0?
+    ; a = A
+    ldi pl, lo(__cc_r_b)
+    ld b
+    or a, b
+    ldi pl, lo(__cc_mul_byte_loop)
+    ldi ph, hi(__cc_mul_byte_loop)
+    jnz ; A | B != 0
+
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jmp
+
+; multiply A and B, result into R
+__cc_mul_word:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ; R := 0
+    ldi pl, lo(__cc_r_r)
+    ldi ph, hi(__cc_r_r)
+    mov a, 0
+    st a
+    inc pl
+    st a
+
+__cc_mul_word_loop:
+    ; lo(B) >>= 1
+    ldi pl, lo(__cc_r_b)
+    ldi ph, hi(__cc_r_b)
+    ld a
+    shr a
+    st a
+    ldi pl, lo(__cc_mul_word_added)
+    ldi ph, hi(__cc_mul_word_added)
+    jnc ; no need to add
+    ; R += A
+    ldi pl, lo(__cc_r_a)
+    ldi ph, hi(__cc_r_a)
+    ld a
+    ldi pl, lo(__cc_r_r)
+    ld b
+    add b, a
+    st b
+    ldi pl, lo(__cc_r_a + 1)
+    ld a
+    ldi pl, lo(__cc_r_r + 1)
+    ld b
+    adc b, a
+    st b
+__cc_mul_word_added:
+    ; hi(B) >>= 1
+    ldi pl, lo(__cc_r_b + 1)
+    ldi ph, hi(__cc_r_b)
+    ld b
+    shr b
+    st b
+    exp b
+    ldi a, 0x80
+    and a, b
+    ; lo(B) |= c ? 0x80 : 0
+    dec pl
+    ld b
+    or a, b
+    st a
+    ; A <<= 1
+    ldi pl, lo(__cc_r_a)
+    ld a
+    shl a
+    st a
+    exp b
+    ldi a, 0x01
+    and b, a
+    inc pl
+    ld a
+    shl a
+    or a, b
+    st a
+
+    ; A | B == 0?
+    ; a = hi(A)
+    dec pl
+    ld b
+    or a, b
+    ldi pl, lo(__cc_r_b)
+    ld b
+    or a, b
+    inc pl
+    ld b
+    or a, b
+    ldi pl, lo(__cc_mul_word_loop)
+    ldi ph, hi(__cc_mul_word_loop)
+    jnz ; A | B != 0
+
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jmp
+
     .section bss
     .align 32 ; all internal data have same hi byte
 __cc_r_sp: res 2
@@ -520,6 +672,10 @@ __cc_sh_val: res 2
 __cc_sh_count: res 2
 __cc_from: res 2
 __cc_to: res 2
+__cc_r_a: res 2
+__cc_r_b: res 2
+__cc_r_r: res 2
+
 int_ret: res 2
 src_from: res 2
 src_to: res 2
