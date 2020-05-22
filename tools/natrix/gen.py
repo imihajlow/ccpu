@@ -8,7 +8,7 @@ import labelname
 import sys
 
 class Generator:
-    def __init__(self, filename, callgraph, literalPool, backend):
+    def __init__(self, callgraph, literalPool, backend):
         self.maxTempVarIndex = -1
         self.paramVars = {} # name -> (type, index)
         self.localVars = {} # name -> type

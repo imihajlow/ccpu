@@ -1,3 +1,4 @@
+#include "test.h"
 import s8 trap();
 
 export s16 sum(s16 x) {
@@ -12,6 +13,6 @@ export s16 sum(s16 x) {
 
 export s8 main() {
     s16 test_result = -2;
-    test_result = sum(100);
+    test_result = sum(T);
     trap();
 }

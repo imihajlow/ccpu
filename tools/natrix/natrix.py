@@ -10,11 +10,11 @@ from subscript import SubscriptTransformer
 from literal import LiteralTransformer
 from compound import CompoundTransformer
 from lineinfo import LineInfoTransformer
-from callgraph import CallGraph
-from gen import Generator
-import operator
+import subprocess
 import ccpu.code
+from gen import Generator
 from exceptions import NatrixError
+from callgraph import CallGraph
 
 def format(code):
     result = []
@@ -29,10 +29,20 @@ def format(code):
                 result.append('\t' + l)
     return "\n".join(result)
 
+def preprocess(filename, cpp, cppArgs):
+    if cppArgs is None:
+        cppArgs = []
+    cppCmd = [cpp, "-nostdinc"] + cppArgs + [filename]
+    r = subprocess.run(cppCmd, stdout=subprocess.PIPE, encoding="ascii", check=True)
+    return r.stdout
+
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Natrix compiler')
     argparser.add_argument('-o', metavar="RESULT", type=argparse.FileType("w"), required=True, help='output file name')
-    argparser.add_argument('file', type=argparse.FileType("r"), help='input file name')
+    argparser.add_argument('file', help='input file name')
+    argparser.add_argument('--cpp-arg', metavar="CPP_OPTION", action="append", help='C preprocessor option')
+    argparser.add_argument('--do-not-preprocess', default=False, action='store_true', help='do not run C preprocessor')
+    argparser.add_argument('--cpp', default="cpp", help="C preprocessor executable (default: cpp)")
     argparser.add_argument('--tree', default=False, action='store_true', help='print syntax tree')
     args = argparser.parse_args()
 
@@ -40,15 +50,23 @@ if __name__ == '__main__':
     with open(os.path.join(sys.path[0], "grammar.lark"), "r") as gf:
         parser = Lark(gf, propagate_positions=True)
 
-    code = args.file.read()
+    if args.do_not_preprocess:
+        with open(args.file, "r") as f:
+            code = f.read()
+    else:
+        try:
+            code = preprocess(args.file, args.cpp, args.cpp_arg)
+        except subprocess.CalledProcessError:
+            sys.stderr.write("Preprocessing of {} failed\n".format(args.file))
+            sys.exit(1)
 
     try:
         t = parser.parse(code)
     except LarkError as e:
-        sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
+        sys.stderr.write("Syntax error in {}: {}\n".format(args.file, str(e)))
         sys.exit(1)
 
-    lit = LineInfoTransformer(args.file.name)
+    lit = LineInfoTransformer(args.file)
     t = lit.transform(t)
     try:
         t = CompoundTransformer().transform(t)
@@ -64,7 +82,7 @@ if __name__ == '__main__':
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(args.file.name, cg, lt, ccpu.code)
+        g = Generator(cg, lt, ccpu.code)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:
@@ -72,5 +90,5 @@ if __name__ == '__main__':
         sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.msg))
         sys.exit(1)
     except LarkError as e:
-        sys.stderr.write("Syntax error in {}: {}\n".format(args.file.name, str(e)))
+        sys.stderr.write("Syntax error in {}: {}\n".format(args.file, str(e)))
         sys.exit(1)
