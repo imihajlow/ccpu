@@ -3,6 +3,8 @@
 import s8 trap();
 
 export s8 main() {
-    display_init();
-    display_print("Hello NATRIX");
+    s16 x = -22;
+    s16 y = -7;
+    s16 test_result = x % y;
+    trap();
 }

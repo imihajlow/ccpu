@@ -1,36 +1,6 @@
 from value import Value
 from exceptions import SemanticError
-
-def _copyW(f, t):
-    return '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        ld b
-        inc pl
-        ld a
-        ldi pl, lo({1})
-        ldi ph, hi({1})
-        st b
-        inc pl
-        st a
-    '''.format(f, t)
-
-def _copyB(f, t):
-    return '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        ld b
-        ldi pl, lo({1})
-        ldi ph, hi({1})
-        st b
-    '''.format(f, t)
-
-def _call(f):
-    return '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        jmp
-    '''.format(f)
+from .common import *
 
 def _genMulVCByte(rs, v, c):
     result = '; {} = {} * {} (byte)\n'.format(rs, v, c)
@@ -63,7 +33,7 @@ def _genMulVCByte(rs, v, c):
 def _genMulVCWord(rs, v, c):
     result = '; {} = {} * {} (word)\n'.format(rs, v, c)
     # TODO optimize
-    result += _copyW(v, "__cc_r_a")
+    result += copyW(v, "__cc_r_a")
     result += '''
         ldi b, lo({0})
         ldi a, hi({0})
@@ -73,8 +43,8 @@ def _genMulVCWord(rs, v, c):
         inc pl
         st a
     '''.format(c)
-    result += _call("__cc_mul_word")
-    result += _copyW("__cc_r_r", rs)
+    result += call("__cc_mul_word")
+    result += copyW("__cc_r_r", rs)
     return result
 
 def _genMulVC(resultLoc, v, c):
@@ -114,13 +84,13 @@ def genMul(resultLoc, src1Loc, src2Loc):
         result = '; {} = {} * {}\n'.format(resultLoc, src1Loc, src2Loc)
         isWord = t.getSize() == 2
         if isWord:
-            result += _copyW(src1Loc.getSource(), "__cc_r_a")
-            result += _copyW(src2Loc.getSource(), "__cc_r_b")
-            result += _call("__cc_mul_word")
-            result += _copyW("__cc_r_r", resultLoc.getSource())
+            result += copyW(src1Loc.getSource(), "__cc_r_a")
+            result += copyW(src2Loc.getSource(), "__cc_r_b")
+            result += call("__cc_mul_word")
+            result += copyW("__cc_r_r", resultLoc.getSource())
         else:
-            result += _copyB(src1Loc.getSource(), "__cc_r_a")
-            result += _copyB(src2Loc.getSource(), "__cc_r_b")
-            result += _call("__cc_mul_byte")
-            result += _copyB("__cc_r_r", resultLoc.getSource())
+            result += copyB(src1Loc.getSource(), "__cc_r_a")
+            result += copyB(src2Loc.getSource(), "__cc_r_b")
+            result += call("__cc_mul_byte")
+            result += copyB("__cc_r_r", resultLoc.getSource())
         return resultLoc, result

@@ -6,6 +6,7 @@ from .shift import genShift
 from .common import *
 from .compare import *
 from .mul import *
+from .div import *
 from exceptions import SemanticError
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
@@ -37,6 +38,10 @@ def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
         return genShift(resultLoc, src1Loc, src2Loc, op, labelProvider)
     elif op == 'mul':
         return genMul(resultLoc, src1Loc, src2Loc)
+    elif op == 'div':
+        return genDiv(resultLoc, src1Loc, src2Loc)
+    elif op == 'mod':
+        return genMod(resultLoc, src1Loc, src2Loc)
     else:
         raise RuntimeError("Unhandled binary op: {}".format(op))
 

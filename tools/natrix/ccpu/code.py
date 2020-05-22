@@ -39,9 +39,14 @@ def _dumpRuntimeImports():
     .global __cc_to
     .global __cc_mul_word
     .global __cc_mul_byte
+    .global __cc_div_word
+    .global __cc_udiv_word
+    ;.global __cc_div_byte
     .global __cc_r_r
     .global __cc_r_a
     .global __cc_r_b
+    .global __cc_r_quotient
+    .global __cc_r_remainder
     """
 
 def dumpLiterals(lp):
