@@ -1,13 +1,17 @@
 import s8 trap();
 
-import u8 z;
-export s16 x;
-export u8 z;
-u16 a[6];
+export s16 sum(s16 x) {
+    if (x == 0) {
+        return 0;
+    } else {
+        s16 sum_rest;
+        sum_rest = sum(x - 1);
+        return x + sum_rest;
+    }
+}
 
 export s8 main() {
     s16 test_result = -2;
-    test_result += 5;
-    x = (s16)a[test_result];
+    test_result = sum(100);
     trap();
 }

@@ -5,6 +5,7 @@ from type import Type, BoolType
 from function import Function
 from location import Location
 import labelname
+import sys
 
 class Generator:
     def __init__(self, filename, callgraph, literalPool, backend):
@@ -170,6 +171,8 @@ class Generator:
                 Value.variable(Location.fromAny(expr), labelname.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
         isRecursive = self.callgraph.isRecursive(curFn, name)
         if isRecursive:
+            sys.stderr.write("Warning: {}: recursion\n".format(location)) # TODO warning function in a different module
+        if isRecursive:
             result += self.backend.genPushLocals(curFn)
         result += self.backend.genCall(name)
         if isRecursive:
@@ -320,10 +323,10 @@ class Generator:
             return ""
         result = self.backend.genLabel(labelname.getReserveBeginLabel(fn.name))
         result += self.backend.reserve(labelname.getReturnAddressLabel(fn.name), 2)
-        result += self.backend.reserve(labelname.getReturnName(fn.name), 2)
         result += "".join(self.backend.reserve(labelname.getArgumentName(fn.name, i), 2) for i in range(len(fn.args)))
         result += "".join(self.backend.reserveVar(labelname.getLocalName(fn.name, v), fn.localVars[v]) for v in fn.localVars)
         result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
+        result += self.backend.reserve(labelname.getReturnName(fn.name), 2)
         return result
 
     def generateReserve(self):

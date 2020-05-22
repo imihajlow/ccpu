@@ -5,6 +5,11 @@
     .export __cc_sh_val
     .export __cc_sh_count
 
+    .export __cc_push
+    .export __cc_pop
+    .export __cc_from
+    .export __cc_to
+
     .global __seg_stack_end ; provided by the linker
     .global main
 
@@ -305,9 +310,218 @@ exit:
     mov pl, a
     jmp
 
+    ; push onto stack values in range [__cc_from, __cc_to)
+__cc_push:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ; SP -= (to - from)
+    ; SP -= to
+    ldi pl, lo(__cc_to)
+    ld b
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    sub a, b
+    st a
+    ldi pl, lo(__cc_to + 1)
+    ld b
+    ldi pl, lo(__cc_r_sp + 1)
+    ld a
+    sbb a, b
+    st a
+    ; SP += from
+    ldi pl, lo(__cc_from)
+    ld b
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    add a, b
+    st a
+    ldi pl, lo(__cc_from + 1)
+    ld b
+    ldi pl, lo(__cc_r_sp + 1)
+    ld a
+    adc a, b
+    st a
+
+    ; src_from := from
+    ldi pl, lo(__cc_from)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(src_from)
+    st a
+    inc pl
+    st b
+    ; src_to := to
+    ldi pl, lo(__cc_to)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(src_to)
+    st a
+    inc pl
+    st b
+    ; dst_from := SP
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(dst_from)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(copy)
+    ldi ph, hi(copy)
+    jmp
+
+    ; pop from stack values into range [__cc_from, __cc_to)
+__cc_pop:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ; src_from := SP
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(src_from)
+    st a
+    inc pl
+    st b
+
+    ; SP += (to - from)
+    ; SP += to
+    ldi pl, lo(__cc_to)
+    ld b
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    add a, b
+    st a
+    ldi pl, lo(__cc_to + 1)
+    ld b
+    ldi pl, lo(__cc_r_sp + 1)
+    ld a
+    adc a, b
+    st a
+    ; SP -= from
+    ldi pl, lo(__cc_from)
+    ld b
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    sub a, b
+    st a
+    ldi pl, lo(__cc_from + 1)
+    ld b
+    ldi pl, lo(__cc_r_sp + 1)
+    ld a
+    sbb a, b
+    st a
+
+    ; src_to := SP
+    ldi pl, lo(__cc_r_sp)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(src_to)
+    st a
+    inc pl
+    st b
+    ; dst_from := from
+    ldi pl, lo(__cc_from)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(dst_from)
+    st a
+    inc pl
+    st b
+
+    ; copy [src_from, src_to) into [dst_from, ...)
+copy:
+
+copy_loop:
+        ldi ph, hi(src_from)
+        ldi pl, lo(src_from)
+        ld b
+        ldi pl, lo(src_to)
+        ld a
+        sub b, a
+        ldi pl, lo(copy_loop_neq)
+        ldi ph, hi(copy_loop_neq)
+        jnz
+        ldi ph, hi(src_from + 1)
+        ldi pl, lo(src_from + 1)
+        ld b
+        ldi pl, lo(src_to + 1)
+        ld a
+        sub b, a
+        ldi pl, lo(exit)
+        ldi ph, hi(exit)
+        jz ; src_to == src_from
+    copy_loop_neq:
+        ; *dst_from := *src_from
+        ldi pl, lo(src_from)
+        ldi ph, hi(src_from)
+        ld a
+        inc pl
+        ld ph
+        mov pl, a
+        ld b
+        ldi ph, hi(dst_from)
+        ldi pl, lo(dst_from)
+        ld a
+        inc pl
+        ld ph
+        mov pl, a
+        st b
+        ; src_from -= 1
+        ldi pl, lo(src_from)
+        ldi ph, hi(src_from)
+        ld b
+        inc pl
+        ld a
+        inc b
+        adc a, 0
+        st a
+        dec pl
+        st b
+        ; dst_from -= 1
+        ldi pl, lo(dst_from)
+        ld b
+        inc pl
+        ld a
+        inc b
+        adc a, 0
+        st a
+        dec pl
+        st b
+
+        ldi pl, lo(copy_loop)
+        ldi ph, hi(copy_loop)
+        jmp
+
     .section bss
     .align 32 ; all internal data have same hi byte
 __cc_r_sp: res 2
 __cc_sh_val: res 2
 __cc_sh_count: res 2
+__cc_from: res 2
+__cc_to: res 2
 int_ret: res 2
+src_from: res 2
+src_to: res 2
+dst_from: res 2
+tmp: res 2

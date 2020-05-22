@@ -7,6 +7,7 @@ from .binary import *
 from .unary import *
 from .shift import *
 from .common import *
+from .stack import *
 from exceptions import SemanticError
 
 def startCodeSection():
@@ -32,6 +33,10 @@ def _dumpRuntimeImports():
     .global __cc_lsr
     .global __cc_sh_val
     .global __cc_sh_count
+    .global __cc_push
+    .global __cc_pop
+    .global __cc_from
+    .global __cc_to
     """
 
 def dumpLiterals(lp):
@@ -93,10 +98,11 @@ def genCall(fn):
         '''.format(fn)
 
 def genPushLocals(fn):
-    raise NotImplementedError("Recursion isn't implemented")
+
+    return "; push frame of {}\n".format(fn) + genPush(labelname.getReserveBeginLabel(fn), labelname.getReserveEndLabel(fn))
 
 def genPopLocals(fn):
-    raise NotImplementedError("Recursion isn't implemented")
+    return "; pop frame of {}\n".format(fn) + genPop(labelname.getReserveBeginLabel(fn), labelname.getReserveEndLabel(fn))
 
 def _loadConst(size, value):
     # load const into a:b
