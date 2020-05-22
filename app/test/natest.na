@@ -1,7 +1,13 @@
 import s8 trap();
 
+import u8 z;
+export s16 x;
+export u8 z;
+u16 a[6];
+
 export s8 main() {
     s16 test_result = -2;
     test_result += 5;
+    x = (s16)a[test_result];
     trap();
 }

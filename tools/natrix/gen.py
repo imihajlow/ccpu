@@ -19,6 +19,8 @@ class Generator:
         self.callgraph = callgraph
         self.backend = backend
         self.literalPool = literalPool
+        self.varExports = [] # name
+        self.varImports = [] # name
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -226,9 +228,35 @@ class Generator:
         except ValueError as e:
             raise SemanticError(location, str(e))
         if name in self.functions and f != self.functions[name]:
-            raise SemanticError(location, "Conflicting declarations of {}".format(name))
+            raise SemanticError(location, "conflicting declarations of {}".format(name))
         self.functions[name] = f
         return f
+
+    def addGlobalVarDeclaration(self, location, attrs, type, name):
+        if name in self.globalVars:
+            if not name in self.varImports:
+                raise SemanticError(location, "conflicting declarations of {}".format(name))
+            else:
+                i = self.varImports.index(name)
+                del self.varImports[i]
+        self.globalVars[name] = type
+        isImported = False
+        isExported = False
+        for a in attrs:
+            if a.data == "attr_import":
+                isImported = True
+            elif a.data == "attr_export":
+                isExported = True
+            elif a.data == "attr_always_recursion":
+                raise SemanticError(location, "a variable can't be a traitor")
+            else:
+                raise RuntimeError("unhandled attribute {}".format(a.data))
+        if isImported and isExported:
+            raise SemanticError(location, "nothing can be imported and exported at the same time")
+        if isImported:
+            self.varImports += [name]
+        if isExported:
+            self.varExports += [name]
 
     def generateFunctionDefinition(self, decl, body):
         attrs, type, name, args = decl.children
@@ -254,6 +282,10 @@ class Generator:
             attrs, type, name, args = t.children
             self.addFunctionDeclaration(Location.fromAny(t), attrs.children, type, str(name), args.children)
             return ""
+        elif t.data == 'gl_decl_var':
+            attrs, type, name = t.children
+            self.addGlobalVarDeclaration(Location.fromAny(t), attrs.children, type, str(name))
+            return ""
 
     def generateStart(self, t):
         if t.data == 'start':
@@ -269,6 +301,8 @@ class Generator:
                 yield labelname.getReturnName(name)
                 for n in range(len(f.args)):
                     yield labelname.getArgumentName(name, n)
+        for name in self.varImports:
+            yield name
 
     def getExports(self):
         for name in self.functions:
@@ -278,6 +312,8 @@ class Generator:
                 yield labelname.getReturnName(name)
                 for n in range(len(f.args)):
                     yield labelname.getArgumentName(name, n)
+        for name in self.varExports:
+            yield name
 
     def generateFunctionReserve(self, fn):
         if fn.isImported:
@@ -291,7 +327,8 @@ class Generator:
         return result
 
     def generateReserve(self):
-        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.functions[name]) for name in self.functions)
+        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.functions[name]) for name in self.functions) \
+            + self.backend.reserveGlobalVars(self.globalVars, self.varImports)
 
     def generate(self, t):
         execCode = self.generateStart(t)

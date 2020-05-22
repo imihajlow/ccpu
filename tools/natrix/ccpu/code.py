@@ -46,7 +46,14 @@ def dumpLiterals(lp):
     return result
 
 def reserve(label, size):
-    return "{}: res {}\n".format(label, min(2, size))
+    return "{}: res {}\n".format(label, max(2, size))
+
+def reserveGlobalVars(vs, imports):
+    result = '; global vars:\n'
+    for v in vs:
+        if v not in imports:
+            result += '{}: res {}\n'.format(v, align(vs[v].getReserveSize(), 2))
+    return result
 
 def reserveTempVars(maxIndex):
     return "".join(reserve(labelname.getTempName(i), 2) for i in range(maxIndex + 1))

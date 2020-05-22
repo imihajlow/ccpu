@@ -192,6 +192,16 @@ class TypeTransformer(Transformer):
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
         raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
 
+    @v_args(tree = True)
+    def gl_decl_array(self, t):
+        attrs, type, name, size = t.children
+        from value import Value
+        if isinstance(size, Value):
+            if isinstance(size.getSource(), int):
+                if size.getIndirLevel() == 0 and size.getSource() > 0:
+                    return Tree("gl_decl_var", [attrs, ArrayType(type, size.getSource()), name], t.meta)
+        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+
 class CastTransformer(Transformer):
     @v_args(tree = True)
     def type_cast(self, t):

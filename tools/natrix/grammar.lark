@@ -1,10 +1,13 @@
-start: (function_definition | forward_declaration)*
+start: (function_definition | forward_declaration | gl_decl_var)*
 
 ?forward_declaration: function_declaration ";"
 
 function_definition: function_declaration function_body
 
 function_declaration: attributes type IDENTIFIER "(" arg_declarations ")"
+
+gl_decl_var: attributes type IDENTIFIER ";"
+    | attributes type IDENTIFIER "[" expression "]" ";" -> gl_decl_array
 
 attributes: attribute*
 
