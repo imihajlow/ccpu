@@ -1,20 +1,28 @@
     ; Init the display module. No arguments.
     .export display_init
+    .export display_init_ret
 
     ; Clear display. No arguments.
     .export display_clear
+    .export display_clear_ret
 
     ; Output a null-terminated string
     ; display_print_arg - string address
     .export display_print
+    .export display_print_arg0
+    .export display_print_ret
 
     ; Output a byte as a hex number
     ; display_print_arg - the byte
     .export display_print_byte
+    .export display_print_byte_arg0
+    .export display_print_byte_ret
 
     ; Set display address.
     ; display_set_address_arg - raw address, like in the datasheet.
     .export display_set_address
+    .export display_set_address_arg0
+    .export display_set_address_ret
 
     ; Output a BCDF number
     ; display_print_bcdf_arg - the number must be copied there
@@ -34,11 +42,20 @@
     .const lcd_control = 0xf002
     .const lcd_data = 0xf003
 
-    .section data
+    .section bss
 
     .align 2
 display_return: res 2
+
+display_init_ret:
+display_clear_ret:
+display_print_byte_ret:
+display_print_byte_arg0:
+display_print_arg0:
+display_print_ret:
 display_print_arg: res 2
+display_set_address_ret:
+display_set_address_arg0:
 display_set_address_arg: res 1
     .align 2
 delay_return: res 2

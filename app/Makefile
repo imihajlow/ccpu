@@ -16,7 +16,7 @@ test: test.bin
 natest: natest.bin
 	../tools/sim.py natest.bin natest.map -c 'break trap' -c 'run' -c 'p w test_result'
 
-natest.bin: test/natest.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o
+natest.bin: test/natest.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 calc.bin: calc/calc.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o

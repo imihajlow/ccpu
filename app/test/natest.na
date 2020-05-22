@@ -1,9 +1,8 @@
+#include "../lib/display.h"
+
 import s8 trap();
 
 export s8 main() {
-    s16 test_result = -2;
-    u8 a = (u8)5;
-    u8 b = (u8)7;
-    test_result *= -5;
-    trap();
+    display_init();
+    display_print("Hello NATRIX");
 }
