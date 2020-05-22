@@ -129,6 +129,11 @@ INT_TYPE: /[us](8|16)/
 
 COMPOUND_OPERATOR: "+=" | "-=" | "*=" | "/=" | "%=" | ">>=" | "<<=" | "&=" | "|=" | "^=" | "&&=" | "||="
 
+COMMENT: "/*" /(.|\n|\r)*/"*/"
+    | "//" /.*/ NEWLINE
+
 %import common.WS
 %import common.ESCAPED_STRING
+%import common.NEWLINE
 %ignore WS
+%ignore COMMENT
