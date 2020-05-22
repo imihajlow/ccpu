@@ -14,7 +14,9 @@
     .export __cc_r_r
     .export __cc_mul_byte
     .export __cc_mul_word
+    .export __cc_div_byte
     .export __cc_div_word
+    .export __cc_udiv_byte
     .export __cc_udiv_word
     .export __cc_r_quotient
     .export __cc_r_remainder
@@ -835,9 +837,9 @@ __cc_div_word_neg_denom:
     jmp
 
 __cc_div_word_neg_nom:
-    ; A = - A
-    ldi ph, hi(__cc_r_a)
-    ldi pl, lo(__cc_r_a)
+    ; N = -N
+    ldi ph, hi(numerator)
+    ldi pl, lo(numerator)
     ld b
     inc pl
     ld a
@@ -859,27 +861,9 @@ __cc_div_word_neg_nom:
     ldi ph, hi(__cc_div_word_positive)
     jmp
 
-__cc_udiv_word:
-    mov a, pl
-    mov b, a
-    mov a, ph
-    ldi pl, lo(int_ret)
-    ldi ph, hi(int_ret)
-    st b
-    inc pl
-    st a
-
-    ; actually divide
-    ldi pl, lo(divide_word)
-    ldi ph, hi(divide_word)
-    jmp
-
-    ldi pl, lo(exit)
-    ldi ph, hi(exit)
-    jmp
-
     ; A (=N) / B (=D)
     ; preserve B
+__cc_udiv_word:
 divide_word:
     mov a, pl
     mov b, a
@@ -1080,6 +1064,252 @@ divide_word_loop_2_r_lt_d:
     mov pl, a
     jmp
 
+
+    ; A / B
+    ; __cc_r_a / __cc_r_b -> __cc_r_quotient, __cc_r_remainder
+__cc_div_byte:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ; tmp & 1 = numerator was negative
+    ; tmp & 2 = denominator was negative
+    ; tmp := 0
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    mov a, 0
+    st a
+
+    ; test D
+    ldi pl, lo(denominator)
+    ld a
+    add a, 0
+    ldi pl, lo(__cc_div_byte_neg_denom)
+    ldi ph, hi(__cc_div_byte_neg_denom)
+    js ; D < 0
+
+__cc_div_byte_test_sec:
+    ; D >= 0
+    ; test N
+    ldi pl, lo(numerator)
+    ldi ph, hi(numerator)
+    ld a
+    add a, 0
+    ldi pl, lo(__cc_div_byte_neg_nom)
+    ldi ph, hi(__cc_div_byte_neg_nom)
+    js ; N < 0
+
+__cc_div_byte_positive:
+    ; D >= 0
+    ; N >= 0
+    ; actually divide
+    ldi pl, lo(divide_byte)
+    ldi ph, hi(divide_byte)
+    jmp
+
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    ld a
+    shr a
+    st a
+    ldi pl, lo(__cc_div_byte_result_nom_positive)
+    ldi ph, hi(__cc_div_byte_result_nom_positive)
+    jnc
+
+    ; numerator was negative
+
+    ; Q = ~Q
+    ldi pl, lo(quotient)
+    ldi ph, hi(quotient)
+    ld a
+    not a
+    st a
+
+    ; R == 0?
+    ldi pl, lo(remainder)
+    ld a
+    add a, 0
+    ldi pl, lo(__cc_div_byte_d_minus_r)
+    ldi ph, hi(__cc_div_byte_d_minus_r)
+    jnz
+
+    ; "return -Q, 0"
+    ; R == 0
+    ; Q += 1 - finish the negation
+    ldi pl, lo(quotient)
+    ldi ph, hi(quotient)
+    ld b
+    inc b
+    st b
+
+    ldi pl, lo(__cc_div_byte_result_nom_positive)
+    ldi ph, hi(__cc_div_byte_result_nom_positive)
+    jmp
+
+__cc_div_byte_d_minus_r:
+    ; "return -Q - 1, D - R"
+    ; Q is already that
+    ; R := D - R
+    ldi ph, hi(denominator)
+    ldi pl, lo(denominator)
+    ld b
+    ldi pl, lo(remainder)
+    ld a
+    sub b, a
+    st b
+
+__cc_div_byte_result_nom_positive:
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    ld a
+    shr a
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jnc
+    ; denominator was negative
+    ; "return -Q, R"
+    ; Q := -Q
+    ldi pl, lo(quotient)
+    ldi ph, hi(quotient)
+    ld b
+    neg b
+    st b
+
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jmp
+
+__cc_div_byte_neg_denom:
+    ; D = -D
+    ldi ph, hi(denominator)
+    ldi pl, lo(denominator)
+    ld b
+    neg b
+    st b
+
+    ldi pl, lo(tmp)
+    ldi a, 0x02 ; negative denominator
+    st a
+
+    ldi pl, lo(__cc_div_byte_test_sec)
+    ldi ph, hi(__cc_div_byte_test_sec)
+    jmp
+
+__cc_div_byte_neg_nom:
+    ; N = -N
+    ldi ph, hi(numerator)
+    ldi pl, lo(numerator)
+    ld b
+    neg b
+    st b
+
+    ldi pl, lo(tmp)
+    ld a
+    ldi b, 0x01 ; negative numerator
+    or a, b
+    st a
+
+    ldi pl, lo(__cc_div_byte_positive)
+    ldi ph, hi(__cc_div_byte_positive)
+    jmp
+
+
+    ; A (=N) / B (=D)
+    ; preserve B
+__cc_udiv_byte:
+divide_byte:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(div_ret)
+    ldi ph, hi(div_ret)
+    st b
+    inc pl
+    st a
+
+    ; D == 0?
+    ldi ph, hi(denominator)
+    ldi pl, lo(denominator)
+    ld a
+    add a, 0
+    ldi pl, lo(__cc_div_zero_trap)
+    ldi ph, hi(__cc_div_zero_trap)
+    jz ; D == 0
+
+    ; Q := 0
+    ldi ph, hi(quotient)
+    ldi pl, lo(quotient)
+    mov a, 0
+    st a
+    ; R := 0
+    ldi pl, lo(remainder)
+    st a
+
+    ; qbit := 0x80
+    ldi pl, lo(qbit)
+    ldi a, 0x80
+    st a
+
+divide_byte_loop:
+    ; R := (R << 1) | msb(N)
+    ; N <<= 1
+    ldi ph, hi(remainder)
+    ldi pl, lo(remainder)
+    ld a
+    shl a
+    ldi pl, lo(numerator)
+    ld b
+    shl b
+    st b
+    adc a, 0
+    ldi pl, lo(remainder)
+    st a
+
+    ; R >= D?
+    ldi pl, lo(denominator)
+    ld b
+    sub a, b
+    ldi pl, lo(divide_byte_loop_r_lt_d)
+    ldi ph, hi(divide_byte_loop_r_lt_d)
+    jc ; R < D
+
+    ; R >= D
+    ; R -= D
+    ldi ph, hi(remainder)
+    ldi pl, lo(remainder)
+    st a ; a is already R - D after comparison
+
+    ; Q |= qbit
+    ldi pl, lo(qbit)
+    ld a
+    ldi pl, lo(quotient)
+    ld b
+    or b, a
+    st b
+
+divide_byte_loop_r_lt_d:
+    ; qbit >>= 1
+    ldi ph, hi(qbit)
+    ldi pl, lo(qbit)
+    ld a
+    shr a
+    st a
+    ldi ph, hi(divide_byte_loop)
+    ldi pl, lo(divide_byte_loop)
+    jnc
+
+    ldi pl, lo(div_ret)
+    ldi ph, hi(div_ret)
+    ld a
+    inc pl
+    ld ph
+    mov pl, a
+    jmp
 
 __cc_div_zero_trap:
     ldi pl, lo(__cc_div_zero_trap)

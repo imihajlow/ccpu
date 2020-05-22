@@ -61,6 +61,14 @@ def storeConstW(c, dst):
         st a
     '''.format(dst, c)
 
+def storeConstB(c, dst):
+    return '''
+        ldi pl, lo({0})
+        ldi ph, hi({0})
+        ldi a, lo({1})
+        st a
+    '''.format(dst, c)
+
 def call(f):
     return '''
         ldi pl, lo({0})

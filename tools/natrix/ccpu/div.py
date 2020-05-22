@@ -19,32 +19,47 @@ def _genDMCommon(resultLoc, src1Loc, src2Loc):
             result += storeConstW(src1Loc.getSource(), "__cc_r_a")
             result += copyW(src2Loc.getSource(), "__cc_r_b")
         else:
-            raise NotImplementedError()
+            result += storeConstB(src1Loc.getSource(), "__cc_r_a")
+            result += copyB(src2Loc.getSource(), "__cc_r_b")
     elif l2 == 0:
         s = src2Loc.getSource()
         if isWord:
             result += copyW(src1Loc.getSource(), "__cc_r_a")
             result += storeConstW(src2Loc.getSource(), "__cc_r_b")
         else:
-            raise NotImplementedError()
+            result += copyB(src1Loc.getSource(), "__cc_r_a")
+            result += storeConstB(src2Loc.getSource(), "__cc_r_b")
     else:
         if isWord:
             result += copyW(src1Loc.getSource(), "__cc_r_a")
             result += copyW(src2Loc.getSource(), "__cc_r_b")
         else:
-            raise NotImplementedError()
-    if t.getSign():
-        result += call("__cc_div_word")
+            result += copyB(src1Loc.getSource(), "__cc_r_a")
+            result += copyB(src2Loc.getSource(), "__cc_r_b")
+    if isWord:
+        if t.getSign():
+            result += call("__cc_div_word")
+        else:
+            result += call("__cc_udiv_word")
     else:
-        result += call("__cc_udiv_word")
-    return result
+        if t.getSign():
+            result += call("__cc_div_byte")
+        else:
+            result += call("__cc_udiv_byte")
+    return resultLoc, result
 
 def genDiv(resultLoc, src1Loc, src2Loc):
-    result = _genDMCommon(resultLoc, src1Loc, src2Loc)
-    result += copyW("__cc_r_quotient", resultLoc.getSource())
+    resultLoc, result = _genDMCommon(resultLoc, src1Loc, src2Loc)
+    if resultLoc.getType().getSize() == 2:
+        result += copyW("__cc_r_quotient", resultLoc.getSource())
+    else:
+        result += copyB("__cc_r_quotient", resultLoc.getSource())
     return resultLoc, result
 
 def genMod(resultLoc, src1Loc, src2Loc):
-    result = _genDMCommon(resultLoc, src1Loc, src2Loc)
-    result += copyW("__cc_r_remainder", resultLoc.getSource())
+    resultLoc, result = _genDMCommon(resultLoc, src1Loc, src2Loc)
+    if resultLoc.getType().getSize() == 2:
+        result += copyW("__cc_r_remainder", resultLoc.getSource())
+    else:
+        result += copyB("__cc_r_remainder", resultLoc.getSource())
     return resultLoc, result
