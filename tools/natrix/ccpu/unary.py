@@ -15,18 +15,19 @@ def genDeref(resultLoc, srcLoc):
     t = resultLoc.getType()
     assert(0 < t.getSize() <= 2)
 
+    if srcLoc.getIndirLevel() == 0:
+        return Value(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource()), ""
+
     result = '; {} = deref {}\n'.format(resultLoc, srcLoc)
     result += '''
         ldi pl, lo({0})
         ldi ph, hi({0})
-    '''.format(srcLoc.getSource())
-    if srcLoc.getIndirLevel() == 1:
-        result += '''
-            ld a
-            inc pl
-            ld ph
-            mov pl, a
-        '''
+        ld a
+        ldi pl, lo({0} + 1)
+        ldi ph, hi({0} + 1)
+        ld ph
+        mov pl, a
+    '''.format(srcLoc.getSource()) # TODO optimize aligned
     # TODO: s8 x; s8 a[10]; x = *a;
     result += '''
         ld b
@@ -92,10 +93,11 @@ def genBNot(resultLoc, srcLoc):
         '''.format(srcLoc.getSource())
         if t.getSize() > 1:
             result += '''
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
                 not a
-            '''
+            '''.format(srcLoc.getSource()) # TODO optimize aligned
     result += '''
         ldi pl, lo({0})
         ldi ph, hi({0})
@@ -174,13 +176,14 @@ def genNeg(resultLoc, srcLoc):
 
         if t.getSize() > 1:
             result += '''
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
                 not a
                 not b
                 inc b
                 adc a, 0
-            '''
+            '''.format(srcLoc.getSource())
         else:
             result += 'neg b\n'
     result += '''

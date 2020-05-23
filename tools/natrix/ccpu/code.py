@@ -148,9 +148,8 @@ def genMove(resultLoc, srcLoc, avoidCopy):
             if resultLoc.getIndirLevel() != 1:
                 raise RuntimeError("Compiler error: move destination level of indirection is not 1")
             size = srcLoc.getType().getSize()
-            if size != 1 and size != 2:
-                raise RuntimeError("Compiler error: move size is {}".format(size))
-            loadCode = ""
+            assert(size == 1 or size == 2)
+            loadCode = "; {} := {}\n".format(resultLoc, srcLoc)
             if srcLoc.getIndirLevel() == 0:
                 # var := const
                 c = srcLoc.getSource()
@@ -164,9 +163,10 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                     '''.format(srcLoc.getSource())
                 if size > 1:
                     loadCode += '''
-                    inc pl
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
                     ld a
-                    '''
+                    '''.format(srcLoc.getSource()) # TODO optimize aligned
             storeCode = '''
                 ldi pl, lo({0})
                 ldi ph, hi({0})
@@ -174,9 +174,10 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                 '''.format(resultLoc.getSource())
             if size > 1:
                 storeCode += '''
-                    inc pl
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
                     st a
-                    '''
+                    '''.format(resultLoc.getSource()) # TODO optimize aligned
             return resultLoc, loadCode + storeCode
 
 def genCast(resultLoc, t, srcLoc):
@@ -264,30 +265,31 @@ def _loadP(loc, offset=0):
     result = ''
     if loc.getIndirLevel() == 0:
         result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-        '''.format(loc.getSource())
+            ldi pl, lo({0} + {1})
+            ldi ph, hi({0} + {1})
+        '''.format(loc.getSource(), offset)
     else:
         result += '''
             ldi pl, lo({0})
             ldi ph, hi({0})
             ld a
-            inc pl
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
             ld ph
             mov pl, a
-        '''.format(loc.getSource())
-    if offset != 0:
-        l = lo(offset)
-        h = hi(offset)
-        result += '''
-            ldi a, {}
-            add pl, a
-        '''.format(l)
-        if h == 0:
-            result += 'mov a, 0\n'
-        else:
-            result += 'ldi a, {}\n'.format(h)
-        result += 'adc ph, a\n'
+        '''.format(loc.getSource()) # TODO optimize aligned
+        if offset != 0:
+            l = lo(offset)
+            h = hi(offset)
+            result += '''
+                ldi a, {}
+                add pl, a
+            '''.format(l)
+            if h == 0:
+                result += 'mov a, 0\n'
+            else:
+                result += 'ldi a, {}\n'.format(h)
+            result += 'adc ph, a\n'
     return result
 
 def _loadAB(loc):
@@ -305,9 +307,10 @@ def _loadAB(loc):
         '''.format(loc.getSource())
         if isWord:
             result += '''
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
-            '''
+            '''.format(loc.getSource())
     return result
 
 def _loadBLow(loc):

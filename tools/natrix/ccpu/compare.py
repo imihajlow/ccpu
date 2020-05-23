@@ -37,9 +37,10 @@ def _genEqNeCmp(src1Loc, src2Loc):
         result += 'sub b, a\n'
         if isWord:
             result += '''
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld pl
-            '''
+            '''.format(s1) # TODO optimize aligned
             if isinstance(s2, int):
                 h = hi(s2)
                 if h == 0:
@@ -72,14 +73,15 @@ def _genEqNeCmp(src1Loc, src2Loc):
                 ldi ph, hi({1})
                 ld b
                 sub b, a
-                inc pl
+                ldi pl, lo({1} + 1)
+                ldi ph, hi({1} + 1)
                 ld a
                 ldi pl, lo({0})
                 ldi ph, hi({0})
                 ld pl
                 sub a, pl
                 or b, a
-            '''.format(s1, s2)
+            '''.format(s1, s2) # TODO optimize aligned
     return result
 
 def genEq(resultLoc, src1Loc, src2Loc):
@@ -173,12 +175,13 @@ def _genCmpSub(src1Loc, src2Loc, op):
         '''.format(s2, l)
         if isWord:
             result += '''
-                inc pl
                 sub b, a
+                ldi pl, lo({1} + 1)
+                ldi ph, hi({1} + 1)
                 ld a
-                ldi pl, {1}
+                ldi pl, {0}
                 sbb pl, a
-            '''.format(h)
+            '''.format(h, s2) # TODO optimize aligned
         else:
             result += 'sub b, a\n'
             if op == 'le' or op == 'gt':
@@ -199,12 +202,13 @@ def _genCmpSub(src1Loc, src2Loc, op):
         '''.format(s1, l)
         if isWord:
             result += '''
-                inc pl
                 sub b, a
+                ldi pl, lo({1} + 1)
+                ldi ph, hi({1} + 1)
                 ld pl
                 ldi a, {0}
                 sbb pl, a
-            '''.format(h)
+            '''.format(h, s1) # TODO optimize aligned
         else:
             result += 'sub b, a\n'
             if op == 'le' or op == 'gt':
@@ -219,14 +223,15 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 ldi pl, lo({1})
                 ldi ph, hi({1})
                 ld a
-                inc pl
+                ldi pl, lo({1} + 1)
+                ldi ph, hi({1} + 1)
                 sub b, a
                 ld a
                 ldi pl, lo({0} + 1)
                 ldi ph, hi({0} + 1)
                 ld pl
                 sbb pl, a
-            '''.format(s1, s2)
+            '''.format(s1, s2) # TODO optimize aligned
         else:
             result += '''
                 ldi pl, lo({0})

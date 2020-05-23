@@ -16,23 +16,23 @@ def _genDMCommon(resultLoc, src1Loc, src2Loc):
         raise NotImplementedError("doing shit with pointers?")
     elif l1 == 0:
         if isWord:
-            result += storeConstW(src1Loc.getSource(), "__cc_r_a")
-            result += copyW(src2Loc.getSource(), "__cc_r_b")
+            result += storeConstW(src1Loc.getSource(), "__cc_r_a", False)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", False, True)
         else:
             result += storeConstB(src1Loc.getSource(), "__cc_r_a")
             result += copyB(src2Loc.getSource(), "__cc_r_b")
     elif l2 == 0:
         s = src2Loc.getSource()
         if isWord:
-            result += copyW(src1Loc.getSource(), "__cc_r_a")
-            result += storeConstW(src2Loc.getSource(), "__cc_r_b")
+            result += copyW(src1Loc.getSource(), "__cc_r_a", False, True)
+            result += storeConstW(src2Loc.getSource(), "__cc_r_b", False)
         else:
             result += copyB(src1Loc.getSource(), "__cc_r_a")
             result += storeConstB(src2Loc.getSource(), "__cc_r_b")
     else:
         if isWord:
-            result += copyW(src1Loc.getSource(), "__cc_r_a")
-            result += copyW(src2Loc.getSource(), "__cc_r_b")
+            result += copyW(src1Loc.getSource(), "__cc_r_a", False, True)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", False, True)
         else:
             result += copyB(src1Loc.getSource(), "__cc_r_a")
             result += copyB(src2Loc.getSource(), "__cc_r_b")
@@ -51,7 +51,7 @@ def _genDMCommon(resultLoc, src1Loc, src2Loc):
 def genDiv(resultLoc, src1Loc, src2Loc):
     resultLoc, result = _genDMCommon(resultLoc, src1Loc, src2Loc)
     if resultLoc.getType().getSize() == 2:
-        result += copyW("__cc_r_quotient", resultLoc.getSource())
+        result += copyW("__cc_r_quotient", resultLoc.getSource(), True, False)
     else:
         result += copyB("__cc_r_quotient", resultLoc.getSource())
     return resultLoc, result
@@ -59,7 +59,7 @@ def genDiv(resultLoc, src1Loc, src2Loc):
 def genMod(resultLoc, src1Loc, src2Loc):
     resultLoc, result = _genDMCommon(resultLoc, src1Loc, src2Loc)
     if resultLoc.getType().getSize() == 2:
-        result += copyW("__cc_r_remainder", resultLoc.getSource())
+        result += copyW("__cc_r_remainder", resultLoc.getSource(), True, False)
     else:
         result += copyB("__cc_r_remainder", resultLoc.getSource())
     return resultLoc, result

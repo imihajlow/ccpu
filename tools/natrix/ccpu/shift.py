@@ -99,9 +99,10 @@ def _genSHLVarByConst(resultLoc, srcLoc, n):
                 ldi pl, lo({0})
                 ldi ph, hi({0})
                 ld b
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
-            '''.format(s)
+            '''.format(s) # TODO optimize aligned
             for i in range(n):
                 result += '''
                     shl a
@@ -177,10 +178,11 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
                 ldi pl, lo({0})
                 ldi ph, hi({0})
                 ld b
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
                 mov pl, a
-            '''.format(s)
+            '''.format(s) # TODO optimize aligned
             for i in range(n):
                 result += '''
                     shr a
@@ -274,10 +276,11 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 ldi pl, lo({0})
                 ldi ph, hi({0})
                 ld b
-                inc pl
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld a
                 mov pl, a
-            '''.format(s)
+            '''.format(s) # TODO optimize aligned
             for i in range(n):
                 result += '''
                     sar a
@@ -369,9 +372,10 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
             ldi pl, lo({0})
             ldi ph, hi({0})
             ld b
-            inc pl
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
             ld a
-        '''.format(src1Loc.getSource())
+        '''.format(src1Loc.getSource()) # TODO optimize aligned
     result += '''
         ldi pl, lo(__cc_sh_var)
         ldi ph, hi(__cc_sh_var)
@@ -384,9 +388,10 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
     '''.format(src2Loc.getSource())
     if src2Loc.getType().getSize() == 2:
         result += '''
-            inc pl
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
             ld a
-        '''
+        '''.format(src2Loc.getSource()) # TODO optimize aligned
     else:
         result += 'mov a, 0\n'
     result += '''

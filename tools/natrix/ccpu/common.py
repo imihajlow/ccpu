@@ -5,10 +5,13 @@ def align(x, a):
         return (x // a)  * a + a
 
 def signExpandByte(x):
-    if x & 0x80:
-        return x | 0xff00
+    if isinstance(x, int):
+        if bool(x & 0x80):
+            return x | 0xff00
+        else:
+            return x
     else:
-        return x
+        return "(({0}) | 0xff00 if bool({0} & 0x80) else ({0}))"
 
 def hi(x):
     return (x >> 8) & 0xff
@@ -26,19 +29,36 @@ def isPowerOfTwo(x):
         x >>= 1
     return True
 
-def copyW(f, t):
-    return '''
+def copyW(f, t, fAligned, tAligned):
+    result = '''
         ldi pl, lo({0})
         ldi ph, hi({0})
         ld b
         inc pl
+    '''.format(f)
+    if not fAligned:
+        result += '''
+            mov a, 0
+            adc ph, a
+        '''
+    result += '''
         ld a
-        ldi pl, lo({1})
-        ldi ph, hi({1})
+        ldi pl, lo({0})
+        ldi ph, hi({0})
         st b
-        inc pl
-        st a
-    '''.format(f, t)
+    '''.format(t)
+    if tAligned:
+        result += '''
+            inc pl
+            st a
+        '''
+    else:
+        result += '''
+            ldi pl, lo(({0}) + 1)
+            ldi ph, hi(({0}) + 1)
+            st a
+        '''.format(t)
+    return result
 
 def copyB(f, t):
     return '''
@@ -50,16 +70,24 @@ def copyB(f, t):
         st b
     '''.format(f, t)
 
-def storeConstW(c, dst):
-    return '''
+def storeConstW(c, dst, aligned):
+    result = '''
         ldi pl, lo({0})
         ldi ph, hi({0})
-        ldi a, lo({1})
-        st a
+        ldi b, lo({1})
+        st b
         inc pl
-        ldi a, hi({1})
-        st a
     '''.format(dst, c)
+    if not aligned:
+        result += '''
+            mov a, 0
+            adc ph, a
+        '''
+    result += '''
+        ldi b, hi({})
+        st b
+    '''.format(c)
+    return result
 
 def storeConstB(c, dst):
     return '''

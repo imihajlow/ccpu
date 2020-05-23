@@ -67,7 +67,7 @@ class Value:
         return Value(self._location, self._type.removeUnknown(newType), self._level, self._src)
 
     def __str__(self):
-        return "({}, {}, {})@{}".format(self._type, self._level, self._src, str(self._location))
+        return "({}, {}, {})".format(self._type, self._level, self._src)
 
     def __eq__(self, other):
         return isinstance(other, Value) and self._type == other._type and self._level == other._level and self._src == other._src

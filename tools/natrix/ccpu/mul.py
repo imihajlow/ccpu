@@ -33,18 +33,10 @@ def _genMulVCByte(rs, v, c):
 def _genMulVCWord(rs, v, c):
     result = '; {} = {} * {} (word)\n'.format(rs, v, c)
     # TODO optimize
-    result += copyW(v, "__cc_r_a")
-    result += '''
-        ldi b, lo({0})
-        ldi a, hi({0})
-        ldi pl, lo(__cc_r_b)
-        ldi ph, hi(__cc_r_b)
-        st b
-        inc pl
-        st a
-    '''.format(c)
+    result += copyW(v, "__cc_r_a", False, True)
+    result += storeConstW("__cc_r_b", c, True)
     result += call("__cc_mul_word")
-    result += copyW("__cc_r_r", rs)
+    result += copyW("__cc_r_r", rs, True, False)
     return result
 
 def _genMulVC(resultLoc, v, c):
@@ -84,10 +76,10 @@ def genMul(resultLoc, src1Loc, src2Loc):
         result = '; {} = {} * {}\n'.format(resultLoc, src1Loc, src2Loc)
         isWord = t.getSize() == 2
         if isWord:
-            result += copyW(src1Loc.getSource(), "__cc_r_a")
-            result += copyW(src2Loc.getSource(), "__cc_r_b")
+            result += copyW(src1Loc.getSource(), "__cc_r_a", False, True)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", False, True)
             result += call("__cc_mul_word")
-            result += copyW("__cc_r_r", resultLoc.getSource())
+            result += copyW("__cc_r_r", resultLoc.getSource(), True, False)
         else:
             result += copyB(src1Loc.getSource(), "__cc_r_a")
             result += copyB(src2Loc.getSource(), "__cc_r_b")
