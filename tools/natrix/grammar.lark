@@ -20,7 +20,7 @@ arg_declarations: (arg_declaration ("," arg_declaration)*)?
 
 arg_declaration: type IDENTIFIER
 
-function_body: statement*
+function_body: "{" statement* "}"
 
 ?statement: assignment ";"
     | declaration ";"
@@ -122,7 +122,7 @@ number: DEC_NUMBER -> n10
 ?literal: ESCAPED_STRING -> string_literal
     | "{" expression ("," expression)* "}" -> array_literal
 
-cpp_line_info: "#" DEC_NUMBER ESCAPED_STRING (DEC_NUMBER)* NEWLINE
+cpp_line_info: "#" DEC_NUMBER ESCAPED_STRING (DEC_NUMBER)*
 
 IDENTIFIER: /[a-z_]\w*/i
 
@@ -131,7 +131,7 @@ HEX_NUMBER: /0x[0-9a-f]+/i
 OCT_NUMBER: /0[0-7]*/
 BIN_NUMBER: /0b[01]+/
 
-INT_TYPE: /[us](8|16)/
+INT_TYPE.2: /[us](8|16)/
 
 COMPOUND_OPERATOR: "+=" | "-=" | "*=" | "/=" | "%=" | ">>=" | "<<=" | "&=" | "|=" | "^=" | "&&=" | "||="
 
@@ -143,3 +143,4 @@ COMMENT: "/*" /(.|\n|\r)*/"*/"
 %import common.NEWLINE
 %ignore WS
 %ignore COMMENT
+%ignore NEWLINE

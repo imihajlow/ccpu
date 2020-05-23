@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     parser = None
     with open(os.path.join(sys.path[0], "grammar.lark"), "r") as gf:
-        parser = Lark(gf, propagate_positions=True)
+        parser = Lark(gf, propagate_positions=True, parser="lalr", lexer="standard")
 
     if args.do_not_preprocess:
         with open(args.file, "r") as f:
