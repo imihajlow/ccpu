@@ -871,6 +871,28 @@ u8 test_shl() {
     ASSERT_TRUE(a16 << au16 == 0);
 }
 
+s16 f(s16 level) {
+    s16 a;
+    s16 b;
+    s16 r;
+    if (level != 0) {
+        a = 0xa55a + level;
+        b = 0x7531 + level;
+        r = f(level - 1);
+        ASSERT_TRUE(a == 0xa55a + level);
+        ASSERT_TRUE(b == 0x7531 + level);
+        ASSERT_TRUE(r == level + 6);
+    } else {
+        a = 1000;
+        b = 1000;
+    }
+    return level + 7;
+}
+
+u8 test_stack() {
+    f(20);
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
