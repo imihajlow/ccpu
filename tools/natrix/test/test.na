@@ -1,0 +1,882 @@
+
+export u8 fail(s16 line) {
+}
+
+export u8 success() {
+}
+
+u8 _assert_true(u8 v, s16 line) {
+    if (!v) {
+        fail(line);
+    }
+}
+
+u8 _assert_false(u8 v, s16 line) {
+    if (v) {
+        fail(line);
+    }
+}
+
+import s16 __seg_init_begin[1]; // external symbol guaranteed to be 0
+
+#define ASSERT_TRUE(v) _assert_true(v, __LINE__)
+#define ASSERT_FALSE(v) _assert_false(v, __LINE__)
+#define TRUE (u8)1
+#define FALSE (u8)0
+
+u8 test_type_cast() {
+    // const
+    ASSERT_TRUE((u16)(s8)(-1) == (u16)0xffff);
+    ASSERT_TRUE((u16)(u8)(-1) == (u16)0x00ff);
+
+    u8 _u8 = (u8)0xff;
+    u16 _u16 = (u16)0xffff;
+    s8 _s8 = (s8)0xff;
+    s16 _s16;
+    _s16 = 0xf0ff;
+    _s16 = (s16)(s8)_s16;
+    ASSERT_TRUE(_s16 == -1);
+    ASSERT_TRUE((u16)_s16 == _u16);
+    ASSERT_TRUE((s8)_s16 == _s8);
+    ASSERT_TRUE((u8)_s16 == _u8);
+
+    _u16 = (u16)0xf0ff;
+    _u16 = (u16)(u8)_u16;
+    ASSERT_TRUE(_u16 == (u16)0x00ff);
+
+    _u8 = (u8)0xaa;
+    _s16 = (s16)_u8;
+    ASSERT_TRUE(_s16 == 0x00aa);
+
+    _s8 = (s8)0x55;
+    _u16 = (u16)_s8;
+    ASSERT_TRUE(_u16 == (u16)0x0055);
+
+    _s8 = (s8)0xaa;
+    _u16 = (u16)_s8;
+    ASSERT_TRUE(_u16 == (u16)0xffaa);
+}
+
+u8 test_indirect() {
+    s16 x16;
+    s8 x8;
+    s16 *p16;
+    s8 *p8;
+    s8 a8[10];
+    s16 a16[10];
+    s16 st16;
+    s8 st8;
+
+    x16 = 0x55aa;
+    x8 = (s8)0x74;
+
+    p16 = &st16;
+    *p16 = x16;
+    ASSERT_TRUE(x16 == *p16);
+    ASSERT_TRUE(*p16 == x16);
+
+    p8 = &st8;
+    *p8 = x8;
+    ASSERT_TRUE(x8 == *p8);
+    ASSERT_TRUE(*p8 == x8);
+
+    p16 = (s16*)a16;
+    p16 += 2;
+    x16 = 0x726b;
+    *p16 = x16;
+    a16[0] = 0;
+    ASSERT_TRUE(*p16 == x16);
+    ASSERT_TRUE(a16[2] == x16);
+    ASSERT_TRUE(a16[0] != x16);
+    ASSERT_TRUE(*p16 == a16[2]);
+    u8 xu8;
+    xu8 = (u8)2;
+    ASSERT_TRUE(a16[xu8] == x16);
+    p16 += -2; // TODO p16 -= 2
+    ASSERT_TRUE(*(p16 + xu8) == x16);
+}
+
+u8 test_jump() {
+    if (FALSE) {
+        ASSERT_TRUE(FALSE);
+    } else {
+        ASSERT_TRUE(TRUE);
+    }
+    ASSERT_TRUE(TRUE);
+    if (TRUE) {
+        ASSERT_TRUE(TRUE);
+    } else {
+        ASSERT_TRUE(FALSE);
+    }
+    ASSERT_TRUE(TRUE);
+
+    s16 a[4];
+    if ((u8)a) {
+        ASSERT_TRUE(TRUE);
+    } else {
+        ASSERT_TRUE(FALSE);
+    }
+    ASSERT_TRUE(TRUE);
+}
+
+#define C1_16 0x1234
+#define C2_16 0xab91
+#define C3_16 0xab00
+#define C4_16 0x0015
+#define C1_8 (s8)0x53
+#define C2_8 (s8)0x9f
+
+u8 test_unary() {
+    s16 x16 = C1_16;
+    s8 x8 = C1_8;
+    ASSERT_TRUE(~x16 == ~C1_16);
+    ASSERT_TRUE(~x8 == ~C1_8);
+
+    ASSERT_TRUE(-x16 == -C1_16);
+    ASSERT_TRUE(-x8 == -C1_8);
+}
+
+u8 test_binary() {
+    s16 x16 = C1_16;
+    s8 x8 = C1_8;
+
+    s16 a[1];
+
+    // var + const
+    ASSERT_TRUE(x16 + C2_16 == C1_16 + C2_16);
+    ASSERT_TRUE(x16 + C3_16 == C1_16 + C3_16);
+    ASSERT_TRUE(x16 + C4_16 == C1_16 + C4_16);
+    ASSERT_TRUE(x8 + C2_8 == C1_8 + C2_8);
+
+    ASSERT_TRUE(x16 + (s16)a == C1_16 + (s16)a);
+    ASSERT_TRUE(x8 + (s8)a == C1_8 + (s8)a);
+
+    // const + var
+    ASSERT_TRUE(C2_16 + x16 == C1_16 + C2_16);
+    ASSERT_TRUE(C3_16 + x16 == C1_16 + C3_16);
+    ASSERT_TRUE(C4_16 + x16 == C1_16 + C4_16);
+    ASSERT_TRUE(C2_8 + x8 == C1_8 + C2_8);
+
+    ASSERT_TRUE((s16)a + x16 == C1_16 + (s16)a);
+    ASSERT_TRUE((s8)a + x8 == C1_8 + (s8)a);
+
+    // var + var
+    s16 y16 = C2_16;
+    s8 y8 = C2_8;
+    ASSERT_TRUE(x16 + y16 == C1_16 + C2_16);
+    ASSERT_TRUE(x8 + y8 == C1_8 + C2_8);
+}
+
+u8 test_bool_binary() {
+    u8 a;
+    u8 b;
+
+    // var and const
+    a = TRUE;
+    ASSERT_TRUE(a && TRUE);
+    ASSERT_FALSE(a && FALSE);
+    ASSERT_TRUE(a || TRUE);
+    ASSERT_TRUE(a || FALSE);
+    a = FALSE;
+    ASSERT_FALSE(a && TRUE);
+    ASSERT_FALSE(a && FALSE);
+    ASSERT_TRUE(a || TRUE);
+    ASSERT_FALSE(a || FALSE);
+
+    a = TRUE;
+    ASSERT_TRUE(TRUE && a);
+    ASSERT_FALSE(FALSE && a);
+    ASSERT_TRUE(TRUE || a);
+    ASSERT_TRUE(FALSE || a);
+    a = FALSE;
+    ASSERT_FALSE(TRUE && a);
+    ASSERT_FALSE(FALSE && a);
+    ASSERT_TRUE(TRUE || a);
+    ASSERT_FALSE(FALSE || a);
+
+    u8 s[1];
+    // var and const, const is a symbol
+    a = TRUE;
+    ASSERT_TRUE(a && (u8)s);
+    ASSERT_FALSE(a && (u8)__seg_init_begin);
+    ASSERT_TRUE(a || (u8)s);
+    ASSERT_TRUE(a || (u8)__seg_init_begin);
+    a = FALSE;
+    ASSERT_FALSE(a && (u8)s);
+    ASSERT_FALSE(a && (u8)__seg_init_begin);
+    ASSERT_TRUE(a || (u8)s);
+    ASSERT_FALSE(a || (u8)__seg_init_begin);
+
+    // var and var
+    a = TRUE;
+    b = TRUE;
+    ASSERT_TRUE(a || b);
+    ASSERT_TRUE(a && b);
+
+    a = TRUE;
+    b = FALSE;
+    ASSERT_TRUE(a || b);
+    ASSERT_FALSE(a && b);
+
+    a = FALSE;
+    b = TRUE;
+    ASSERT_TRUE(a || b);
+    ASSERT_FALSE(a && b);
+
+    a = FALSE;
+    b = FALSE;
+    ASSERT_FALSE(a || b);
+    ASSERT_FALSE(a && b);
+
+    // true is something but 1
+    a = (u8)2;
+    b = (u8)8;
+    ASSERT_TRUE(a || b);
+    ASSERT_TRUE(a && b);
+    a = (u8)0;
+    ASSERT_TRUE(a || b);
+    ASSERT_FALSE(a && b);
+    b = (u8)0;
+    a = (u8)4;
+    ASSERT_TRUE(a || b);
+    ASSERT_FALSE(a && b);
+}
+
+u8 test_pointer_add() {
+    s16 a16[260];
+    s8 a8[260];
+    a16[0] = 10;
+    a16[1] = 20;
+    a16[2] = 30;
+    a16[128] = 1280;
+    a16[256] = 2560;
+
+    a8[0] = (s8)10;
+    a8[1] = (s8)20;
+    a8[2] = (s8)30;
+    a8[128] = (s8)12;
+    a8[256] = (s8)25;
+
+    u8 x8;
+    s16 x16;
+
+    s8 *p8 = (s8*)a8;
+    s16 *p16 = (s16*)a16;
+
+    ASSERT_TRUE(*p8 == (s8)10);
+    ASSERT_TRUE(*p16 == 10);
+
+    // s8*
+    x16 = 2;
+    p8 += x16;
+    ASSERT_TRUE(*p8 == (s8)30);
+    x16 = -2;
+    p8 += x16;
+    ASSERT_TRUE(*p8 == (s8)10);
+    x16 = 128;
+    p8 += x16;
+    ASSERT_TRUE(*p8 == (s8)12);
+    x16 = -x16;
+    p8 += x16;
+    ASSERT_TRUE(*p8 == (s8)10);
+    x16 = 256;
+    p8 += x16;
+    ASSERT_TRUE(*p8 == (s8)25);
+
+    p8 = (s8*)a8;
+    x8 = (u8)2;
+    p8 += x8;
+    ASSERT_TRUE(*p8 == (s8)30);
+    p8 = (s8*)a8;
+    ASSERT_TRUE(*p8 == (s8)10);
+    x8 = (u8)128;
+    p8 += x8;
+    ASSERT_TRUE(*p8 == (s8)12);
+    p8 += x8;
+    ASSERT_TRUE(*p8 == (s8)25);
+
+    // s16*
+    x16 = 2;
+    p16 += x16;
+    ASSERT_TRUE(*p16 == 30);
+    x16 = -2;
+    p16 += x16;
+    ASSERT_TRUE(*p16 == 10);
+    x16 = 128;
+    p16 += x16;
+    ASSERT_TRUE(*p16 == 1280);
+    x16 = -x16;
+    p16 += x16;
+    ASSERT_TRUE(*p16 == 10);
+    x16 = 256;
+    p16 += x16;
+    ASSERT_TRUE(*p16 == 2560);
+
+    p16 = (s16*)a16;
+    x8 = (u8)2;
+    p16 += x8;
+    ASSERT_TRUE(*p16 == 30);
+    p16 = (s16*)a16;
+    ASSERT_TRUE(*p16 == 10);
+    x8 = (u8)128;
+    p16 += x8;
+    ASSERT_TRUE(*p16 == 1280);
+    p16 += x8;
+    ASSERT_TRUE(*p16 == 2560);
+
+    p16 = (s16*)a16;
+    ASSERT_TRUE(*(p16 + (u8)1) == 20);
+    ASSERT_TRUE(*(p16 + (s8)2) == 30);
+    x8 = (u8)128;
+    ASSERT_TRUE(a8[x8] == (s8)12);
+}
+
+u8 test_compare_unsigned() {
+    u8 a8; u8 b8;
+    u16 a16; u16 b16;
+
+    // 8 bit
+    // const and var
+    a8 = (u8)20;
+    ASSERT_TRUE(a8 > (u8)5);
+    ASSERT_TRUE(a8 >= (u8)5);
+    ASSERT_TRUE(a8 >= (u8)20);
+    ASSERT_TRUE(a8 < (u8)50);
+    ASSERT_TRUE(a8 <= (u8)50);
+    ASSERT_TRUE(a8 <= (u8)20);
+
+    ASSERT_FALSE(a8 < (u8)5);
+    ASSERT_FALSE(a8 <= (u8)5);
+    ASSERT_FALSE(a8 > (u8)50);
+    ASSERT_FALSE(a8 >= (u8)50);
+
+    ASSERT_TRUE((u8)5 < a8);
+    ASSERT_TRUE((u8)5 <= a8);
+    ASSERT_TRUE((u8)20 <= a8);
+    ASSERT_TRUE((u8)50 > a8);
+    ASSERT_TRUE((u8)50 >= a8);
+    ASSERT_TRUE((u8)20 >= a8);
+
+    ASSERT_FALSE((u8)5 > a8);
+    ASSERT_FALSE((u8)5 >= a8);
+    ASSERT_FALSE((u8)50 < a8);
+    ASSERT_FALSE((u8)50 <= a8);
+
+    // var and var
+    b8 = (u8)5;
+    ASSERT_TRUE(a8 > b8);
+    ASSERT_TRUE(a8 >= b8);
+    ASSERT_TRUE(b8 < a8);
+    ASSERT_TRUE(b8 <= a8);
+    ASSERT_FALSE(a8 < b8);
+    ASSERT_FALSE(a8 <= b8);
+    ASSERT_FALSE(b8 > a8);
+    ASSERT_FALSE(b8 >= a8);
+    b8 = a8;
+    ASSERT_TRUE(a8 >= b8);
+    ASSERT_TRUE(a8 <= b8);
+    ASSERT_FALSE(a8 < b8);
+    ASSERT_FALSE(a8 > b8);
+
+    // 16 bit
+    // const and var
+    a16 = (u16)0x1020;
+    ASSERT_TRUE(a16 > (u16)0x0030);
+    ASSERT_TRUE(a16 > (u16)0x1010);
+    ASSERT_TRUE(a16 >= (u16)0x0030);
+    ASSERT_TRUE(a16 >= (u16)0x1010);
+    ASSERT_TRUE(a16 >= (u16)0x1020);
+
+    ASSERT_TRUE(a16 < (u16)0x2010);
+    ASSERT_TRUE(a16 < (u16)0x1030);
+    ASSERT_TRUE(a16 <= (u16)0x2010);
+    ASSERT_TRUE(a16 <= (u16)0x1030);
+    ASSERT_TRUE(a16 <= (u16)0x1020);
+
+    ASSERT_FALSE(a16 < (u16)0x0030);
+    ASSERT_FALSE(a16 < (u16)0x1010);
+    ASSERT_FALSE(a16 <= (u16)0x0030);
+    ASSERT_FALSE(a16 <= (u16)0x1010);
+
+    ASSERT_FALSE(a16 > (u16)0x2010);
+    ASSERT_FALSE(a16 > (u16)0x1030);
+    ASSERT_FALSE(a16 >= (u16)0x2010);
+    ASSERT_FALSE(a16 >= (u16)0x1030);
+
+    // var and var
+    b16 = (u16)0x0030;
+    ASSERT_TRUE(a16 > b16);
+    ASSERT_TRUE(a16 >= b16);
+    ASSERT_FALSE(a16 < b16);
+    ASSERT_FALSE(a16 <= b16);
+
+    b16 = (u16)0x1010;
+    ASSERT_TRUE(a16 > b16);
+    ASSERT_TRUE(a16 >= b16);
+    ASSERT_FALSE(a16 < b16);
+    ASSERT_FALSE(a16 <= b16);
+
+    b16 = (u16)0x2010;
+    ASSERT_FALSE(a16 > b16);
+    ASSERT_FALSE(a16 >= b16);
+    ASSERT_TRUE(a16 < b16);
+    ASSERT_TRUE(a16 <= b16);
+
+    b16 = (u16)0x1030;
+    ASSERT_FALSE(a16 > b16);
+    ASSERT_FALSE(a16 >= b16);
+    ASSERT_TRUE(a16 < b16);
+    ASSERT_TRUE(a16 <= b16);
+
+    b16 = a16;
+    ASSERT_FALSE(a16 > b16);
+    ASSERT_TRUE(a16 >= b16);
+    ASSERT_FALSE(a16 < b16);
+    ASSERT_TRUE(a16 <= b16);
+}
+
+#define TEST_CMP(l, g) \
+    ASSERT_TRUE(l < g); \
+    ASSERT_FALSE(l > g); \
+    ASSERT_TRUE(l <= g); \
+    ASSERT_FALSE(l >= g)
+
+u8 test_compare_signed() {
+    s8 a8; s8 b8;
+    s16 a16; s16 b16;
+
+    // 8 bit
+    // var and const
+    // no overflow
+    a8 = (s8)10;
+    TEST_CMP(a8, (s8)20);
+    TEST_CMP((s8)5, a8);
+    ASSERT_TRUE(a8 <= (s8)10);
+    ASSERT_TRUE(a8 >= (s8)10);
+    ASSERT_FALSE(a8 < (s8)10);
+    ASSERT_FALSE(a8 > (s8)10);
+    a8 = -(s8)10;
+    TEST_CMP(a8, -(s8)5);
+    TEST_CMP(-(s8)20, a8);
+    // overflow
+    a8 = (s8)120;
+    TEST_CMP(-(s8)20, a8);
+    a8 = -(s8)120;
+    TEST_CMP(a8, (s8)20);
+
+    // var and var
+    // no overflow
+    a8 = (s8)10;
+    b8 = (s8)20;
+    TEST_CMP(a8, b8);
+    b8 = a8;
+    ASSERT_TRUE(a8 <= b8);
+    ASSERT_TRUE(a8 >= b8);
+    ASSERT_FALSE(a8 < b8);
+    ASSERT_FALSE(a8 > b8);
+    // overflow
+    a8 = (s8)120;
+    b8 = -(s8)20;
+    TEST_CMP(b8, a8);
+    a8 = -(s8)120;
+    b8 = (s8)20;
+    TEST_CMP(a8, b8);
+
+    // 16 bit
+    // TODO
+}
+
+u8 test_shr_byte() {
+    // 8 bit
+    u8 au8; u8 bu8;
+    s8 as8;
+    u16 a16;
+
+    // var by const
+    au8 = (u8)0b10100101;
+    ASSERT_TRUE(au8 >> (u8)0 == (u8)0b10100101);
+    ASSERT_TRUE(au8 >> (u8)1 == (u8)0b01010010);
+    ASSERT_TRUE(au8 >> (u8)2 == (u8)0b00101001);
+    ASSERT_TRUE(au8 >> (u8)8 == (u8)0);
+    ASSERT_TRUE(au8 >> (u16)0x101 == (u8)0);
+    as8 = (s8)0b10100101;
+    ASSERT_TRUE(au8 >> (u8)0 == (u8)0b10100101);
+    ASSERT_TRUE(as8 >> (u8)1 == (s8)0b11010010);
+    ASSERT_TRUE(as8 >> (u8)2 == (s8)0b11101001);
+    ASSERT_TRUE(as8 >> (u8)8 == (s8)0b11111111);
+    ASSERT_TRUE(as8 >> (u16)0x101 == (s8)0b11111111);
+    as8 = (s8)0b00100101;
+    ASSERT_TRUE(as8 >> (u8)1 == (s8)0b00010010);
+    ASSERT_TRUE(as8 >> (u8)2 == (s8)0b00001001);
+    ASSERT_TRUE(as8 >> (u8)8 == (s8)0);
+    ASSERT_TRUE(as8 >> (u16)0x101 == (s8)0);
+
+    // const by var
+    // byte
+    bu8 = (u8)0;
+    ASSERT_TRUE((u8)0b10100101 >> bu8 == (u8)0b10100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE((u8)0b10100101 >> bu8 == (u8)0b01010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE((u8)0b10100101 >> bu8 == (u8)0b00101001);
+    bu8 = (u8)9;
+    ASSERT_TRUE((u8)0b10100101 >> bu8 == (u8)0);
+
+    bu8 = (u8)0;
+    ASSERT_TRUE((s8)0b10100101 >> bu8 == (s8)0b10100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE((s8)0b10100101 >> bu8 == (s8)0b11010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE((s8)0b10100101 >> bu8 == (s8)0b11101001);
+    bu8 = (u8)9;
+    ASSERT_TRUE((s8)0b10100101 >> bu8 == (s8)0xff);
+
+    bu8 = (u8)0;
+    ASSERT_TRUE((s8)0b00100101 >> bu8 == (s8)0b00100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE((s8)0b00100101 >> bu8 == (s8)0b00010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE((s8)0b00100101 >> bu8 == (s8)0b00001001);
+    bu8 = (u8)9;
+    ASSERT_TRUE((s8)0b00100101 >> bu8 == (s8)0x00);
+
+    // word
+    a16 = (u16)0;
+    ASSERT_TRUE((u8)0b10100101 >> a16 == (u8)0b10100101);
+    a16 = (u16)1;
+    ASSERT_TRUE((u8)0b10100101 >> a16 == (u8)0b01010010);
+    a16 = (u16)2;
+    ASSERT_TRUE((u8)0b10100101 >> a16 == (u8)0b00101001);
+    a16 = (u16)9;
+    ASSERT_TRUE((u8)0b10100101 >> a16 == (u8)0);
+    a16 = (u16)0x100;
+    ASSERT_TRUE((u8)0b10100101 >> a16 == (u8)0);
+
+    a16 = (u16)0;
+    ASSERT_TRUE((s8)0b10100101 >> a16 == (s8)0b10100101);
+    a16 = (u16)1;
+    ASSERT_TRUE((s8)0b10100101 >> a16 == (s8)0b11010010);
+    a16 = (u16)2;
+    ASSERT_TRUE((s8)0b10100101 >> a16 == (s8)0b11101001);
+    a16 = (u16)9;
+    ASSERT_TRUE((s8)0b10100101 >> a16 == (s8)0xff);
+    a16 = (u16)0x100;
+    ASSERT_TRUE((s8)0b10100101 >> a16 == (s8)0xff);
+
+    a16 = (u16)0;
+    ASSERT_TRUE((s8)0b00100101 >> a16 == (s8)0b00100101);
+    a16 = (u16)1;
+    ASSERT_TRUE((s8)0b00100101 >> a16 == (s8)0b00010010);
+    a16 = (u16)2;
+    ASSERT_TRUE((s8)0b00100101 >> a16 == (s8)0b00001001);
+    a16 = (u16)9;
+    ASSERT_TRUE((s8)0b00100101 >> a16 == (s8)0x00);
+    a16 = (u16)0x100;
+    ASSERT_TRUE((s8)0b00100101 >> a16 == (s8)0x00);
+
+    // var and var
+    au8 = (u8)0b10100101;
+    // byte
+    bu8 = (u8)0;
+    ASSERT_TRUE(au8 >> bu8 == (u8)0b10100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE(au8 >> bu8 == (u8)0b01010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE(au8 >> bu8 == (u8)0b00101001);
+    bu8 = (u8)9;
+    ASSERT_TRUE(au8 >> bu8 == (u8)0);
+
+    as8 = (s8)0b10100101;
+    bu8 = (u8)0;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b10100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b11010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b11101001);
+    bu8 = (u8)9;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0xff);
+
+    as8 = (s8)0b00100101;
+    bu8 = (u8)0;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b00100101);
+    bu8 = (u8)1;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b00010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0b00001001);
+    bu8 = (u8)9;
+    ASSERT_TRUE(as8 >> bu8 == (s8)0x00);
+
+    // word
+    a16 = (u16)0;
+    ASSERT_TRUE(au8 >> a16 == (u8)0b10100101);
+    a16 = (u16)1;
+    ASSERT_TRUE(au8 >> a16 == (u8)0b01010010);
+    a16 = (u16)2;
+    ASSERT_TRUE(au8 >> a16 == (u8)0b00101001);
+    a16 = (u16)9;
+    ASSERT_TRUE(au8 >> a16 == (u8)0);
+    a16 = (u16)0x100;
+    ASSERT_TRUE(au8 >> a16 == (u8)0);
+
+    as8 = (s8)0b10100101;
+    a16 = (u16)0;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b10100101);
+    a16 = (u16)1;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b11010010);
+    a16 = (u16)2;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b11101001);
+    a16 = (u16)9;
+    ASSERT_TRUE(as8 >> a16 == (s8)0xff);
+    a16 = (u16)0x100;
+    ASSERT_TRUE(as8 >> a16 == (s8)0xff);
+
+    as8 = (s8)0b00100101;
+    a16 = (u16)0;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b00100101);
+    a16 = (u16)1;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b00010010);
+    a16 = (u16)2;
+    ASSERT_TRUE(as8 >> a16 == (s8)0b00001001);
+    a16 = (u16)9;
+    ASSERT_TRUE(as8 >> a16 == (s8)0x00);
+    a16 = (u16)0x100;
+    ASSERT_TRUE(as8 >> a16 == (s8)0x00);
+}
+
+u8 test_shr_word() {
+    u8 au8; u8 bu8;
+    u16 au16; u16 bu16;
+    s16 as16;
+
+    // var by const
+    au16 = (u16)0xa55a;
+    ASSERT_TRUE(au16 >> (u8)0 == (u16)0xa55a);
+    ASSERT_TRUE(au16 >> (u8)1 == (u16)0b0101001010101101);
+    ASSERT_TRUE(au16 >> (u8)2 == (u16)0b0010100101010110);
+    ASSERT_TRUE(au16 >> (u8)8 == (u16)0x00a5);
+    ASSERT_TRUE(au16 >> (u8)9 == (u16)0b0000000001010010);
+    ASSERT_TRUE(au16 >> (u8)16 == (u16)0);
+    ASSERT_TRUE(au16 >> (u16)0x101 == (u16)0);
+
+    as16 = 0xa55a;
+    ASSERT_TRUE(as16 >> (u8)0 == 0xa55a);
+    ASSERT_TRUE(as16 >> (u8)1 == 0b1101001010101101);
+    ASSERT_TRUE(as16 >> (u8)2 == 0b1110100101010110);
+    ASSERT_TRUE(as16 >> (u8)8 == 0xffa5);
+    ASSERT_TRUE(as16 >> (u8)9 == 0xffd2);
+    ASSERT_TRUE(as16 >> (u8)16 == 0xffff);
+    ASSERT_TRUE(as16 >> (u16)0x101 == 0xffff);
+
+    as16 = 0x5aa5;
+    ASSERT_TRUE(as16 >> (u8)0 == 0x5aa5);
+    ASSERT_TRUE(as16 >> (u8)1 == 0b0010110101010010);
+    ASSERT_TRUE(as16 >> (u8)2 == 0b0001011010101001);
+    ASSERT_TRUE(as16 >> (u8)8 == 0x005a);
+    ASSERT_TRUE(as16 >> (u8)9 == 0x002d);
+    ASSERT_TRUE(as16 >> (u8)16 == 0);
+    ASSERT_TRUE(as16 >> (u16)0x101 == 0);
+
+    // const by var
+    // byte
+    bu8 = (u8)0;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0xa55a);
+    bu8 = (u8)1;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0b0101001010101101);
+    bu8 = (u8)2;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0b0010100101010110);
+    bu8 = (u8)8;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0x00a5);
+    bu8 = (u8)9;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0b0000000001010010);
+    bu8 = (u8)16;
+    ASSERT_TRUE((u16)0xa55a >> bu8 == (u16)0);
+
+    bu8 = (u8)0;
+    ASSERT_TRUE(0xa55a >> bu8 == 0xa55a);
+    bu8 = (u8)1;
+    ASSERT_TRUE(0xa55a >> bu8 == 0b1101001010101101);
+    bu8 = (u8)2;
+    ASSERT_TRUE(0xa55a >> bu8 == 0b1110100101010110);
+    bu8 = (u8)8;
+    ASSERT_TRUE(0xa55a >> bu8 == 0xffa5);
+    bu8 = (u8)9;
+    ASSERT_TRUE(0xa55a >> bu8 == 0b1111111111010010);
+    bu8 = (u8)16;
+    ASSERT_TRUE(0xa55a >> bu8 == 0xffff);
+
+    bu8 = (u8)0;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0x5aa5);
+    bu8 = (u8)1;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0b0010110101010010);
+    bu8 = (u8)2;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0b0001011010101001);
+    bu8 = (u8)8;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0x005a);
+    bu8 = (u8)9;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0b0000000000101101);
+    bu8 = (u8)16;
+    ASSERT_TRUE(0x5aa5 >> bu8 == 0);
+
+    // word
+    bu16 = (u16)0;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0xa55a);
+    bu16 = (u16)1;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0b0101001010101101);
+    bu16 = (u16)2;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0b0010100101010110);
+    bu16 = (u16)8;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0x00a5);
+    bu16 = (u16)9;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0b0000000001010010);
+    bu16 = (u16)16;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE((u16)0xa55a >> bu16 == (u16)0);
+
+    bu16 = (u16)0;
+    ASSERT_TRUE(0xa55a >> bu16 == 0xa55a);
+    bu16 = (u16)1;
+    ASSERT_TRUE(0xa55a >> bu16 == 0b1101001010101101);
+    bu16 = (u16)2;
+    ASSERT_TRUE(0xa55a >> bu16 == 0b1110100101010110);
+    bu16 = (u16)8;
+    ASSERT_TRUE(0xa55a >> bu16 == 0xffa5);
+    bu16 = (u16)9;
+    ASSERT_TRUE(0xa55a >> bu16 == 0b1111111111010010);
+    bu16 = (u16)16;
+    ASSERT_TRUE(0xa55a >> bu16 == 0xffff);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE(0xa55a >> bu16 == 0xffff);
+
+    bu16 = (u16)0;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0x5aa5);
+    bu16 = (u16)1;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0b0010110101010010);
+    bu16 = (u16)2;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0b0001011010101001);
+    bu16 = (u16)8;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0x005a);
+    bu16 = (u16)9;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0b0000000000101101);
+    bu16 = (u16)16;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE(0x5aa5 >> bu16 == 0);
+
+    // var and var
+    // word
+    au16 = (u16)0xa55a;
+    bu16 = (u16)0;
+    ASSERT_TRUE(au16 >> bu16 == au16);
+    bu16 = (u16)1;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0b0101001010101101);
+    bu16 = (u16)2;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0b0010100101010110);
+    bu16 = (u16)8;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0x00a5);
+    bu16 = (u16)9;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0b0000000001010010);
+    bu16 = (u16)16;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE(au16 >> bu16 == (u16)0);
+
+    as16 = 0xa55a;
+    bu16 = (u16)0;
+    ASSERT_TRUE(as16 >> bu16 == as16);
+    bu16 = (u16)1;
+    ASSERT_TRUE(as16 >> bu16 == 0b1101001010101101);
+    bu16 = (u16)2;
+    ASSERT_TRUE(as16 >> bu16 == 0b1110100101010110);
+    bu16 = (u16)8;
+    ASSERT_TRUE(as16 >> bu16 == 0xffa5);
+    bu16 = (u16)9;
+    ASSERT_TRUE(as16 >> bu16 == 0b1111111111010010);
+    bu16 = (u16)16;
+    ASSERT_TRUE(as16 >> bu16 == 0xffff);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE(as16 >> bu16 == 0xffff);
+
+    as16 = 0x5aa5;
+    bu16 = (u16)0;
+    ASSERT_TRUE(as16 >> bu16 == as16);
+    bu16 = (u16)1;
+    ASSERT_TRUE(as16 >> bu16 == 0b0010110101010010);
+    bu16 = (u16)2;
+    ASSERT_TRUE(as16 >> bu16 == 0b0001011010101001);
+    bu16 = (u16)8;
+    ASSERT_TRUE(as16 >> bu16 == 0x005a);
+    bu16 = (u16)9;
+    ASSERT_TRUE(as16 >> bu16 == 0b0000000000101101);
+    bu16 = (u16)16;
+    ASSERT_TRUE(as16 >> bu16 == 0);
+    bu16 = (u16)0x101;
+    ASSERT_TRUE(as16 >> bu16 == 0);
+}
+
+u8 test_shl() {
+    u16 au16;
+    s16 a16;
+    s8 a8;
+
+    // var and const
+    a8 = (s8)0xa5;
+    ASSERT_TRUE(a8 << (u16)0 == a8);
+    ASSERT_TRUE(a8 << (u16)1 == (s8)0b01001010);
+    ASSERT_TRUE(a8 << (u16)2 == (s8)0b10010100);
+    ASSERT_TRUE(a8 << (u16)8 == (s8)0);
+    ASSERT_TRUE(a8 << (u16)0x101 == (s8)0);
+    a16 = 0xa55a;
+    ASSERT_TRUE(a16 << (u16)0 == a16);
+    ASSERT_TRUE(a16 << (u16)1 == 0b0100101010110100);
+    ASSERT_TRUE(a16 << (u16)2 == 0b1001010101101000);
+    ASSERT_TRUE(a16 << (u16)8 == 0x5a00);
+    ASSERT_TRUE(a16 << (u16)9 == 0b1011010000000000);
+    ASSERT_TRUE(a16 << (u16)16 == 0);
+    ASSERT_TRUE(a16 << (u16)0x101 == 0);
+
+    // var and var
+    a8 = (s8)0xa5;
+    au16 = (u16)0;
+    ASSERT_TRUE(a8 << au16 == a8);
+    au16 = (u16)1;
+    ASSERT_TRUE(a8 << au16 == (s8)0b01001010);
+    au16 = (u16)2;
+    ASSERT_TRUE(a8 << au16 == (s8)0b10010100);
+    au16 = (u16)8;
+    ASSERT_TRUE(a8 << au16 == (s8)0);
+    au16 = (u16)0x101;
+    ASSERT_TRUE(a8 << au16 == (s8)0);
+
+
+    au16 = (u16)0;
+    ASSERT_TRUE(a16 << au16 == a16);
+    au16 = (u16)1;
+    ASSERT_TRUE(a16 << au16 == 0b0100101010110100);
+    au16 = (u16)2;
+    ASSERT_TRUE(a16 << au16 == 0b1001010101101000);
+    au16 = (u16)8;
+    ASSERT_TRUE(a16 << au16 == 0x5a00);
+    au16 = (u16)9;
+    ASSERT_TRUE(a16 << au16 == 0b1011010000000000);
+    au16 = (u16)16;
+    ASSERT_TRUE(a16 << au16 == 0);
+    au16 = (u16)0x101;
+    ASSERT_TRUE(a16 << au16 == 0);
+}
+
+export u8 main() {
+    test_type_cast();
+    test_indirect();
+    test_jump();
+    test_unary();
+    test_binary();
+    test_bool_binary();
+    test_pointer_add();
+    test_compare_unsigned();
+    test_compare_signed();
+    test_shr_byte();
+    test_shr_word();
+    test_shl();
+    success();
+}

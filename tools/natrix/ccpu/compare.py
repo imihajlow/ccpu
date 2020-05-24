@@ -76,8 +76,8 @@ def _genEqNeCmp(src1Loc, src2Loc):
                 ldi pl, lo({1} + 1)
                 ldi ph, hi({1} + 1)
                 ld a
-                ldi pl, lo({0})
-                ldi ph, hi({0})
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
                 ld pl
                 sub a, pl
                 or b, a

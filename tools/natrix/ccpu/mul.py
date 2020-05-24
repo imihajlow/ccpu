@@ -34,7 +34,7 @@ def _genMulVCWord(rs, v, c):
     result = '; {} = {} * {} (word)\n'.format(rs, v, c)
     # TODO optimize
     result += copyW(v, "__cc_r_a", False, True)
-    result += storeConstW("__cc_r_b", c, True)
+    result += storeConstW(c, "__cc_r_b", True)
     result += call("__cc_mul_word")
     result += copyW("__cc_r_r", rs, True, False)
     return result

@@ -5,7 +5,7 @@ def __lo(x):
 def __hi(x):
     return (x >> 8) & 0xff
 
-__allowedBuiltins = {"abs": abs, "ord": ord, "len": len, "max": max, "min": min, "round": round, "lo": __lo, "hi": __hi}
+__allowedBuiltins = {"abs": abs, "ord": ord, "len": len, "max": max, "min": min, "round": round, "lo": __lo, "hi": __hi, "int": int, "bool": bool}
 
 def evaluate(e, gl=None, loc=None):
     gls = {"__builtins__": __allowedBuiltins}

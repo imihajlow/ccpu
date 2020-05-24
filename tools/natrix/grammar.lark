@@ -20,7 +20,7 @@ arg_declarations: (arg_declaration ("," arg_declaration)*)?
 
 arg_declaration: type IDENTIFIER
 
-function_body: "{" statement* "}"
+function_body: "{" (statement | cpp_line_info)* "}"
 
 ?statement: assignment ";"
     | declaration ";"
@@ -32,6 +32,7 @@ function_body: "{" statement* "}"
     | function_call ";"
     | "return" ";" -> empty_return_statement
     | "return" expression ";" -> return_statement
+    | "return" function_call ";" -> return_fc_statement
 
 conditional: "if" "(" expression ")" statement ("else" statement)?
 
@@ -118,6 +119,7 @@ number: DEC_NUMBER -> n10
     | HEX_NUMBER -> n16
     | OCT_NUMBER -> n8
     | BIN_NUMBER -> n2
+    | CHAR_LITERAL -> char
 
 ?literal: ESCAPED_STRING -> string_literal
     | "{" expression ("," expression)* "}" -> array_literal
@@ -135,8 +137,10 @@ INT_TYPE.2: /[us](8|16)/
 
 COMPOUND_OPERATOR: "+=" | "-=" | "*=" | "/=" | "%=" | ">>=" | "<<=" | "&=" | "|=" | "^=" | "&&=" | "||="
 
+CHAR_LITERAL: /'(\\[^\\']|[^\\']|\\\\)'/
+
 COMMENT: "/*" /(.|\n|\r)*/"*/"
-    | "//" /.*/ NEWLINE
+    | "//" /[^\n]*/ NEWLINE
 
 %import common.WS
 %import common.ESCAPED_STRING

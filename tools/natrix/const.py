@@ -3,6 +3,7 @@ from lark import Lark, Transformer, v_args, Tree
 from value import Value
 from type import IntType
 from location import Location
+from literal import unescapeString
 import exceptions
 
 def signExpand(t, value):
@@ -43,10 +44,10 @@ def unary(tree, op):
         return tree
     else:
         sa = signExpand(a.getType(), a.getSource())
-        return _const(Location.fromAny(tree), a.t, op(sa))
+        return _const(Location.fromAny(tree), a.getType(), op(sa))
 
 def cast(v, oldType, newType):
-    if oldType.getSize() < newType.getSize() and newType.getSign():
+    if oldType.getSize() < newType.getSize() and oldType.getSign():
         bits = oldType.getSize() * 8
         sign = bool(v & (1 << (bits - 1)))
         if sign:
@@ -76,6 +77,14 @@ class ConstTransformer(Transformer):
     def n2(self, t):
         value = t.children[0]
         return _const(Location.fromAny(t), IntType(True, 2), int(value[2:], 2))
+
+    def char(self, t):
+        l = Location.fromAny(t)
+        try:
+            value = str(t.children[0])
+            return _const(l, IntType(False, 1), ord(unescapeString(value, "'", False)[0]))
+        except ValueError as e:
+            raise exceptions.LiteralError(l, str(e))
 
     def add(self, tree):
         return binary(tree, operator.add)

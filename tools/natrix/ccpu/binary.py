@@ -135,7 +135,7 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             result += '''
                 ldi pl, lo({0} + 1)
                 ldi ph, hi({0} + 1)
-            '''.format(src1Loc.getSource()) # TODO optimize aligned
+            '''.format(src2Loc.getSource()) # TODO optimize aligned
         c = src1Loc.getSource()
         if isinstance(c, int):
             l = lo(c)
@@ -285,6 +285,7 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     '''.format(rs)
     return resultLoc, result
 
+# TODO _genSubPtr
 def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
         raise SemanticError(src2Loc.getLocation(),
@@ -295,7 +296,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     rs = resultLoc.getSource()
     t = resultLoc.getType()
     result = '; {} = {} + {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
-    isWord = src2Loc.getType().getSize()
+    isWord = src2Loc.getType().getSize() == 2
     if isWord:
         if memberSize == 1:
             # no multiplication, just add

@@ -185,7 +185,6 @@ class Generator:
         resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType, final=True)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
-
     def generateStatement(self, t, curFn):
         if t.data == 'assignment':
             l, r = t.children
@@ -224,6 +223,13 @@ class Generator:
             return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
             return self.backend.genReturn(curFn)
+        elif t.data == 'return_fc_statement':
+            call = t.children[0]
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
+            callCode = self.generateFunctionAssignment(Location.fromAny(t), Location.fromAny(call),
+                dest, str(call.children[0]), call.children[1:], curFn)
+            retCode = self.backend.genReturn(curFn)
+            return callCode + retCode
 
     def addFunctionDeclaration(self, location, attrs, type, name, args, allowAttrOverride=False):
         try:

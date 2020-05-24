@@ -109,7 +109,6 @@ def genCall(fn):
         '''.format(fn)
 
 def genPushLocals(fn):
-
     return "; push frame of {}\n".format(fn) + genPush(labelname.getReserveBeginLabel(fn), labelname.getReserveEndLabel(fn))
 
 def genPopLocals(fn):
@@ -188,13 +187,14 @@ def genCast(resultLoc, t, srcLoc):
         raise RuntimeError("Compiler error: move destination level of indirection is not 1")
     assert(resultLoc.getType().getSize() == 1 or resultLoc.getType().getSize() == 2)
     assert(srcLoc.getType().getSize() == 1 or srcLoc.getType().getSize() == 2)
+    result = '; cast {} := {}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 1 and srcLoc.getSource() == resultLoc.getSource():
         # cast into itself
         if resultLoc.getType().getSize() > srcLoc.getType().getSize():
             # widen
             if srcLoc.getType().getSign():
                 # sign expand
-                return resultLoc, '''
+                return resultLoc, result + '''
                     ; widening cast, sign expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
@@ -206,7 +206,7 @@ def genCast(resultLoc, t, srcLoc):
                     '''.format(srcLoc.getSource())
             else:
                 # zero expand
-                return resultLoc, '''
+                return resultLoc, result + '''
                     ; widening cast, zero expand
                     ldi pl, lo({0} + 1)
                     ldi ph, hi({0} + 1)
@@ -229,7 +229,7 @@ def genCast(resultLoc, t, srcLoc):
             # widen a byte
             if srcLoc.getType().getSign():
                 # sign expand
-                result = '''
+                result += '''
                     ; widening cast, sign expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
@@ -244,7 +244,7 @@ def genCast(resultLoc, t, srcLoc):
                     '''.format(srcLoc.getSource(), resultLoc.getSource())
             else:
                 # zero expand
-                result = '''
+                result += '''
                     ; widening cast, zero expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})

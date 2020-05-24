@@ -124,7 +124,7 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
     isWord = srcLoc.getType().getSize() == 2
     result = '; shr {}, {}'.format(srcLoc, n)
     if n == 0:
-        return resultLoc, result
+        return srcLoc, result
     if not isWord:
         if n >= 8:
             result += '''
@@ -209,7 +209,7 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
     isWord = srcLoc.getType().getSize() == 2
     result = '; sar {}, {}'.format(srcLoc, n)
     if n == 0:
-        return resultLoc, result
+        return srcLoc, result
     if not isWord:
         if n >= 8:
             result += '''
@@ -305,18 +305,18 @@ def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
     lBegin = labelProvider.allocLabel("shift_begin")
     lLoop = labelProvider.allocLabel("shift_loop")
     lEnd = labelProvider.allocLabel("shift_end")
+    lInf = labelProvider.allocLabel("shift_inf")
     result = '; {} = {} {}, {} (byte)'.format(resultLoc, op, src1Loc, src2Loc)
     if src2Loc.getType().getSize() != 1:
         result += '''
             ldi pl, lo({src2} + 1)
             ldi ph, hi({src2} + 1)
             ld a
-            ldi b, 0
             add a, 0
-            ldi pl, lo({labelEnd})
-            ldi ph, hi({labelEnd})
+            ldi pl, lo({labelInf})
+            ldi ph, hi({labelInf})
             jnz
-        '''.format(src2 = src2Loc.getSource(), labelEnd = lEnd)
+        '''.format(src2 = src2Loc.getSource(), labelInf = lInf)
     result += '''
         ldi pl, lo({src2})
         ldi ph, hi({src2})
@@ -325,13 +325,30 @@ def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
         sub b, a
         ldi pl, lo({labelBegin})
         ldi ph, hi({labelBegin})
-        jnc ; a > 7
-        ldi b, 0
+        jnc ; a <= 7
+    {labelInf}:
+    '''.format(src2 = src2Loc.getSource(), labelBegin = lBegin, labelInf = lInf)
+    if src1Loc.getType().getSign() and op != 'shl':
+        if src1Loc.getIndirLevel() == 0:
+            result += 'ldi b, lo({})\n'.format(src1Loc.getSource())
+        else:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+            '''.format(src1Loc.getSource())
+        result += '''
+            shl b
+            exp b
+        '''
+    else:
+        result += 'ldi b, 0\n'
+    result += '''
         ldi pl, lo({labelEnd})
         ldi ph, hi({labelEnd})
         jmp
     {labelBegin}:
-    '''.format(src2 = src2Loc.getSource(), labelBegin = lBegin, labelEnd = lEnd)
+    '''.format(labelBegin = lBegin, labelEnd = lEnd)
     if src1Loc.getIndirLevel() == 0:
         result += 'ldi b, lo({})\n'.format(src1Loc.getSource())
     else:
@@ -348,8 +365,8 @@ def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
     {labelLoop}:
         {op} b
         dec a
-        ldi pl, lo(labelLoop)
-        ldi ph, hi(labelLoop)
+        ldi pl, lo({labelLoop})
+        ldi ph, hi({labelLoop})
         jnz
     {labelEnd}:
         ldi pl, lo({res})
@@ -377,8 +394,8 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
             ld a
         '''.format(src1Loc.getSource()) # TODO optimize aligned
     result += '''
-        ldi pl, lo(__cc_sh_var)
-        ldi ph, hi(__cc_sh_var)
+        ldi pl, lo(__cc_sh_val)
+        ldi ph, hi(__cc_sh_val)
         st b
         inc pl
         st a
@@ -403,8 +420,8 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
         ldi pl, lo({0})
         ldi ph, hi({0})
         jmp
-        ldi pl, lo(__cc_sh_var)
-        ldi ph, hi(__cc_sh_var)
+        ldi pl, lo(__cc_sh_val)
+        ldi ph, hi(__cc_sh_val)
         ld b
         inc pl
         ld a

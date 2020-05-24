@@ -4,7 +4,7 @@ from location import Location
 from type import IntType, PtrType
 from value import Value
 
-def unescapeString(s):
+def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True):
     s = s[1:-1]
     escape = False
     result = ""
@@ -17,14 +17,17 @@ def unescapeString(s):
                     raise ValueError("only 127 ASCII characters are supported")
                 result += c
         else:
-            if c == '"':
+            if c == quote:
                 result += c
             elif c == 'n':
                 result += chr(10)
             elif c == '\\':
                 result += c
             else:
-                result += ['\\', c]
+                if acceptUnknownEscapeSeq:
+                    result += ['\\', c]
+                else:
+                    raise ValueError("unknown escape sequence: \\{}".format(c))
             escape = False
     return result
 
