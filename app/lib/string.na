@@ -1,4 +1,4 @@
-#include "stdlib.h"
+#include "string.h"
 
 export u8 memset(u8 *b, u8 c, u16 len) {
     while (len != (u16)0) {

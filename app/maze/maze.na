@@ -1,0 +1,183 @@
+#include "maze.h"
+#include "../lib/string.h"
+#include "../lib/random.h"
+#include "../lib/display.h"
+
+import s8 trap();
+
+#define MAZE_ARRAY_SIZE (MAZE_MAX_SIDE * MAZE_MAX_SIDE)
+
+u8 maze_data[MAZE_ARRAY_SIZE];
+u8 width;
+u8 height;
+
+export u8 maze_init(u8 w, u8 h)
+{
+    memset((u8*)maze_data, MAZE_WALL, (u16)MAZE_ARRAY_SIZE);
+    width = w;
+    height = h;
+}
+
+export u8 maze_dfs(s16 x, s16 y)
+{
+    u8 directions[4];
+    u8 i;
+    u16 index;
+
+    index = (u16)x + (u16)y * (u16)width;
+    maze_data[index] = MAZE_PASSAGE;
+
+    directions[0] = NORTH;
+    directions[1] = EAST;
+    directions[2] = SOUTH;
+    directions[3] = WEST;
+
+    // trap();
+    i = (u8)4;
+    while (i > (u8)1) {
+        u16 n;
+        u8 t;
+        n = random((u16)i);
+        t = directions[(s16)i - 1];
+        directions[(s16)i - 1] = directions[n];
+        directions[n] = t;
+        i -= (u8)1;
+    }
+
+    i = (u8)0;
+    while (i < (u8)4) {
+        s16 xn;
+        s16 yn;
+        u8 dir = directions[(s16)i];
+
+        xn = x;
+        yn = y;
+        if (dir == NORTH) {
+            yn -= 2;
+        } else if (dir == EAST) {
+            xn += 2;
+        } else if (dir == SOUTH) {
+            yn += 2;
+        } else {
+            xn -= 2;
+        }
+        if (xn >= 0 && yn >= 0 && xn < (s16)width && yn < (s16)height) {
+            index = (u16)(yn * (s16)width + xn);
+            if (maze_data[index] == MAZE_WALL) {
+                index = (u16)((x + xn) >> (u8)1) + (u16)((y + yn) >> (u8)1) * (u16)width; // wall between squares
+                maze_data[index] = MAZE_PASSAGE;
+                maze_dfs(xn, yn);
+            }
+        }
+        i += (u8)1;
+    }
+}
+
+u8 maze_get(s8 x, s8 y)
+{
+    if (x >= (s8)0 && x < (s8)width && y >= (s8)0 && y < (s8)height) {
+        return maze_data[(u16)x + (u16)y * (u16)width];
+    } else {
+        return MAZE_WALL;
+    }
+}
+
+u8 maze_get_with_orientation(s8 x, s8 y, u8 orientation, s8 offset_parallel, s8 offset_orthogonal)
+{
+    if (orientation == NORTH) {
+        return maze_get(x + offset_parallel, y + offset_orthogonal);
+    } else if (orientation == EAST) {
+        return maze_get(x + offset_orthogonal, y + offset_parallel);
+    } else if (orientation == SOUTH) {
+        return maze_get(x - offset_parallel, y - offset_orthogonal);
+    } else if (orientation == WEST) {
+        return maze_get(x - offset_orthogonal, y - offset_parallel);
+    }
+}
+
+u8 maze_print_cell(u8 center, u8 top, u8 bottom)
+{
+    u8 c;
+    if (center) {
+        if (top) {
+            if (bottom) {
+                c = CHAR_PASSAGE_UPDN;
+            } else {
+                c = CHAR_PASSAGE_UP;
+            }
+        } else {
+            if (bottom) {
+                c = CHAR_PASSAGE_DN;
+            } else {
+                c = CHAR_PASSAGE;
+            }
+        }
+    } else {
+        c = CHAR_WALL;
+    }
+    display_print_char(c);
+}
+
+u8 maze_print_player(u8 top, u8 bottom)
+{
+    u8 c;
+    if (top) {
+        if (bottom) {
+            c = CHAR_PLAYER_UPDN;
+        } else {
+            c = CHAR_PLAYER_UP;
+        }
+    } else {
+        if (bottom) {
+            c = CHAR_PLAYER_DN;
+        } else {
+            c = CHAR_PLAYER;
+        }
+    }
+    display_print_char(c);
+}
+
+export u8 maze_print(u8 x, u8 y, u8 orientation)
+{
+    u8 i;
+    u8 length;
+    s8 offset;
+    u8 center;
+    u8 top;
+    u8 bottom;
+
+    display_set_address((u8)0x40);
+
+    if (orientation & (u8)1)
+        length = height;
+    else
+        length = width;
+
+    if (length < DISPLAY_WIDTH - (u8)2) {
+        s8 left_offset;
+        left_offset = (s8)((DISPLAY_WIDTH - length) >> (u8)1) - (s8)1;
+        if (orientation == NORTH)
+            offset = -(s8)x - left_offset;
+        else if (orientation == EAST)
+            offset = -(s8)y - left_offset;
+        else if (orientation == SOUTH)
+            offset = (s8)x - left_offset - (s8)length + (s8)1;
+        else if (orientation == WEST)
+            offset = (s8)y - left_offset - (s8)length + (s8)1;
+        i = (u8)0;
+        while (i < (u8)16) {
+            top = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, -(s8)1);
+            bottom = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)1);
+            if (offset != (s8)0) {
+                center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
+                maze_print_cell(center, top, bottom);
+            } else {
+                maze_print_player(top, bottom);
+            }
+            i += (u8)1;
+            offset += (s8)1;
+        }
+    } else {
+        display_print("not implemented");
+    }
+}

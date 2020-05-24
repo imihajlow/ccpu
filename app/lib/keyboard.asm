@@ -35,6 +35,7 @@
 ; the key code (byte) is returned in keyboard_wait_key_released_result
     .export keyboard_wait_key_released
     .export keyboard_wait_key_released_result
+    .export keyboard_wait_key_released_ret
 
     .const key_ent = 0
     .const key_right = 1
@@ -59,7 +60,9 @@
 
     .const keyboard = 0xf000
 
-    .section data
+    .section bss
+    .align 2
+keyboard_wait_key_released_ret:
 keyboard_wait_key_released_result: res 1
     .section text
 keyboard_wait_key_released:
