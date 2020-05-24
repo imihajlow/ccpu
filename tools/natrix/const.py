@@ -1,3 +1,4 @@
+import re
 import operator
 from lark import Lark, Transformer, v_args, Tree
 from value import Value
@@ -56,27 +57,46 @@ def cast(v, oldType, newType):
             return hi | v
     return v
 
+def _parseTypeSuffix(s):
+    if s is None:
+        return IntType(True, 2)
+    sign = s[0].lower() == 's'
+    s = s[1:]
+    if len(s) > 0:
+        width = int(s) // 8
+    else:
+        width = 2
+    return IntType(sign, width)
 
 @v_args(tree = True)
 class ConstTransformer(Transformer):
     def __init__(self, transformCasts):
         self._transformCast = transformCasts
+        self._intRe = dict()
+        self._intRe[10] = re.compile(r"([+-]?[1-9]\d*)([su](?:8|16)?)?", re.I)
+        self._intRe[16] = re.compile(r"0x([0-9a-f]+)([su](?:8|16)?)?", re.I)
+        self._intRe[8] = re.compile(r"0([0-7]*)([su](?:8|16)?)?", re.I)
+        self._intRe[2] = re.compile(r"0b([01]+)([su](?:8|16)?)?", re.I)
+
+    def _constFromLiteral(self, t, base):
+        value = str(t.children[0])
+        m = self._intRe[base].match(value)
+        print(m.group(1), m.group(2))
+        n = int(m.group(1) if len(m.group(1)) > 0 else '0', base)
+        suffix = m.group(2)
+        return _const(Location.fromAny(t), _parseTypeSuffix(suffix), n)
 
     def n10(self, t):
-        value = t.children[0]
-        return _const(Location.fromAny(t), IntType(True, 2), int(value, 10))
+        return self._constFromLiteral(t, 10)
 
     def n16(self, t):
-        value = t.children[0]
-        return _const(Location.fromAny(t), IntType(True, 2), int(value, 0))
+        return self._constFromLiteral(t, 16)
 
     def n8(self, t):
-        value = t.children[0]
-        return _const(Location.fromAny(t), IntType(True, 2), int(value, 8))
+        return self._constFromLiteral(t, 8)
 
     def n2(self, t):
-        value = t.children[0]
-        return _const(Location.fromAny(t), IntType(True, 2), int(value[2:], 2))
+        return self._constFromLiteral(t, 2)
 
     def char(self, t):
         l = Location.fromAny(t)

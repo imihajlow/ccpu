@@ -128,10 +128,10 @@ cpp_line_info: "#" DEC_NUMBER ESCAPED_STRING (DEC_NUMBER)*
 
 IDENTIFIER: /[a-z_]\w*/i
 
-DEC_NUMBER: /[+-]?[1-9]\d*/
-HEX_NUMBER: /0x[0-9a-f]+/i
-OCT_NUMBER: /0[0-7]*/
-BIN_NUMBER: /0b[01]+/
+DEC_NUMBER: /[+-]?[1-9]\d*([su](8|16)?)?/i
+HEX_NUMBER: /0x[0-9a-f]+([su](8|16)?)?/i
+OCT_NUMBER: /0[0-7]*([su](8|16)?)?/i
+BIN_NUMBER: /0b[01]+([su](8|16)?)?/i
 
 INT_TYPE.2: /[us](8|16)/
 

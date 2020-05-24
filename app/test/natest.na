@@ -3,8 +3,8 @@
 import s8 trap();
 
 export s8 main() {
-    s8 x = (s8)-49;
-    s8 y = (s8)-5;
+    s8 x = 0x101s8;
+    s8 y = 0x11s8;
     s16 test_result = (s16)(x % y);
     trap();
 }
