@@ -29,6 +29,12 @@
     ; display_print_bcdf_width - max characters to output
     .export display_print_bcdf
 
+    ; Output a character
+    ; display_print_arg - the character
+    .export display_print_char
+    .export display_print_char_arg0
+    .export display_print_char_ret
+
     .export display_print_arg
     .export display_set_address_arg
     .export display_print_bcdf_arg
@@ -53,6 +59,8 @@ display_print_byte_ret:
 display_print_byte_arg0:
 display_print_arg0:
 display_print_ret:
+display_print_char_arg0:
+display_print_char_ret:
 display_print_arg: res 2
 display_set_address_ret:
 display_set_address_arg0:
@@ -139,6 +147,30 @@ display_clear:
     ldi ph, hi(display_finish)
     jmp
 
+
+display_print_char:
+    mov a, ph
+    mov b, a
+    mov a, pl
+    ldi pl, lo(display_return)
+    ldi ph, hi(display_return)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ld a
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st a
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+    ldi pl, lo(display_finish)
+    ldi ph, hi(display_finish)
+    jmp
 
 ; display_print_arg - string address
 display_print:

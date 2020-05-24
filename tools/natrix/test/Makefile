@@ -5,7 +5,7 @@ test: test.bin
 	rm -f test.o
 	coverage html
 
-test.bin: test.o ../runtime/natrix_runtime.o
+test.bin: test.o ../runtime/natrix_runtime.o ../../../app/lib/display.o ../../../app/lib/bcdf.o
 	../../link.py -o $@ -m test.map $^
 
 %.o: %.asm
@@ -14,3 +14,7 @@ test.bin: test.o ../runtime/natrix_runtime.o
 test.o: test.na
 	coverage run ../natrix.py -o $(@:.o=.s) $^
 	../../asm.py -o $@ $(@:.o=.s)
+
+%.rom: %.bin
+	cp $^ $@
+	../../flip67.py $@

@@ -1,5 +1,11 @@
+#include "../../../app/lib/display.h"
 
 export u8 fail(s16 line) {
+    display_print("Fail at line:");
+    display_set_address(DISPLAY_LINE_2);
+    display_print_byte((u8)(line >> (u8)8));
+    display_print_byte((u8)line);
+    while ((u8)1) {}
 }
 
 export u8 success() {
@@ -866,6 +872,7 @@ u8 test_shl() {
 }
 
 export u8 main() {
+    display_init();
     test_type_cast();
     test_indirect();
     test_jump();
@@ -878,5 +885,6 @@ export u8 main() {
     test_shr_byte();
     test_shr_word();
     test_shl();
+    display_print("Success!");
     success();
 }
