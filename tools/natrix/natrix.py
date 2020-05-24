@@ -6,9 +6,8 @@ from lark import Lark, Transformer, v_args, Tree, LarkError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
-from sugar import SubscriptTransformer, DeclarationTransformer
+from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer
 from literal import LiteralTransformer
-from compound import CompoundTransformer
 from lineinfo import LineInfoTransformer
 import subprocess
 import ccpu.code
