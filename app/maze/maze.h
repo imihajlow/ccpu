@@ -27,6 +27,6 @@
 
 import u8 maze_init(u8 w, u8 h);
 
-import u8 maze_dfs(s16 x, s16 y);
+import u8 maze_dfs(u8 x, u8 y);
 
 import u8 maze_print(u8 x, u8 y, u8 orientation);

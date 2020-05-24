@@ -7,12 +7,13 @@ import u8 trap();
 
 export u8 main() {
     u8 y;
-    srand((u16)12512);
-    maze_init((u8)7, (u8)7);
-    maze_dfs(0, 0);
+    u8 n = (u8)9;
+    srand((u16)12520);
+    maze_init(n, n);
+    maze_dfs((u8)0, (u8)0);
     trap();
     y = (u8)0;
-    while (y < (u8)7) {
+    while (y < n) {
         maze_print((u8)4, y, NORTH);
         display_clear();
         y += (u8)1;

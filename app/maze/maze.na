@@ -13,63 +13,85 @@ u8 height;
 
 export u8 maze_init(u8 w, u8 h)
 {
-    memset((u8*)maze_data, MAZE_WALL, (u16)MAZE_ARRAY_SIZE);
+    memset((u8*)maze_data, MAZE_WALL, (u16)w * (u16)h);
     width = w;
     height = h;
 }
 
-export u8 maze_dfs(s16 x, s16 y)
+#define DFS_STACK_SIZE 8192
+
+export u8 maze_dfs(u8 ux, u8 uy)
 {
     u8 directions[4];
     u8 i;
     u16 index;
+    s8 stack[DFS_STACK_SIZE];
+    s8 *sp = (s8*)stack;
 
-    index = (u16)x + (u16)y * (u16)width;
-    maze_data[index] = MAZE_PASSAGE;
-
+    *sp = (s8)ux;
+    *(sp + 1) = (s8)uy;
+    *(sp + 2) = (s8)ux;
+    *(sp + 3) = (s8)uy;
+    sp += 4;
     directions[0] = NORTH;
     directions[1] = EAST;
     directions[2] = SOUTH;
     directions[3] = WEST;
 
-    // trap();
-    i = (u8)4;
-    while (i > (u8)1) {
-        u16 n;
-        u8 t;
-        n = random((u16)i);
-        t = directions[(s16)i - 1];
-        directions[(s16)i - 1] = directions[n];
-        directions[n] = t;
-        i -= (u8)1;
-    }
+    while (sp != (s8*)stack)
+    {
+        sp += -4;
+        s8 x = *sp;
+        s8 y = *(sp + 1);
+        s8 xl = *(sp + 2);
+        s8 yl = *(sp + 3);
 
-    i = (u8)0;
-    while (i < (u8)4) {
-        s16 xn;
-        s16 yn;
-        u8 dir = directions[(s16)i];
+        index = (u16)x + (u16)y * (u16)width;
+        if (maze_data[index])
+            continue;
+        maze_data[index] = MAZE_PASSAGE;
+        index = (((u16)xl + (u16)yl * (u16)width) + index) >> (u8)1; // wall between squares
+        maze_data[index] = MAZE_PASSAGE;
+        xl = x;
+        yl = y;
 
-        xn = x;
-        yn = y;
-        if (dir == NORTH) {
-            yn -= 2;
-        } else if (dir == EAST) {
-            xn += 2;
-        } else if (dir == SOUTH) {
-            yn += 2;
-        } else {
-            xn -= 2;
+        i = (u8)4;
+        while (i > (u8)1) {
+            u16 n;
+            u8 t;
+            n = random((u16)i);
+            t = directions[(s16)i - 1];
+            directions[(s16)i - 1] = directions[n];
+            directions[n] = t;
+            i -= (u8)1;
         }
-        if (xn >= 0 && yn >= 0 && xn < (s16)width && yn < (s16)height) {
-            index = (u16)(yn * (s16)width + xn);
-            if (maze_data[index] == MAZE_WALL) {
-                index = (u16)((x + xn) >> (u8)1) + (u16)((y + yn) >> (u8)1) * (u16)width; // wall between squares
-                maze_data[index] = MAZE_PASSAGE;
-                maze_dfs(xn, yn);
+
+        i = (u8)0;
+        while (i < (u8)4) {
+            s8 xn;
+            s8 yn;
+            u8 dir = directions[(s16)i];
+
+            xn = x;
+            yn = y;
+            if (dir == NORTH) {
+                yn -= (s8)2;
+            } else if (dir == EAST) {
+                xn += (s8)2;
+            } else if (dir == SOUTH) {
+                yn += (s8)2;
+            } else {
+                xn -= (s8)2;
             }
+            if (xn >= (s8)0 && yn >= (s8)0 && xn < (s8)width && yn < (s8)height) {
+                *sp = xn;
+                *(sp + 1) = yn;
+                *(sp + 2) = x;
+                *(sp + 3) = y;
+                sp += 4;
+            }
+            i += (u8)1;
         }
-        i += (u8)1;
     }
 }
 
@@ -172,7 +194,9 @@ export u8 maze_print(u8 x, u8 y, u8 orientation)
                 center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
                 maze_print_cell(center, top, bottom);
             } else {
-                maze_print_player(top, bottom);
+                center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
+                maze_print_cell(center, top, bottom);
+                // maze_print_player(top, bottom);
             }
             i += (u8)1;
             offset += (s8)1;
