@@ -1,4 +1,4 @@
-#include "../lib/display.h"
+
 
 import s8 trap();
 
@@ -6,5 +6,6 @@ export s8 main() {
     s8 x = 0x101s8;
     s8 y = 0x11s8;
     s16 test_result = (s16)(x % y);
+    u8 a, b = 0u8, c[14];
     trap();
 }

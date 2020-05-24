@@ -40,9 +40,13 @@ while_loop: "while" "(" expression ")" statement
 
 ?block: "{" statement* "}"
 
-declaration: type IDENTIFIER -> decl_var
-    | type IDENTIFIER "=" expression -> def_var
-    | type IDENTIFIER "[" expression "]" -> decl_array
+declaration: type _declarator_list
+
+_declarator_list: declarator ("," declarator)*
+
+declarator: IDENTIFIER -> decl_var
+    | IDENTIFIER "=" expression -> def_var
+    | IDENTIFIER "[" expression "]" -> decl_array
 
 ?type: INT_TYPE -> int_type
     | type "*" -> ptr

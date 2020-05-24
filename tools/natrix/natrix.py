@@ -6,7 +6,7 @@ from lark import Lark, Transformer, v_args, Tree, LarkError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
-from subscript import SubscriptTransformer
+from sugar import SubscriptTransformer, DeclarationTransformer
 from literal import LiteralTransformer
 from compound import CompoundTransformer
 from lineinfo import LineInfoTransformer
@@ -69,6 +69,7 @@ if __name__ == '__main__':
     lit = LineInfoTransformer(args.file)
     t = lit.transform(t)
     try:
+        t = DeclarationTransformer().transform(t)
         t = CompoundTransformer().transform(t)
         t = ConstTransformer(False).transform(t)
         t = TypeTransformer().transform(t)
