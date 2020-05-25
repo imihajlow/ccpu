@@ -81,7 +81,6 @@ class ConstTransformer(Transformer):
     def _constFromLiteral(self, t, base):
         value = str(t.children[0])
         m = self._intRe[base].match(value)
-        print(m.group(1), m.group(2))
         n = int(m.group(1) if len(m.group(1)) > 0 else '0', base)
         suffix = m.group(2)
         return _const(Location.fromAny(t), _parseTypeSuffix(suffix), n)

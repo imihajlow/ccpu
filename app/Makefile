@@ -28,14 +28,14 @@ test.bin: test/test.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o 
 io_test.bin: test/io_test.o lib/display.o lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-maze.bin: maze/main.o maze/maze.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o
+maze.bin: maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o lib/entropy.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm
 	../tools/asm.py -o $@ $^
 
 %.o: %.na
-	$(NATRIX) -o $(@:.o=.s) $^
+	$(NATRIX) --cpp-arg=-Ilib -o $(@:.o=.s) $^
 	../tools/asm.py -o $@ $(@:.o=.s)
 
 %.bin: %.o

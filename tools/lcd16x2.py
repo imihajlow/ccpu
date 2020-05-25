@@ -9,7 +9,10 @@ class Display:
             self.text += [""]
 
     def writeData(self, v):
-        self.text[-1] += chr(v)
+        if 32 <= v < 128:
+            self.text[-1] += chr(v)
+        else:
+            self.text[-1] += '?'
 
     def print(self):
         if len(self.text) > 1 or len(self.text[0]) > 1:

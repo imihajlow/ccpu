@@ -35,6 +35,11 @@
     .export display_print_char_arg0
     .export display_print_char_ret
 
+    ; Load 64 bytes into CGRAM, then sets the DDRAM address 0
+    .export display_load_cg_ram
+    .export display_load_cg_ram_arg0
+    .export display_load_cg_ram_ret
+
     .export display_print_arg
     .export display_set_address_arg
     .export display_print_bcdf_arg
@@ -61,6 +66,8 @@ display_print_arg0:
 display_print_ret:
 display_print_char_arg0:
 display_print_char_ret:
+display_load_cg_ram_arg0:
+display_load_cg_ram_ret:
 display_print_arg: res 2
 display_set_address_ret:
 display_set_address_arg0:
@@ -290,6 +297,7 @@ display_set_address:
     inc pl
     st b
 
+display_set_address_begin:
     ldi pl, lo(display_set_address_arg)
     ldi ph, hi(display_set_address_arg)
     ld a
@@ -737,6 +745,76 @@ display_print_bcdf_exp_dig1:
 
     ldi pl, lo(display_finish)
     ldi ph, hi(display_finish)
+    jmp
+
+display_load_cg_ram:
+    mov a, ph
+    mov b, a
+    mov a, pl
+    ldi pl, lo(display_return)
+    ldi ph, hi(display_return)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(lcd_control)
+    ldi ph, hi(lcd_control)
+    ldi a, 0x40 ; set CGRAM address 0
+    st a
+
+    ldi pl, lo(delay_60us)
+    ldi ph, hi(delay_60us)
+    jmp
+
+    ; tmp := 64
+    ldi b, 64
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    st b
+display_load_cg_ram_loop:
+    ; load next byte
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ld a
+    inc pl
+    ld ph
+    mov pl, a
+    ld a
+
+    ; send it out
+    ldi pl, lo(lcd_data)
+    ldi ph, hi(lcd_data)
+    st a
+    ; the whole loop provides >60us delay
+
+    ; increment the pointer
+    ldi pl, lo(display_print_arg)
+    ldi ph, hi(display_print_arg)
+    ld b
+    inc pl
+    ld a
+    inc b
+    adc a, 0
+    st a
+    dec pl
+    st b
+
+    ; tmp -= 1
+    ldi pl, lo(tmp)
+    ldi ph, hi(tmp)
+    ld b
+    dec b
+    st b
+    ldi pl, lo(display_load_cg_ram_loop)
+    ldi ph, hi(display_load_cg_ram_loop)
+    jnz ; tmp != 0
+
+    ; b = 0 here
+    ldi pl, lo(display_set_address_arg)
+    ldi ph, hi(display_set_address_arg)
+    st b
+    ldi pl, lo(display_set_address_begin)
+    ldi ph, hi(display_set_address_begin)
     jmp
 
     .section data

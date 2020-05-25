@@ -1,0 +1,31 @@
+#include "entropy.h"
+
+#define KEYBOARD_ADDR 0xf000u
+#define KEYBOARD_PORT *((u8*)KEYBOARD_ADDR)
+
+#define FIRST_ROW 0b11111110u8
+#define MAX_ROW 0b10111111u8
+
+export u16 get_keyboard_entropy() {
+    u16 result; // not initialized to keep possible RAM garbage on startup
+
+    u8 row = FIRST_ROW;
+    KEYBOARD_PORT = row;
+    // scan until pressed
+    while (KEYBOARD_PORT == 0xffu8) {
+        result += 1u;
+        row <<= 1u;
+        row |= 1u8;
+        if (row == MAX_ROW) {
+            row = FIRST_ROW;
+        }
+        KEYBOARD_PORT = row;
+    }
+    // pressed
+    result += (u16)KEYBOARD_PORT;
+    while (KEYBOARD_PORT != 0xffu8) {
+        result += 1u;
+    }
+    KEYBOARD_PORT = 0xffu8;
+    return result;
+}

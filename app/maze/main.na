@@ -1,22 +1,43 @@
-#include "../lib/keyboard.h"
-#include "../lib/random.h"
-#include "../lib/display.h"
+#include <keyboard.h>
+#include <random.h>
+#include <display.h>
 #include "maze.h"
+#include "game.h"
+#include "entropy.h"
 
 import u8 trap();
 
 export u8 main() {
-    u8 y;
-    u8 n = (u8)9;
-    srand((u16)12520);
-    maze_init(n, n);
-    maze_dfs((u8)0, (u8)0);
+    u8 n = (u8)7;
+    u8 k, r;
+    u16 entropy;
+    display_init();
+    maze_load_cgram();
+    display_print("Pls press a key");
+    entropy = get_keyboard_entropy();
     trap();
-    y = (u8)0;
-    while (y < n) {
-        maze_print((u8)4, y, NORTH);
-        display_clear();
-        y += (u8)1;
+    display_clear();
+    display_set_address(DISPLAY_LINE_2);
+    display_print("Generating...");
+    srand(entropy);
+    game_init(n);
+    game_print_state();
+    trap();
+    while (1u8) {
+        k = keyboard_wait_key_released();
+        if (k == KEY_RIGHT) {
+            r = game_move_right();
+        } else if (k == KEY_LEFT) {
+            r = game_move_left();
+        } else if (k == KEY_UP) {
+            r = game_rotate_cw();
+        } else if (k == KEY_DOWN) {
+            r = game_rotate_ccw();
+        } else {
+            r = 0u8;
+        }
+        if (r) {
+            game_print_state();
+        }
     }
-    trap();
 }

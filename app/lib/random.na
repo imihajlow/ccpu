@@ -1,12 +1,12 @@
 #include "random.h"
 
 #define MULTIPLIER (u16)16807
-#define INCREMENT (u16)0
+#define INCREMENT (u16)1
 
 u16 random_seed;
 
 export u8 srand(u16 seed) {
-    random_seed = seed;
+    random_seed = seed | 1u;
 }
 
 export u16 random(u16 top) {

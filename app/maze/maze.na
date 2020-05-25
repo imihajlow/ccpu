@@ -1,7 +1,7 @@
 #include "maze.h"
-#include "../lib/string.h"
-#include "../lib/random.h"
-#include "../lib/display.h"
+#include <string.h>
+#include <random.h>
+#include <display.h>
 
 import s8 trap();
 
@@ -95,7 +95,7 @@ export u8 maze_dfs(u8 ux, u8 uy)
     }
 }
 
-u8 maze_get(s8 x, s8 y)
+export u8 maze_get(s8 x, s8 y)
 {
     if (x >= (s8)0 && x < (s8)width && y >= (s8)0 && y < (s8)height) {
         return maze_data[(u16)x + (u16)y * (u16)width];
@@ -104,23 +104,28 @@ u8 maze_get(s8 x, s8 y)
     }
 }
 
+export u8 maze_set(u8 x, u8 y, u8 v)
+{
+    maze_data[(u16)x + (u16)y * (u16)width] = v;
+}
+
 u8 maze_get_with_orientation(s8 x, s8 y, u8 orientation, s8 offset_parallel, s8 offset_orthogonal)
 {
     if (orientation == NORTH) {
         return maze_get(x + offset_parallel, y + offset_orthogonal);
     } else if (orientation == EAST) {
-        return maze_get(x + offset_orthogonal, y + offset_parallel);
+        return maze_get(x - offset_orthogonal, y + offset_parallel);
     } else if (orientation == SOUTH) {
         return maze_get(x - offset_parallel, y - offset_orthogonal);
     } else if (orientation == WEST) {
-        return maze_get(x - offset_orthogonal, y - offset_parallel);
+        return maze_get(x + offset_orthogonal, y - offset_parallel);
     }
 }
 
 u8 maze_print_cell(u8 center, u8 top, u8 bottom)
 {
     u8 c;
-    if (center) {
+    if (center == MAZE_PASSAGE) {
         if (top) {
             if (bottom) {
                 c = CHAR_PASSAGE_UPDN;
@@ -134,6 +139,10 @@ u8 maze_print_cell(u8 center, u8 top, u8 bottom)
                 c = CHAR_PASSAGE;
             }
         }
+    } else if (center == MAZE_KEY) {
+        c = CHAR_KEY;
+    } else if (center == MAZE_EXIT) {
+        c = CHAR_EXIT;
     } else {
         c = CHAR_WALL;
     }
@@ -194,9 +203,7 @@ export u8 maze_print(u8 x, u8 y, u8 orientation)
                 center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
                 maze_print_cell(center, top, bottom);
             } else {
-                center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
-                maze_print_cell(center, top, bottom);
-                // maze_print_player(top, bottom);
+                maze_print_player(top, bottom);
             }
             i += (u8)1;
             offset += (s8)1;
@@ -204,4 +211,92 @@ export u8 maze_print(u8 x, u8 y, u8 orientation)
     } else {
         display_print("not implemented");
     }
+}
+
+export u8 maze_load_cgram() {
+    // Passage with no walls - space
+    // Passage with a wall below - 0x0e
+    // Passage with a wall above - 0x08
+    // Passage with two walls - 0x09
+    // Player in an empty passage - 0x0a
+    // Player in a passage with a wall below - 0x0b
+    // Player in a passage with a wall above - 0x0c
+    // Player in a passage with two walls - 0x0d
+    // Key - 0xd2
+    // Exit - 0xfc
+    // Wall - 0xff
+    display_load_cg_ram({
+        // Passage with a wall above - 0x08
+        0b11111u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        // Passage with two walls - 0x09
+        0b11111u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b11111u8,
+        // Player in an empty passage - 0x0a
+        0b00000u8,
+        0b00000u8,
+        0b00100u8,
+        0b01110u8,
+        0b00100u8,
+        0b01010u8,
+        0b00000u8,
+        0b00000u8,
+        // Player in a passage with a wall below - 0x0b
+        0b00000u8,
+        0b00000u8,
+        0b00100u8,
+        0b01110u8,
+        0b00100u8,
+        0b01010u8,
+        0b00000u8,
+        0b11111u8,
+        // Player in a passage with a wall above - 0x0c
+        0b11111u8,
+        0b00000u8,
+        0b00100u8,
+        0b01110u8,
+        0b00100u8,
+        0b01010u8,
+        0b00000u8,
+        0b00000u8,
+        // Player in a passage with two walls - 0x0d
+        0b11111u8,
+        0b00000u8,
+        0b00100u8,
+        0b01110u8,
+        0b00100u8,
+        0b01010u8,
+        0b00000u8,
+        0b11111u8,
+        // Passage with a wall below - 0x0e
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b11111u8,
+        // Unused - 0x0f
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8
+    });
 }
