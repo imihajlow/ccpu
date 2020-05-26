@@ -1,4 +1,5 @@
 #pragma once
+// #define MAZE_ASCII
 
 #define DISPLAY_WIDTH (u8)16
 
@@ -16,6 +17,21 @@
 
 #define MAZE_MAX_SIDE 64
 
+#ifdef MAZE_ASCII
+#define CHAR_WALL '#'
+#define CHAR_PASSAGE_UP '_'
+#define CHAR_PASSAGE_DN 'T'
+#define CHAR_PASSAGE_UPDN ' '
+#define CHAR_PASSAGE 'I'
+
+#define CHAR_PLAYER_UP '@'
+#define CHAR_PLAYER_DN '@'
+#define CHAR_PLAYER_UPDN '@'
+#define CHAR_PLAYER '@'
+
+#define CHAR_KEY '?'
+#define CHAR_EXIT 'E'
+#else
 #define CHAR_WALL 0xffu8
 #define CHAR_PASSAGE_UP 0x0eu8
 #define CHAR_PASSAGE_DN 0x08u8
@@ -29,6 +45,7 @@
 
 #define CHAR_KEY 0xd2u8
 #define CHAR_EXIT 0xfcu8
+#endif
 
 import u8 maze_init(u8 w, u8 h);
 

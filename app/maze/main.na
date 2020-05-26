@@ -7,37 +7,67 @@
 
 import u8 trap();
 
+u8 print_decimal(u8 x) {
+    if (x >= 100u8) {
+        display_print_char('0' + x / 100u8);
+        x = x % 100u8;
+        display_print_char('0' + x / 10u8);
+        display_print_char('0' + x % 10u8);
+    } else if (x >= 10u8) {
+        display_print_char('0' + x / 10u8);
+        display_print_char('0' + x % 10u8);
+    } else {
+        display_print_char('0' + x);
+    }
+}
+
 export u8 main() {
-    u8 n = (u8)7;
+    u8 n = (u8)3;
     u8 k, r;
     u16 entropy;
     display_init();
     maze_load_cgram();
     display_print("Pls press a key");
     entropy = get_keyboard_entropy();
-    trap();
-    display_clear();
-    display_set_address(DISPLAY_LINE_2);
-    display_print("Generating...");
     srand(entropy);
-    game_init(n);
-    game_print_state();
-    trap();
-    while (1u8) {
-        k = keyboard_wait_key_released();
-        if (k == KEY_RIGHT) {
-            r = game_move_right();
-        } else if (k == KEY_LEFT) {
-            r = game_move_left();
-        } else if (k == KEY_UP) {
-            r = game_rotate_cw();
-        } else if (k == KEY_DOWN) {
-            r = game_rotate_ccw();
-        } else {
-            r = 0u8;
+
+    while (n < 50u8) {
+        display_clear();
+        display_set_address(DISPLAY_LINE_2);
+        display_print("Generating ");
+        print_decimal(n);
+        game_init(n);
+        game_print_state();
+        trap();
+        while (1u8) {
+            k = keyboard_wait_key_released();
+            if (k == KEY_RIGHT) {
+                r = game_move_right();
+            } else if (k == KEY_LEFT) {
+                r = game_move_left();
+            } else if (k == KEY_UP) {
+                r = game_rotate_cw();
+            } else if (k == KEY_DOWN) {
+                r = game_rotate_ccw();
+            } else if (k == KEY_8) {
+                r = game_move_up();
+            } else if (k == KEY_0) {
+                r = game_move_down();
+            } else {
+                r = 0u8;
+            }
+            if (r == RESULT_EXIT) {
+                break;
+            }
+            if (r) {
+                game_print_state();
+            }
         }
-        if (r) {
-            game_print_state();
-        }
+        display_clear();
+        display_print("You have escaped");
+        display_set_address(DISPLAY_LINE_2);
+        display_print("press a key...");
+        keyboard_wait_key_released();
+        n += 2u8;
     }
 }

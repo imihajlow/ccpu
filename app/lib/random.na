@@ -1,15 +1,21 @@
 #include "random.h"
 
-#define MULTIPLIER (u16)16807
-#define INCREMENT (u16)1
+// http://b2d-f9r.blogspot.com/2010/08/16-bit-xorshift-rng-now-with-more.html
+#define RANDOM_A 5u
+#define RANDOM_B 7u
+#define RANDOM_C 4u
 
-u16 random_seed;
+u16 x;
+u16 y;
 
 export u8 srand(u16 seed) {
-    random_seed = seed | 1u;
+    x = seed;
+    y = 1u;
 }
 
 export u16 random(u16 top) {
-    random_seed = random_seed * MULTIPLIER + INCREMENT;
-    return random_seed % top;
+    u16 t = x ^ (x << RANDOM_A);
+    x = y;
+    y = (y ^ (y >> RANDOM_C)) ^ (t ^ (t >> RANDOM_B));
+    return y % top;
 }
