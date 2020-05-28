@@ -170,46 +170,71 @@ u8 maze_print_player(u8 top, u8 bottom)
 
 export u8 maze_print(u8 x, u8 y, u8 orientation)
 {
-    u8 i;
-    u8 length;
+    s8 i;
+    s8 length;
     s8 offset;
     u8 center;
     u8 top;
     u8 bottom;
+    s8 coordinate;
 
-    display_set_address((u8)0x40);
+    display_set_address(DISPLAY_LINE_2);
 
-    if (orientation & (u8)1)
-        length = height;
-    else
-        length = width;
+    if (orientation & 1u8) {
+        length = (s8)height;
+        coordinate = (s8)y;
+    } else {
+        length = (s8)width;
+        coordinate = (s8)x;
+    }
 
-    if (length < DISPLAY_WIDTH - (u8)2) {
-        s8 left_offset;
-        left_offset = (s8)((DISPLAY_WIDTH - length) >> (u8)1) - (s8)1;
-        if (orientation == NORTH)
-            offset = -(s8)x - left_offset;
-        else if (orientation == EAST)
-            offset = -(s8)y - left_offset;
-        else if (orientation == SOUTH)
-            offset = (s8)x - left_offset - (s8)length + (s8)1;
-        else if (orientation == WEST)
-            offset = (s8)y - left_offset - (s8)length + (s8)1;
-        i = (u8)0;
-        while (i < (u8)16) {
-            top = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, -(s8)1);
-            bottom = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)1);
-            if (offset != (s8)0) {
-                center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
-                maze_print_cell(center, top, bottom);
-            } else {
-                maze_print_player(top, bottom);
-            }
-            i += (u8)1;
-            offset += (s8)1;
+    s8 f; // absolute coordinate of the very left character
+    s8 left_offset; // parralel_offset of the left character
+    if (length < (s8)DISPLAY_WIDTH - 2s8) {
+        if (orientation & 0x2u8) { // SOUTH or WEST
+            f = length + (((s8)DISPLAY_WIDTH - length) >> 1u);
+            // x - left_offset = f
+            left_offset = coordinate - f;
+        } else {
+            // NORTH or EAST
+            f = -(((s8)DISPLAY_WIDTH - length - 1s8) >> 1u) - 1s8;
+            // x + left_offset = f
+            left_offset = f - coordinate;
         }
     } else {
-        display_print("not implemented");
+        if (orientation & 0x2u8) { // SOUTH or WEST
+            if (coordinate > length - (s8)DISPLAY_WIDTH / 2s8) {
+                f = length;
+            } else if (coordinate < (s8)DISPLAY_WIDTH / 2s8 - 2s8) {
+                f = (s8)DISPLAY_WIDTH - 2s8;
+            } else {
+                f = coordinate + (s8)DISPLAY_WIDTH / 2s8;
+            }
+            left_offset = coordinate - f;
+        } else {
+            // NORTH or EAST
+            if (coordinate < (s8)DISPLAY_WIDTH / 2s8 - 1s8) {
+                f = -1s8;
+            } else if (coordinate >= length - (s8)DISPLAY_WIDTH / 2s8 + 2s8) {
+                f = length - (s8)DISPLAY_WIDTH + 1s8;
+            } else {
+                f = coordinate - (s8)DISPLAY_WIDTH / 2s8;
+            }
+            left_offset = f - coordinate;
+        }
+    }
+    i = 0s8;
+    while (i < 16s8) {
+        s8 offset = i + left_offset;
+        top = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, -(s8)1);
+        bottom = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)1);
+        if (offset != (s8)0) {
+            center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
+            maze_print_cell(center, top, bottom);
+        } else {
+            maze_print_player(top, bottom);
+        }
+        i += 1s8;
     }
 }
 

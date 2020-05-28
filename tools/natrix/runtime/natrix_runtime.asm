@@ -26,6 +26,7 @@
 
     ; start-up code
     .section init
+    nop
     ; point SP to the end of stack segment
     ldi pl, lo(__cc_r_sp)
     ldi ph, hi(__cc_r_sp)
