@@ -35,9 +35,11 @@
     .export display_print_char_arg0
     .export display_print_char_ret
 
-    ; Load 64 bytes into CGRAM, then sets the DDRAM address 0
+    ; Load data into CGRAM, then sets the DDRAM address 0
     .export display_load_cg_ram
-    .export display_load_cg_ram_arg0
+    .export display_load_cg_ram_arg0 ; data address
+    .export display_load_cg_ram_arg1 ; CGRAM address
+    .export display_load_cg_ram_arg2 ; data count (1-64)
     .export display_load_cg_ram_ret
 
     .export display_print_arg
@@ -72,6 +74,8 @@ display_print_arg: res 2
 display_set_address_ret:
 display_set_address_arg0:
 display_set_address_arg: res 1
+display_load_cg_ram_arg1: res 1
+display_load_cg_ram_arg2: res 1
     .align 2
 delay_return: res 2
 
@@ -747,6 +751,9 @@ display_print_bcdf_exp_dig1:
     ldi ph, hi(display_finish)
     jmp
 
+    ; arg0 = display_print_arg - data address
+    ; arg1 = CGRAM address
+    ; arg2 = count
 display_load_cg_ram:
     mov a, ph
     mov b, a
@@ -757,20 +764,19 @@ display_load_cg_ram:
     inc pl
     st b
 
+    ldi pl, lo(display_load_cg_ram_arg1)
+    ldi ph, hi(display_load_cg_ram_arg1)
+    ld a
+    ldi b, 0x40
+    or a, b
     ldi pl, lo(lcd_control)
     ldi ph, hi(lcd_control)
-    ldi a, 0x40 ; set CGRAM address 0
     st a
 
     ldi pl, lo(delay_60us)
     ldi ph, hi(delay_60us)
     jmp
 
-    ; tmp := 64
-    ldi b, 64
-    ldi pl, lo(tmp)
-    ldi ph, hi(tmp)
-    st b
 display_load_cg_ram_loop:
     ; load next byte
     ldi pl, lo(display_print_arg)
@@ -799,15 +805,15 @@ display_load_cg_ram_loop:
     dec pl
     st b
 
-    ; tmp -= 1
-    ldi pl, lo(tmp)
-    ldi ph, hi(tmp)
+    ; count -= 1
+    ldi pl, lo(display_load_cg_ram_arg2)
+    ldi ph, hi(display_load_cg_ram_arg2)
     ld b
     dec b
     st b
     ldi pl, lo(display_load_cg_ram_loop)
     ldi ph, hi(display_load_cg_ram_loop)
-    jnz ; tmp != 0
+    jnz ; count != 0
 
     ; b = 0 here
     ldi pl, lo(display_set_address_arg)

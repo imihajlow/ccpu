@@ -11,6 +11,20 @@ u8 maze_data[MAZE_ARRAY_SIZE];
 u8 width;
 u8 height;
 
+u8 last_player_top;
+u8 last_player_bottom;
+u8 last_key_top;
+u8 last_key_bottom;
+u8 last_exit_top;
+u8 last_exit_bottom;
+
+u8 new_player_top;
+u8 new_player_bottom;
+u8 new_key_top;
+u8 new_key_bottom;
+u8 new_exit_top;
+u8 new_exit_bottom;
+
 export u8 maze_init(u8 w, u8 h)
 {
     memset((u8*)maze_data, MAZE_WALL, (u16)w * (u16)h);
@@ -141,31 +155,64 @@ u8 maze_print_cell(u8 center, u8 top, u8 bottom)
         }
     } else if (center == MAZE_KEY) {
         c = CHAR_KEY;
+        new_key_top = !top;
+        new_key_bottom = !bottom;
     } else if (center == MAZE_EXIT) {
         c = CHAR_EXIT;
+        new_exit_top = !top;
+        new_exit_bottom = !bottom;
     } else {
         c = CHAR_WALL;
     }
     display_print_char(c);
 }
 
-u8 maze_print_player(u8 top, u8 bottom)
+u8 maze_update_cgram()
 {
-    u8 c;
-    if (top) {
-        if (bottom) {
-            c = CHAR_PLAYER_UPDN;
-        } else {
-            c = CHAR_PLAYER_UP;
-        }
-    } else {
-        if (bottom) {
-            c = CHAR_PLAYER_DN;
-        } else {
-            c = CHAR_PLAYER;
-        }
+    u8 *full = {0b11111u8};
+    u8 *empty = {0b00000u8};
+    if (new_player_top != last_player_top) {
+        if (new_player_top)
+            display_load_cg_ram(full, (CHAR_PLAYER - 8u8) * 8u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_PLAYER - 8u8) * 8u8, 1u8);
     }
-    display_print_char(c);
+    if (new_player_bottom != last_player_bottom) {
+        if (new_player_bottom)
+            display_load_cg_ram(full, (CHAR_PLAYER - 8u8) * 8u8 + 7u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_PLAYER - 8u8) * 8u8 + 7u8, 1u8);
+    }
+    if (new_key_top != last_key_top) {
+        if (new_key_top)
+            display_load_cg_ram(full, (CHAR_KEY - 8u8) * 8u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_KEY - 8u8) * 8u8, 1u8);
+    }
+    if (new_key_bottom != last_key_bottom) {
+        if (new_key_bottom)
+            display_load_cg_ram(full, (CHAR_KEY - 8u8) * 8u8 + 7u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_KEY - 8u8) * 8u8 + 7u8, 1u8);
+    }
+    if (new_exit_top != last_exit_top) {
+        if (new_exit_top)
+            display_load_cg_ram(full, (CHAR_EXIT - 8u8) * 8u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_EXIT - 8u8) * 8u8, 1u8);
+    }
+    if (new_exit_bottom != last_exit_bottom) {
+        if (new_exit_bottom)
+            display_load_cg_ram(full, (CHAR_EXIT - 8u8) * 8u8 + 7u8, 1u8);
+        else
+            display_load_cg_ram(empty, (CHAR_EXIT - 8u8) * 8u8 + 7u8, 1u8);
+    }
+    last_player_top = new_player_top;
+    last_player_bottom = new_player_bottom;
+    last_key_top = new_key_top;
+    last_key_bottom = new_key_bottom;
+    last_exit_top = new_exit_top;
+    last_exit_bottom = new_exit_bottom;
 }
 
 export u8 maze_print(u8 x, u8 y, u8 orientation)
@@ -232,23 +279,23 @@ export u8 maze_print(u8 x, u8 y, u8 orientation)
             center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
             maze_print_cell(center, top, bottom);
         } else {
-            maze_print_player(top, bottom);
+            display_print_char(CHAR_PLAYER);
+            new_player_top = !top;
+            new_player_bottom = !bottom;
         }
         i += 1s8;
     }
+    maze_update_cgram();
 }
 
 export u8 maze_load_cgram() {
     // Passage with no walls - space
-    // Passage with a wall below - 0x0e
+    // Passage with a wall below - 0x0a
     // Passage with a wall above - 0x08
     // Passage with two walls - 0x09
-    // Player in an empty passage - 0x0a
-    // Player in a passage with a wall below - 0x0b
-    // Player in a passage with a wall above - 0x0c
-    // Player in a passage with two walls - 0x0d
-    // Key - 0xd2
-    // Exit - 0xfc
+    // Player - 0x0b
+    // Key - 0xd2 (static, for the status line) and 0x0c (for the maze)
+    // Exit - 0xfc (static, for the status line) and 0x0d (for the maze)
     // Wall - 0xff
     display_load_cg_ram({
         // Passage with a wall above - 0x08
@@ -269,7 +316,16 @@ export u8 maze_load_cgram() {
         0b00000u8,
         0b00000u8,
         0b11111u8,
-        // Player in an empty passage - 0x0a
+        // Passage with a wall below - 0x0a
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b00000u8,
+        0b11111u8,
+        // Player - 0x0b
         0b00000u8,
         0b00000u8,
         0b00100u8,
@@ -278,50 +334,37 @@ export u8 maze_load_cgram() {
         0b01010u8,
         0b00000u8,
         0b00000u8,
-        // Player in a passage with a wall below - 0x0b
+        // Key - same as 0xd2 - 0x0c
         0b00000u8,
-        0b00000u8,
-        0b00100u8,
-        0b01110u8,
+        0b00001u8,
+        0b00001u8,
+        0b01010u8,
         0b00100u8,
         0b01010u8,
+        0b10000u8,
         0b00000u8,
-        0b11111u8,
-        // Player in a passage with a wall above - 0x0c
-        0b11111u8,
-        0b00000u8,
-        0b00100u8,
-        0b01110u8,
-        0b00100u8,
-        0b01010u8,
-        0b00000u8,
-        0b00000u8,
-        // Player in a passage with two walls - 0x0d
-        0b11111u8,
-        0b00000u8,
-        0b00100u8,
-        0b01110u8,
-        0b00100u8,
-        0b01010u8,
-        0b00000u8,
-        0b11111u8,
-        // Passage with a wall below - 0x0e
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
+        // Door - same as 0xfc - 0x0d
         0b00000u8,
         0b00000u8,
         0b11111u8,
-        // Unused - 0x0f
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
+        0b10101u8,
+        0b11111u8,
+        0b10001u8,
+        0b10001u8,
         0b00000u8
-    });
+    }, 0u8, 6u8 * 8u8);
+
+    last_player_top = 0u8;
+    last_player_bottom = 0u8;
+    last_key_top = 0u8;
+    last_key_bottom = 0u8;
+    last_exit_top = 0u8;
+    last_exit_bottom = 0u8;
+
+    new_player_top = 0u8;
+    new_player_bottom = 0u8;
+    new_key_top = 0u8;
+    new_key_bottom = 0u8;
+    new_exit_top = 0u8;
+    new_exit_bottom = 0u8;
 }

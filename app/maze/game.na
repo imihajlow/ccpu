@@ -58,7 +58,7 @@ export u8 game_print_state() {
     display_print_byte(player_y);
     if (has_key) {
         display_print_char(' ');
-        display_print_char(CHAR_KEY);
+        display_print_char(CHAR_KEY_STATIC);
     } else if (on_exit) {
         display_print(" NO KEY");
     } else {
