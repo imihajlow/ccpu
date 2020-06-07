@@ -30,6 +30,7 @@
     .export key_f1
 
     .export keyboard_key_digit_map
+    .export bit_mask_to_index
 
 ; wait until a key is released
 ; the key code (byte) is returned in keyboard_wait_key_released_result
@@ -158,8 +159,8 @@ keyboard_wait_key_released__wait_release:
     ; to prevent garbage, zero upper 4 bits
     ldi a, 0x0f
     and a, b
-    ldi pl, lo(col_map)
-    ldi ph, hi(col_map)
+    ldi pl, lo(bit_mask_to_index)
+    ldi ph, hi(bit_mask_to_index)
     add pl, a
     ld b
     ; b - col index
@@ -183,8 +184,8 @@ keyboard_wait_key_released__wait_release:
     jmp
 
 ; mapping from a col mask to a col index: lower index has priority
-    .align 16 ; guarantees no ph overflow
-col_map:
+    .align 32 ; guarantees no ph overflow
+bit_mask_to_index:
     db 0 ; 0
     db 0 ; 1
     db 1 ; 2
@@ -201,6 +202,22 @@ col_map:
     db 0 ; 13
     db 1 ; 14
     db 0 ; 15
+    db 4 ; 16
+    db 0 ; 17
+    db 1 ; 18
+    db 0 ; 19
+    db 2 ; 20
+    db 0 ; 21
+    db 1 ; 22
+    db 0 ; 23
+    db 3 ; 24
+    db 0 ; 25
+    db 1 ; 26
+    db 0 ; 27
+    db 2 ; 28
+    db 0 ; 29
+    db 1 ; 30
+    db 0 ; 31
 
 ; Mapping from a key code to a digit. Keys which are not digits are 0xff
     .align 32 ; guarantees no ph overflow

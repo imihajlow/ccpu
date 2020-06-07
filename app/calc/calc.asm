@@ -1,3 +1,6 @@
+    .export calc_main
+    .export calc_main_ret
+
     .global display_init
     .global display_clear
     .global display_print
@@ -52,6 +55,11 @@
 
     ldi pl, lo(display_init)
     ldi ph, hi(display_init)
+    jmp
+
+calc_main:
+    ldi pl, lo(display_clear)
+    ldi ph, hi(display_clear)
     jmp
 
     ldi pl, lo(number_string + 16)
@@ -671,8 +679,9 @@ op_prompt:
     ascii "OP?             "
     db 0
 
-    .section data
+    .section bss
     .align 16
+calc_main_ret:
 number_string: res 17
 tmp: res 1
     .align 16 ; guarantees no ph overflow when indexing bcdf_a

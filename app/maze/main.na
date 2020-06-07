@@ -1,9 +1,9 @@
 #include <keyboard.h>
-#include <random.h>
 #include <display.h>
+#include <entropy.h>
+#include <random.h>
 #include "maze.h"
 #include "game.h"
-#include "entropy.h"
 
 import u8 trap();
 
@@ -21,38 +21,95 @@ u8 print_decimal(u8 x) {
     }
 }
 
-export u8 main() {
+#define MODE_EASY 0u8
+#define MODE_HARD 1u8
+#define MODE_CHEAT 2u8
+u8 maze_loop(u8 mode);
+
+u8 help(u8 mode) {
+    display_clear();
+    if (mode == MODE_EASY) {
+        display_print("EASY MODE: SHIFT");
+        display_set_address(DISPLAY_LINE_2);
+        display_print("MOVE WITH ARROWS");
+    } else if (mode == MODE_HARD) {
+        display_print("HARD MODE:ROTATE");
+        display_set_address(DISPLAY_LINE_2);
+    } else if (mode == MODE_CHEAT) {
+        display_print("CHEAT MODE");
+        display_set_address(DISPLAY_LINE_2);
+        display_print("SHIFT and ROTATE");
+    }
+    keyboard_wait_key_released();
+}
+
+export u8 maze_main() {
+    srand(entropy);
+    maze_load_cgram();
+
+    u8 mode = 0u8;
+    display_clear();
+    display_print("1. EASY 2. HARD");
+    display_set_address(DISPLAY_LINE_2);
+    display_print("3. CHEAT");
+
+    while (1u8) {
+        u8 k;
+        k = keyboard_wait_key_released();
+        if (k == KEY_1) {
+            mode = MODE_EASY;
+            break;
+        } else if (k == KEY_2) {
+            mode = MODE_HARD;
+            break;
+        } else if (k == KEY_3) {
+            mode = MODE_CHEAT;
+            break;
+        } else if (k == KEY_ESC) {
+            return;
+        }
+    }
+    help(mode);
+    maze_loop(mode);
+}
+
+u8 maze_loop(u8 mode) {
     u8 n = (u8)3;
     u8 k, r;
-    u16 entropy;
-    display_init();
-    maze_load_cgram();
-    display_print("Pls press a key");
-    entropy = get_keyboard_entropy();
-    srand(entropy);
 
     while (n < 50u8) {
         display_clear();
         display_set_address(DISPLAY_LINE_2);
-        display_print("Generating ");
+        display_print("GENERATING ");
         print_decimal(n);
         game_init(n);
         game_print_state();
         trap();
         while (1u8) {
             k = keyboard_wait_key_released();
-            if (k == KEY_RIGHT) {
+            if (k == KEY_ESC) {
+                return;
+            } else if (k == KEY_RIGHT) {
                 r = game_move_right();
             } else if (k == KEY_LEFT) {
                 r = game_move_left();
-            } else if (k == KEY_UP) {
+            } else if (k == KEY_UP && (mode == MODE_HARD || mode == MODE_CHEAT)) {
                 r = game_rotate_cw();
-            } else if (k == KEY_DOWN) {
+            } else if (k == KEY_DOWN && (mode == MODE_HARD || mode == MODE_CHEAT)) {
                 r = game_rotate_ccw();
-            } else if (k == KEY_8) {
+            } else if (k == KEY_8 && mode == MODE_CHEAT) {
                 r = game_move_up();
-            } else if (k == KEY_0) {
+            } else if (k == KEY_0 && mode == MODE_CHEAT) {
                 r = game_move_down();
+            } else if (k == KEY_UP && mode == MODE_EASY) {
+                r = game_move_up();
+            } else if (k == KEY_DOWN && mode == MODE_EASY) {
+                r = game_move_down();
+            } else if (k == KEY_F2 && mode == MODE_CHEAT) {
+                break;
+            } else if (k == KEY_F1 && mode == MODE_CHEAT) {
+                n -= 4u8;
+                break;
             } else {
                 r = 0u8;
             }
@@ -64,9 +121,9 @@ export u8 main() {
             }
         }
         display_clear();
-        display_print("You have escaped");
+        display_print("YOU HAVE ESCAPED");
         display_set_address(DISPLAY_LINE_2);
-        display_print("press a key...");
+        display_print("PRESS A KEY...");
         keyboard_wait_key_released();
         n += 2u8;
     }

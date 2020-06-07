@@ -22,3 +22,5 @@
 #define KEY_F1 19u8
 
 import u8 keyboard_wait_key_released();
+
+import u8 bit_mask_to_index[32];

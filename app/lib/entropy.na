@@ -4,28 +4,30 @@
 #define KEYBOARD_PORT *((u8*)KEYBOARD_ADDR)
 
 #define FIRST_ROW 0b11111110u8
-#define MAX_ROW 0b10111111u8
+#define MAX_ROW 0b11011111u8
 
-export u16 get_keyboard_entropy() {
-    u16 result; // not initialized to keep possible RAM garbage on startup
+export u16 entropy; // not initialized to keep possible RAM garbage on startup
 
+export u8 keyboard_wait_key_released_entropy() {
     u8 row = FIRST_ROW;
+    u8 col;
     KEYBOARD_PORT = row;
-    // scan until pressed
-    while (KEYBOARD_PORT == 0xffu8) {
-        result += 1u;
+    col = KEYBOARD_PORT;
+    while (col == 0xffu8) {
+        entropy += 1u;
         row <<= 1u;
         row |= 1u8;
         if (row == MAX_ROW) {
             row = FIRST_ROW;
         }
         KEYBOARD_PORT = row;
+        col = KEYBOARD_PORT;
     }
     // pressed
-    result += (u16)KEYBOARD_PORT;
+    entropy += (u16)col + (u16)row;
     while (KEYBOARD_PORT != 0xffu8) {
-        result += 1u;
+        entropy += 1u;
     }
     KEYBOARD_PORT = 0xffu8;
-    return result;
+    return bit_mask_to_index[0xfu8 & ~col] + (bit_mask_to_index[~row] << 2u);
 }

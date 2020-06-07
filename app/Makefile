@@ -1,7 +1,7 @@
 NATRIX_DIR=../tools/natrix
 NATRIX=$(NATRIX_DIR)/natrix.py
 
-all: calc.rom io_test.rom test.bin natest.bin
+all: calc.rom io_test.rom test.bin natest.bin main.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s
@@ -28,7 +28,7 @@ test.bin: test/test.o lib/display.o lib/keyboard.o lib/bcdf.o lib/bcdf_addsub.o 
 io_test.bin: test/io_test.o lib/display.o lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-maze.bin: maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o lib/entropy.o
+main.bin: main.o maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o lib/entropy.o calc/calc.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm
