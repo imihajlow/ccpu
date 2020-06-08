@@ -281,7 +281,7 @@ sign_input:
     ldi ph, hi(keyboard_wait_key_released_result)
     ld a
 
-    ldi b, key_star ; minus
+    ldi b, key_down ; minus
     sub b, a
     ldi pl, lo(sign_toggle)
     ldi ph, hi(sign_toggle)
