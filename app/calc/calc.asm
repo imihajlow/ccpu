@@ -5,6 +5,7 @@
     .global display_clear
     .global display_print
     .global display_print_byte
+    .global display_print_char
     .global display_print_arg
     .global display_set_address
     .global display_set_address_arg
@@ -65,10 +66,6 @@ calc_main:
     ldi pl, lo(number_string + 16)
     ldi ph, hi(number_string + 16)
     mov a, 0
-    st a
-
-    ldi pl, lo(op_null_term)
-    ldi ph, hi(op_null_term)
     st a
 
     ldi pl, lo(display_print_bcdf_width)
@@ -221,15 +218,14 @@ init:
     ldi ph, hi(display_set_address)
     jmp
 
+    ldi pl, lo(op)
+    ldi ph, hi(op)
+    ld a
     ldi pl, lo(display_print_arg)
     ldi ph, hi(display_print_arg)
-    ldi a, lo(op)
     st a
-    inc pl
-    ldi a, hi(op)
-    st b
-    ldi pl, lo(display_print)
-    ldi ph, hi(display_print)
+    ldi pl, lo(display_print_char)
+    ldi ph, hi(display_print_char)
     jmp
 
     ldi pl, lo(display_set_address_arg)
@@ -671,10 +667,6 @@ display_entered_number_end:
     mov pl, a
     jmp
 
-hello_string:
-    ascii "Hello"
-    db 0
-
 op_prompt:
     ascii "OP?             "
     db 0
@@ -689,7 +681,6 @@ bcdf_a: res 16
 number_input_position: res 1
 is_dot_entered: res 1
 op: res 1
-op_null_term: res 1
     .align 2
 ret: res 2
 p_op: res 2
