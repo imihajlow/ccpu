@@ -1,0 +1,4 @@
+Copyright 2020 Ivan Mikhailov
+
+This program is licensed under the GNU General Public License, version 3. See LICENSE.GPL.
+  http://www.gnu.org/licenses/gpl-3.0.html

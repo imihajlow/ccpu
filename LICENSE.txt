@@ -1,0 +1,11 @@
+Copyright 2020 Ivan Mikhailov
+
+Unless otherwise stated:
+
+Hardware design, documentation, and products are licensed under the TAPR Open
+Hardware License, version 1.0. See LICENSE.TAPR.
+  https://www.tapr.org/OHL
+
+Software, firmware, or code loaded into programmable devices is
+licensed under the GNU General Public License, version 3.  See LICENSE.GPL.
+  http://www.gnu.org/licenses/gpl-3.0.html
