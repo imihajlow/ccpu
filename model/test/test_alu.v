@@ -1,26 +1,27 @@
+`timescale 1us/1ns
 module test_alu;
     task assert;
         input v;
-        if (!v)
+        if (v === 1'b0)
             $fatal;
     endtask
 
-    localparam ADD = 0; //  a + b
-    localparam SUB = 1; //  a - b
-    localparam ADC = 2; //  a + b + c
-    localparam SBB = 3; //  a - b - c
-    localparam INC = 4; //  a + 1
-    localparam DEC = 5; //  a - 1
-    localparam SHL = 6; //  a << 1
-    localparam NEG = 7; // -a
-    localparam MOV = 8; //  a
-    localparam NOT = 9; //  ~a
-    localparam EXP = 10; //  c ? 0xff : 0x00
-    localparam AND = 11; // a & b
-    localparam OR  = 12; // a | b
-    localparam XOR = 13; // a ^ b
-    localparam SHR = 14; // a >> 1, zero extended
-    localparam SAR = 15; // a >> 1, sign extended
+    localparam ADD = 9; //  a + b
+    localparam SUB = 13; //  a - b
+    localparam ADC = 10; //  a + b + c
+    localparam SBB = 14; //  a - b - c
+    localparam INC = 11; //  a + 1
+    localparam DEC = 15; //  a - 1
+    localparam SHL = 3; //  a << 1
+    localparam NEG = 12; // -a
+    localparam MOV = 8; //  b
+    localparam NOT = 4; //  ~a
+    localparam EXP = 0; //  c ? 0xff : 0x00
+    localparam AND = 1; // a & b
+    localparam OR  = 2; // a | b
+    localparam XOR = 5; // a ^ b
+    localparam SHR = 6; // a >> 1, zero extended
+    localparam SAR = 7; // a >> 1, sign extended
 
     reg [7:0] a;
     reg [7:0] b;
@@ -44,8 +45,8 @@ module test_alu;
 
     integer i_carry, i_invert, i_a, i_b;
     initial begin
-        $dumpfile("test_alu.vcd");
-        $dumpvars;
+        // $dumpfile("test_alu.vcd");
+        // $dumpvars;
 
         n_oe = 1'b0;
 
@@ -228,9 +229,7 @@ module test_alu;
 
                         op = MOV;
                         #1
-                        assert(result == i_a);
-                        assert(flags[0] == (result == 0));
-                        assert(flags[2] == result[7]);
+                        assert(result == i_b);
 
                         op = NOT;
                         #1

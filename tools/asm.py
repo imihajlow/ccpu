@@ -94,40 +94,51 @@ def encodeSrc(reg):
     else:
         raise ValueError("Bad register `{}`".format(reg))
 
-def encodeAlu(op):
-    if op == 'add':
-        return 0
-    if op == 'sub':
-        return 1
-    if op == 'adc':
-        return 2
-    if op == 'sbb':
-        return 3
-    if op == 'inc':
-        return 4
-    if op == 'dec':
-        return 5
-    if op == 'shl':
-        return 6
-    if op == 'neg':
-        return 7
-    if op == 'mov':
-        return 8
-    if op == 'not':
-        return 9
-    if op == 'exp':
-        return 10
-    if op == 'and':
-        return 11
-    if op == 'or':
-        return  12
-    if op == 'xor':
-        return 13
-    if op == 'shr':
-        return 14
-    if op == 'sar':
-        return 15
-    raise ValueError("Wrong instruction: {}".format(op))
+def encodeAlu(op, aluRevision):
+    if aluRevision == 1:
+        d = {
+            'add': 0,
+            'sub': 1,
+            'adc': 2,
+            'sbb': 3,
+            'inc': 4,
+            'dec': 5,
+            'shl': 6,
+            'neg': 7,
+            'mov': 8,
+            'not': 9,
+            'exp': 10,
+            'and': 11,
+            'or':  12,
+            'xor': 13,
+            'shr': 14,
+            'sar': 15,
+        }
+    elif aluRevision == 2:
+        d = {
+            'add': 9,
+            'sub': 13,
+            'adc': 10,
+            'sbb': 14,
+            'inc': 11,
+            'dec': 15,
+            'shl': 3,
+            'neg': 12,
+            'mov': 8,
+            'not': 4,
+            'exp': 0,
+            'and': 1,
+            'or':  2,
+            'xor': 5,
+            'shr': 6,
+            'sar': 7,
+        }
+    else:
+        raise RuntimeError("Bad ALU revision: {}".format(aluRevision))
+    if op in d:
+        return d[op]
+    else:
+        raise ValueError("Wrong instruction: {}".format(op))
 
 def evalExpression(value, obj):
     # check if the expression is correct
@@ -156,7 +167,7 @@ def encodeFlag(f):
         raise ValueError("Wrong jump condition: {}".format(f))
 
 # TODO use consts here for expressions?
-def encode(op, args, obj):
+def encode(op, args, obj, aluRevision):
     if isAlu(op):
         singleArg = isSingleArg(op)
         m = re.match(r"(a|b|ph|pl)\s*(?:,\s*(a|b|ph|pl|0))?", args)
@@ -168,7 +179,7 @@ def encode(op, args, obj):
         inverse = not straight if singleArg else src == 'a'
         if straight == inverse:
             raise ValueError("Only one of {} operands should be A".format(op))
-        return [(encodeAlu(op) << 3) | (4 if inverse else 0) | encodeSrc(dst if inverse else src)], []
+        return [(encodeAlu(op, aluRevision) << 3) | (4 if inverse else 0) | encodeSrc(dst if inverse else src)], []
     elif op == 'ld':
         return [0x80 | encodeSrc(args)], []
     elif op == 'st':
@@ -225,7 +236,7 @@ def encode(op, args, obj):
     else:
         raise ValueError("Invalid opcode: {}".format(op))
 
-def assemble(lines):
+def assemble(lines, aluRevision):
     result = Object()
     r = re.compile(r"^\s*(?:(?P<label>[_a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"'.?]*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
     for i,l in enumerate(lines):
@@ -276,7 +287,7 @@ def assemble(lines):
                 elif op == '.export':
                     result.declareExport(args)
             else:
-                text, refs = encode(op, args, result)
+                text, refs = encode(op, args, result, aluRevision)
                 result.placeValue(text)
                 for offset, ref in refs:
                     result.placeExpression(offset, ref)
@@ -293,11 +304,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Assembler')
     parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
     parser.add_argument('file', type=argparse.FileType("r"), help='input file name')
+    parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision')
     args = parser.parse_args()
 
     try:
         lines = args.file.readlines()
-        o = assemble(lines)
+        o = assemble(lines, args.alu_revision)
         save(args.o, o)
     except AssemblyError as e:
         print(e)

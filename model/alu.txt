@@ -1,0 +1,13 @@
+mov = 8
+
+            n_sa_ena    n_sb_ena    adder_b_one swap    sub     adder_carry_ena
+mov         1           0           0           0       0       0                   1000    exp
+add         0           0           0           0       0       0                   1001    and
+adc         0           0           0           0       0       1                   1010    or
+inc         0           1           1           0       0       0                   1011    shl
+neg         1           0           0           1       1       0                   1100    not
+sub         0           0           0           0       1       0                   1101    xor
+sbb         0           0           0           0       1       1                   1110    shr
+dec         0           1           1           0       1       0                   1111    sar
+
+         !(0|1)        0&1         0&1       2&!(0|1)   2      1&!0
