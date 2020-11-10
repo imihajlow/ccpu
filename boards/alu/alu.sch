@@ -57,46 +57,46 @@ Text Label 3450 3050 0    50   ~ 0
 flags[0..3]
 $Comp
 L 74xx:74LS02 U14
-U 1 1 5FC47CF2
+U 3 1 5FC47CF2
 P 14400 12450
 F 0 "U14" H 14400 12775 50  0000 C CNN
 F 1 "MC74ACT02DTR2G" H 14400 12684 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14400 12450 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74ls02" H 14400 12450 50  0001 C CNN
-	1    14400 12450
+	3    14400 12450
 	1    0    0    -1  
 $EndComp
 $Comp
 L 74xx:74LS02 U14
-U 2 1 5FC4E346
+U 4 1 5FC4E346
 P 14400 13000
 F 0 "U14" H 14400 13325 50  0000 C CNN
 F 1 "MC74ACT02DTR2G" H 14400 13234 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14400 13000 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74ls02" H 14400 13000 50  0001 C CNN
-	2    14400 13000
+	4    14400 13000
 	1    0    0    -1  
 $EndComp
 $Comp
 L 74xx:74LS02 U14
-U 3 1 5FC506A0
+U 1 1 5FC506A0
 P 14400 13550
 F 0 "U14" H 14400 13875 50  0000 C CNN
 F 1 "MC74ACT02DTR2G" H 14400 13784 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14400 13550 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74ls02" H 14400 13550 50  0001 C CNN
-	3    14400 13550
+	1    14400 13550
 	1    0    0    -1  
 $EndComp
 $Comp
 L 74xx:74LS02 U14
-U 4 1 5FC52E76
+U 2 1 5FC52E76
 P 14400 14100
 F 0 "U14" H 14400 14425 50  0000 C CNN
 F 1 "MC74ACT02DTR2G" H 14400 14334 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14400 14100 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74ls02" H 14400 14100 50  0001 C CNN
-	4    14400 14100
+	2    14400 14100
 	1    0    0    -1  
 $EndComp
 Text Label 14100 12350 2    50   ~ 0
@@ -124,7 +124,7 @@ F 1 "SN74ACT08PW" H 15350 14034 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 15350 13800 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 15350 13800 50  0001 C CNN
 	4    15350 13800
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 Wire Wire Line
 	14700 12450 14900 12450
@@ -582,798 +582,6 @@ F 3 "" H 22200 13850 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:LED D1
-U 1 1 5FD21D52
-P 2250 13300
-F 0 "D1" H 1350 13300 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13136 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 13300 50  0001 C CNN
-F 3 "~" H 2250 13300 50  0001 C CNN
-	1    2250 13300
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R1
-U 1 1 5FD27625
-P 2550 13300
-F 0 "R1" V 2550 14100 50  0000 C CNN
-F 1 "600" V 2550 14450 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 13300 50  0001 C CNN
-F 3 "~" H 2550 13300 50  0001 C CNN
-	1    2550 13300
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR03
-U 1 1 5FD283A0
-P 2700 13300
-F 0 "#PWR03" H 2700 13050 50  0001 C CNN
-F 1 "GND" V 2705 13172 50  0000 R CNN
-F 2 "" H 2700 13300 50  0001 C CNN
-F 3 "" H 2700 13300 50  0001 C CNN
-	1    2700 13300
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D2
-U 1 1 5FD295D5
-P 2250 13450
-F 0 "D2" H 1350 13450 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13286 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 13450 50  0001 C CNN
-F 3 "~" H 2250 13450 50  0001 C CNN
-	1    2250 13450
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R2
-U 1 1 5FD295DB
-P 2550 13450
-F 0 "R2" V 2550 14250 50  0000 C CNN
-F 1 "600" V 2550 14600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 13450 50  0001 C CNN
-F 3 "~" H 2550 13450 50  0001 C CNN
-	1    2550 13450
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR04
-U 1 1 5FD295E1
-P 2700 13450
-F 0 "#PWR04" H 2700 13200 50  0001 C CNN
-F 1 "GND" V 2705 13322 50  0000 R CNN
-F 2 "" H 2700 13450 50  0001 C CNN
-F 3 "" H 2700 13450 50  0001 C CNN
-	1    2700 13450
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D3
-U 1 1 5FD2D075
-P 2250 13600
-F 0 "D3" H 1350 13600 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13436 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 13600 50  0001 C CNN
-F 3 "~" H 2250 13600 50  0001 C CNN
-	1    2250 13600
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R3
-U 1 1 5FD2D07B
-P 2550 13600
-F 0 "R3" V 2550 14400 50  0000 C CNN
-F 1 "600" V 2550 14750 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 13600 50  0001 C CNN
-F 3 "~" H 2550 13600 50  0001 C CNN
-	1    2550 13600
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR05
-U 1 1 5FD2D081
-P 2700 13600
-F 0 "#PWR05" H 2700 13350 50  0001 C CNN
-F 1 "GND" V 2705 13472 50  0000 R CNN
-F 2 "" H 2700 13600 50  0001 C CNN
-F 3 "" H 2700 13600 50  0001 C CNN
-	1    2700 13600
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D4
-U 1 1 5FD2D087
-P 2250 13750
-F 0 "D4" H 1350 13750 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13586 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 13750 50  0001 C CNN
-F 3 "~" H 2250 13750 50  0001 C CNN
-	1    2250 13750
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R4
-U 1 1 5FD2D08D
-P 2550 13750
-F 0 "R4" V 2550 14550 50  0000 C CNN
-F 1 "600" V 2550 14900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 13750 50  0001 C CNN
-F 3 "~" H 2550 13750 50  0001 C CNN
-	1    2550 13750
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR06
-U 1 1 5FD2D093
-P 2700 13750
-F 0 "#PWR06" H 2700 13500 50  0001 C CNN
-F 1 "GND" V 2705 13622 50  0000 R CNN
-F 2 "" H 2700 13750 50  0001 C CNN
-F 3 "" H 2700 13750 50  0001 C CNN
-	1    2700 13750
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D5
-U 1 1 5FD315F4
-P 2250 13900
-F 0 "D5" H 1350 13900 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13736 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 13900 50  0001 C CNN
-F 3 "~" H 2250 13900 50  0001 C CNN
-	1    2250 13900
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R5
-U 1 1 5FD315FA
-P 2550 13900
-F 0 "R5" V 2550 14700 50  0000 C CNN
-F 1 "600" V 2550 15050 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 13900 50  0001 C CNN
-F 3 "~" H 2550 13900 50  0001 C CNN
-	1    2550 13900
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR07
-U 1 1 5FD31600
-P 2700 13900
-F 0 "#PWR07" H 2700 13650 50  0001 C CNN
-F 1 "GND" V 2705 13772 50  0000 R CNN
-F 2 "" H 2700 13900 50  0001 C CNN
-F 3 "" H 2700 13900 50  0001 C CNN
-	1    2700 13900
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D6
-U 1 1 5FD31606
-P 2250 14050
-F 0 "D6" H 1350 14050 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 13886 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 14050 50  0001 C CNN
-F 3 "~" H 2250 14050 50  0001 C CNN
-	1    2250 14050
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R6
-U 1 1 5FD3160C
-P 2550 14050
-F 0 "R6" V 2550 14850 50  0000 C CNN
-F 1 "600" V 2550 15200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 14050 50  0001 C CNN
-F 3 "~" H 2550 14050 50  0001 C CNN
-	1    2550 14050
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR08
-U 1 1 5FD31612
-P 2700 14050
-F 0 "#PWR08" H 2700 13800 50  0001 C CNN
-F 1 "GND" V 2705 13922 50  0000 R CNN
-F 2 "" H 2700 14050 50  0001 C CNN
-F 3 "" H 2700 14050 50  0001 C CNN
-	1    2700 14050
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D7
-U 1 1 5FD31618
-P 2250 14200
-F 0 "D7" H 1350 14200 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 14036 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 14200 50  0001 C CNN
-F 3 "~" H 2250 14200 50  0001 C CNN
-	1    2250 14200
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R7
-U 1 1 5FD3161E
-P 2550 14200
-F 0 "R7" V 2550 15000 50  0000 C CNN
-F 1 "600" V 2550 15350 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 14200 50  0001 C CNN
-F 3 "~" H 2550 14200 50  0001 C CNN
-	1    2550 14200
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR09
-U 1 1 5FD31624
-P 2700 14200
-F 0 "#PWR09" H 2700 13950 50  0001 C CNN
-F 1 "GND" V 2705 14072 50  0000 R CNN
-F 2 "" H 2700 14200 50  0001 C CNN
-F 3 "" H 2700 14200 50  0001 C CNN
-	1    2700 14200
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D8
-U 1 1 5FD3162A
-P 2250 14350
-F 0 "D8" H 1350 14350 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 14186 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 14350 50  0001 C CNN
-F 3 "~" H 2250 14350 50  0001 C CNN
-	1    2250 14350
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R8
-U 1 1 5FD31630
-P 2550 14350
-F 0 "R8" V 2550 15150 50  0000 C CNN
-F 1 "600" V 2550 15500 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 14350 50  0001 C CNN
-F 3 "~" H 2550 14350 50  0001 C CNN
-	1    2550 14350
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR010
-U 1 1 5FD31636
-P 2700 14350
-F 0 "#PWR010" H 2700 14100 50  0001 C CNN
-F 1 "GND" V 2705 14222 50  0000 R CNN
-F 2 "" H 2700 14350 50  0001 C CNN
-F 3 "" H 2700 14350 50  0001 C CNN
-	1    2700 14350
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D9
-U 1 1 5FD3C0C0
-P 2250 14750
-F 0 "D9" H 1350 14750 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 14586 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 14750 50  0001 C CNN
-F 3 "~" H 2250 14750 50  0001 C CNN
-	1    2250 14750
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R9
-U 1 1 5FD3C0C6
-P 2550 14750
-F 0 "R9" V 2550 15550 50  0000 C CNN
-F 1 "600" V 2550 15900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 14750 50  0001 C CNN
-F 3 "~" H 2550 14750 50  0001 C CNN
-	1    2550 14750
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR011
-U 1 1 5FD3C0CC
-P 2700 14750
-F 0 "#PWR011" H 2700 14500 50  0001 C CNN
-F 1 "GND" V 2705 14622 50  0000 R CNN
-F 2 "" H 2700 14750 50  0001 C CNN
-F 3 "" H 2700 14750 50  0001 C CNN
-	1    2700 14750
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D10
-U 1 1 5FD3C0D2
-P 2250 14900
-F 0 "D10" H 1350 14900 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 14736 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 14900 50  0001 C CNN
-F 3 "~" H 2250 14900 50  0001 C CNN
-	1    2250 14900
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R10
-U 1 1 5FD3C0D8
-P 2550 14900
-F 0 "R10" V 2550 15700 50  0000 C CNN
-F 1 "600" V 2550 16050 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 14900 50  0001 C CNN
-F 3 "~" H 2550 14900 50  0001 C CNN
-	1    2550 14900
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR012
-U 1 1 5FD3C0DE
-P 2700 14900
-F 0 "#PWR012" H 2700 14650 50  0001 C CNN
-F 1 "GND" V 2705 14772 50  0000 R CNN
-F 2 "" H 2700 14900 50  0001 C CNN
-F 3 "" H 2700 14900 50  0001 C CNN
-	1    2700 14900
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D11
-U 1 1 5FD3C0E4
-P 2250 15050
-F 0 "D11" H 1350 15050 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 14886 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15050 50  0001 C CNN
-F 3 "~" H 2250 15050 50  0001 C CNN
-	1    2250 15050
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R11
-U 1 1 5FD3C0EA
-P 2550 15050
-F 0 "R11" V 2550 15850 50  0000 C CNN
-F 1 "600" V 2550 16200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15050 50  0001 C CNN
-F 3 "~" H 2550 15050 50  0001 C CNN
-	1    2550 15050
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR013
-U 1 1 5FD3C0F0
-P 2700 15050
-F 0 "#PWR013" H 2700 14800 50  0001 C CNN
-F 1 "GND" V 2705 14922 50  0000 R CNN
-F 2 "" H 2700 15050 50  0001 C CNN
-F 3 "" H 2700 15050 50  0001 C CNN
-	1    2700 15050
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D12
-U 1 1 5FD3C0F6
-P 2250 15200
-F 0 "D12" H 1350 15200 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 15036 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15200 50  0001 C CNN
-F 3 "~" H 2250 15200 50  0001 C CNN
-	1    2250 15200
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R12
-U 1 1 5FD3C0FC
-P 2550 15200
-F 0 "R12" V 2550 16000 50  0000 C CNN
-F 1 "600" V 2550 16350 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15200 50  0001 C CNN
-F 3 "~" H 2550 15200 50  0001 C CNN
-	1    2550 15200
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR014
-U 1 1 5FD3C102
-P 2700 15200
-F 0 "#PWR014" H 2700 14950 50  0001 C CNN
-F 1 "GND" V 2705 15072 50  0000 R CNN
-F 2 "" H 2700 15200 50  0001 C CNN
-F 3 "" H 2700 15200 50  0001 C CNN
-	1    2700 15200
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D13
-U 1 1 5FD3C108
-P 2250 15350
-F 0 "D13" H 1350 15350 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 15186 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15350 50  0001 C CNN
-F 3 "~" H 2250 15350 50  0001 C CNN
-	1    2250 15350
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R13
-U 1 1 5FD3C10E
-P 2550 15350
-F 0 "R13" V 2550 16150 50  0000 C CNN
-F 1 "600" V 2550 16500 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15350 50  0001 C CNN
-F 3 "~" H 2550 15350 50  0001 C CNN
-	1    2550 15350
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR015
-U 1 1 5FD3C114
-P 2700 15350
-F 0 "#PWR015" H 2700 15100 50  0001 C CNN
-F 1 "GND" V 2705 15222 50  0000 R CNN
-F 2 "" H 2700 15350 50  0001 C CNN
-F 3 "" H 2700 15350 50  0001 C CNN
-	1    2700 15350
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D14
-U 1 1 5FD3C11A
-P 2250 15500
-F 0 "D14" H 1350 15500 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 15336 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15500 50  0001 C CNN
-F 3 "~" H 2250 15500 50  0001 C CNN
-	1    2250 15500
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R14
-U 1 1 5FD3C120
-P 2550 15500
-F 0 "R14" V 2550 16300 50  0000 C CNN
-F 1 "600" V 2550 16650 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15500 50  0001 C CNN
-F 3 "~" H 2550 15500 50  0001 C CNN
-	1    2550 15500
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR016
-U 1 1 5FD3C126
-P 2700 15500
-F 0 "#PWR016" H 2700 15250 50  0001 C CNN
-F 1 "GND" V 2705 15372 50  0000 R CNN
-F 2 "" H 2700 15500 50  0001 C CNN
-F 3 "" H 2700 15500 50  0001 C CNN
-	1    2700 15500
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D15
-U 1 1 5FD3C12C
-P 2250 15650
-F 0 "D15" H 1350 15650 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 15486 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15650 50  0001 C CNN
-F 3 "~" H 2250 15650 50  0001 C CNN
-	1    2250 15650
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R15
-U 1 1 5FD3C132
-P 2550 15650
-F 0 "R15" V 2550 16450 50  0000 C CNN
-F 1 "600" V 2550 16800 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15650 50  0001 C CNN
-F 3 "~" H 2550 15650 50  0001 C CNN
-	1    2550 15650
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR017
-U 1 1 5FD3C138
-P 2700 15650
-F 0 "#PWR017" H 2700 15400 50  0001 C CNN
-F 1 "GND" V 2705 15522 50  0000 R CNN
-F 2 "" H 2700 15650 50  0001 C CNN
-F 3 "" H 2700 15650 50  0001 C CNN
-	1    2700 15650
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D16
-U 1 1 5FD3C13E
-P 2250 15800
-F 0 "D16" H 1350 15800 50  0000 C CNN
-F 1 "KP-2012CGCK" H 2243 15636 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 2250 15800 50  0001 C CNN
-F 3 "~" H 2250 15800 50  0001 C CNN
-	1    2250 15800
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R16
-U 1 1 5FD3C144
-P 2550 15800
-F 0 "R16" V 2550 16600 50  0000 C CNN
-F 1 "600" V 2550 16950 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 2480 15800 50  0001 C CNN
-F 3 "~" H 2550 15800 50  0001 C CNN
-	1    2550 15800
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR018
-U 1 1 5FD3C14A
-P 2700 15800
-F 0 "#PWR018" H 2700 15550 50  0001 C CNN
-F 1 "GND" V 2705 15672 50  0000 R CNN
-F 2 "" H 2700 15800 50  0001 C CNN
-F 3 "" H 2700 15800 50  0001 C CNN
-	1    2700 15800
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D17
-U 1 1 5FD60C72
-P 4350 13300
-F 0 "D17" H 3450 13300 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13136 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 13300 50  0001 C CNN
-F 3 "~" H 4350 13300 50  0001 C CNN
-	1    4350 13300
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R17
-U 1 1 5FD60C78
-P 4650 13300
-F 0 "R17" V 4650 14100 50  0000 C CNN
-F 1 "620" V 4650 14450 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 13300 50  0001 C CNN
-F 3 "~" H 4650 13300 50  0001 C CNN
-	1    4650 13300
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR023
-U 1 1 5FD60C7E
-P 4800 13300
-F 0 "#PWR023" H 4800 13050 50  0001 C CNN
-F 1 "GND" V 4805 13172 50  0000 R CNN
-F 2 "" H 4800 13300 50  0001 C CNN
-F 3 "" H 4800 13300 50  0001 C CNN
-	1    4800 13300
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D18
-U 1 1 5FD60C84
-P 4350 13450
-F 0 "D18" H 3450 13450 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13286 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 13450 50  0001 C CNN
-F 3 "~" H 4350 13450 50  0001 C CNN
-	1    4350 13450
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R18
-U 1 1 5FD60C8A
-P 4650 13450
-F 0 "R18" V 4650 14250 50  0000 C CNN
-F 1 "620" V 4650 14600 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 13450 50  0001 C CNN
-F 3 "~" H 4650 13450 50  0001 C CNN
-	1    4650 13450
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR024
-U 1 1 5FD60C90
-P 4800 13450
-F 0 "#PWR024" H 4800 13200 50  0001 C CNN
-F 1 "GND" V 4805 13322 50  0000 R CNN
-F 2 "" H 4800 13450 50  0001 C CNN
-F 3 "" H 4800 13450 50  0001 C CNN
-	1    4800 13450
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D19
-U 1 1 5FD60C96
-P 4350 13600
-F 0 "D19" H 3450 13600 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13436 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 13600 50  0001 C CNN
-F 3 "~" H 4350 13600 50  0001 C CNN
-	1    4350 13600
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R19
-U 1 1 5FD60C9C
-P 4650 13600
-F 0 "R19" V 4650 14400 50  0000 C CNN
-F 1 "620" V 4650 14750 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 13600 50  0001 C CNN
-F 3 "~" H 4650 13600 50  0001 C CNN
-	1    4650 13600
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR025
-U 1 1 5FD60CA2
-P 4800 13600
-F 0 "#PWR025" H 4800 13350 50  0001 C CNN
-F 1 "GND" V 4805 13472 50  0000 R CNN
-F 2 "" H 4800 13600 50  0001 C CNN
-F 3 "" H 4800 13600 50  0001 C CNN
-	1    4800 13600
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D20
-U 1 1 5FD60CA8
-P 4350 13750
-F 0 "D20" H 3450 13750 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13586 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 13750 50  0001 C CNN
-F 3 "~" H 4350 13750 50  0001 C CNN
-	1    4350 13750
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R20
-U 1 1 5FD60CAE
-P 4650 13750
-F 0 "R20" V 4650 14550 50  0000 C CNN
-F 1 "620" V 4650 14900 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 13750 50  0001 C CNN
-F 3 "~" H 4650 13750 50  0001 C CNN
-	1    4650 13750
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR026
-U 1 1 5FD60CB4
-P 4800 13750
-F 0 "#PWR026" H 4800 13500 50  0001 C CNN
-F 1 "GND" V 4805 13622 50  0000 R CNN
-F 2 "" H 4800 13750 50  0001 C CNN
-F 3 "" H 4800 13750 50  0001 C CNN
-	1    4800 13750
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D21
-U 1 1 5FD60CBA
-P 4350 13900
-F 0 "D21" H 3450 13900 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13736 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 13900 50  0001 C CNN
-F 3 "~" H 4350 13900 50  0001 C CNN
-	1    4350 13900
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R21
-U 1 1 5FD60CC0
-P 4650 13900
-F 0 "R21" V 4650 14700 50  0000 C CNN
-F 1 "620" V 4650 15050 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 13900 50  0001 C CNN
-F 3 "~" H 4650 13900 50  0001 C CNN
-	1    4650 13900
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR027
-U 1 1 5FD60CC6
-P 4800 13900
-F 0 "#PWR027" H 4800 13650 50  0001 C CNN
-F 1 "GND" V 4805 13772 50  0000 R CNN
-F 2 "" H 4800 13900 50  0001 C CNN
-F 3 "" H 4800 13900 50  0001 C CNN
-	1    4800 13900
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D22
-U 1 1 5FD60CCC
-P 4350 14050
-F 0 "D22" H 3450 14050 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 13886 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 14050 50  0001 C CNN
-F 3 "~" H 4350 14050 50  0001 C CNN
-	1    4350 14050
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R22
-U 1 1 5FD60CD2
-P 4650 14050
-F 0 "R22" V 4650 14850 50  0000 C CNN
-F 1 "620" V 4650 15200 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 14050 50  0001 C CNN
-F 3 "~" H 4650 14050 50  0001 C CNN
-	1    4650 14050
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR028
-U 1 1 5FD60CD8
-P 4800 14050
-F 0 "#PWR028" H 4800 13800 50  0001 C CNN
-F 1 "GND" V 4805 13922 50  0000 R CNN
-F 2 "" H 4800 14050 50  0001 C CNN
-F 3 "" H 4800 14050 50  0001 C CNN
-	1    4800 14050
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D23
-U 1 1 5FD60CDE
-P 4350 14200
-F 0 "D23" H 3450 14200 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 14036 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 14200 50  0001 C CNN
-F 3 "~" H 4350 14200 50  0001 C CNN
-	1    4350 14200
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R23
-U 1 1 5FD60CE4
-P 4650 14200
-F 0 "R23" V 4650 15000 50  0000 C CNN
-F 1 "620" V 4650 15350 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 14200 50  0001 C CNN
-F 3 "~" H 4650 14200 50  0001 C CNN
-	1    4650 14200
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR029
-U 1 1 5FD60CEA
-P 4800 14200
-F 0 "#PWR029" H 4800 13950 50  0001 C CNN
-F 1 "GND" V 4805 14072 50  0000 R CNN
-F 2 "" H 4800 14200 50  0001 C CNN
-F 3 "" H 4800 14200 50  0001 C CNN
-	1    4800 14200
-	0    -1   -1   0   
-$EndComp
-$Comp
-L Device:LED D24
-U 1 1 5FD60CF0
-P 4350 14350
-F 0 "D24" H 3450 14350 50  0000 C CNN
-F 1 "KP-2012EC" H 4343 14186 50  0001 C CNN
-F 2 "LED_SMD:LED_0805_2012Metric" H 4350 14350 50  0001 C CNN
-F 3 "~" H 4350 14350 50  0001 C CNN
-	1    4350 14350
-	-1   0    0    1   
-$EndComp
-$Comp
-L Device:R R24
-U 1 1 5FD60CF6
-P 4650 14350
-F 0 "R24" V 4650 15150 50  0000 C CNN
-F 1 "620" V 4650 15500 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 4580 14350 50  0001 C CNN
-F 3 "~" H 4650 14350 50  0001 C CNN
-	1    4650 14350
-	0    1    1    0   
-$EndComp
-$Comp
-L power:GND #PWR030
-U 1 1 5FD60CFC
-P 4800 14350
-F 0 "#PWR030" H 4800 14100 50  0001 C CNN
-F 1 "GND" V 4805 14222 50  0000 R CNN
-F 2 "" H 4800 14350 50  0001 C CNN
-F 3 "" H 4800 14350 50  0001 C CNN
-	1    4800 14350
-	0    -1   -1   0   
-$EndComp
-$Comp
 L Device:LED D30
 U 1 1 5FD7867E
 P 6400 15350
@@ -1637,54 +845,6 @@ F 3 "" H 4800 15500 50  0001 C CNN
 	1    4800 15500
 	0    -1   -1   0   
 $EndComp
-Text Label 2100 13300 2    50   ~ 0
-a0
-Text Label 2100 13450 2    50   ~ 0
-a1
-Text Label 2100 13600 2    50   ~ 0
-a2
-Text Label 2100 13750 2    50   ~ 0
-a3
-Text Label 2100 13900 2    50   ~ 0
-a4
-Text Label 2100 14050 2    50   ~ 0
-a5
-Text Label 2100 14200 2    50   ~ 0
-a6
-Text Label 2100 14350 2    50   ~ 0
-a7
-Text Label 2100 14750 2    50   ~ 0
-b0
-Text Label 2100 14900 2    50   ~ 0
-b1
-Text Label 2100 15050 2    50   ~ 0
-b2
-Text Label 2100 15200 2    50   ~ 0
-b3
-Text Label 2100 15350 2    50   ~ 0
-b4
-Text Label 2100 15500 2    50   ~ 0
-b5
-Text Label 2100 15650 2    50   ~ 0
-b6
-Text Label 2100 15800 2    50   ~ 0
-b7
-Text Label 4200 13300 2    50   ~ 0
-r0
-Text Label 4200 13450 2    50   ~ 0
-r1
-Text Label 4200 13600 2    50   ~ 0
-r2
-Text Label 4200 13750 2    50   ~ 0
-r3
-Text Label 4200 13900 2    50   ~ 0
-r4
-Text Label 4200 14050 2    50   ~ 0
-r5
-Text Label 4200 14200 2    50   ~ 0
-r6
-Text Label 4200 14350 2    50   ~ 0
-r7
 Text Label 6250 15350 2    50   ~ 0
 op0
 Text Label 6250 15500 2    50   ~ 0
@@ -1976,37 +1136,37 @@ b6
 Text Label 6000 5300 0    50   ~ 0
 b7
 Text Label 5550 6550 0    50   ~ 0
-b0
-Text Label 5550 6850 0    50   ~ 0
 b1
+Text Label 5550 6850 0    50   ~ 0
+b0
 Text Label 5550 7150 0    50   ~ 0
-b2
-Text Label 5550 7450 0    50   ~ 0
 b3
+Text Label 5550 7450 0    50   ~ 0
+b2
 Text Label 5550 8750 0    50   ~ 0
-b4
-Text Label 5550 9050 0    50   ~ 0
 b5
+Text Label 5550 9050 0    50   ~ 0
+b4
 Text Label 5550 9350 0    50   ~ 0
-b6
-Text Label 5550 9650 0    50   ~ 0
 b7
+Text Label 5550 9650 0    50   ~ 0
+b6
 Text Label 6050 6650 0    50   ~ 0
-a0
-Text Label 6050 6950 0    50   ~ 0
 a1
+Text Label 6050 6950 0    50   ~ 0
+a0
 Text Label 6050 7250 0    50   ~ 0
-a2
-Text Label 6050 7550 0    50   ~ 0
 a3
+Text Label 6050 7550 0    50   ~ 0
+a2
 Text Label 6050 8850 0    50   ~ 0
-a4
-Text Label 6050 9150 0    50   ~ 0
 a5
+Text Label 6050 9150 0    50   ~ 0
+a4
 Text Label 6050 9450 0    50   ~ 0
-a6
-Text Label 6050 9750 0    50   ~ 0
 a7
+Text Label 6050 9750 0    50   ~ 0
+a6
 $Comp
 L power:GND #PWR037
 U 1 1 60831F45
@@ -2228,21 +1388,21 @@ sa6
 Text Label 7650 5200 0    50   ~ 0
 sa7
 Text Label 7650 6550 0    50   ~ 0
-sb0
-Text Label 7650 6850 0    50   ~ 0
 sb1
+Text Label 7650 6850 0    50   ~ 0
+sb0
 Text Label 7650 7150 0    50   ~ 0
-sb2
-Text Label 7650 7450 0    50   ~ 0
 sb3
+Text Label 7650 7450 0    50   ~ 0
+sb2
 Text Label 7650 8750 0    50   ~ 0
-sb4
-Text Label 7650 9050 0    50   ~ 0
 sb5
+Text Label 7650 9050 0    50   ~ 0
+sb4
 Text Label 7650 9350 0    50   ~ 0
-sb6
-Text Label 7650 9650 0    50   ~ 0
 sb7
+Text Label 7650 9650 0    50   ~ 0
+sb6
 Wire Bus Line
 	7800 1950 14000 1950
 Wire Bus Line
@@ -2324,37 +1484,37 @@ F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 17900 1
 	1    17900 1550
 	1    0    0    -1  
 $EndComp
-Text Label 18400 1050 0    50   ~ 0
+Text Label 18400 1450 0    50   ~ 0
 r0
-Text Label 18400 1150 0    50   ~ 0
+Text Label 18400 1550 0    50   ~ 0
 r1
-Text Label 18400 1250 0    50   ~ 0
+Text Label 18400 1650 0    50   ~ 0
 r2
 Text Label 18400 1350 0    50   ~ 0
-r3
-Text Label 18400 1450 0    50   ~ 0
+r7
+Text Label 18400 1050 0    50   ~ 0
 r4
-Text Label 18400 1550 0    50   ~ 0
+Text Label 18400 1150 0    50   ~ 0
 r5
-Text Label 18400 1650 0    50   ~ 0
+Text Label 18400 1250 0    50   ~ 0
 r6
 Text Label 18400 1750 0    50   ~ 0
-r7
-Text Label 17400 1050 2    50   ~ 0
-adder_r0
-Text Label 17400 1150 2    50   ~ 0
-adder_r1
-Text Label 17400 1250 2    50   ~ 0
-adder_r2
-Text Label 17400 1350 2    50   ~ 0
-adder_r3
+r3
 Text Label 17400 1450 2    50   ~ 0
-adder_r4
+adder_r0
 Text Label 17400 1550 2    50   ~ 0
-adder_r5
+adder_r1
 Text Label 17400 1650 2    50   ~ 0
-adder_r6
+adder_r2
 Text Label 17400 1750 2    50   ~ 0
+adder_r3
+Text Label 17400 1050 2    50   ~ 0
+adder_r4
+Text Label 17400 1150 2    50   ~ 0
+adder_r5
+Text Label 17400 1250 2    50   ~ 0
+adder_r6
+Text Label 17400 1350 2    50   ~ 0
 adder_r7
 Text Label 17400 1950 2    50   ~ 0
 ~adder_oe
@@ -2542,23 +1702,23 @@ F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 17900 7
 	1    17900 7850
 	1    0    0    -1  
 $EndComp
-Text Label 18400 7350 0    50   ~ 0
-r0
-Text Label 18400 7450 0    50   ~ 0
-r1
-Text Label 18400 7550 0    50   ~ 0
-r2
-Text Label 18400 7650 0    50   ~ 0
-r3
 Text Label 18400 7750 0    50   ~ 0
-r4
+r0
 Text Label 18400 7850 0    50   ~ 0
-r5
+r1
 Text Label 18400 7950 0    50   ~ 0
-r6
+r2
 Text Label 18400 8050 0    50   ~ 0
+r3
+Text Label 18400 7350 0    50   ~ 0
+r4
+Text Label 18400 7450 0    50   ~ 0
+r5
+Text Label 18400 7550 0    50   ~ 0
+r6
+Text Label 18400 7650 0    50   ~ 0
 r7
-Text Label 17400 8250 2    50   ~ 0
+Text Label 17400 8300 2    50   ~ 0
 ~shr_oe
 Wire Wire Line
 	17400 8250 17400 8350
@@ -2584,36 +1744,36 @@ F 3 "" H 17900 7050 50  0001 C CNN
 	1    17900 7050
 	1    0    0    -1  
 $EndComp
-Text Label 17400 7350 2    50   ~ 0
-sa1
-Text Label 17400 7450 2    50   ~ 0
-sa2
-Text Label 17400 7550 2    50   ~ 0
-sa3
-Text Label 17400 7650 2    50   ~ 0
-sa4
 Text Label 17400 7750 2    50   ~ 0
-sa5
+sa1
 Text Label 17400 7850 2    50   ~ 0
-sa6
+sa2
 Text Label 17400 7950 2    50   ~ 0
+sa3
+Text Label 17400 8050 2    50   ~ 0
+sa4
+Text Label 17400 7350 2    50   ~ 0
+sa5
+Text Label 17400 7450 2    50   ~ 0
+sa6
+Text Label 17400 7550 2    50   ~ 0
 sa7
-Text Label 16500 8150 2    50   ~ 0
+Text Label 16500 7750 2    50   ~ 0
 sa7
 Wire Wire Line
-	17100 8050 17400 8050
+	17100 7650 17400 7650
 $Comp
 L 74xx:74LS08 U15
 U 2 1 60B88332
-P 16800 8050
-F 0 "U15" H 16800 8375 50  0000 C CNN
-F 1 "SN74ACT08PW" H 16800 8284 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 16800 8050 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 16800 8050 50  0001 C CNN
-	2    16800 8050
+P 16800 7650
+F 0 "U15" H 16800 7975 50  0000 C CNN
+F 1 "SN74ACT08PW" H 16800 7884 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 16800 7650 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 16800 7650 50  0001 C CNN
+	2    16800 7650
 	1    0    0    -1  
 $EndComp
-Text Label 16500 7950 2    50   ~ 0
+Text Label 16500 7550 2    50   ~ 0
 sar_ena
 $Comp
 L 74xx:74HC240 U21
@@ -2630,37 +1790,37 @@ Wire Wire Line
 	20200 2050 20200 1950
 Text Label 20200 1950 2    50   ~ 0
 ~not_oe
-Text Label 20200 1150 2    50   ~ 0
-sb1
-Text Label 20200 1250 2    50   ~ 0
-sb2
-Text Label 20200 1350 2    50   ~ 0
-sb3
-Text Label 20200 1450 2    50   ~ 0
-sb4
 Text Label 20200 1550 2    50   ~ 0
-sb5
+sb1
 Text Label 20200 1650 2    50   ~ 0
-sb6
+sb2
 Text Label 20200 1750 2    50   ~ 0
-sb7
+sb3
 Text Label 20200 1050 2    50   ~ 0
+sb4
+Text Label 20200 1150 2    50   ~ 0
+sb5
+Text Label 20200 1250 2    50   ~ 0
+sb6
+Text Label 20200 1350 2    50   ~ 0
+sb7
+Text Label 20200 1450 2    50   ~ 0
 sb0
-Text Label 21200 1050 0    50   ~ 0
-r0
-Text Label 21200 1150 0    50   ~ 0
-r1
-Text Label 21200 1250 0    50   ~ 0
-r2
-Text Label 21200 1350 0    50   ~ 0
-r3
 Text Label 21200 1450 0    50   ~ 0
-r4
+r0
 Text Label 21200 1550 0    50   ~ 0
-r5
+r1
 Text Label 21200 1650 0    50   ~ 0
-r6
+r2
 Text Label 21200 1750 0    50   ~ 0
+r3
+Text Label 21200 1050 0    50   ~ 0
+r4
+Text Label 21200 1150 0    50   ~ 0
+r5
+Text Label 21200 1250 0    50   ~ 0
+r6
+Text Label 21200 1350 0    50   ~ 0
 r7
 $Comp
 L power:GND #PWR083
@@ -2772,37 +1932,37 @@ F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 1550 11300 50  0001 C CNN
 	4    1550 11300
 	1    0    0    -1  
 $EndComp
-Text Label 1250 7350 2    50   ~ 0
-sa0
-Text Label 1250 7550 2    50   ~ 0
-sb0
-Text Label 1250 7900 2    50   ~ 0
-sa1
-Text Label 1250 8100 2    50   ~ 0
-sb1
-Text Label 1250 8450 2    50   ~ 0
-sa2
-Text Label 1250 8650 2    50   ~ 0
-sb2
-Text Label 1250 9000 2    50   ~ 0
-sa3
-Text Label 1250 9200 2    50   ~ 0
-sb3
 Text Label 1250 9550 2    50   ~ 0
-sa4
+sa0
 Text Label 1250 9750 2    50   ~ 0
-sb4
+sb0
 Text Label 1250 10100 2    50   ~ 0
-sa5
+sa1
 Text Label 1250 10300 2    50   ~ 0
-sb5
+sb1
 Text Label 1250 10650 2    50   ~ 0
-sa6
+sa2
 Text Label 1250 10850 2    50   ~ 0
-sb6
+sb2
 Text Label 1250 11200 2    50   ~ 0
-sa7
+sa3
 Text Label 1250 11400 2    50   ~ 0
+sb3
+Text Label 1250 7350 2    50   ~ 0
+sa4
+Text Label 1250 7550 2    50   ~ 0
+sb4
+Text Label 1250 7900 2    50   ~ 0
+sa5
+Text Label 1250 8100 2    50   ~ 0
+sb5
+Text Label 1250 8450 2    50   ~ 0
+sa6
+Text Label 1250 8650 2    50   ~ 0
+sb6
+Text Label 1250 9000 2    50   ~ 0
+sa7
+Text Label 1250 9200 2    50   ~ 0
 sb7
 $Comp
 L 74xx:74HC244 U3
@@ -2863,21 +2023,21 @@ Wire Wire Line
 	2350 9900 2350 10000
 Text Label 2350 9900 2    50   ~ 0
 ~and_oe
-Text Label 3350 9000 0    50   ~ 0
-r0
-Text Label 3350 9100 0    50   ~ 0
-r1
-Text Label 3350 9200 0    50   ~ 0
-r2
-Text Label 3350 9300 0    50   ~ 0
-r3
 Text Label 3350 9400 0    50   ~ 0
-r4
+r0
 Text Label 3350 9500 0    50   ~ 0
-r5
+r1
 Text Label 3350 9600 0    50   ~ 0
-r6
+r2
 Text Label 3350 9700 0    50   ~ 0
+r3
+Text Label 3350 9000 0    50   ~ 0
+r4
+Text Label 3350 9100 0    50   ~ 0
+r5
+Text Label 3350 9200 0    50   ~ 0
+r6
+Text Label 3350 9300 0    50   ~ 0
 r7
 $Comp
 L power:GND #PWR020
@@ -2901,38 +2061,6 @@ F 3 "" H 2850 8700 50  0001 C CNN
 	1    2850 8700
 	1    0    0    -1  
 $EndComp
-Text Label 8400 7300 2    50   ~ 0
-sa0
-Text Label 8400 7500 2    50   ~ 0
-sb0
-Text Label 8400 7850 2    50   ~ 0
-sa1
-Text Label 8400 8050 2    50   ~ 0
-sb1
-Text Label 8400 8400 2    50   ~ 0
-sa2
-Text Label 8400 8600 2    50   ~ 0
-sb2
-Text Label 8400 8950 2    50   ~ 0
-sa3
-Text Label 8400 9150 2    50   ~ 0
-sb3
-Text Label 8400 9500 2    50   ~ 0
-sa4
-Text Label 8400 9700 2    50   ~ 0
-sb4
-Text Label 8400 10050 2    50   ~ 0
-sa5
-Text Label 8400 10250 2    50   ~ 0
-sb5
-Text Label 8400 10600 2    50   ~ 0
-sa6
-Text Label 8400 10800 2    50   ~ 0
-sb6
-Text Label 8400 11150 2    50   ~ 0
-sa7
-Text Label 8400 11350 2    50   ~ 0
-sb7
 $Comp
 L 74xx:74HC244 U10
 U 1 1 60CE597E
@@ -2993,20 +2121,12 @@ Wire Wire Line
 Text Label 9500 9850 2    50   ~ 0
 ~or_oe
 Text Label 10500 8950 0    50   ~ 0
-r0
-Text Label 10500 9050 0    50   ~ 0
-r1
-Text Label 10500 9150 0    50   ~ 0
-r2
-Text Label 10500 9250 0    50   ~ 0
-r3
-Text Label 10500 9350 0    50   ~ 0
 r4
-Text Label 10500 9450 0    50   ~ 0
+Text Label 10500 9050 0    50   ~ 0
 r5
-Text Label 10500 9550 0    50   ~ 0
+Text Label 10500 9150 0    50   ~ 0
 r6
-Text Label 10500 9650 0    50   ~ 0
+Text Label 10500 9250 0    50   ~ 0
 r7
 $Comp
 L power:GND #PWR051
@@ -3447,7 +2567,7 @@ L 74xx:74LS32 U11
 U 5 1 60F72C9B
 P 16200 15000
 F 0 "U11" H 16430 15046 50  0000 L CNN
-F 1 "74ACT32MTCX" H 16430 14955 50  0000 L CNN
+F 1 "74ACT32MTCX" V 15950 14750 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 16200 15000 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 16200 15000 50  0001 C CNN
 	5    16200 15000
@@ -3506,7 +2626,7 @@ F 1 "SN74ACT08PW" H 16200 13484 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 16200 13250 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 16200 13250 50  0001 C CNN
 	2    16200 13250
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 $Comp
 L 74xx:74LS08 U15
@@ -3644,7 +2764,7 @@ L 74xx:74HC86 U36
 U 5 1 61058652
 P 17800 15000
 F 0 "U36" H 18030 15046 50  0000 L CNN
-F 1 "MC74ACT86DG" H 18030 14955 50  0000 L CNN
+F 1 "MC74ACT86DG" V 17550 14750 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 17800 15000 50  0001 C CNN
 F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 17800 15000 50  0001 C CNN
 	5    17800 15000
@@ -3984,10 +3104,10 @@ r7
 Wire Wire Line
 	18150 12500 18350 12500
 $Comp
-L Device:C C?
+L Device:C C11
 U 1 1 614B7270
 P 21750 12800
-F 0 "C?" H 21865 12846 50  0000 L CNN
+F 0 "C11" H 21865 12846 50  0000 L CNN
 F 1 "0.1u" H 21865 12755 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 21788 12650 50  0001 C CNN
 F 3 "~" H 21750 12800 50  0001 C CNN
@@ -3995,10 +3115,10 @@ F 3 "~" H 21750 12800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0138
 U 1 1 614B7276
 P 21750 12950
-F 0 "#PWR?" H 21750 12700 50  0001 C CNN
+F 0 "#PWR0138" H 21750 12700 50  0001 C CNN
 F 1 "GND" H 21755 12777 50  0000 C CNN
 F 2 "" H 21750 12950 50  0001 C CNN
 F 3 "" H 21750 12950 50  0001 C CNN
@@ -4006,10 +3126,10 @@ F 3 "" H 21750 12950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR0139
 U 1 1 614B727C
 P 21750 12650
-F 0 "#PWR?" H 21750 12500 50  0001 C CNN
+F 0 "#PWR0139" H 21750 12500 50  0001 C CNN
 F 1 "VCC" H 21767 12823 50  0000 C CNN
 F 2 "" H 21750 12650 50  0001 C CNN
 F 3 "" H 21750 12650 50  0001 C CNN
@@ -4017,10 +3137,10 @@ F 3 "" H 21750 12650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:C C?
+L Device:C C10
 U 1 1 614CCB2A
 P 21350 12800
-F 0 "C?" H 21465 12846 50  0000 L CNN
+F 0 "C10" H 21465 12846 50  0000 L CNN
 F 1 "0.1u" H 21465 12755 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0805_2012Metric" H 21388 12650 50  0001 C CNN
 F 3 "~" H 21350 12800 50  0001 C CNN
@@ -4028,10 +3148,10 @@ F 3 "~" H 21350 12800 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0140
 U 1 1 614CCB30
 P 21350 12950
-F 0 "#PWR?" H 21350 12700 50  0001 C CNN
+F 0 "#PWR0140" H 21350 12700 50  0001 C CNN
 F 1 "GND" H 21355 12777 50  0000 C CNN
 F 2 "" H 21350 12950 50  0001 C CNN
 F 3 "" H 21350 12950 50  0001 C CNN
@@ -4039,16 +3159,56 @@ F 3 "" H 21350 12950 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR0141
 U 1 1 614CCB36
 P 21350 12650
-F 0 "#PWR?" H 21350 12500 50  0001 C CNN
+F 0 "#PWR0141" H 21350 12500 50  0001 C CNN
 F 1 "VCC" H 21367 12823 50  0000 C CNN
 F 2 "" H 21350 12650 50  0001 C CNN
 F 3 "" H 21350 12650 50  0001 C CNN
 	1    21350 12650
 	1    0    0    -1  
 $EndComp
+Text Label 8400 9150 2    50   ~ 0
+sb7
+Text Label 8400 8950 2    50   ~ 0
+sa7
+Text Label 8400 8600 2    50   ~ 0
+sb6
+Text Label 8400 8400 2    50   ~ 0
+sa6
+Text Label 8400 8050 2    50   ~ 0
+sb5
+Text Label 8400 7850 2    50   ~ 0
+sa5
+Text Label 8400 7500 2    50   ~ 0
+sb4
+Text Label 8400 7300 2    50   ~ 0
+sa4
+Text Label 8400 11350 2    50   ~ 0
+sb3
+Text Label 8400 11150 2    50   ~ 0
+sa3
+Text Label 8400 10800 2    50   ~ 0
+sb2
+Text Label 8400 10600 2    50   ~ 0
+sa2
+Text Label 8400 10250 2    50   ~ 0
+sb1
+Text Label 8400 10050 2    50   ~ 0
+sa1
+Text Label 8400 9700 2    50   ~ 0
+sb0
+Text Label 8400 9500 2    50   ~ 0
+sa0
+Text Label 10500 9650 0    50   ~ 0
+r3
+Text Label 10500 9550 0    50   ~ 0
+r2
+Text Label 10500 9450 0    50   ~ 0
+r1
+Text Label 10500 9350 0    50   ~ 0
+r0
 Wire Wire Line
 	5450 2100 6350 2100
 Wire Wire Line
