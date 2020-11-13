@@ -2104,6 +2104,9 @@ Wire Wire Line
 	11800 17550 11800 2600
 Wire Wire Line
 	11800 2600 12900 2600
+Connection ~ 9200 17550
+Text HLabel 12900 2600 2    50   Output ~ 0
+c6_out
 Wire Bus Line
 	5150 2100 5150 18600
 Wire Bus Line
@@ -2112,7 +2115,4 @@ Wire Bus Line
 	9850 1850 9850 19100
 Wire Bus Line
 	10350 2150 10350 18700
-Connection ~ 9200 17550
-Text HLabel 12900 2600 2    50   Output ~ 0
-c6_out
 $EndSCHEMATC
