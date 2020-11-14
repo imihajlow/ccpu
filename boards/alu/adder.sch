@@ -22,7 +22,7 @@ AR Path="/5FF15207/6002966D" Ref="U22"  Part="1"
 F 0 "U22" H 6750 3025 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 2934 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 2700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 2700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 2700 50  0001 C CNN
 	1    6750 2700
 	1    0    0    -1  
 $EndComp
@@ -35,7 +35,7 @@ AR Path="/5FF15207/60029673" Ref="U22"  Part="2"
 F 0 "U22" H 7750 3425 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 3334 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 3100 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 3100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 3100 50  0001 C CNN
 	2    7750 3100
 	1    0    0    -1  
 $EndComp
@@ -48,7 +48,7 @@ AR Path="/5FF15207/60029679" Ref="U22"  Part="3"
 F 0 "U22" H 7550 4125 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 4034 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 3800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 3800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 3800 50  0001 C CNN
 	3    7550 3800
 	1    0    0    -1  
 $EndComp
@@ -61,7 +61,7 @@ AR Path="/5FF15207/6002967F" Ref="U22"  Part="4"
 F 0 "U22" H 6500 4125 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 4034 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 3800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 3800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 3800 50  0001 C CNN
 	4    6500 3800
 	1    0    0    -1  
 $EndComp
@@ -96,7 +96,7 @@ AR Path="/5FF15207/60029693" Ref="U30"  Part="1"
 F 0 "U30" H 8300 4575 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 4484 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 4250 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 4250 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 4250 50  0001 C CNN
 	1    8300 4250
 	1    0    0    -1  
 $EndComp
@@ -109,7 +109,7 @@ AR Path="/5FF15207/60029699" Ref="U30"  Part="2"
 F 0 "U30" H 8300 4025 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 3934 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 3700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 3700 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 3700 50  0001 C CNN
 	2    8300 3700
 	1    0    0    -1  
 $EndComp
@@ -146,7 +146,7 @@ AR Path="/5FF15207/600296AB" Ref="U34"  Part="1"
 F 0 "U34" H 8900 4275 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 4184 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 3950 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 3950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 3950 50  0001 C CNN
 	1    8900 3950
 	1    0    0    -1  
 $EndComp
@@ -163,7 +163,7 @@ AR Path="/5FF15207/600296B3" Ref="U23"  Part="1"
 F 0 "U23" H 6750 5325 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 5234 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 5000 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 5000 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 5000 50  0001 C CNN
 	1    6750 5000
 	1    0    0    -1  
 $EndComp
@@ -176,7 +176,7 @@ AR Path="/5FF15207/600296B9" Ref="U23"  Part="2"
 F 0 "U23" H 7750 5725 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 5634 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 5400 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 5400 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 5400 50  0001 C CNN
 	2    7750 5400
 	1    0    0    -1  
 $EndComp
@@ -189,7 +189,7 @@ AR Path="/5FF15207/600296BF" Ref="U23"  Part="3"
 F 0 "U23" H 7550 6425 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 6334 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 6100 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 6100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 6100 50  0001 C CNN
 	3    7550 6100
 	1    0    0    -1  
 $EndComp
@@ -202,7 +202,7 @@ AR Path="/5FF15207/600296C5" Ref="U23"  Part="4"
 F 0 "U23" H 6500 6425 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 6334 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 6100 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 6100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 6100 50  0001 C CNN
 	4    6500 6100
 	1    0    0    -1  
 $EndComp
@@ -237,7 +237,7 @@ AR Path="/5FF15207/600296D7" Ref="U30"  Part="4"
 F 0 "U30" H 8300 6875 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 6784 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 6550 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 6550 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 6550 50  0001 C CNN
 	4    8300 6550
 	1    0    0    -1  
 $EndComp
@@ -250,7 +250,7 @@ AR Path="/5FF15207/600296DD" Ref="U30"  Part="3"
 F 0 "U30" H 8300 6325 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 6234 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 6000 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 6000 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 6000 50  0001 C CNN
 	3    8300 6000
 	1    0    0    -1  
 $EndComp
@@ -287,7 +287,7 @@ AR Path="/5FF15207/600296EF" Ref="U34"  Part="2"
 F 0 "U34" H 8900 6575 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 6484 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 6250 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 6250 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 6250 50  0001 C CNN
 	2    8900 6250
 	1    0    0    -1  
 $EndComp
@@ -304,7 +304,7 @@ AR Path="/5FF15207/600296F7" Ref="U24"  Part="1"
 F 0 "U24" H 6750 7525 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 7434 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 7200 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 7200 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 7200 50  0001 C CNN
 	1    6750 7200
 	1    0    0    -1  
 $EndComp
@@ -317,7 +317,7 @@ AR Path="/5FF15207/600296FD" Ref="U24"  Part="2"
 F 0 "U24" H 7750 7925 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 7834 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 7600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 7600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 7600 50  0001 C CNN
 	2    7750 7600
 	1    0    0    -1  
 $EndComp
@@ -330,7 +330,7 @@ AR Path="/5FF15207/60029703" Ref="U24"  Part="3"
 F 0 "U24" H 7550 8625 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 8534 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 8300 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 8300 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 8300 50  0001 C CNN
 	3    7550 8300
 	1    0    0    -1  
 $EndComp
@@ -343,7 +343,7 @@ AR Path="/5FF15207/60029709" Ref="U24"  Part="4"
 F 0 "U24" H 6500 8625 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 8534 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 8300 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 8300 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 8300 50  0001 C CNN
 	4    6500 8300
 	1    0    0    -1  
 $EndComp
@@ -378,7 +378,7 @@ AR Path="/5FF15207/6002971B" Ref="U31"  Part="1"
 F 0 "U31" H 8300 9075 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 8984 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 8750 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 8750 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 8750 50  0001 C CNN
 	1    8300 8750
 	1    0    0    -1  
 $EndComp
@@ -391,7 +391,7 @@ AR Path="/5FF15207/60029721" Ref="U31"  Part="2"
 F 0 "U31" H 8300 8525 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 8434 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 8200 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 8200 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 8200 50  0001 C CNN
 	2    8300 8200
 	1    0    0    -1  
 $EndComp
@@ -428,7 +428,7 @@ AR Path="/5FF15207/60029733" Ref="U34"  Part="3"
 F 0 "U34" H 8900 8775 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 8684 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 8450 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 8450 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 8450 50  0001 C CNN
 	3    8900 8450
 	1    0    0    -1  
 $EndComp
@@ -445,7 +445,7 @@ AR Path="/5FF15207/6002973B" Ref="U25"  Part="1"
 F 0 "U25" H 6750 9825 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 9734 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 9500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 9500 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 9500 50  0001 C CNN
 	1    6750 9500
 	1    0    0    -1  
 $EndComp
@@ -458,7 +458,7 @@ AR Path="/5FF15207/60029741" Ref="U25"  Part="2"
 F 0 "U25" H 7750 10225 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 10134 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 9900 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 9900 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 9900 50  0001 C CNN
 	2    7750 9900
 	1    0    0    -1  
 $EndComp
@@ -471,7 +471,7 @@ AR Path="/5FF15207/60029747" Ref="U25"  Part="3"
 F 0 "U25" H 7550 10925 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 10834 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 10600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 10600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 10600 50  0001 C CNN
 	3    7550 10600
 	1    0    0    -1  
 $EndComp
@@ -484,7 +484,7 @@ AR Path="/5FF15207/6002974D" Ref="U25"  Part="4"
 F 0 "U25" H 6500 10925 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 10834 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 10600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 10600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 10600 50  0001 C CNN
 	4    6500 10600
 	1    0    0    -1  
 $EndComp
@@ -519,7 +519,7 @@ AR Path="/5FF15207/6002975F" Ref="U31"  Part="4"
 F 0 "U31" H 8300 11375 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 11284 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 11050 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 11050 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 11050 50  0001 C CNN
 	4    8300 11050
 	1    0    0    -1  
 $EndComp
@@ -532,7 +532,7 @@ AR Path="/5FF15207/60029765" Ref="U31"  Part="3"
 F 0 "U31" H 8300 10825 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 10734 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 10500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 10500 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 10500 50  0001 C CNN
 	3    8300 10500
 	1    0    0    -1  
 $EndComp
@@ -567,7 +567,7 @@ AR Path="/5FF15207/60029777" Ref="U34"  Part="4"
 F 0 "U34" H 8900 11075 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 10984 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 10750 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 10750 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 10750 50  0001 C CNN
 	4    8900 10750
 	1    0    0    -1  
 $EndComp
@@ -584,7 +584,7 @@ AR Path="/5FF15207/6002977F" Ref="U26"  Part="1"
 F 0 "U26" H 6750 12125 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 12034 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 11800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 11800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 11800 50  0001 C CNN
 	1    6750 11800
 	1    0    0    -1  
 $EndComp
@@ -597,7 +597,7 @@ AR Path="/5FF15207/60029785" Ref="U26"  Part="2"
 F 0 "U26" H 7750 12525 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 12434 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 12200 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 12200 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 12200 50  0001 C CNN
 	2    7750 12200
 	1    0    0    -1  
 $EndComp
@@ -610,7 +610,7 @@ AR Path="/5FF15207/6002978B" Ref="U26"  Part="3"
 F 0 "U26" H 7550 13225 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 13134 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 12900 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 12900 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 12900 50  0001 C CNN
 	3    7550 12900
 	1    0    0    -1  
 $EndComp
@@ -623,7 +623,7 @@ AR Path="/5FF15207/60029791" Ref="U26"  Part="4"
 F 0 "U26" H 6500 13225 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 13134 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 12900 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 12900 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 12900 50  0001 C CNN
 	4    6500 12900
 	1    0    0    -1  
 $EndComp
@@ -658,7 +658,7 @@ AR Path="/5FF15207/600297A3" Ref="U32"  Part="1"
 F 0 "U32" H 8300 13675 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 13584 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 13350 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 13350 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 13350 50  0001 C CNN
 	1    8300 13350
 	1    0    0    -1  
 $EndComp
@@ -671,7 +671,7 @@ AR Path="/5FF15207/600297A9" Ref="U32"  Part="2"
 F 0 "U32" H 8300 13125 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 13034 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 12800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 12800 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 12800 50  0001 C CNN
 	2    8300 12800
 	1    0    0    -1  
 $EndComp
@@ -708,7 +708,7 @@ AR Path="/5FF15207/600297BB" Ref="U35"  Part="1"
 F 0 "U35" H 8900 13375 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 13284 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 13050 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 13050 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 13050 50  0001 C CNN
 	1    8900 13050
 	1    0    0    -1  
 $EndComp
@@ -725,7 +725,7 @@ AR Path="/5FF15207/600297C3" Ref="U27"  Part="1"
 F 0 "U27" H 6750 14425 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 14334 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 14100 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 14100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 14100 50  0001 C CNN
 	1    6750 14100
 	1    0    0    -1  
 $EndComp
@@ -738,7 +738,7 @@ AR Path="/5FF15207/600297C9" Ref="U27"  Part="2"
 F 0 "U27" H 7750 14825 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 14734 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 14500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 14500 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 14500 50  0001 C CNN
 	2    7750 14500
 	1    0    0    -1  
 $EndComp
@@ -751,7 +751,7 @@ AR Path="/5FF15207/600297CF" Ref="U27"  Part="3"
 F 0 "U27" H 7550 15525 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 15434 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 15200 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 15200 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 15200 50  0001 C CNN
 	3    7550 15200
 	1    0    0    -1  
 $EndComp
@@ -764,7 +764,7 @@ AR Path="/5FF15207/600297D5" Ref="U27"  Part="4"
 F 0 "U27" H 6500 15525 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 15434 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 15200 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 15200 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 15200 50  0001 C CNN
 	4    6500 15200
 	1    0    0    -1  
 $EndComp
@@ -799,7 +799,7 @@ AR Path="/5FF15207/600297E7" Ref="U32"  Part="4"
 F 0 "U32" H 8300 15975 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 15884 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 15650 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 15650 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 15650 50  0001 C CNN
 	4    8300 15650
 	1    0    0    -1  
 $EndComp
@@ -812,7 +812,7 @@ AR Path="/5FF15207/600297ED" Ref="U32"  Part="3"
 F 0 "U32" H 8300 15425 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 15334 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 15100 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 15100 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 15100 50  0001 C CNN
 	3    8300 15100
 	1    0    0    -1  
 $EndComp
@@ -849,7 +849,7 @@ AR Path="/5FF15207/600297FF" Ref="U35"  Part="2"
 F 0 "U35" H 8900 15675 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 15584 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 15350 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 15350 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 15350 50  0001 C CNN
 	2    8900 15350
 	1    0    0    -1  
 $EndComp
@@ -866,7 +866,7 @@ AR Path="/5FF15207/60029807" Ref="U28"  Part="1"
 F 0 "U28" H 6750 16625 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 16534 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 16300 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 16300 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 16300 50  0001 C CNN
 	1    6750 16300
 	1    0    0    -1  
 $EndComp
@@ -879,7 +879,7 @@ AR Path="/5FF15207/6002980D" Ref="U28"  Part="2"
 F 0 "U28" H 7750 17025 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 16934 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 16700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 16700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 16700 50  0001 C CNN
 	2    7750 16700
 	1    0    0    -1  
 $EndComp
@@ -892,7 +892,7 @@ AR Path="/5FF15207/60029813" Ref="U28"  Part="3"
 F 0 "U28" H 7550 17725 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 17634 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 17400 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 17400 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 17400 50  0001 C CNN
 	3    7550 17400
 	1    0    0    -1  
 $EndComp
@@ -905,7 +905,7 @@ AR Path="/5FF15207/60029819" Ref="U28"  Part="4"
 F 0 "U28" H 6500 17725 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 17634 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 17400 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 17400 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 17400 50  0001 C CNN
 	4    6500 17400
 	1    0    0    -1  
 $EndComp
@@ -940,7 +940,7 @@ AR Path="/5FF15207/6002982B" Ref="U33"  Part="1"
 F 0 "U33" H 8300 18175 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 18084 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 17850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 17850 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 17850 50  0001 C CNN
 	1    8300 17850
 	1    0    0    -1  
 $EndComp
@@ -953,7 +953,7 @@ AR Path="/5FF15207/60029831" Ref="U33"  Part="2"
 F 0 "U33" H 8300 17625 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 17534 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 17300 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 17300 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 17300 50  0001 C CNN
 	2    8300 17300
 	1    0    0    -1  
 $EndComp
@@ -990,7 +990,7 @@ AR Path="/5FF15207/60029843" Ref="U35"  Part="3"
 F 0 "U35" H 8900 17875 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 17784 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 17550 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 17550 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 17550 50  0001 C CNN
 	3    8900 17550
 	1    0    0    -1  
 $EndComp
@@ -1007,7 +1007,7 @@ AR Path="/5FF15207/6002984B" Ref="U29"  Part="1"
 F 0 "U29" H 6750 18925 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6750 18834 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6750 18600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6750 18600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6750 18600 50  0001 C CNN
 	1    6750 18600
 	1    0    0    -1  
 $EndComp
@@ -1020,7 +1020,7 @@ AR Path="/5FF15207/60029851" Ref="U29"  Part="2"
 F 0 "U29" H 7750 19325 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7750 19234 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7750 19000 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7750 19000 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7750 19000 50  0001 C CNN
 	2    7750 19000
 	1    0    0    -1  
 $EndComp
@@ -1033,7 +1033,7 @@ AR Path="/5FF15207/60029857" Ref="U29"  Part="3"
 F 0 "U29" H 7550 20025 50  0000 C CNN
 F 1 "MC74ACT86DG" H 7550 19934 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 7550 19700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 7550 19700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 7550 19700 50  0001 C CNN
 	3    7550 19700
 	1    0    0    -1  
 $EndComp
@@ -1046,7 +1046,7 @@ AR Path="/5FF15207/6002985D" Ref="U29"  Part="4"
 F 0 "U29" H 6500 20025 50  0000 C CNN
 F 1 "MC74ACT86DG" H 6500 19934 50  0000 C CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6500 19700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 6500 19700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 6500 19700 50  0001 C CNN
 	4    6500 19700
 	1    0    0    -1  
 $EndComp
@@ -1081,7 +1081,7 @@ AR Path="/5FF15207/6002986F" Ref="U33"  Part="4"
 F 0 "U33" H 8300 20475 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 20384 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 20150 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 20150 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 20150 50  0001 C CNN
 	4    8300 20150
 	1    0    0    -1  
 $EndComp
@@ -1094,7 +1094,7 @@ AR Path="/5FF15207/60029875" Ref="U33"  Part="3"
 F 0 "U33" H 8300 19925 50  0000 C CNN
 F 1 "SN74ACT08PW" H 8300 19834 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8300 19600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 8300 19600 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 8300 19600 50  0001 C CNN
 	3    8300 19600
 	1    0    0    -1  
 $EndComp
@@ -1131,7 +1131,7 @@ AR Path="/5FF15207/60029887" Ref="U35"  Part="4"
 F 0 "U35" H 8900 20175 50  0000 C CNN
 F 1 "74ACT32MTCX" H 8900 20084 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 19850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8900 19850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 8900 19850 50  0001 C CNN
 	4    8900 19850
 	1    0    0    -1  
 $EndComp
@@ -1445,7 +1445,7 @@ P 12350 3450
 F 0 "U22" H 12580 3496 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12580 3405 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12350 3450 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12350 3450 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12350 3450 50  0001 C CNN
 	5    12350 3450
 	1    0    0    -1  
 $EndComp
@@ -1478,7 +1478,7 @@ P 12400 5600
 F 0 "U23" H 12630 5646 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12630 5555 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12400 5600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12400 5600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12400 5600 50  0001 C CNN
 	5    12400 5600
 	1    0    0    -1  
 $EndComp
@@ -1511,7 +1511,7 @@ P 12400 7800
 F 0 "U24" H 12630 7846 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12630 7755 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12400 7800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12400 7800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12400 7800 50  0001 C CNN
 	5    12400 7800
 	1    0    0    -1  
 $EndComp
@@ -1544,7 +1544,7 @@ P 12450 9950
 F 0 "U25" H 12680 9996 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12680 9905 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12450 9950 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12450 9950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12450 9950 50  0001 C CNN
 	5    12450 9950
 	1    0    0    -1  
 $EndComp
@@ -1577,7 +1577,7 @@ P 12450 12350
 F 0 "U26" H 12680 12396 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12680 12305 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12450 12350 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12450 12350 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12450 12350 50  0001 C CNN
 	5    12450 12350
 	1    0    0    -1  
 $EndComp
@@ -1610,7 +1610,7 @@ P 12500 14500
 F 0 "U27" H 12730 14546 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12730 14455 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12500 14500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12500 14500 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12500 14500 50  0001 C CNN
 	5    12500 14500
 	1    0    0    -1  
 $EndComp
@@ -1643,7 +1643,7 @@ P 12500 16700
 F 0 "U28" H 12730 16746 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12730 16655 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12500 16700 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12500 16700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12500 16700 50  0001 C CNN
 	5    12500 16700
 	1    0    0    -1  
 $EndComp
@@ -1676,7 +1676,7 @@ P 12550 18850
 F 0 "U29" H 12780 18896 50  0000 L CNN
 F 1 "MC74ACT86DG" H 12780 18805 50  0000 L CNN
 F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 12550 18850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC86" H 12550 18850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1912674.pdf" H 12550 18850 50  0001 C CNN
 	5    12550 18850
 	1    0    0    -1  
 $EndComp
@@ -1709,7 +1709,7 @@ P 13550 4600
 F 0 "U30" H 13780 4646 50  0000 L CNN
 F 1 "SN74ACT08PW" H 13780 4555 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 13550 4600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 13550 4600 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 13550 4600 50  0001 C CNN
 	5    13550 4600
 	1    0    0    -1  
 $EndComp
@@ -1742,7 +1742,7 @@ P 13600 8800
 F 0 "U31" H 13830 8846 50  0000 L CNN
 F 1 "SN74ACT08PW" H 13830 8755 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 13600 8800 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 13600 8800 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 13600 8800 50  0001 C CNN
 	5    13600 8800
 	1    0    0    -1  
 $EndComp
@@ -1775,7 +1775,7 @@ P 13650 13350
 F 0 "U32" H 13880 13396 50  0000 L CNN
 F 1 "SN74ACT08PW" H 13880 13305 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 13650 13350 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 13650 13350 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 13650 13350 50  0001 C CNN
 	5    13650 13350
 	1    0    0    -1  
 $EndComp
@@ -1808,7 +1808,7 @@ P 13750 17650
 F 0 "U33" H 13980 17696 50  0000 L CNN
 F 1 "SN74ACT08PW" H 13980 17605 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 13750 17650 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS08" H 13750 17650 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74act08.pdf" H 13750 17650 50  0001 C CNN
 	5    13750 17650
 	1    0    0    -1  
 $EndComp
@@ -1841,7 +1841,7 @@ P 14650 6850
 F 0 "U34" H 14880 6896 50  0000 L CNN
 F 1 "74ACT32MTCX" H 14880 6805 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14650 6850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 14650 6850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 14650 6850 50  0001 C CNN
 	5    14650 6850
 	1    0    0    -1  
 $EndComp
@@ -1874,7 +1874,7 @@ P 14700 15550
 F 0 "U35" H 14930 15596 50  0000 L CNN
 F 1 "74ACT32MTCX" H 14930 15505 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 14700 15550 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 14700 15550 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/245063.pdf" H 14700 15550 50  0001 C CNN
 	5    14700 15550
 	1    0    0    -1  
 $EndComp
