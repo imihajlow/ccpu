@@ -1,4 +1,5 @@
-.PHONY: all alu
+.PHONY: all alu clean
+
 
 all: test_adder test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474
 	./test_adder
@@ -10,6 +11,10 @@ all: test_adder test_pointer_reg test_pointer_pair test_control_unit test_cpu te
 	./test_pointer_pair
 	./test_control_unit
 	./test_cpu
+
+clean:
+	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu
+	rm -f test_alu
 
 alu: test_alu
 	./test_alu
