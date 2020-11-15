@@ -36,14 +36,14 @@ def lookupAddress(s, labels):
                 return labels[l]
         raise
 
-def loop(program, labels, initialCommand):
+def loop(program, labels, initialCommand, aluRevision):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
     keyboard = Keyboard()
     display = Display()
     memory = Memory(program, keyboard, display)
     memory.setVerbose(False)
-    m = Machine(memory)
+    m = Machine(memory, aluRevision)
     newState = True
     while True:
         if newState:
@@ -166,12 +166,13 @@ if __name__ == "__main__":
     parser.add_argument('-c', metavar="COMMAND", action="append", help='simulator command to execute at start (more than one -c is allosed)')
     parser.add_argument('file', type=argparse.FileType("rb"), help='program file')
     parser.add_argument('mapfile', type=argparse.FileType("r"), help='label map file')
+    parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision (default = 2)')
     args = parser.parse_args()
 
     # try:
     program = load(args.file)
     labels = loadLabels(args.mapfile)
-    loop(program, labels, args.c)
+    loop(program, labels, args.c, args.alu_revision)
     # except Exception as e:
     #     print(e)
     #     sys.exit(1)

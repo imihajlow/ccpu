@@ -304,7 +304,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Assembler')
     parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
     parser.add_argument('file', type=argparse.FileType("r"), help='input file name')
-    parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision')
+    parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision (default = 2)')
     args = parser.parse_args()
 
     try:

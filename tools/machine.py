@@ -59,9 +59,14 @@ def getSrcName(b):
     else:
         return "A"
 
-def getAluOp(b):
+def getAluOp(b, aluRevision):
     op = (b >> 3) & 0x0f
-    return ["ADD", "SUB", "ADC", "SBB", "INC", "DEC", "SHL", "NEG", "MOV", "NOT", "EXP", "AND", "OR", "XOR", "SHR", "SAR"][op]
+    if aluRevision == 1:
+        return ["ADD", "SUB", "ADC", "SBB", "INC", "DEC", "SHL", "NEG", "MOV", "NOT", "EXP", "AND", "OR", "XOR", "SHR", "SAR"][op]
+    elif aluRevision == 2:
+        return ["EXP", "AND", "OR", "SHL", "NOT", "XOR", "SHR", "SAR", "MOV", "ADD", "ADC", "INC", "NEG", "SUB", "SBB", "DEC"][op]
+    else:
+        raise ValueError(f"Invalid ALU revision: {aluRevision}")
 
 def getFlag(b):
     return b & 0x03
@@ -152,7 +157,7 @@ def isSingleArgAlu(op):
     return op in ["INC", "DEC", "SHL", "SHR", "NEG", "NOT", "EXP", "SAR"]
 
 class Machine:
-    def __init__(self, memory):
+    def __init__(self, memory, aluRevision):
         self.memory = memory
         self.ip = 0
         self.p = 0
@@ -164,12 +169,13 @@ class Machine:
         self.o = 0
         self.breakpoints = []
         self.time = 0
+        self.aluRevision = aluRevision
 
     def disasm(self, addr):
         b = self.memory.get(addr)
         if isAlu(b):
             inverse = bool(b & 0x04)
-            op = getAluOp(b)
+            op = getAluOp(b, self.aluRevision)
             singleArg = isSingleArgAlu(op)
             dest = getDestName(b, not inverse)
             if inverse:
@@ -238,7 +244,7 @@ class Machine:
         b = self.memory.get(self.ip)
         if isAlu(b):
             inverse = bool(b & 0x04)
-            op = getAluOp(b)
+            op = getAluOp(b, self.aluRevision)
             dest = getDest(b)
             result, z, c, s, o = alu(op, self.a, self.__getRegister(dest, not inverse), self.c, inverse)
             if op != "MOV":
