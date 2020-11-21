@@ -1,12 +1,12 @@
 NATRIX_DIR=../tools/natrix
 NATRIX=$(NATRIX_DIR)/natrix.py
 
-all: calc.rom io_test.rom test.bin natest.bin main.rom
+all: calc.rom io_test.rom test.bin natest.bin main.rom alutest.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s
 
-.SECONDARY: calc.bin io_test.bin test.bin
+.SECONDARY: calc.bin io_test.bin test.bin alutest.bin
 
 .PHONY: test ctest clean
 
@@ -29,6 +29,9 @@ io_test.bin: test/io_test.o lib/display.o lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 main.bin: main.o maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o lib/entropy.o calc/calc.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+alutest.bin: test/alutest.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm
