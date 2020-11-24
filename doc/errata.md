@@ -25,3 +25,14 @@ The schematic of this board has an error: the n_oe_mem signal should be generate
 6. Solder a wire to connect pin 8 of U16 and pins 1 and 2 of U9 (oe_mem).
 
 As a result, U9A will be used as an inverter, U16C as an OR gate and U16D as a repeater to make soldering easier.
+
+# ALU rev. 2
+Sometimes a high-frequency noice of unknown source appears. To reproduce (and test), use the following code:
+```
+ldi a, 127
+ldi b, -127
+sub a, b
+```
+The noice happens when the `sub` instruction is executed. Noice can be checked on any VCC pin on the ALU board or on the sa or sb buses.
+
+To overcome this problem, solder a 10 pF capacitor between pins 1 and 8 of U36. Somehow it helps.
