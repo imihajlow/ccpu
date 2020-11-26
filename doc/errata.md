@@ -35,4 +35,4 @@ sub a, b
 ```
 The noice happens when the `sub` instruction is executed. Noice can be checked on any VCC pin on the ALU board or on the sa or sb buses.
 
-To overcome this problem, solder a 10 pF capacitor between pins 1 and 8 of U36. Somehow it helps.
+To overcome this problem, solder a 10 pF capacitor between pins 1 and 7 of U36. Somehow it helps.
