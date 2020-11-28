@@ -2,22 +2,22 @@
 
 
 all: test_adder test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474
-	./test_adder
-	./test_7474
-	./test_74153
-	./test_gp_reg_a
-	./test_gp_reg_b
-	./test_pointer_reg
-	./test_pointer_pair
-	./test_control_unit
-	./test_cpu
+	./verilog-verify.sh ./test_adder
+	./verilog-verify.sh ./test_7474
+	./verilog-verify.sh ./test_74153
+	./verilog-verify.sh ./test_gp_reg_a
+	./verilog-verify.sh ./test_gp_reg_b
+	./verilog-verify.sh ./test_pointer_reg
+	./verilog-verify.sh ./test_pointer_pair
+	./verilog-verify.sh ./test_control_unit
+	./verilog-verify.sh ./test_cpu
 
 clean:
 	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu
 	rm -f test_alu
 
 alu: test_alu
-	./test_alu
+	./verilog-verify.sh ./test_alu
 
 test_adder: test_adder.v ../adder.v
 	iverilog -o $@ $^
