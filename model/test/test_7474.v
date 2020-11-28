@@ -56,6 +56,22 @@ module test_7474();
         assert(n_q === 1'b1);
 
         n_cd = 1'b1;
+        #1
+        assert(q === 1'b1);
+        assert(n_q === 1'b0);
+
+        n_cd = 1'b0;
+        n_sd = 1'b0;
+        #1
+        assert(q === 1'b1);
+        assert(n_q === 1'b1);
+
+        n_sd = 1'b1;
+        #1
+        assert(q === 1'b0);
+        assert(n_q === 1'b1);
+
+        n_cd = 1'b1;
         n_sd = 1'b1;
         d = 1'b1;
         cp = 1'b1;

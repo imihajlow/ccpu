@@ -15,17 +15,28 @@ module d_ff_7474(
     output wire q;
     output wire n_q;
 
-    reg q_reg;
-    assign #15 q = (n_cd | n_sd) ? q_reg : 1'b1;
-    assign #15 n_q = (n_cd | n_sd) ? ~q_reg : 1'b1;
+    reg rq, rnq;
 
-    always @(posedge cp or negedge n_cd or negedge n_sd) begin
-        if (~n_cd) begin
-            q_reg <= 1'b0;
-        end else if (~n_sd) begin
-            q_reg <= 1'b1;
-        end else begin
-            q_reg <= d;
+    assign #15 q = rq;
+    assign #15 n_q = rnq;
+
+    always @(n_cd or n_sd) begin
+        if (n_sd & ~n_cd) begin
+            rq = 1'b0;
+            rnq = 1'b1;
+        end else if (~n_sd & n_cd) begin
+            rq = 1'b1;
+            rnq = 1'b0;
+        end else if (~n_sd & ~n_cd) begin
+            rq = 1'b1;
+            rnq = 1'b1;
+        end
+    end
+
+    always @(posedge cp) begin
+        if (n_sd & n_cd) begin
+            rq <= d;
+            rnq <= ~d;
         end
     end
 endmodule
