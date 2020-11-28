@@ -27,3 +27,4 @@ __pycache__
 *.pyc
 *.o
 *.s
+*.gtkw

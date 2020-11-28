@@ -80,10 +80,11 @@ module control_unit(
 
     wire cycle;
     wire n_cycle;
+    wire cycle_d;
     d_ff_7474 ff_cycle(
         .q(cycle),
         .n_q(n_cycle),
-        .d(n_cycle),
+        .d(cycle_d),
         .cp(clk),
         .n_cd(n_rst),
         .n_sd(1'b1));
@@ -112,10 +113,11 @@ module control_unit(
     wire n_we_cycle;
     wire #10 n_clear_we_cycle = n_rst | n_clk; // 74x32 OR gate
     wire #10 n_set_we_cycle = n_rst | clk; // 74x32 OR gate
+    wire we_cycle_d;
     d_ff_7474 ff_we_cycle(
         .q(we_cycle),
         .n_q(n_we_cycle),
-        .d(n_we_cycle),
+        .d(we_cycle_d),
         .cp(n_clk),
         .n_cd(n_clear_we_cycle),
         .n_sd(n_set_we_cycle));
@@ -151,6 +153,22 @@ module control_unit(
         .n_e(op_alu)
         );
 
+    //===========================
+    wire mem_rdy = ~n_mem_rdy;
+    wire we_cycle_wait;
+    d_ff_7474 ff_rdy(
+        .n_q(we_cycle_wait),
+        .d(1'b0),
+        .cp(1'b0),
+        .n_cd(mem_rdy),
+        .n_sd(n_clk & n_rst));
+
+    wire cycle_flip_ena = ~we_cycle_wait;
+    assign we_cycle_d = we_cycle ^ cycle_flip_ena;
+    assign cycle_d = cycle ^ cycle_flip_ena;
+    assign inc_ip = cycle & cycle_flip_ena;
+    //===========================
+
     // n_oe_mem is always low, except cycle 1 of ST
     assign #20 n_oe_mem = ~(n_op_st | n_cycle); // 74x32 OR + 74x00 NAND
 
@@ -169,7 +187,6 @@ module control_unit(
     assign #10 n_oe_d_di = n_oe_d_di_a | n_oe_d_di_b; // 74x32 OR
 
 
-    assign inc_ip = cycle;
 
     // addr_dp is 1 on cycle 1 of LD or ST
     wire #10 op_ld_or_st = ~(n_op_ld & n_op_st); // 74x00 NAND

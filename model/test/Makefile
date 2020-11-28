@@ -1,8 +1,7 @@
 .PHONY: all alu clean
 
 
-all: test_adder test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474
-	./verilog-verify.sh ./test_adder
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474
 	./verilog-verify.sh ./test_7474
 	./verilog-verify.sh ./test_74153
 	./verilog-verify.sh ./test_gp_reg_a
@@ -18,6 +17,9 @@ clean:
 
 alu: test_alu
 	./verilog-verify.sh ./test_alu
+
+adder: test_adder
+	./verilog-verify.sh ./test_adder
 
 test_adder: test_adder.v ../adder.v
 	iverilog -o $@ $^
