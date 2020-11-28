@@ -152,7 +152,7 @@ module control_unit(
         );
 
     // n_oe_mem is always low, except cycle 1 of ST
-    assign #10 n_oe_mem = ~(n_op_st | n_cycle); // 74x00 NAND
+    assign #20 n_oe_mem = ~(n_op_st | n_cycle); // 74x32 OR + 74x00 NAND
 
     // n_we_mem is always high, except high clk on cycle 1 of st
     assign #10 n_we_mem = ~(n_oe_mem & we_cycle); // 74x00 NAND

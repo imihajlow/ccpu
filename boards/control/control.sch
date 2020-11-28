@@ -1783,19 +1783,19 @@ $EndComp
 $Comp
 L 74xx:74HC00 U9
 U 1 1 5E83EE30
-P 6200 3600
-F 0 "U9" H 6200 3925 50  0000 C CNN
-F 1 "74ACT00MTCX" H 6200 3834 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 6200 3600 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 6200 3600 50  0001 C CNN
-	1    6200 3600
+P 6950 3600
+F 0 "U9" H 6950 3925 50  0000 C CNN
+F 1 "74ACT00MTCX" H 6950 3834 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 6950 3600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 6950 3600 50  0001 C CNN
+	1    6950 3600
 	1    0    0    -1  
 $EndComp
 Text Label 5900 3500 2    50   ~ 0
 ~op_st
 Text Label 5900 3700 2    50   ~ 0
 ~cycle
-Text Label 6500 3600 0    50   ~ 0
+Text Label 7250 3600 0    50   ~ 0
 ~oe_mem
 Text Label 5900 4050 2    50   ~ 0
 ~oe_mem
@@ -2518,12 +2518,12 @@ $EndComp
 $Comp
 L 74xx:74LS32 U16
 U 3 1 5EAB37A5
-P 8150 12500
-F 0 "U16" H 8150 12825 50  0000 C CNN
-F 1 "SN74ACT32PW" H 8150 12734 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8150 12500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 8150 12500 50  0001 C CNN
-	3    8150 12500
+P 6200 3600
+F 0 "U16" H 6200 3925 50  0000 C CNN
+F 1 "SN74ACT32PW" H 6200 3834 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 6200 3600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS32" H 6200 3600 50  0001 C CNN
+	3    6200 3600
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -3047,8 +3047,15 @@ Wire Wire Line
 	2800 4750 2800 4150
 Wire Wire Line
 	2800 4150 2750 4150
+Wire Wire Line
+	6500 3600 6650 3600
+Wire Wire Line
+	6650 3600 6650 3500
+Wire Wire Line
+	6650 3700 6650 3600
 Wire Bus Line
 	3750 2050 3750 2650
 Wire Bus Line
 	3750 1150 3750 1950
+Connection ~ 6650 3600
 $EndSCHEMATC
