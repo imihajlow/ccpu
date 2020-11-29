@@ -1,15 +1,18 @@
 /* https://wavedrom.com/editor.html */
 {signal: [
-  {name: 'clk', wave: '1010101'},
+  {name: 'clk', wave: 'hLhLhLh', period: 1},
   {name: 'cycle', wave: '0.1.0.x'},
+  {name: 'we_cycle', wave: '01.0.1.'},
+  {name: 'cycle_flip_ena', wave: '1...01........', period: 0.5},
   {name: 'IR', wave: 'x3...x.', data: "LD"},
   {name: 'A', wave: '3.4.3.x', data: "IP DP IP+1"},
-  {name: 'D', wave: 'z.....x'},
+  {name: 'D (driven by memory)', wave: '4...x5..6...x.', data: "", period: 0.5},
+  {name: 'n_mem_rdy', wave: '0...10........', period: 0.5},
   {name: 'n_oe_mem', wave: '0.....x'},
   {name: 'n_we_mem', wave: '1.....x'},
   {name: 'n_oe_d_di', wave: '1.0.1.x'},
   {name: 'we_ir', wave: '1.0.1.x'},
-  {name: 'inc_ip', wave: '0.1.0.x'},
+  {name: 'inc_ip', wave: '0...01..0...x.', period: 0.5},
   {name: 'addr_dp', wave: '0.1.0.x'},
   {name: 'swap_p', wave: '0.....x'},
   {name: 'n_we_x', wave: '1.0.1.x'},
@@ -17,6 +20,6 @@
   {name: 'n_oe_x_d', wave: '1.....x'},
   {name: 'n_we_flags', wave: '1.....x'},
 ],
-  head: {text: "LD operation"},
-  config: {hscale: 3}
+  head: {text: "LD operation - fast ready"},
+  config: {hscale: 2}
 }
