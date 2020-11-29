@@ -153,21 +153,18 @@ module control_unit(
         .n_e(op_alu)
         );
 
-    //===========================
-    wire mem_rdy = ~n_mem_rdy;
-    wire we_cycle_wait;
+    wire #10 mem_rdy = ~(n_mem_rdy | n_mem_rdy); // 74x02 NOR
+    assign #10 inc_ip = ~(n_cycle | n_cycle_flip_ena); // 74x02 NOR
+    wire #20 ff_rdy_n_sd = n_clk & n_rst; // 74x00 NAND + 74x02 NOR
+    wire n_cycle_flip_ena;
     d_ff_7474 ff_rdy(
-        .n_q(we_cycle_wait),
+        .n_q(n_cycle_flip_ena),
         .d(1'b0),
         .cp(1'b0),
         .n_cd(mem_rdy),
-        .n_sd(n_clk & n_rst));
-
-    wire cycle_flip_ena = ~we_cycle_wait;
-    assign we_cycle_d = we_cycle ^ cycle_flip_ena;
-    assign cycle_d = cycle ^ cycle_flip_ena;
-    assign inc_ip = cycle & cycle_flip_ena;
-    //===========================
+        .n_sd(ff_rdy_n_sd));
+    assign #10 we_cycle_d = n_we_cycle ^ n_cycle_flip_ena; // 74x86 XOR
+    assign #10 cycle_d = n_cycle ^ n_cycle_flip_ena; // 74x86 XOR
 
     // n_oe_mem is always low, except cycle 1 of ST
     assign #20 n_oe_mem = ~(n_op_st | n_cycle); // 74x32 OR + 74x00 NAND

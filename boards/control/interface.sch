@@ -5,8 +5,8 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 2 2
 Title "Interface connector"
-Date "2020-01-25"
-Rev "1"
+Date "2020-11-29"
+Rev "3"
 Comp ""
 Comment1 "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)"
 Comment2 ""
@@ -199,8 +199,6 @@ Connection ~ 4800 3550
 Wire Bus Line
 	4800 3550 4800 3600
 Wire Wire Line
-	6250 4000 6150 4000
-Wire Wire Line
 	6150 4100 6250 4100
 NoConn ~ 5650 4000
 NoConn ~ 5650 2900
@@ -318,7 +316,10 @@ F 3 "" H 8200 3800 50  0001 C CNN
 	1    8200 3800
 	1    0    0    -1  
 $EndComp
-NoConn ~ 6250 4000
+Text HLabel 6250 4000 2    50   Output ~ 0
+~mem_rdy
+Wire Wire Line
+	6150 4000 6250 4000
 Wire Bus Line
 	4800 3700 4800 3850
 Wire Bus Line
