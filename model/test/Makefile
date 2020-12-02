@@ -1,9 +1,10 @@
 .PHONY: all alu clean
 
 
-all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151
 	./verilog-verify.sh ./test_7474
 	./verilog-verify.sh ./test_74153
+	./verilog-verify.sh ./test_74151
 	./verilog-verify.sh ./test_gp_reg_a
 	./verilog-verify.sh ./test_gp_reg_b
 	./verilog-verify.sh ./test_pointer_reg
@@ -40,6 +41,9 @@ test_cpu: test_cpu.v ../cpu.v ../alu.v ../adder.v ../control_unit.v ../pointer_p
 	iverilog -o $@ $(filter %.v,$^)
 
 test_74153: test_74153.v ../74xx/selector_74153.v
+	iverilog -o $@ $^
+
+test_74151: test_74151.v ../74xx/mux_74151.v
 	iverilog -o $@ $^
 
 test_7474: test_7474.v ../74xx/d_ff_7474.v
