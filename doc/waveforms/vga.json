@@ -1,0 +1,17 @@
+/* https://wavedrom.com/editor.html */
+{signal: [
+  {name: "pixel_clk", wave: "P........."},
+  {name: "hx[0..3]", wave: "2222222222", data: "7 0 1 2 3 4 5 6 7 0"},
+  {name: "ccol_clk", wave: "01...0...1"},
+  {name: "ccol", wave: "22.......2", data: "x x+1 x+2", node: ".a"},
+  {name: "text_d", wave: "2x.2.....x", data: "RAM[x] RAM[x+1]", node: "...b"},
+  {name: "cgrom_d", wave: "2x.....2.x", data: "CG[x] CG[x+1]", node: ".......c"},
+  {name: "store_pixel", wave: "22.......2", data: "CG[x-1] CG[x] CG[x+1]"},
+  {node: ".f.......g"}
+],
+  edge: [
+  'a~>b 55 nS', 'b~>c 150 nS', 'f<->g 318 nS'
+],
+  head: {text: "VGA pipeline"},
+  config: {hscale: 2}
+}
