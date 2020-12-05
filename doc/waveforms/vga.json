@@ -6,7 +6,7 @@
   {name: "ccol", wave: "22.......2", data: "x x+1 x+2", node: ".a"},
   {name: "text_d", wave: "2x.2.....x", data: "RAM[x] RAM[x+1]", node: "...b"},
   {name: "cgrom_d", wave: "2x.....2.x", data: "CG[x] CG[x+1]", node: ".......c"},
-  {name: "store_pixel", wave: "22.......2", data: "CG[x-1] CG[x] CG[x+1]"},
+  {name: "stored_pixel", wave: "22.......2", data: "CG[x-1] CG[x] CG[x+1]"},
   {node: ".f.......g"}
 ],
   edge: [

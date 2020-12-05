@@ -1,7 +1,7 @@
 .PHONY: all alu clean
 
 
-all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl
 	./verilog-verify.sh ./test_7474
 	./verilog-verify.sh ./test_74153
 	./verilog-verify.sh ./test_74151
@@ -11,6 +11,7 @@ all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 te
 	./verilog-verify.sh ./test_pointer_pair
 	./verilog-verify.sh ./test_control_unit
 	./verilog-verify.sh ./test_cpu
+	./verilog-verify.sh ./test_vga_ctrl
 
 clean:
 	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu
@@ -53,6 +54,9 @@ test_gp_reg_a: test_gp_reg_a.v ../gp_reg_a.v ../74xx/buffer_74244.v ../74xx/regi
 	iverilog -o $@ $^
 
 test_gp_reg_b: test_gp_reg_b.v ../gp_reg_b.v ../74xx/buffer_74244.v ../74xx/register_74273.v
+	iverilog -o $@ $^
+
+test_vga_ctrl: test_vga_ctrl.v ../vga_ctrl.v ../74xx/counter_74161.v
 	iverilog -o $@ $^
 
 alu_lo.mem: ../../tools/gen-alu.py
