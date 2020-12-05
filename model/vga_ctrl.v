@@ -14,6 +14,7 @@ module vga_ctrl(/*autoport*/
             n_pixel_ena,
             n_h_rst,
             n_v_rst,
+            v_cnt_ena,
             hsync_out,
             vsync_out,
             n_rdy,
@@ -41,6 +42,7 @@ output wire n_d_to_color_oe;
 output wire n_pixel_ena;
 output wire n_h_rst;
 output wire n_v_rst;
+output wire v_cnt_ena;
 output wire hsync_out;
 output wire vsync_out;
 input wire [9:0] vy; // line number (total)
@@ -80,4 +82,5 @@ assign n_d_to_text_oe = n_text_ram_we;
 assign n_d_to_color_oe = n_color_ram_we;
 
 assign n_rdy = ram_busy | ~ext_selected;
+
 endmodule

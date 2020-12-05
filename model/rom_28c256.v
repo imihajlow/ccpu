@@ -18,5 +18,5 @@ module rom_28c256(
         $readmemh(FILENAME, rom);
     end
 
-    assign #350 d = (n_cs | n_oe) ? 8'bz : rom[a];
+    assign #200 d = (n_cs | n_oe) ? 8'bz : rom[a];
 endmodule

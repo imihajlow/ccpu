@@ -20,15 +20,15 @@ always @(posedge clk or negedge clr_n)
 begin
   if (~clr_n)
   begin
-    count <= #26 4'b0000;
+    count <= #10 4'b0000;
   end
   else if (~load_n)
   begin
-    count <= #15 P;
+    count <= #10 P;
   end
   else if (enp & ent)
   begin
-    count <= #15 count + 1;
+    count <= #10 count + 1;
   end
 end
 

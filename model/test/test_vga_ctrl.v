@@ -29,6 +29,7 @@ reg [9:0] hx;
 wire n_rdy;
 wire n_h_rst;
 wire n_v_rst;
+wire v_cnt_ena;
 
 vga_ctrl inst(
     .n_ccol_rst(n_ccol_rst),
@@ -44,6 +45,7 @@ vga_ctrl inst(
     .n_pixel_ena(n_pixel_ena),
     .hsync_out(hsync_out),
     .vsync_out(vsync_out),
+    .v_cnt_ena(v_cnt_ena),
     .vy(vy),
     .hx(hx),
     .n_rst(n_rst),
@@ -101,6 +103,7 @@ initial begin
                     assert(n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
+                    assert(~v_cnt_ena);
                 end else if (i < 96 + 40) begin
                     // back porch before preload
                     assert(~hsync_out);
@@ -117,6 +120,7 @@ initial begin
                     assert(n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
+                    assert(~v_cnt_ena);
                 end else if (i < 96 + 48) begin
                     // back porch and preload
                     assert(~hsync_out);
@@ -133,6 +137,7 @@ initial begin
                     assert(n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(~a_sel);
+                    assert(~v_cnt_ena);
                 end else if (i < 96 + 48 + 640 - 8) begin
                     // pixel area and preload
                     assert(~hsync_out);
@@ -165,6 +170,7 @@ initial begin
                     assert(n_d_to_color_oe);
                     assert(~n_pixel_ena);
                     assert(a_sel);
+                    assert(~v_cnt_ena);
                 end else if (i < 96 + 48 + 640 + 16) begin
                     // front porch
                     assert(~hsync_out);
@@ -181,6 +187,7 @@ initial begin
                     assert(n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
+                    assert(v_cnt_ena == (i == 96 + 48 + 640 + 16 - 1));
                 end else if (i == 96 + 48 + 640 + 16) begin
                     // reset
                     assert(~n_h_rst);
@@ -205,6 +212,7 @@ initial begin
                     assert(n_pixel_ena);
                     assert(a_sel);
                     assert(n_h_rst);
+                    assert(v_cnt_ena == (i == 96 + 48 + 640 + 16 - 1));
                 end else if (i == 96 + 48 + 640 + 16) begin
                     assert(~n_h_rst);
                 end
@@ -243,6 +251,7 @@ initial begin
                 assert(n_d_to_color_oe === ~j[0]);
                 assert(n_pixel_ena);
                 assert(a_sel);
+                assert(~v_cnt_ena);
             end else if (i < 96 + 40) begin
                 // back porch before preload
                 assert(~hsync_out);
@@ -259,6 +268,7 @@ initial begin
                 assert(n_d_to_color_oe === ~j[0]);
                 assert(n_pixel_ena);
                 assert(a_sel);
+                assert(~v_cnt_ena);
             end else if (i < 96 + 48) begin
                 // back porch and preload
                 assert(~hsync_out);
@@ -275,6 +285,7 @@ initial begin
                 assert(n_d_to_color_oe);
                 assert(n_pixel_ena);
                 assert(~a_sel);
+                assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640 - 8) begin
                 // pixel area and preload
                 assert(~hsync_out);
@@ -291,6 +302,7 @@ initial begin
                 assert(n_d_to_color_oe);
                 assert(~n_pixel_ena);
                 assert(~a_sel);
+                assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640) begin
                 // pixel area, no preload
                 assert(~hsync_out);
@@ -307,6 +319,7 @@ initial begin
                 assert(n_d_to_color_oe === ~j[0]);
                 assert(~n_pixel_ena);
                 assert(a_sel);
+                assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640 + 16) begin
                 // front porch
                 assert(~hsync_out);
@@ -323,6 +336,7 @@ initial begin
                 assert(n_d_to_color_oe === ~j[0]);
                 assert(n_pixel_ena);
                 assert(a_sel);
+                assert(v_cnt_ena == (i == 96 + 48 + 640 + 16 - 1));
             end else if (i == 96 + 48 + 640 + 16) begin
                 // reset
                 assert(~n_h_rst);
@@ -352,6 +366,7 @@ initial begin
                 assert(n_d_to_color_oe === ~j[0]);
                 assert(n_pixel_ena);
                 assert(a_sel);
+                assert(v_cnt_ena == (i == 96 + 48 + 640 + 16 - 1));
             end else if (i == 96 + 48 + 640 + 16) begin
                 assert(~n_h_rst);
             end
