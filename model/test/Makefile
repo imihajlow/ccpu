@@ -1,7 +1,7 @@
 .PHONY: all alu clean
 
 
-all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga test_io
 	./verilog-verify.sh ./test_7474
 	./verilog-verify.sh ./test_74153
 	./verilog-verify.sh ./test_74151
@@ -13,6 +13,7 @@ all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 te
 	./verilog-verify.sh ./test_cpu
 	./verilog-verify.sh ./test_vga_ctrl
 	./verilog-verify.sh ./test_vga
+	./verilog-verify.sh ./test_io
 
 clean:
 	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu
@@ -63,10 +64,8 @@ test_vga_ctrl: test_vga_ctrl.v ../vga_ctrl.v ../74xx/counter_74161.v
 test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_74157.v ../74xx/buffer_74244.v ../74xx/register_74273.v ../74xx/mux_74151.v ../async_ram.v ../rom_28c256.v
 	iverilog -o $@ $^
 
-alu_lo.mem: ../../tools/gen-alu.py
-	../../tools/gen-alu.py
-
-alu_hi.mem: alu_lo.mem
+test_io: test_io.v ../io.v ../74xx/mux_74151.v
+	iverilog -o $@ $^
 
 %.hex: %.asm ../../tools/asm.py
 	../../tools/asm.py -o $(@:.hex=.o) $<
