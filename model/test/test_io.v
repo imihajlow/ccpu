@@ -75,8 +75,8 @@ initial begin
                 for (i = 'h0000; i < 'h10000; i = i + 1) begin
                     a = i;
                     #1
+                    assert(~n_rdy);
                     if (i < 'h8000) begin
-                        assert(~n_rdy);
                         assert(n_rom_cs === raml_ena);
                         assert(n_raml_cs === ~raml_ena);
                         assert(n_ramh_cs);
@@ -85,7 +85,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'ha000) begin
-                        assert(~n_rdy);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(~n_ramh_cs);
@@ -94,7 +93,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'hb000) begin
-                        assert(n_rdy === ~ram_a_ena);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs === ~ram_a_ena);
@@ -103,7 +101,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'hc000) begin
-                        assert(n_rdy === ~ram_b_ena);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs === ~ram_b_ena);
@@ -112,7 +109,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'hd000) begin
-                        assert(n_rdy === ~ram_c_ena);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs === ~ram_c_ena);
@@ -121,7 +117,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'he000) begin
-                        assert(n_rdy === ~ram_d_ena);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs === ~ram_d_ena);
@@ -130,7 +125,6 @@ initial begin
                         assert(cr_cp);
                         assert(~lcd_e);
                     end else if (i < 'hf000) begin
-                        assert(n_rdy === ~ram_e_ena);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs === ~ram_e_ena);
@@ -145,27 +139,23 @@ initial begin
                         assert(n_ramh_cs);
                         if ((i & 'h6) === 0) begin
                             // keyboard: 0xffx0 or 0xffx1
-                            assert(~n_rdy);
                             assert(n_kb_oe === n_oe);
                             assert(kb_cp === n_we);
                             assert(cr_cp);
                             assert(~lcd_e);
                         end else if ((i & 'h6) === 2) begin
                             // LCD: 0xffx2 and 0xffx3
-                            assert(~n_rdy);
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp);
                             assert(lcd_e === ~n_we);
                         end else if ((i & 'h6) === 4) begin
                             // CR: 0xffx4 or 0xffx5
-                            assert(~n_rdy);
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp === n_we);
                             assert(~lcd_e);
                         end else begin
-                            assert(~n_rdy);
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp);
@@ -173,7 +163,6 @@ initial begin
                         end
                     end else begin
                         // 0xf000 - 0xfeff - empty
-                        assert(n_rdy);
                         assert(n_rom_cs);
                         assert(n_raml_cs);
                         assert(n_ramh_cs);

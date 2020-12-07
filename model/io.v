@@ -64,8 +64,7 @@ assign #20 cr_cp = n_cr_cs | n_we; // 74x32
 wire #20 n_lcd_e = (a[2] | n_a1) | (n_io_cs | n_we); // 3x 74x32
 assign #10 lcd_e = ~(n_lcd_e & n_lcd_e); // 74x00
 
-// n_rdy is open drain pull-down
-wire #10 rdy = ~(n_rom_cs & n_raml_cs & n_ramh_cs & n_io_cs); // 74x30
-assign #10 n_rdy = ~rdy; // N-MOSFET
+// n_rdy is open drain pull-up
+assign #10 n_rdy = 1'b0; // always open
 
 endmodule

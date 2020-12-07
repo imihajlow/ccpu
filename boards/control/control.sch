@@ -3328,12 +3328,37 @@ F 3 "" H 7750 19050 50  0001 C CNN
 	1    7750 19050
 	1    0    0    -1  
 $EndComp
-Wire Bus Line
-	3750 2050 3750 2650
-Wire Bus Line
-	3750 1150 3750 1950
 Text Label 5050 5850 3    50   ~ 0
 we_cycle_d
 Text Label 1300 8700 1    50   ~ 0
 cycle_d
+$Comp
+L Device:R R?
+U 1 1 60425BE5
+P 2400 10850
+F 0 "R?" V 2550 10850 50  0000 C CNN
+F 1 "1k" V 2650 10850 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 2330 10850 50  0001 C CNN
+F 3 "~" H 2400 10850 50  0001 C CNN
+	1    2400 10850
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	2550 10850 2550 10700
+Wire Bus Line
+	3750 2050 3750 2650
+Wire Bus Line
+	3750 1150 3750 1950
+Connection ~ 2550 10700
+$Comp
+L power:GND #PWR?
+U 1 1 6042F712
+P 2250 10850
+F 0 "#PWR?" H 2250 10600 50  0001 C CNN
+F 1 "GND" H 2255 10677 50  0000 C CNN
+F 2 "" H 2250 10850 50  0001 C CNN
+F 3 "" H 2250 10850 50  0001 C CNN
+	1    2250 10850
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
