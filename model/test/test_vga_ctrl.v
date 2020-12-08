@@ -85,11 +85,11 @@ initial begin
             #40
             if (j < 480) begin
                 // visible area
-                assert(~vsync_out);
+                assert(vsync_out);
                 assert(n_v_rst);
                 if (i < 96) begin
                     // hsync
-                    assert(hsync_out);
+                    assert(~hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst);
@@ -106,7 +106,7 @@ initial begin
                     assert(~v_cnt_ena);
                 end else if (i < 96 + 40) begin
                     // back porch before preload
-                    assert(~hsync_out);
+                    assert(hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst);
@@ -123,7 +123,7 @@ initial begin
                     assert(~v_cnt_ena);
                 end else if (i < 96 + 48) begin
                     // back porch and preload
-                    assert(~hsync_out);
+                    assert(hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst === i[2]);
@@ -140,7 +140,7 @@ initial begin
                     assert(~v_cnt_ena);
                 end else if (i < 96 + 48 + 640 - 8) begin
                     // pixel area and preload
-                    assert(~hsync_out);
+                    assert(hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst);
@@ -156,7 +156,7 @@ initial begin
                     assert(~a_sel);
                 end else if (i < 96 + 48 + 640) begin
                     // pixel area, no preload
-                    assert(~hsync_out);
+                    assert(hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst);
@@ -173,7 +173,7 @@ initial begin
                     assert(~v_cnt_ena);
                 end else if (i < 96 + 48 + 640 + 16) begin
                     // front porch
-                    assert(~hsync_out);
+                    assert(hsync_out);
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_ccol_rst);
@@ -195,10 +195,10 @@ initial begin
             end else if (j < 480 + 10 + 2 + 33) begin
                 // v blank
                 assert(n_v_rst);
-                assert(vsync_out === ((j >= 480 + 10) & (j < 480 + 10 + 2)));
+                assert(vsync_out === ~((j >= 480 + 10) & (j < 480 + 10 + 2)));
 
                 if (i < 96 + 48 + 640 + 16) begin
-                    assert(hsync_out === (i < 96));
+                    assert(hsync_out === ~(i < 96));
                     assert(n_h_rst);
                     assert(n_rdy);
                     assert(n_text_ram_cs);
@@ -233,11 +233,11 @@ initial begin
         for (i = 0; i <= 96 + 48 + 640 + 16; i = i + 1) begin
             hx = i;
             #40
-            assert(~vsync_out);
+            assert(vsync_out);
             assert(n_v_rst);
             if (i < 96) begin
                 // hsync
-                assert(hsync_out);
+                assert(~hsync_out);
                 assert(n_h_rst);
                 assert(~n_rdy);
                 assert(n_ccol_rst);
@@ -254,7 +254,7 @@ initial begin
                 assert(~v_cnt_ena);
             end else if (i < 96 + 40) begin
                 // back porch before preload
-                assert(~hsync_out);
+                assert(hsync_out);
                 assert(n_h_rst);
                 assert(~n_rdy);
                 assert(n_ccol_rst);
@@ -271,7 +271,7 @@ initial begin
                 assert(~v_cnt_ena);
             end else if (i < 96 + 48) begin
                 // back porch and preload
-                assert(~hsync_out);
+                assert(hsync_out);
                 assert(n_h_rst);
                 assert(n_rdy);
                 assert(n_ccol_rst === i[2]);
@@ -288,7 +288,7 @@ initial begin
                 assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640 - 8) begin
                 // pixel area and preload
-                assert(~hsync_out);
+                assert(hsync_out);
                 assert(n_h_rst);
                 assert(n_rdy);
                 assert(n_ccol_rst);
@@ -305,7 +305,7 @@ initial begin
                 assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640) begin
                 // pixel area, no preload
-                assert(~hsync_out);
+                assert(hsync_out);
                 assert(n_h_rst);
                 assert(~n_rdy);
                 assert(n_ccol_rst);
@@ -322,7 +322,7 @@ initial begin
                 assert(~v_cnt_ena);
             end else if (i < 96 + 48 + 640 + 16) begin
                 // front porch
-                assert(~hsync_out);
+                assert(hsync_out);
                 assert(n_h_rst);
                 assert(~n_rdy);
                 assert(n_ccol_rst);
@@ -350,10 +350,10 @@ initial begin
             #40
             // v blank
             assert(n_v_rst);
-            assert(~vsync_out);
+            assert(vsync_out);
 
             if (i < 96 + 48 + 640 + 16) begin
-                assert(hsync_out === (i < 96));
+                assert(hsync_out === ~(i < 96));
                 assert(n_h_rst);
                 assert(~n_rdy);
                 assert(n_text_ram_cs === j[0]);

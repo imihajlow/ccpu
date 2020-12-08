@@ -54,8 +54,8 @@ H: 96 sync + 48 back + 640 pixels + 16 front
 V: 480 lines + 10 front + 2 sync + 33 back
 */
 
-assign hsync_out = hx < 96;
-assign vsync_out = (vy >= 480 + 10) & (vy < 480 + 10 + 2);
+assign hsync_out = ~(hx < 96);
+assign vsync_out = ~((vy >= 480 + 10) & (vy < 480 + 10 + 2));
 
 assign n_v_rst = ~(vy == 480 + 10 + 2 + 33) & n_rst;
 assign n_h_rst = ~(hx == 96 + 48 + 640 + 16) & n_rst;
