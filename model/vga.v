@@ -121,7 +121,7 @@ assign vy[9:8] = cnt_v2_q[1:0];
 // char column counter: which char to preload
 // reset when total column number is just before the visible area
 // incremented on the edge of 8 pixels
-wire [7:0] ccol;
+wire [6:0] ccol;
 wire n_ccol_rst;
 wire ccol_clk = ~hx[2];
 wire carry_ccol01;
@@ -142,11 +142,14 @@ counter_74161 cnt_p1(
     .ent(carry_ccol01),
     .load_n(1'b1),
     .P(4'b0),
-    .Q(ccol[7:4]));
+    .Q(cnt_p1_q));
+assign ccol[6:4] = cnt_p1_q[2:0];
 
 wire [4:0] crow = vy[8:4];
 
-wire [11:0] int_a = {crow, ccol}; // internal address bus to read chars when output is active
+wire [11:0] int_a; // internal address bus to read chars when output is active
+assign int_a[6:0] = ccol;
+assign int_a[11:7] = crow;
 
 // address bus mux: selects address input to the both RAMs
 wire a_sel; // 0 - int, 1 - ext
@@ -239,7 +242,7 @@ register_74273 reg_color(
 wire n_pixel_ena;
 wire pixel_out;
 mux_74151 mux_pixel(
-    .n_g(n_pixel_ena),
+    .n_g(1'b0),
     .d(stored_pixel),
     .a(hx[0]),
     .b(hx[1]),
