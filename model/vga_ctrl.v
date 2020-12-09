@@ -78,7 +78,6 @@ wire vy_lt_480 = ~(vy_8765 | vy[9]);
 // 648 = 10 1000 1000
 // 8 = 00 0000 1000
 wire hx_86543 = hx[8] | hx[6] | hx[5] | hx[4] | hx[3];
-// wire hx_ge_648 = hx[9] & (hx[8] | hx[7]) & hx_86543;
 wire hx_lt_648 = ~(hx[9] & (hx[8] | hx[7]) & hx_86543);
 wire hx_gt_8 = hx[9] | hx[7] | hx_86543;
 assign n_pixel_ena = ~(vy_lt_480 & hx_lt_648 & hx_gt_8);

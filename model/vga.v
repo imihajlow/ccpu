@@ -121,29 +121,7 @@ assign vy[9:8] = cnt_v2_q[1:0];
 // char column counter: which char to preload
 // reset when total column number is just before the visible area
 // incremented on the edge of 8 pixels
-wire [6:0] ccol;
-wire n_ccol_rst;
-wire ccol_clk = ~hx[2];
-wire carry_ccol01;
-counter_74161 cnt_p0(
-    .clk(ccol_clk),
-    .clr_n(n_ccol_rst),
-    .enp(1'b1),
-    .ent(1'b1),
-    .load_n(1'b1),
-    .P(4'b0),
-    .Q(ccol[3:0]),
-    .rco(carry_ccol01));
-wire [3:0] cnt_p1_q;
-counter_74161 cnt_p1(
-    .clk(ccol_clk),
-    .clr_n(n_ccol_rst),
-    .enp(1'b1),
-    .ent(carry_ccol01),
-    .load_n(1'b1),
-    .P(4'b0),
-    .Q(cnt_p1_q));
-assign ccol[6:4] = cnt_p1_q[2:0];
+wire [6:0] ccol = hx[9:3];
 
 wire [4:0] crow = vy[8:4];
 
@@ -223,7 +201,7 @@ rom_28c256 #(.FILENAME("cg.hex")) cg_rom(
     .n_oe(1'b0));
 
 // registers to preload 8 pixels of the characters and color
-wire buf_clk = ccol_clk;
+wire buf_clk = ~hx[2];
 wire [7:0] stored_pixel;
 register_74273 reg_char(
           .q(stored_pixel),
@@ -258,7 +236,6 @@ mux_74157 mux_color(
     .z(color_out));
 
 vga_ctrl ctrl(
-    .n_ccol_rst(n_ccol_rst),
     .a_sel(a_sel),
     .n_text_ram_cs(n_text_ram_cs),
     .n_text_ram_oe(n_text_ram_oe),

@@ -1420,19 +1420,19 @@ vy7
 Text Label 3050 12350 2    50   ~ 0
 vy8
 Text Label 3050 10950 2    50   ~ 0
-ccol0
+hx3
 Text Label 3050 11050 2    50   ~ 0
-ccol1
+hx4
 Text Label 3050 11150 2    50   ~ 0
-ccol2
+hx5
 Text Label 3050 11250 2    50   ~ 0
-ccol3
+hx6
 Text Label 3050 11350 2    50   ~ 0
-ccol4
+hx7
 Text Label 3050 11450 2    50   ~ 0
-ccol5
+hx8
 Text Label 3050 11550 2    50   ~ 0
-ccol6
+hx9
 $Comp
 L power:GND #PWR?
 U 1 1 5FE9ACC4
@@ -2228,189 +2228,6 @@ Text Label 4900 16650 2    50   ~ 0
 ~v_rst
 NoConn ~ 7600 15850
 NoConn ~ 7600 15950
-$Comp
-L 74xx:74LS161 U?
-U 1 1 6012E395
-P 3700 18500
-F 0 "U?" H 4100 17900 50  0000 C CNN
-F 1 "74LS161" H 4100 17800 50  0000 C CNN
-F 2 "" H 3700 18500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS161" H 3700 18500 50  0001 C CNN
-	1    3700 18500
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 6012E39B
-P 3700 19300
-F 0 "#PWR?" H 3700 19050 50  0001 C CNN
-F 1 "GND" H 3705 19127 50  0000 C CNN
-F 2 "" H 3700 19300 50  0001 C CNN
-F 3 "" H 3700 19300 50  0001 C CNN
-	1    3700 19300
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3A1
-P 3700 17700
-F 0 "#PWR?" H 3700 17550 50  0001 C CNN
-F 1 "VCC" H 3715 17873 50  0000 C CNN
-F 2 "" H 3700 17700 50  0001 C CNN
-F 3 "" H 3700 17700 50  0001 C CNN
-	1    3700 17700
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 6012E3A7
-P 3100 18150
-F 0 "#PWR?" H 3100 17900 50  0001 C CNN
-F 1 "GND" H 3105 17977 50  0000 C CNN
-F 2 "" H 3100 18150 50  0001 C CNN
-F 3 "" H 3100 18150 50  0001 C CNN
-	1    3100 18150
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	3200 18000 3200 18100
-Connection ~ 3200 18100
-Wire Wire Line
-	3200 18100 3200 18150
-Connection ~ 3200 18200
-Wire Wire Line
-	3200 18200 3200 18300
-Wire Wire Line
-	3100 18150 3200 18150
-Connection ~ 3200 18150
-Wire Wire Line
-	3200 18150 3200 18200
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3B5
-P 3200 18500
-F 0 "#PWR?" H 3200 18350 50  0001 C CNN
-F 1 "VCC" V 3215 18673 50  0000 C CNN
-F 2 "" H 3200 18500 50  0001 C CNN
-F 3 "" H 3200 18500 50  0001 C CNN
-	1    3200 18500
-	0    -1   -1   0   
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3BB
-P 3200 18600
-F 0 "#PWR?" H 3200 18450 50  0001 C CNN
-F 1 "VCC" V 3215 18773 50  0000 C CNN
-F 2 "" H 3200 18600 50  0001 C CNN
-F 3 "" H 3200 18600 50  0001 C CNN
-	1    3200 18600
-	0    -1   -1   0   
-$EndComp
-$Comp
-L 74xx:74LS161 U?
-U 1 1 6012E3C1
-P 5400 18500
-F 0 "U?" H 5800 17900 50  0000 C CNN
-F 1 "74LS161" H 5800 17800 50  0000 C CNN
-F 2 "" H 5400 18500 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS161" H 5400 18500 50  0001 C CNN
-	1    5400 18500
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 6012E3C7
-P 5400 19300
-F 0 "#PWR?" H 5400 19050 50  0001 C CNN
-F 1 "GND" H 5405 19127 50  0000 C CNN
-F 2 "" H 5400 19300 50  0001 C CNN
-F 3 "" H 5400 19300 50  0001 C CNN
-	1    5400 19300
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3CD
-P 5400 17700
-F 0 "#PWR?" H 5400 17550 50  0001 C CNN
-F 1 "VCC" H 5415 17873 50  0000 C CNN
-F 2 "" H 5400 17700 50  0001 C CNN
-F 3 "" H 5400 17700 50  0001 C CNN
-	1    5400 17700
-	1    0    0    -1  
-$EndComp
-$Comp
-L power:GND #PWR?
-U 1 1 6012E3D3
-P 4800 18150
-F 0 "#PWR?" H 4800 17900 50  0001 C CNN
-F 1 "GND" H 4805 17977 50  0000 C CNN
-F 2 "" H 4800 18150 50  0001 C CNN
-F 3 "" H 4800 18150 50  0001 C CNN
-	1    4800 18150
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	4900 18000 4900 18100
-Connection ~ 4900 18100
-Wire Wire Line
-	4900 18100 4900 18150
-Connection ~ 4900 18200
-Wire Wire Line
-	4900 18200 4900 18300
-Wire Wire Line
-	4800 18150 4900 18150
-Connection ~ 4900 18150
-Wire Wire Line
-	4900 18150 4900 18200
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3E1
-P 4900 18500
-F 0 "#PWR?" H 4900 18350 50  0001 C CNN
-F 1 "VCC" V 4915 18673 50  0000 C CNN
-F 2 "" H 4900 18500 50  0001 C CNN
-F 3 "" H 4900 18500 50  0001 C CNN
-	1    4900 18500
-	0    -1   -1   0   
-$EndComp
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E3E7
-P 4900 18600
-F 0 "#PWR?" H 4900 18450 50  0001 C CNN
-F 1 "VCC" V 4915 18773 50  0000 C CNN
-F 2 "" H 4900 18600 50  0001 C CNN
-F 3 "" H 4900 18600 50  0001 C CNN
-	1    4900 18600
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	4200 18500 4500 18500
-Wire Wire Line
-	4500 18500 4500 18700
-Wire Wire Line
-	4500 18700 4900 18700
-$Comp
-L power:VCC #PWR?
-U 1 1 6012E420
-P 3200 18700
-F 0 "#PWR?" H 3200 18550 50  0001 C CNN
-F 1 "VCC" V 3215 18873 50  0000 C CNN
-F 2 "" H 3200 18700 50  0001 C CNN
-F 3 "" H 3200 18700 50  0001 C CNN
-	1    3200 18700
-	0    -1   -1   0   
-$EndComp
-Text Label 3200 18800 2    50   ~ 0
-ccol_clk
-Text Label 4900 18800 2    50   ~ 0
-ccol_clk
-Text Label 3200 19000 2    50   ~ 0
-~ccol_rst
-Text Label 4900 19000 2    50   ~ 0
-~ccol_rst
 Text Label 4200 15650 0    50   ~ 0
 vy0
 Text Label 4200 15750 0    50   ~ 0
@@ -2433,22 +2250,6 @@ Text Label 7600 15750 0    50   ~ 0
 vy9
 Text Label 6600 16650 2    50   ~ 0
 ~v_rst
-NoConn ~ 5900 18500
-Text Label 4200 18000 0    50   ~ 0
-ccol0
-Text Label 4200 18100 0    50   ~ 0
-ccol1
-Text Label 4200 18200 0    50   ~ 0
-ccol2
-Text Label 4200 18300 0    50   ~ 0
-ccol3
-Text Label 5900 18000 0    50   ~ 0
-ccol4
-Text Label 5900 18100 0    50   ~ 0
-ccol5
-Text Label 5900 18200 0    50   ~ 0
-ccol6
-NoConn ~ 5900 18300
 $Comp
 L Oscillator:CXO_DIP8 X?
 U 1 1 6022AE12
