@@ -14,6 +14,7 @@ reg n_rst;
 reg [15:0] a;
 wire [7:0] d;
 reg n_oe, n_we;
+reg ena;
 wire n_rdy;
 wire [3:0] color_out;
 wire hsync_out, vsync_out;
@@ -24,6 +25,7 @@ vga inst(
     .d(d),
     .n_oe(n_oe),
     .n_we(n_we),
+    .ena(ena),
     .n_rdy(n_rdy),
     .color_out(color_out),
     .hsync_out(hsync_out),
@@ -36,6 +38,7 @@ initial begin
     a = 0;
     n_oe = 1;
     n_we = 1;
+    ena = 1;
     #1000
 
     n_rst = 1;

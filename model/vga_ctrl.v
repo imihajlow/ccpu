@@ -23,7 +23,8 @@ module vga_ctrl(/*autoport*/
             n_we,
             n_oe,
             vy,
-            hx);
+            hx,
+            ena);
 input wire n_rst;
 input wire [15:0] a;
 input wire n_we;
@@ -45,6 +46,7 @@ output wire n_hsync_out;
 output wire vsync_out;
 input wire [9:0] vy; // line number (total)
 input wire [9:0] hx; // column number (total)
+input wire ena;
 output wire n_rdy;
 
 /*
@@ -98,11 +100,11 @@ assign #10 n_v_rst = vy_nand_9320 & n_rst; // 74x08
 wire #10 hx_nand_985 = ~(hx[9] & hx[8] & hx[5]); // 74x10
 assign #10 n_h_rst = hx_nand_985 & n_rst; // 74x08 // true if hx === 800, false if hx < 800
 
-// ======================================================
 assign a_sel = n_pixel_ena_int;
+// ======================================================
 wire ram_busy = ~a_sel;
 
-wire ext_selected = a[15:13] == 3'b111;
+wire ext_selected = ena & ((a[15:12] == 4'b1110) | (a[15:12] == 4'b1101));
 assign n_text_ram_we = n_we | ~ext_selected | a[12] | ram_busy;
 assign n_color_ram_we = n_we | ~ext_selected | ~a[12] | ram_busy;
 

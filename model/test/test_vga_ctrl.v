@@ -10,6 +10,7 @@ reg n_rst;
 reg [15:0] a;
 reg n_we;
 reg n_oe;
+reg ena;
 
 wire a_sel; // 0 - int, 1 - ext
 wire n_text_ram_cs;
@@ -50,9 +51,10 @@ vga_ctrl inst(
     .n_oe(n_oe),
     .n_rdy(n_rdy),
     .n_h_rst(n_h_rst),
-    .n_v_rst(n_v_rst));
+    .n_v_rst(n_v_rst),
+    .ena(ena));
 
-integer i, j;
+integer i, j, k;
 initial begin
     $dumpfile("test_vga_ctrl.vcd");
     $dumpvars;
@@ -63,6 +65,7 @@ initial begin
     n_oe = 1;
     vy = 0;
     hx = 0;
+    ena = 0;
 
     // test n_rst
     #40
@@ -208,140 +211,145 @@ initial begin
     end // for j
 
     // Check memory access
+    //
     n_we = 1'b0;
-    a = 16'hf000;
-    for (j = 0; j < 2; j = j + 1) begin
-        a[12] = j[0];
-        vy = 100; // inside visible area
-        // H: 96 sync + 48 back + 640 pixels + 16 front
-        for (i = 0; i <= 96 + 48 + 640 + 16; i = i + 1) begin
-            hx = i;
-            #40
-            assert(vsync_out);
-            assert(n_v_rst);
-            if (i < 8) begin
-                // back porch and preload
-                assert(hsync_out);
-                assert(n_h_rst);
-                assert(n_rdy);
-                assert(~n_text_ram_cs);
-                assert(~n_text_ram_oe);
-                assert(n_text_ram_we);
-                assert(~n_color_ram_cs);
-                assert(~n_color_ram_oe);
-                assert(n_color_ram_we);
-                assert(n_d_to_text_oe);
-                assert(n_d_to_color_oe);
-                assert(n_pixel_ena);
-                assert(~a_sel);
-            end else if (i < 8 + 640 - 8) begin
-                // pixel area and preload
-                assert(hsync_out);
-                assert(n_h_rst);
-                assert(n_rdy);
-                assert(~n_text_ram_cs);
-                assert(~n_text_ram_oe);
-                assert(n_text_ram_we);
-                assert(~n_color_ram_cs);
-                assert(~n_color_ram_oe);
-                assert(n_color_ram_we);
-                assert(n_d_to_text_oe);
-                assert(n_d_to_color_oe);
-                assert(~n_pixel_ena);
-                assert(~a_sel);
-            end else if (i < 8 + 640) begin
-                // pixel area, no preload
-                assert(hsync_out);
-                assert(n_h_rst);
-                assert(~n_rdy);
-                assert(n_text_ram_cs === j[0]);
-                assert(n_text_ram_oe);
-                assert(n_text_ram_we === j[0]);
-                assert(n_color_ram_cs === ~j[0]);
-                assert(n_color_ram_oe);
-                assert(n_color_ram_we === ~j[0]);
-                assert(n_d_to_text_oe === j[0]);
-                assert(n_d_to_color_oe === ~j[0]);
-                assert(~n_pixel_ena);
-                assert(a_sel);
-            end else if (i < 8 + 640 + 16) begin
-                // front porch
-                assert(hsync_out);
-                assert(n_h_rst);
-                assert(~n_rdy);
-                assert(n_text_ram_cs === j[0]);
-                assert(n_text_ram_oe);
-                assert(n_text_ram_we === j[0]);
-                assert(n_color_ram_cs === ~j[0]);
-                assert(n_color_ram_oe);
-                assert(n_color_ram_we === ~j[0]);
-                assert(n_d_to_text_oe === j[0]);
-                assert(n_d_to_color_oe === ~j[0]);
-                assert(n_pixel_ena);
-                assert(a_sel);
-            end else if (i < 8 + 640 + 16 + 96) begin
-                // hsync
-                assert(~hsync_out);
-                assert(n_h_rst);
-                assert(~n_rdy);
-                assert(n_text_ram_cs === j[0]);
-                assert(n_text_ram_oe);
-                assert(n_text_ram_we === j[0]);
-                assert(n_color_ram_cs === ~j[0]);
-                assert(n_color_ram_oe);
-                assert(n_color_ram_we === ~j[0]);
-                assert(n_d_to_text_oe === j[0]);
-                assert(n_d_to_color_oe === ~j[0]);
-                assert(n_pixel_ena);
-                assert(a_sel);
-            end else if (i < 8 + 640 + 16 + 96 + 40) begin
-                // back porch before preload
-                assert(hsync_out);
-                assert(n_h_rst);
-                assert(~n_rdy);
-                assert(n_text_ram_cs === j[0]);
-                assert(n_text_ram_oe);
-                assert(n_text_ram_we === j[0]);
-                assert(n_color_ram_cs === ~j[0]);
-                assert(n_color_ram_oe);
-                assert(n_color_ram_we === ~j[0]);
-                assert(n_d_to_text_oe === j[0]);
-                assert(n_d_to_color_oe === ~j[0]);
-                assert(n_pixel_ena);
-                assert(a_sel);
-            end else if (i == 96 + 48 + 640 + 16) begin
-                // reset
-                assert(~n_h_rst);
-            end
-        end // for i
+    a = 16'hd000;
+    for (k = 0; k < 2; k = k + 1) begin
+        ena = k;
+        for (j = 0; j < 2; j = j + 1) begin
+            a[12] = j[0];
+            a[13] = ~j[0];
+            vy = 100; // inside visible area
+            // H: 96 sync + 48 back + 640 pixels + 16 front
+            for (i = 0; i <= 96 + 48 + 640 + 16; i = i + 1) begin
+                hx = i;
+                #40
+                assert(vsync_out);
+                assert(n_v_rst);
+                if (i < 8) begin
+                    // back porch and preload
+                    assert(hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy);
+                    assert(~n_text_ram_cs);
+                    assert(~n_text_ram_oe);
+                    assert(n_text_ram_we);
+                    assert(~n_color_ram_cs);
+                    assert(~n_color_ram_oe);
+                    assert(n_color_ram_we);
+                    assert(n_d_to_text_oe);
+                    assert(n_d_to_color_oe);
+                    assert(n_pixel_ena);
+                    assert(~a_sel);
+                end else if (i < 8 + 640 - 8) begin
+                    // pixel area and preload
+                    assert(hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy);
+                    assert(~n_text_ram_cs);
+                    assert(~n_text_ram_oe);
+                    assert(n_text_ram_we);
+                    assert(~n_color_ram_cs);
+                    assert(~n_color_ram_oe);
+                    assert(n_color_ram_we);
+                    assert(n_d_to_text_oe);
+                    assert(n_d_to_color_oe);
+                    assert(~n_pixel_ena);
+                    assert(~a_sel);
+                end else if (i < 8 + 640) begin
+                    // pixel area, no preload
+                    assert(hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy === ~ena);
+                    assert(n_text_ram_cs === j[0] | ~ena);
+                    assert(n_text_ram_oe);
+                    assert(n_text_ram_we === j[0] | ~ena);
+                    assert(n_color_ram_cs === ~j[0] | ~ena);
+                    assert(n_color_ram_oe);
+                    assert(n_color_ram_we === ~j[0] | ~ena);
+                    assert(n_d_to_text_oe === j[0] | ~ena);
+                    assert(n_d_to_color_oe === ~j[0] | ~ena);
+                    assert(~n_pixel_ena);
+                    assert(a_sel);
+                end else if (i < 8 + 640 + 16) begin
+                    // front porch
+                    assert(hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy === ~ena);
+                    assert(n_text_ram_cs === j[0] | ~ena);
+                    assert(n_text_ram_oe);
+                    assert(n_text_ram_we === j[0] | ~ena);
+                    assert(n_color_ram_cs === ~j[0] | ~ena);
+                    assert(n_color_ram_oe);
+                    assert(n_color_ram_we === ~j[0] | ~ena);
+                    assert(n_d_to_text_oe === j[0] | ~ena);
+                    assert(n_d_to_color_oe === ~j[0] | ~ena);
+                    assert(n_pixel_ena);
+                    assert(a_sel);
+                end else if (i < 8 + 640 + 16 + 96) begin
+                    // hsync
+                    assert(~hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy === ~ena);
+                    assert(n_text_ram_cs === j[0] | ~ena);
+                    assert(n_text_ram_oe);
+                    assert(n_text_ram_we === j[0] | ~ena);
+                    assert(n_color_ram_cs === ~j[0] | ~ena);
+                    assert(n_color_ram_oe);
+                    assert(n_color_ram_we === ~j[0] | ~ena);
+                    assert(n_d_to_text_oe === j[0] | ~ena);
+                    assert(n_d_to_color_oe === ~j[0] | ~ena);
+                    assert(n_pixel_ena);
+                    assert(a_sel);
+                end else if (i < 8 + 640 + 16 + 96 + 40) begin
+                    // back porch before preload
+                    assert(hsync_out);
+                    assert(n_h_rst);
+                    assert(n_rdy === ~ena);
+                    assert(n_text_ram_cs === j[0] | ~ena);
+                    assert(n_text_ram_oe);
+                    assert(n_text_ram_we === j[0] | ~ena);
+                    assert(n_color_ram_cs === ~j[0] | ~ena);
+                    assert(n_color_ram_oe);
+                    assert(n_color_ram_we === ~j[0] | ~ena);
+                    assert(n_d_to_text_oe === j[0] | ~ena);
+                    assert(n_d_to_color_oe === ~j[0] | ~ena);
+                    assert(n_pixel_ena);
+                    assert(a_sel);
+                end else if (i == 96 + 48 + 640 + 16) begin
+                    // reset
+                    assert(~n_h_rst);
+                end
+            end // for i
 
-        vy = 481;
-        // outside visible area
-        for (i = 0; i <= 96 + 48 + 640 + 16; i = i + 1) begin
-            hx = i;
-            #40
-            // v blank
-            assert(n_v_rst);
-            assert(vsync_out);
+            vy = 481;
+            // outside visible area
+            for (i = 0; i <= 96 + 48 + 640 + 16; i = i + 1) begin
+                hx = i;
+                #40
+                // v blank
+                assert(n_v_rst);
+                assert(vsync_out);
 
-            if (i < 96 + 48 + 640 + 16) begin
-                assert(hsync_out === ~(i >= 8 + 640 + 16 && i < 8 + 640 + 16 + 96));
-                assert(n_h_rst);
-                assert(~n_rdy);
-                assert(n_text_ram_cs === j[0]);
-                assert(n_text_ram_oe);
-                assert(n_text_ram_we === j[0]);
-                assert(n_color_ram_cs === ~j[0]);
-                assert(n_color_ram_oe);
-                assert(n_color_ram_we === ~j[0]);
-                assert(n_d_to_text_oe === j[0]);
-                assert(n_d_to_color_oe === ~j[0]);
-                assert(n_pixel_ena);
-                assert(a_sel);
-            end else if (i == 96 + 48 + 640 + 16) begin
-                assert(~n_h_rst);
-            end
-        end // for i
-    end // for j
+                if (i < 96 + 48 + 640 + 16) begin
+                    assert(hsync_out === ~(i >= 8 + 640 + 16 && i < 8 + 640 + 16 + 96));
+                    assert(n_h_rst);
+                    assert(n_rdy === ~ena);
+                    assert(n_text_ram_cs === j[0] | ~ena);
+                    assert(n_text_ram_oe);
+                    assert(n_text_ram_we === j[0] | ~ena);
+                    assert(n_color_ram_cs === ~j[0] | ~ena);
+                    assert(n_color_ram_oe);
+                    assert(n_color_ram_we === ~j[0] | ~ena);
+                    assert(n_d_to_text_oe === j[0] | ~ena);
+                    assert(n_d_to_color_oe === ~j[0] | ~ena);
+                    assert(n_pixel_ena);
+                    assert(a_sel);
+                end else if (i == 96 + 48 + 640 + 16) begin
+                    assert(~n_h_rst);
+                end
+            end // for i
+        end // for j
+    end // for k
 end
 endmodule

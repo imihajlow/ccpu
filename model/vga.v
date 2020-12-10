@@ -1,10 +1,11 @@
 `timescale 1ns/1ns
-module vga(n_rst, a, d, n_oe, n_we, n_rdy, color_out, hsync_out, vsync_out);
+module vga(n_rst, a, d, n_oe, n_we, ena, n_rdy, color_out, hsync_out, vsync_out);
 
 input n_rst;
 input [15:0] a; // external address bus
 inout [7:0] d; // external data bus
 input n_oe, n_we; // memory control signals
+input ena; // board enable signal
 inout n_rdy; // memory ready output
 output [3:0] color_out; // color output, 2 bits each channel
 output hsync_out, vsync_out; // VGA sync lines
