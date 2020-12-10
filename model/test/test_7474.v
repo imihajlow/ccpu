@@ -74,6 +74,7 @@ module test_7474();
         n_cd = 1'b1;
         n_sd = 1'b1;
         d = 1'b1;
+        #1
         cp = 1'b1;
         #1
         assert(q === 1'b1);

@@ -17,8 +17,11 @@ module d_ff_7474(
 
     reg rq, rnq;
 
+    // Timings are from 74ac74 datasheet
     assign #15 q = rq;
     assign #15 n_q = rnq;
+
+    wire #3 di = d;
 
     always @(n_cd or n_sd) begin
         if (n_sd & ~n_cd) begin
@@ -35,8 +38,8 @@ module d_ff_7474(
 
     always @(posedge cp) begin
         if (n_sd & n_cd) begin
-            rq <= d;
-            rnq <= ~d;
+            rq <= di;
+            rnq <= ~di;
         end
     end
 endmodule
