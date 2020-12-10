@@ -51,11 +51,11 @@ test_gp_reg_b: test_gp_reg_b.v ../gp_reg_b.v ../74xx/buffer_74244.v ../74xx/regi
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_gp_reg_b
 
-test_vga_ctrl: test_vga_ctrl.v ../vga_ctrl.v ../74xx/counter_74161.v
+test_vga_ctrl: test_vga_ctrl.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/d_ff_7474.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_vga_ctrl
 
-test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_74157.v ../74xx/buffer_74244.v ../74xx/register_74273.v ../74xx/mux_74151.v ../async_ram.v ../rom_28c256.v
+test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_74157.v ../74xx/buffer_74244.v ../74xx/register_74273.v ../74xx/mux_74151.v ../async_ram.v ../rom_28c256.v  ../74xx/d_ff_7474.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_vga
 

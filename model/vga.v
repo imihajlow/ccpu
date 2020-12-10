@@ -86,11 +86,12 @@ assign hx[9:8] = cnt_h2_q[1:0];
 // row counter
 // always enabled
 wire n_v_rst;
-wire v_cnt_ena;
+wire v_cnt_ena = 1'b1;
 wire carry_v01;
 wire carry_v12;
+wire v_clk = n_hsync_out;
 counter_74161 cnt_v0(
-    .clk(pixel_clk),
+    .clk(v_clk),
     .clr_n(n_v_rst),
     .enp(v_cnt_ena),
     .ent(1'b1),
@@ -99,7 +100,7 @@ counter_74161 cnt_v0(
     .Q(vy[3:0]),
     .rco(carry_v01));
 counter_74161 cnt_v1(
-    .clk(pixel_clk),
+    .clk(v_clk),
     .clr_n(n_v_rst),
     .enp(v_cnt_ena),
     .ent(carry_v01),
@@ -109,7 +110,7 @@ counter_74161 cnt_v1(
     .rco(carry_v12));
 wire [3:0] cnt_v2_q;
 counter_74161 cnt_v2(
-    .clk(pixel_clk),
+    .clk(v_clk),
     .clr_n(n_v_rst),
     .enp(v_cnt_ena),
     .ent(carry_v12),
@@ -235,6 +236,8 @@ mux_74157 mux_color(
     .n_e(n_pixel_ena),
     .z(color_out));
 
+wire n_hsync_out;
+
 vga_ctrl ctrl(
     .a_sel(a_sel),
     .n_text_ram_cs(n_text_ram_cs),
@@ -248,7 +251,7 @@ vga_ctrl ctrl(
     .n_pixel_ena(n_pixel_ena),
     .n_h_rst(n_h_rst),
     .n_v_rst(n_v_rst),
-    .v_cnt_ena(v_cnt_ena),
+    .n_hsync_out(n_hsync_out),
     .hsync_out(hsync_out),
     .vsync_out(vsync_out),
     .n_rdy(n_rdy),
