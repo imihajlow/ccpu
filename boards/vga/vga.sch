@@ -4662,4 +4662,15 @@ Wire Bus Line
 	8000 1850 8000 5850
 Wire Bus Line
 	6050 4500 6050 10250
+$Comp
+L Connector:DB15_Female_HighDensity_MountingHoles J2
+U 1 1 608A11F3
+P 21800 4400
+F 0 "J2" H 21800 5267 50  0000 C CNN
+F 1 "L77HDE15SD1CH4RHNVGA" H 21800 5176 50  0000 C CNN
+F 2 "Connector_Dsub:DSUB-15-HD_Female_Horizontal_P2.29x1.98mm_EdgePinOffset8.35mm_Housed_MountingHolesOffset10.89mm" H 20850 4800 50  0001 C CNN
+F 3 " ~" H 20850 4800 50  0001 C CNN
+	1    21800 4400
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
