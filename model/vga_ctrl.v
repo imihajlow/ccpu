@@ -73,8 +73,8 @@ d_ff_7474 ff_hsync(
 
 // 640 = 10 1000 0000
 wire #5 hx_or_87 = hx[8] | hx[7]; // 74lv32a
-wire #5 hx_lt_640 = ~(hx[9] & hx_or_87); // 74lv00a
-wire #5 n_pixel_ena_int = ~(vy_lt_480 & hx_lt_640); // 74lv00a
+wire #6 n_hx_lt_640 = hx[9] & hx_or_87; // 74lv08a
+wire #5 n_pixel_ena_int = n_vy_lt_480 | n_hx_lt_640; // 74lv32a
 
 d_ff_7474 ff_n_pixel_ena(
       .q(n_pixel_ena),
@@ -90,7 +90,7 @@ assign #5 vsync_out = vy_nand_3 | vy_or_42; // 74lv32a
 
 // 480 = 01 1110 0000
 // wire vy_lt_480 = vy < 480;
-wire #5 vy_lt_480 = ~(vy_8765 | vy[9]); // 74lv00a
+wire #5 n_vy_lt_480 = vy_8765 | vy[9]; // 74lv32a
 
 // assign n_v_rst = ~(vy == 525) & n_rst;
 // 525 = 10 0000 1101
@@ -100,20 +100,40 @@ assign #6 n_v_rst = vy_nand_9320 & n_rst; // 74lv08a
 wire #7 hx_nand_985 = ~(hx[9] & hx[8] & hx[5]); // 74lv10a
 assign #6 n_h_rst = hx_nand_985 & n_rst; // 74lv08a // true if hx === 800, false if hx < 800
 
-assign a_sel = n_pixel_ena_int;
-wire #8 ram_busy = a_sel ^ 1'b1; // 74lv86a
-
-wire #8 a_13_xor_12 = a[13] ^ a[12]; // 74lv86a
-wire #7 n_ext_sel = ~(ena & a[15] & a[14] & a_13_xor_12); // 74lv20
-assign #5 n_rdy = ram_busy | n_ext_sel; // 74lv32a
+wire #8 a_13_xor_12 = a[13] ^ a[12]; // 74ahc1g86
+wire #7 ext_sel = ena & a[15] & a[14] & a_13_xor_12; // 74lv21a
 // ======================================================
 
-assign n_text_ram_we = n_we | n_rdy | a[12];
-assign n_color_ram_we = n_we | n_rdy | ~a[12];
+
+wire buf_a_sel;
+wire n_buf_a_sel;
+wire a_sel_clk = hx[0];
+d_ff_7474 ff_a_sel(
+      .q(buf_a_sel),
+      .n_q(n_buf_a_sel),
+      .d(n_pixel_ena_int),
+      .cp(a_sel_clk),
+      .n_cd(1'b1),
+      .n_sd(n_rst));
+
+assign #6 a_sel = n_pixel_ena_int | buf_a_sel; // A mux (0 = int, 1 = ext)
+wire #6 ext_acc_ena = n_pixel_ena_int & buf_a_sel; // when external access to RAM is enabled
+
+wire #6 acc_req = ext_acc_ena & ext_sel; // address selected and access allowed
+wire #6 n_acc_req = ~acc_req;
+
+wire #5 or_a12_nwe = n_we | a[12];
+assign #5 n_text_ram_we = n_acc_req | or_a12_nwe;
+
+wire #5 nand_rdy_a12 = ~(acc_req & a[12]);
+assign #5 n_color_ram_we = n_we | nand_rdy_a12;
 
 // select when pixel area or when external write selected
-assign n_text_ram_cs = a_sel & n_text_ram_we;
-assign n_color_ram_cs = a_sel & n_color_ram_we;
+assign #6 n_text_ram_cs = a_sel & n_text_ram_we; // 74lv08a
+assign #6 n_color_ram_cs = a_sel & n_color_ram_we; // 74lv08a
+
+wire #5 rdy_out = ~(n_text_ram_we & n_color_ram_we);
+assign #5 n_rdy = ~rdy_out; // P-MOSFET
 
 // always output when pixel area
 assign n_text_ram_oe = a_sel;
