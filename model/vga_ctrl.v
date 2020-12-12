@@ -62,7 +62,6 @@ wire #5 hx_or_654 = hx_or_65 | hx[4]; // 74lv32a
 wire #5 hx_6_0_ge_0010000 = hx_or_654; // 74lv32a
 wire #7 hsync_int = ~(hx[9] & hx[7] & hx_6_0_ge_0010000 & hx_6_0_lt_1110000); // 74lv20a
 
-wire #10 n_hx2 = ~hx[2];
 d_ff_7474 ff_hsync(
       .q(hsync_out),
       .n_q(n_hsync_out),
@@ -102,38 +101,36 @@ assign #6 n_h_rst = hx_nand_985 & n_rst; // 74lv08a // true if hx === 800, false
 
 wire #8 a_13_xor_12 = a[13] ^ a[12]; // 74ahc1g86
 wire #7 ext_sel = ena & a[15] & a[14] & a_13_xor_12; // 74lv21a
-// ======================================================
 
-
-wire buf_a_sel;
-wire n_buf_a_sel;
 wire a_sel_clk = hx[0];
+wire buf_a_sel;
 d_ff_7474 ff_a_sel(
       .q(buf_a_sel),
-      .n_q(n_buf_a_sel),
       .d(n_pixel_ena_int),
       .cp(a_sel_clk),
       .n_cd(1'b1),
       .n_sd(n_rst));
 
+wire #6 ext_acc_ena = n_pixel_ena_int & buf_a_sel; // 74lv08a // when external access to RAM is enabled
+wire #6 acc_req = ext_acc_ena & ext_sel; // 74lv08a // address selected and access allowed
 assign #6 a_sel = n_pixel_ena_int | buf_a_sel; // A mux (0 = int, 1 = ext)
-wire #6 ext_acc_ena = n_pixel_ena_int & buf_a_sel; // when external access to RAM is enabled
 
-wire #6 acc_req = ext_acc_ena & ext_sel; // address selected and access allowed
-wire #6 n_acc_req = ~acc_req;
+wire #6 n_acc_req = ~(acc_req & acc_req); // 74lv00a
 
-wire #5 or_a12_nwe = n_we | a[12];
-assign #5 n_text_ram_we = n_acc_req | or_a12_nwe;
+wire #5 or_a12_nwe = n_we | a[12]; // 74lv32a
+assign #5 n_text_ram_we = n_acc_req | or_a12_nwe; // 74lv32a
 
-wire #5 nand_rdy_a12 = ~(acc_req & a[12]);
-assign #5 n_color_ram_we = n_we | nand_rdy_a12;
+wire #5 nand_rdy_a12 = ~(acc_req & a[12]); // 74lv00a
+assign #5 n_color_ram_we = n_we | nand_rdy_a12; // 74lv32a
 
 // select when pixel area or when external write selected
 assign #6 n_text_ram_cs = a_sel & n_text_ram_we; // 74lv08a
 assign #6 n_color_ram_cs = a_sel & n_color_ram_we; // 74lv08a
 
-wire #5 rdy_out = ~(n_text_ram_we & n_color_ram_we);
+wire #5 rdy_out = ~(n_text_ram_we & n_color_ram_we); // 74lv00a
 assign #5 n_rdy = ~rdy_out; // P-MOSFET
+
+wire #5 n_hx2 = ~(hx[2] & hx[2]); // 74lv00a
 
 // always output when pixel area
 assign n_text_ram_oe = a_sel;
