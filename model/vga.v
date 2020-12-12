@@ -120,16 +120,9 @@ counter_74161 cnt_v2(
     .Q(cnt_v2_q));
 assign vy[9:8] = cnt_v2_q[1:0];
 
-// char column counter: which char to preload
-// reset when total column number is just before the visible area
-// incremented on the edge of 8 pixels
-wire [6:0] ccol = hx[9:3];
-
-wire [4:0] crow = vy[8:4];
-
 wire [11:0] int_a; // internal address bus to read chars when output is active
-assign int_a[6:0] = ccol;
-assign int_a[11:7] = crow;
+assign int_a[6:0] = hx[9:3];
+assign int_a[11:7] = vy[8:4];
 
 // address bus mux: selects address input to the both RAMs
 wire a_sel; // 0 - int, 1 - ext
@@ -203,7 +196,7 @@ rom_28c256 #(.FILENAME("cg.hex")) cg_rom(
     .n_oe(1'b0));
 
 // registers to preload 8 pixels of the characters and color
-wire buf_clk = ~hx[2];
+wire #5 buf_clk = ~(hx[2] & hx[2]); // 74lv00a
 wire [7:0] stored_pixel;
 register_74273 reg_char(
           .q(stored_pixel),

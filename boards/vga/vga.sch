@@ -1399,16 +1399,6 @@ Text Label 3750 12250 2    50   ~ 0
 int_a10
 Text Label 3750 12350 2    50   ~ 0
 int_a11
-Text Label 3400 11950 2    50   ~ 0
-crow0
-Text Label 3400 12050 2    50   ~ 0
-crow1
-Text Label 3400 12150 2    50   ~ 0
-crow2
-Text Label 3400 12250 2    50   ~ 0
-crow3
-Text Label 3400 12350 2    50   ~ 0
-crow4
 Text Label 3050 11950 2    50   ~ 0
 vy4
 Text Label 3050 12050 2    50   ~ 0
@@ -1530,8 +1520,6 @@ Wire Wire Line
 	13000 5550 13000 8200
 Wire Wire Line
 	13000 8200 13250 8200
-Wire Wire Line
-	13000 8200 13000 8600
 Connection ~ 13000 8200
 Text Label 13000 8600 3    50   ~ 0
 buf_clk
@@ -3646,6 +3634,12 @@ Wire Notes Line
 	22550 9750 22550 17150
 Wire Notes Line
 	22550 17150 9400 17150
+Text Notes 17650 10350 0    197  ~ 0
+see /model/vga_ctrl.v
+Wire Wire Line
+	12400 10250 13000 10250
+Wire Wire Line
+	13000 8200 13000 10250
 Wire Bus Line
 	11050 5150 11050 5850
 Wire Bus Line
@@ -3664,6 +3658,5 @@ Wire Bus Line
 	8000 1850 8000 5850
 Wire Bus Line
 	6050 4500 6050 10250
-Text Notes 17650 10350 0    197  ~ 0
-see /model/vga_ctrl.v
+Connection ~ 12400 10250
 $EndSCHEMATC
