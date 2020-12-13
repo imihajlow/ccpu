@@ -289,7 +289,7 @@ Text Label 6200 4700 0    50   ~ 0
 char_a1
 Text Label 6200 4800 0    50   ~ 0
 char_a2
-Text Label 6200 4900 0    50   ~ 0
+Text Label 6200 5600 0    50   ~ 0
 char_a3
 Text Label 6200 5000 0    50   ~ 0
 char_a4
@@ -303,7 +303,7 @@ Text Label 6200 5400 0    50   ~ 0
 char_a8
 Text Label 6200 5500 0    50   ~ 0
 char_a9
-Text Label 6150 5600 0    50   ~ 0
+Text Label 6150 4900 0    50   ~ 0
 char_a10
 Text Label 6150 5700 0    50   ~ 0
 char_a11
@@ -361,7 +361,7 @@ Text Label 6200 8150 0    50   ~ 0
 char_a1
 Text Label 6200 8250 0    50   ~ 0
 char_a2
-Text Label 6200 8350 0    50   ~ 0
+Text Label 6200 9050 0    50   ~ 0
 char_a3
 Text Label 6200 8450 0    50   ~ 0
 char_a4
@@ -375,7 +375,7 @@ Text Label 6200 8850 0    50   ~ 0
 char_a8
 Text Label 6200 8950 0    50   ~ 0
 char_a9
-Text Label 6150 9050 0    50   ~ 0
+Text Label 6150 8350 0    50   ~ 0
 char_a10
 Text Label 6150 9150 0    50   ~ 0
 char_a11
@@ -1796,7 +1796,7 @@ L power:GND #PWR021
 U 1 1 6007D22D
 P 4800 13500
 F 0 "#PWR021" H 4800 13250 50  0001 C CNN
-F 1 "GND" H 4805 13327 50  0000 C CNN
+F 1 "GND" H 4700 13400 50  0000 C CNN
 F 2 "" H 4800 13500 50  0001 C CNN
 F 3 "" H 4800 13500 50  0001 C CNN
 	1    4800 13500
@@ -1944,7 +1944,7 @@ Text Label 4200 13350 0    50   ~ 0
 hx0
 Text Label 4200 13450 0    50   ~ 0
 hx1
-Text Label 4200 13550 0    50   ~ 0
+Text Label 4500 13550 0    50   ~ 0
 hx2
 Text Label 4200 13650 0    50   ~ 0
 hx3
@@ -2576,7 +2576,7 @@ F 3 "" H 12750 11450 50  0001 C CNN
 $EndComp
 Text Label 13050 11250 0    50   ~ 0
 ~hsync_out
-Text Label 12300 10250 0    50   ~ 0
+Text Label 11950 10250 3    50   ~ 0
 ~hx2
 Text Label 10750 10900 0    50   ~ 0
 hx_6_0_lt_1110000
@@ -2620,12 +2620,12 @@ $EndComp
 $Comp
 L 74xx:74LS00 U24
 U 4 1 5FF2A47A
-P 11950 10250
-F 0 "U24" H 11950 10575 50  0000 C CNN
-F 1 "SN74LV00APW" H 11950 10484 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 11950 10250 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 11950 10250 50  0001 C CNN
-	4    11950 10250
+P 11650 10250
+F 0 "U24" H 11650 10575 50  0000 C CNN
+F 1 "SN74LV00APW" H 11650 10484 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 11650 10250 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 11650 10250 50  0001 C CNN
+	4    11650 10250
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -3247,15 +3247,15 @@ Wire Wire Line
 Wire Wire Line
 	12400 12900 12450 12900
 Connection ~ 12400 11150
-Text Label 11550 10250 2    50   ~ 0
+Text Label 11250 10250 2    50   ~ 0
 hx2
 Wire Wire Line
-	11550 10250 11650 10250
+	11250 10250 11350 10250
 Wire Wire Line
-	11650 10250 11650 10150
+	11350 10250 11350 10150
 Wire Wire Line
-	11650 10350 11650 10250
-Connection ~ 11650 10250
+	11350 10350 11350 10250
+Connection ~ 11350 10250
 Wire Wire Line
 	17350 12950 17600 12950
 Wire Wire Line
@@ -5022,10 +5022,10 @@ F 3 "" H 14700 13050 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GNDA #PWR?
+L power:GNDA #PWR0176
 U 1 1 602CF667
 P 21250 6300
-F 0 "#PWR?" H 21250 6050 50  0001 C CNN
+F 0 "#PWR0176" H 21250 6050 50  0001 C CNN
 F 1 "GNDA" V 21255 6173 50  0000 R CNN
 F 2 "" H 21250 6300 50  0001 C CNN
 F 3 "" H 21250 6300 50  0001 C CNN
@@ -5033,10 +5033,10 @@ F 3 "" H 21250 6300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR0177
 U 1 1 602CFE72
 P 21500 6300
-F 0 "#PWR?" H 21500 6050 50  0001 C CNN
+F 0 "#PWR0177" H 21500 6050 50  0001 C CNN
 F 1 "GND" H 21505 6127 50  0000 C CNN
 F 2 "" H 21500 6300 50  0001 C CNN
 F 3 "" H 21500 6300 50  0001 C CNN
@@ -5045,6 +5045,19 @@ F 3 "" H 21500 6300 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	21500 6300 21250 6300
+NoConn ~ 1550 5450
+NoConn ~ 13050 13000
+$Comp
+L Device:R R5
+U 1 1 60AB639B
+P 12100 10250
+F 0 "R5" V 12307 10250 50  0000 C CNN
+F 1 "50" V 12216 10250 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 12030 10250 50  0001 C CNN
+F 3 "~" H 12100 10250 50  0001 C CNN
+	1    12100 10250
+	0    -1   -1   0   
+$EndComp
 Wire Bus Line
 	11050 5150 11050 5850
 Wire Bus Line
@@ -5063,4 +5076,15 @@ Wire Bus Line
 	8000 1850 8000 5850
 Wire Bus Line
 	6050 4500 6050 10250
+$Comp
+L Device:R R6
+U 1 1 60AFB465
+P 4350 13550
+F 0 "R6" V 4550 13450 50  0000 C CNN
+F 1 "50" V 4450 13450 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 4280 13550 50  0001 C CNN
+F 3 "~" H 4350 13550 50  0001 C CNN
+	1    4350 13550
+	0    -1   -1   0   
+$EndComp
 $EndSCHEMATC
