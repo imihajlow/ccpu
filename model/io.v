@@ -37,9 +37,13 @@ wire ram_c_ena = cr[5];
 wire ram_d_ena = cr[6];
 wire ram_e_ena = cr[7];
 
-wire #10 n_a15 = ~(a[15] & a[15]); // 74x00
-assign #10 n_rom_cs = a[15] | raml_ena; // 74x32
-assign #10 n_raml_cs = ~(n_a15 & raml_ena); // 74x00
+wire #5 n_a15 = ~a[15]; // 74lv04a
+wire #5 n_a2 = ~a[2]; // 74lv04a
+wire #5 n_a1 = ~a[1]; // 74lv04a
+wire #5 n_raml_ena= ~raml_ena; // 74lv04a
+
+assign #6 n_rom_cs = a[15] | raml_ena; // 74lv32a
+assign #6 n_raml_cs = a[15] | n_raml_ena; // 74lv32a
 
 mux_74151 ram_mux(
      .n_g(n_a15),
@@ -51,18 +55,17 @@ mux_74151 ram_mux(
 
 wire #12 n_io_cs = ~&a[15:8]; // 74x30
 
-wire #20 n_kb_cs = n_io_cs | a[1] | a[2]; // 2x 74x32
-assign #10 n_kb_oe = n_kb_cs | n_oe; // 74x32
-assign #10 kb_cp = n_kb_cs | n_we; // 74x32
+wire #6 a_or_12 = a[1] | a[2]; // 74lv32a
+wire #6 n_kb_cs = n_io_cs | a_or_12; // 74lv32a
+assign #6 n_kb_oe = n_kb_cs | n_oe; // 74lv32a
+assign #6 kb_cp = n_kb_cs | n_we; // 74lv32a
 
-wire #10 n_a2 = ~a[2];
-wire #10 n_a1 = ~a[1];
+wire #6 a_or_1n2 = n_a2 | a[1]; // 74lv32a
+wire #6 n_cr_cs = n_io_cs | a_or_1n2; // 74lv32a
+assign #6 cr_cp = n_cr_cs | n_we; // 74lv32a
 
-wire #20 n_cr_cs = n_io_cs | n_a2 | a[1]; // 2x 74x32
-assign #20 cr_cp = n_cr_cs | n_we; // 74x32
-
-wire #20 n_lcd_e = (a[2] | n_a1) | (n_io_cs | n_we); // 3x 74x32
-assign #10 lcd_e = ~(n_lcd_e & n_lcd_e); // 74x00
+wire #18 n_lcd_e = (a[2] | n_a1) | (n_io_cs | n_we); // 3x 74lv32a
+assign #10 lcd_e = ~n_lcd_e; // 74lv04a
 
 // n_rdy is open drain pull-up
 assign #10 n_rdy = 1'b0; // always open
