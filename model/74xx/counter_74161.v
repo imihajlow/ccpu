@@ -14,21 +14,21 @@ module counter_74161
 
 reg [3:0] count = 0;
 wire overflow;
-assign #10 overflow = count[3] & count[2] & count[1] & count[0] & ent;
+assign #5 overflow = count[3] & count[2] & count[1] & count[0] & ent;
 
 always @(posedge clk or negedge clr_n)
 begin
   if (~clr_n)
   begin
-    count <= #10 4'b0000;
+    count <= #5 4'b0000;
   end
   else if (~load_n)
   begin
-    count <= #10 P;
+    count <= #5 P;
   end
   else if (enp & ent)
   begin
-    count <= #10 count + 1;
+    count <= #5 count + 1;
   end
 end
 

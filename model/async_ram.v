@@ -20,7 +20,7 @@ module async_ram(a, d, n_oe, n_we, n_cs);
 
     always @(posedge n_we) begin
         if (~n_cs) begin
-            #55 storage[a] <= d;
+            storage[a] <= d;
         end
     end
 endmodule
