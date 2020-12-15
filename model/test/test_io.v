@@ -18,7 +18,8 @@ wire n_ramh_cs;
 wire n_kb_oe;
 wire kb_cp;
 wire cr_cp;
-wire lcd_e;
+wire oport_cp;
+wire n_iport_oe;
 
 wire [7:0] cr;
 
@@ -40,7 +41,8 @@ io inst(
     .n_kb_oe(n_kb_oe),
     .kb_cp(kb_cp),
     .cr_cp(cr_cp),
-    .lcd_e(lcd_e),
+    .oport_cp(oport_cp),
+    .n_iport_oe(n_iport_oe),
     .a(a),
     .n_oe(n_oe),
     .n_we(n_we),
@@ -83,7 +85,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'ha000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -91,7 +94,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'hb000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -99,7 +103,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'hc000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -107,7 +112,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'hd000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -115,7 +121,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'he000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -123,7 +130,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i < 'hf000) begin
                         assert(n_rom_cs);
                         assert(n_raml_cs);
@@ -131,7 +139,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end else if (i >= 'hff00) begin
                         // internal IO area
                         assert(n_rom_cs);
@@ -142,24 +151,28 @@ initial begin
                             assert(n_kb_oe === n_oe);
                             assert(kb_cp === n_we);
                             assert(cr_cp);
-                            assert(~lcd_e);
+                            assert(oport_cp);
+                            assert(n_iport_oe);
                         end else if ((i & 'h6) === 2) begin
-                            // LCD: 0xffx2 and 0xffx3
+                            // IO port: 0xffx2 and 0xffx3
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp);
-                            assert(lcd_e === ~n_we);
+                            assert(oport_cp === n_we);
+                            assert(n_iport_oe === n_oe);
                         end else if ((i & 'h6) === 4) begin
                             // CR: 0xffx4 or 0xffx5
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp === n_we);
-                            assert(~lcd_e);
+                            assert(oport_cp);
+                            assert(n_iport_oe);
                         end else begin
                             assert(n_kb_oe);
                             assert(kb_cp);
                             assert(cr_cp);
-                            assert(~lcd_e);
+                            assert(oport_cp);
+                            assert(n_iport_oe);
                         end
                     end else begin
                         // 0xf000 - 0xfeff - empty
@@ -169,7 +182,8 @@ initial begin
                         assert(n_kb_oe);
                         assert(kb_cp);
                         assert(cr_cp);
-                        assert(~lcd_e);
+                        assert(oport_cp);
+                        assert(n_iport_oe);
                     end
                 end // for i
             end // for j

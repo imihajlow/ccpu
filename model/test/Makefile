@@ -59,7 +59,7 @@ test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_vga
 
-test_io: test_io.v ../io.v ../74xx/mux_74151.v
+test_io: test_io.v ../io.v ../74xx/mux_74151.v ../74xx/decoder_74139.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_io
 
