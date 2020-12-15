@@ -8,8 +8,6 @@ module io(/*autoport*/
              n_kb_oe,
              kb_cp,
              cr_cp,
-             oport_cp,
-             n_iport_oe,
 //input
              a,
              n_oe,
@@ -27,8 +25,6 @@ output wire n_ramh_cs;
 output wire n_kb_oe;
 output wire kb_cp;
 output wire cr_cp;
-output wire oport_cp;
-output wire n_iport_oe;
 
 input wire [7:0] cr;
 
@@ -65,16 +61,11 @@ decoder_74139 dec_io(
 );
 
 assign n_kb_cs = n_dec_o[0];
-assign n_port_cs = n_dec_o[1];
-assign n_cr_cs = n_dec_o[2];
+assign n_cr_cs = n_dec_o[1];
 
 assign #6 n_kb_oe = n_kb_cs | n_oe; // 74lv32a
 assign #6 kb_cp = n_kb_cs | n_we; // 74lv32a
 
-assign #6 n_iport_oe = n_port_cs | n_oe; // 74lv32a
-assign #6 oport_cp = n_port_cs | n_we; // 74lv32a
-
-// cr: 10x
 assign #6 cr_cp = n_cr_cs | n_we; // 74lv32a
 
 // n_rdy is open drain pull-up
