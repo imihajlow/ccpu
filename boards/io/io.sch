@@ -2140,8 +2140,6 @@ F 3 "~" H 12100 4450 50  0001 C CNN
 	1    12100 4450
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4450 13050 4450
 $Comp
 L Device:R R40
 U 1 1 5E9EF1A9
@@ -2153,8 +2151,6 @@ F 3 "~" H 12100 4550 50  0001 C CNN
 	1    12100 4550
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4550 12950 4550
 $Comp
 L Device:R R41
 U 1 1 5E9F3712
@@ -2166,8 +2162,6 @@ F 3 "~" H 12100 4650 50  0001 C CNN
 	1    12100 4650
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4650 12850 4650
 $Comp
 L Device:R R42
 U 1 1 5E9F7CBD
@@ -2179,8 +2173,6 @@ F 3 "~" H 12100 4750 50  0001 C CNN
 	1    12100 4750
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4750 12750 4750
 $Comp
 L Device:R R43
 U 1 1 5E9FC14E
@@ -2192,8 +2184,6 @@ F 3 "~" H 12100 4850 50  0001 C CNN
 	1    12100 4850
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4850 12650 4850
 $Comp
 L Device:R R44
 U 1 1 5EA00390
@@ -2205,8 +2195,6 @@ F 3 "~" H 12100 4950 50  0001 C CNN
 	1    12100 4950
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 4950 12550 4950
 $Comp
 L Device:R R45
 U 1 1 5EA04449
@@ -2218,8 +2206,6 @@ F 3 "~" H 12100 5050 50  0001 C CNN
 	1    12100 5050
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 5050 12450 5050
 $Comp
 L Device:R R46
 U 1 1 5EA08835
@@ -2231,48 +2217,6 @@ F 3 "~" H 12100 5150 50  0001 C CNN
 	1    12100 5150
 	0    1    1    0   
 $EndComp
-Wire Wire Line
-	12250 5150 12350 5150
-Wire Wire Line
-	13050 4250 13050 4450
-Connection ~ 13050 4450
-Wire Wire Line
-	13050 4450 13100 4450
-Wire Wire Line
-	12950 4250 12950 4550
-Connection ~ 12950 4550
-Wire Wire Line
-	12950 4550 13100 4550
-Wire Wire Line
-	12850 4250 12850 4650
-Connection ~ 12850 4650
-Wire Wire Line
-	12850 4650 13100 4650
-Wire Wire Line
-	12750 4250 12750 4750
-Connection ~ 12750 4750
-Wire Wire Line
-	12750 4750 13100 4750
-Wire Wire Line
-	12650 4250 12650 4850
-Connection ~ 12650 4850
-Wire Wire Line
-	12650 4850 13100 4850
-Wire Wire Line
-	12550 4250 12550 4950
-Connection ~ 12550 4950
-Wire Wire Line
-	12550 4950 13100 4950
-Wire Wire Line
-	12450 4250 12450 5050
-Connection ~ 12450 5050
-Wire Wire Line
-	12450 5050 13100 5050
-Wire Wire Line
-	12350 4250 12350 5150
-Connection ~ 12350 5150
-Wire Wire Line
-	12350 5150 13100 5150
 Wire Wire Line
 	11950 4300 11950 4450
 Connection ~ 11950 4450
@@ -2351,7 +2295,7 @@ AR Path="/5E726010/5FCE6393" Ref="J?"  Part="1"
 AR Path="/5FCE6393" Ref="J2"  Part="1" 
 F 0 "J2" H 1150 7517 50  0000 C CNN
 F 1 "SSW-120-02-G-D-RA" H 1150 7426 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Horizontal" H 1100 6400 50  0001 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Horizontal" H 1100 6400 50  0001 C CNN
 F 3 "~" H 1100 6400 50  0001 C CNN
 	1    1100 6400
 	1    0    0    -1  
@@ -2481,7 +2425,7 @@ AR Path="/5E726010/5FCEE327" Ref="J?"  Part="1"
 AR Path="/5FCEE327" Ref="J6"  Part="1" 
 F 0 "J6" H 21550 7567 50  0000 C CNN
 F 1 "SSW-120-02-G-D-RA" H 21550 7476 50  0000 C CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Horizontal" H 21500 6450 50  0001 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Horizontal" H 21500 6450 50  0001 C CNN
 F 3 "~" H 21500 6450 50  0001 C CNN
 	1    21500 6450
 	1    0    0    -1  
@@ -3418,13 +3362,13 @@ $EndComp
 $Comp
 L Connector_Generic:Conn_01x08 J7
 U 1 1 5FDEB6D8
-P 12650 4050
-F 0 "J7" V 12614 3562 50  0000 R CNN
-F 1 "Conn_01x08" V 12750 4200 50  0000 R CNN
-F 2 "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical" H 12650 4050 50  0001 C CNN
-F 3 "~" H 12650 4050 50  0001 C CNN
-	1    12650 4050
-	0    -1   -1   0   
+P 12750 4050
+F 0 "J7" V 12714 3562 50  0000 R CNN
+F 1 "Conn_01x08" V 12850 4200 50  0000 R CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical" H 12750 4050 50  0001 C CNN
+F 3 "~" H 12750 4050 50  0001 C CNN
+	1    12750 4050
+	0    1    -1   0   
 $EndComp
 $Comp
 L Connector_Generic:Conn_01x08 J5
@@ -3815,6 +3759,62 @@ NoConn ~ 10300 14150
 NoConn ~ 16100 10550
 NoConn ~ 7550 7200
 NoConn ~ 9800 10550
+Wire Wire Line
+	12750 4750 13100 4750
+Wire Wire Line
+	12250 4750 12750 4750
+Connection ~ 12750 4750
+Wire Wire Line
+	12750 4250 12750 4750
+Wire Wire Line
+	12650 4850 13100 4850
+Wire Wire Line
+	12250 4850 12650 4850
+Connection ~ 12650 4850
+Wire Wire Line
+	12650 4250 12650 4850
+Wire Wire Line
+	12550 4950 13100 4950
+Wire Wire Line
+	12250 4950 12550 4950
+Connection ~ 12550 4950
+Wire Wire Line
+	12550 4250 12550 4950
+Wire Wire Line
+	12450 5050 13100 5050
+Wire Wire Line
+	12250 5050 12450 5050
+Connection ~ 12450 5050
+Wire Wire Line
+	12450 4250 12450 5050
+Wire Wire Line
+	12350 5150 13100 5150
+Wire Wire Line
+	12250 5150 12350 5150
+Connection ~ 12350 5150
+Wire Wire Line
+	12350 4250 12350 5150
+Wire Wire Line
+	12850 4650 13100 4650
+Wire Wire Line
+	12250 4650 12850 4650
+Connection ~ 12850 4650
+Wire Wire Line
+	12850 4250 12850 4650
+Wire Wire Line
+	12950 4550 13100 4550
+Wire Wire Line
+	12250 4550 12950 4550
+Connection ~ 12950 4550
+Wire Wire Line
+	12950 4250 12950 4550
+Wire Wire Line
+	13050 4450 13100 4450
+Wire Wire Line
+	12250 4450 13050 4450
+Connection ~ 13050 4450
+Wire Wire Line
+	13050 4250 13050 4450
 Wire Bus Line
 	11000 1200 11000 2100
 Wire Bus Line
