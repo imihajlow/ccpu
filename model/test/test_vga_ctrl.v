@@ -131,8 +131,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(a_sel);
                 end else if (i < 8) begin
                     // back porch and preload
@@ -175,8 +175,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(~n_pixel_ena);
                     assert(a_sel);
                 end else if (i < 8 + 640 + 16) begin
@@ -190,8 +190,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
                 end else if (i < 8 + 640 + 16 + 96) begin
@@ -205,8 +205,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
                 end else if (i < 8 + 640 + 16 + 96 + 40) begin
@@ -220,8 +220,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
                 end else if (i == 96 + 48 + 640 + 16) begin
@@ -243,8 +243,8 @@ initial begin
                     assert(n_color_ram_cs);
                     assert(n_color_ram_oe);
                     assert(n_color_ram_we);
-                    assert(n_d_to_text_oe);
-                    assert(n_d_to_color_oe);
+                    assert(~n_d_to_text_oe);
+                    assert(~n_d_to_color_oe);
                     assert(n_pixel_ena);
                     assert(a_sel);
                     assert(n_h_rst);
@@ -293,8 +293,8 @@ initial begin
                             assert(n_color_ram_cs);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we);
-                            assert(n_d_to_text_oe);
-                            assert(n_d_to_color_oe);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(a_sel);
                         end else if (i < 8) begin
                             // back porch and preload
@@ -336,8 +336,8 @@ initial begin
                             assert(n_color_ram_cs);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we);
-                            assert(n_d_to_text_oe);
-                            assert(n_d_to_color_oe);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(~n_pixel_ena);
                             assert(a_sel);
                         end else if (i < 8 + 640) begin
@@ -351,8 +351,8 @@ initial begin
                             assert(n_color_ram_cs === ~j[0] | ~ena);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we === ~j[0] | ~ena);
-                            assert(n_d_to_text_oe === j[0] | ~ena);
-                            assert(n_d_to_color_oe === ~j[0] | ~ena);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(~n_pixel_ena);
                             assert(a_sel);
                         end else if (i < 8 + 640 + 16) begin
@@ -366,8 +366,8 @@ initial begin
                             assert(n_color_ram_cs === ~j[0] | ~ena);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we === ~j[0] | ~ena);
-                            assert(n_d_to_text_oe === j[0] | ~ena);
-                            assert(n_d_to_color_oe === ~j[0] | ~ena);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(n_pixel_ena);
                             assert(a_sel);
                         end else if (i < 8 + 640 + 16 + 96) begin
@@ -381,8 +381,8 @@ initial begin
                             assert(n_color_ram_cs === ~j[0] | ~ena);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we === ~j[0] | ~ena);
-                            assert(n_d_to_text_oe === j[0] | ~ena);
-                            assert(n_d_to_color_oe === ~j[0] | ~ena);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(n_pixel_ena);
                             assert(a_sel);
                         end else if (i < 8 + 640 + 16 + 96 + 40) begin
@@ -396,8 +396,8 @@ initial begin
                             assert(n_color_ram_cs === ~j[0] | ~ena);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we === ~j[0] | ~ena);
-                            assert(n_d_to_text_oe === j[0] | ~ena);
-                            assert(n_d_to_color_oe === ~j[0] | ~ena);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(n_pixel_ena);
                             assert(a_sel);
                         end else if (i == 96 + 48 + 640 + 16) begin
@@ -428,8 +428,8 @@ initial begin
                             assert(n_color_ram_cs === ~j[0] | ~ena);
                             assert(n_color_ram_oe);
                             assert(n_color_ram_we === ~j[0] | ~ena);
-                            assert(n_d_to_text_oe === j[0] | ~ena);
-                            assert(n_d_to_color_oe === ~j[0] | ~ena);
+                            assert(~n_d_to_text_oe);
+                            assert(~n_d_to_color_oe);
                             assert(n_pixel_ena);
                             assert(a_sel);
                         end else if (i == 96 + 48 + 640 + 16) begin

@@ -136,8 +136,17 @@ wire #5 n_hx2 = ~(hx[2] & hx[2]); // 74lv00a
 assign n_text_ram_oe = a_sel;
 assign n_color_ram_oe = a_sel;
 
-assign n_d_to_text_oe = n_text_ram_we;
-assign n_d_to_color_oe = n_color_ram_we;
+wire n_a_sel;
+// using spare 7474 as an inverter
+d_ff_7474 ff_inv(
+      .q(n_a_sel),
+      .d(1'b1),
+      .cp(1'b1),
+      .n_cd(1'b0),
+      .n_sd(a_sel));
+
+assign n_d_to_text_oe = n_a_sel;
+assign n_d_to_color_oe = n_a_sel;
 
 
 endmodule
