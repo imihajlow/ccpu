@@ -3067,7 +3067,7 @@ F 3 "" H 11700 14750 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3700 10150 4250 10150
+	3700 10150 3800 10150
 Text Label 4250 10350 2    50   ~ 0
 ~cycle
 Wire Wire Line
@@ -3530,7 +3530,7 @@ F 1 "KP-2012CGCK" H 3943 9775 50  0001 C CNN
 F 2 "LED_SMD:LED_0805_2012Metric" H 3950 9650 50  0001 C CNN
 F 3 "~" H 3950 9650 50  0001 C CNN
 	1    3950 9650
-	-1   0    0    1   
+	1    0    0    -1  
 $EndComp
 $Comp
 L Device:R R27
@@ -3544,17 +3544,6 @@ F 3 "~" H 4250 9650 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR0121
-U 1 1 5FDFA0FB
-P 4400 9650
-F 0 "#PWR0121" H 4400 9400 50  0001 C CNN
-F 1 "GND" V 4405 9522 50  0000 R CNN
-F 2 "" H 4400 9650 50  0001 C CNN
-F 3 "" H 4400 9650 50  0001 C CNN
-	1    4400 9650
-	0    -1   -1   0   
-$EndComp
-$Comp
 L 74xx:74HC74 U17
 U 1 1 60DE8A07
 P 3400 10050
@@ -3565,12 +3554,6 @@ F 3 "https://www.ti.com/lit/ds/symlink/sn74lv74a.pdf" H 3400 10050 50  0001 C CN
 	1    3400 10050
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	3700 9950 3800 9950
-Wire Wire Line
-	3800 9950 3800 9650
-Text Label 3800 9700 2    50   ~ 0
-cycle_flip_ena
 Wire Wire Line
 	5650 8600 5150 8600
 $Comp
@@ -3650,8 +3633,33 @@ F 3 "" H 7850 13250 50  0001 C CNN
 	1    7850 13250
 	0    -1   -1   0   
 $EndComp
+NoConn ~ 3700 9950
+Wire Wire Line
+	3800 9650 3800 10150
+Connection ~ 3800 10150
+Wire Wire Line
+	3800 10150 4250 10150
 Wire Bus Line
 	3750 2050 3750 2650
 Wire Bus Line
 	3750 1150 3750 1950
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE0CE0B
+P 4400 9650
+F 0 "#PWR?" H 4400 9500 50  0001 C CNN
+F 1 "VCC" V 4417 9778 50  0000 L CNN
+F 2 "" H 4400 9650 50  0001 C CNN
+F 3 "" H 4400 9650 50  0001 C CNN
+	1    4400 9650
+	0    1    1    0   
+$EndComp
+Text Label 2900 9750 0    50   ~ 0
+ff_rdy_n_sd
+Text Label 10050 8450 0    50   ~ 0
+~we_x
+Text Label 11450 1550 3    50   ~ 0
+~oe_reg_d
+Text Label 13500 3050 1    50   ~ 0
+~is_mov
 $EndSCHEMATC
