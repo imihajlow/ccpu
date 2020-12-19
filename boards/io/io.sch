@@ -389,7 +389,7 @@ Text Label 7050 3100 2    50   ~ 0
 Text Notes 1450 1150 0    50   ~ 0
 0000-7FFF ROM or RAM (selected by raml_ena in CR)\n8000-EFFF RAM\nF000-FEFF empty\nFF00-FFFF IO\n
 Text Notes 1450 1500 0    50   ~ 0
-FF00 Keyboard\nFF02 IO port\nFF04 Control register
+FF00 Keyboard\nFF02 Control Register
 $Comp
 L 74xx:74LS32 U1
 U 1 1 5E61782F
@@ -3756,7 +3756,6 @@ NoConn ~ 9200 13350
 NoConn ~ 9200 13450
 NoConn ~ 10300 14700
 NoConn ~ 10300 14150
-NoConn ~ 7550 7200
 NoConn ~ 9800 10550
 Wire Wire Line
 	12750 4750 13100 4750
