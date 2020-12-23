@@ -1,11 +1,12 @@
 .PHONY: all clean
 
 
-all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga test_io
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga test_io test_spi
 
 clean:
 	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu ./test_vga ./test_vga_ctrl
 	rm -f test_alu
+	rm -f test_spi
 
 test_adder: test_adder.v ../adder.v
 	iverilog -o $@ $^
@@ -62,6 +63,10 @@ test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_
 test_io: test_io.v ../io.v ../74xx/mux_74151.v ../74xx/decoder_74139.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_io
+
+test_spi: test_spi.v ../spi.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74xx/counter_74161.v ../74xx/buffer_74244.v ../74xx/d_ff_7474.v
+	iverilog -o $@ $^
+	./verilog-verify.sh ./test_spi
 
 cg.hex: ../../app/font/font.txt
 	../../tools/fontgen.py --mode hex $^ $@
