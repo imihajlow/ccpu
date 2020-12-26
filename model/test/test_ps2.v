@@ -48,6 +48,7 @@ end
 
 task transmit_to_host;
     input [7:0] b;
+    input parity_valid;
 
     reg complete;
     integer i;
@@ -64,7 +65,7 @@ task transmit_to_host;
                 else if (i < 9)
                     data_in = b[i - 1];
                 else if (i == 9)
-                    data_in = ~^b;
+                    data_in = parity_valid ^ ^b;
                 else
                     data_in = 1;
                 #25
@@ -81,6 +82,7 @@ task transmit_to_host;
     end
 endtask
 
+reg [7:0] recv_template;
 reg [7:0] recv_data;
 reg recv_parity;
 integer last_clk_down;
@@ -113,7 +115,15 @@ always @(negedge n_clk_out) begin
         if (reception_bit != 11)
             $display("reception interrupted");
         else begin
-            $display("data received: %08b %01b", recv_data, recv_parity);
+            $display("data received by device: %08b %01b", recv_data, recv_parity);
+            if (recv_template !== recv_data) begin
+                $display("received by device data mismatch: %08b expected, %08b got", recv_template, recv_data);
+                $fatal;
+            end
+            if (^recv_data == recv_parity) begin
+                $display("host to device parity error");
+                $fatal;
+            end
         end
     end
 end
@@ -150,7 +160,7 @@ initial begin
     n_oe = 0;
     a = 1;
     #1
-    while (~rdy) #10;
+    wait (rdy);
     assert(d[0] === 0); // no data
     n_oe = 1;
     #1
@@ -158,7 +168,7 @@ initial begin
     // Test reception
     for (j = 0; j < N; j = j + 1) begin
         #1
-        transmit_to_host(data_recv[j]);
+        transmit_to_host(data_recv[j], j[0]);
         #150 ;
         assert(n_clk_out === 1);
 
@@ -169,7 +179,7 @@ initial begin
         wait (rdy);
         #10;
         assert(d[0] === 1); // has data
-        // assert(d[1] === j[0]); // parity valid on even input values, invalid on odd
+        assert(d[1] === j[0]); // parity valid on even input values, invalid on odd
         n_oe = 1;
         #1
 
@@ -177,7 +187,7 @@ initial begin
         n_oe = 0;
         a = 0;
         #1;
-        while (~rdy) #10;
+        wait (rdy);
         assert(n_clk_out === 1);
         if (d !== data_recv[j]) begin
             $display("received data mismatch: expected %08b, got %08b", data_recv[j], d);
@@ -202,7 +212,7 @@ initial begin
         n_oe = 0;
         a = 1;
         #1
-        while (~rdy) #10;
+        wait (rdy);
         assert(d[0] === 0); // no data
         n_oe = 1;
     end
@@ -210,35 +220,60 @@ initial begin
     #300
 
     // test send
+    recv_template = 8'b11001010;
     a = 0;
-    d_in = 8'b11001010;
+    d_in = recv_template;
     n_we = 0;
     #1;
     n_we = 1;
-    #3
-    // while (clk) #1;
-    // while (~clk) #1;
-    // if (data !== 1'b0) begin
-    //     $display("data is high after clk went high");
-    //     $fatal;
-    // end
-    // for (i = 0; i < 11; i = i + 1) begin
-    //     #50
-    //     clk_in = 0;
-    //     #50
-    //     clk_in = 1;
-    //     #1
-    //     if (clk === 0) begin
-    //         $display("send interrupted");
-    //         $fatal;
-    //     end
-    //     if (i == 9) begin
-    //         data_in = 0;
-    //     end
-    //     data_send[i] = data;
-    // end
-    // data_in = 1;
-    // $display("received: %010b", data_send);
+    #1
+    // read status
+    a = 1;
+    n_oe = 0;
+    wait(rdy);
+    assert(~d[0]); // no data in recv register
+    assert(d[2] === 0); // ack
+
+    // send when data is received
+    transmit_to_host(8'h4c, 1);
+    #1
+    a = 1;
+    n_oe = 0;
+    wait(rdy);
+    assert(d[0]); // has data
+    assert(d[1]); // parity valid
+    a = 0;
+    #1
+    wait(rdy);
+    assert(d === 8'h4c);
+
+    #1
+    n_oe = 1;
+    a = 0;
+    #1
+    recv_template = 8'hc5;
+    d_in = recv_template;
+    n_we = 0;
+    #1
+    wait(rdy);
+    n_we = 1;
+    #1
+    // read status
+    a = 1;
+    n_oe = 0;
+    wait(rdy);
+    assert(d[0]); // has data
+    assert(d[1]); // parity valid
+    assert(d[2] === 0); // ack
+    #1
+    assert(n_clk_out); // reception is still inhibited
+
+    // read data
+    a = 0;
+    #1
+    wait(rdy);
+    assert(d === 8'h4c);
+
     #1000;
     $finish;
 end

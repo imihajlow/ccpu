@@ -30,19 +30,20 @@ input wire a; // 0 - data, 1 - status
 // =========================================
 // Receiving part
 wire recv_clk;
+wire recv_shift_clk = recv_clk & n_send_ena;
 wire [15:0] recv_reg_q;
 wire [15:0] recv_reg_d;
 register_74273 reg_recv_lo(
     .q(recv_reg_q[7:0]),
     .d(recv_reg_d[7:0]),
     .n_mr(n_rst),
-    .cp(recv_clk)
+    .cp(recv_shift_clk)
 );
 register_74273 reg_recv_hi(
     .q(recv_reg_q[15:8]),
     .d(recv_reg_d[15:8]),
     .n_mr(n_rst),
-    .cp(recv_clk)
+    .cp(recv_shift_clk)
 );
 
 assign recv_reg_d[9:0] = recv_reg_q[10:1]; // shift in LSB first
@@ -84,16 +85,7 @@ d_ff_7474 ff_recv_has_data(
     .n_sd(1'b1)
 );
 
-wire recv_clk_out;
-wire n_recv_clk_out;
-d_ff_7474 ff_recv_clk_out(
-    .q(n_recv_clk_out),
-    .n_q(recv_clk_out),
-    .d(1'b1),
-    .cp(recv_full_clk),
-    .n_cd(n_recv_rst),
-    .n_sd(1'b1)
-);
+wire n_recv_clk_out = has_data;
 
 wire n_recv_clk = clk_in;
 assign #10 recv_clk = ~n_recv_clk;
