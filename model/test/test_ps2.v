@@ -39,22 +39,96 @@ ps2 inst(
 reg [7:0] d_in;
 assign #0.1 d = n_we ? 8'bz : d_in;
 
+reg can_transmit;
+reg transmitting;
+initial begin
+    transmitting = 0;
+    can_transmit = 1;
+end
+
+task transmit_to_host;
+    input [7:0] b;
+
+    reg complete;
+    integer i;
+    begin
+        complete = 0;
+        while (~complete) begin
+            wait(clk);
+            #5
+            wait(can_transmit);
+            transmitting = 1;
+            for (i = 0; (i < 11) & ~n_clk_out; i = i + 1) begin
+                if (i == 0)
+                    data_in = 0;
+                else if (i < 9)
+                    data_in = b[i - 1];
+                else if (i == 9)
+                    data_in = ~^b;
+                else
+                    data_in = 1;
+                #25
+                clk_in = 0;
+                #25
+                clk_in = 1;
+            end
+            data_in = 1;
+            complete = i == 11;
+            if (~complete)
+                $display("transmission interrupted");
+            transmitting = 0;
+        end
+    end
+endtask
+
+reg [7:0] recv_data;
+reg recv_parity;
+integer last_clk_down;
+initial begin
+    last_clk_down = 0;
+end
+always @(posedge n_clk_out) begin
+    last_clk_down = $stime;
+end
+integer reception_bit;
+always @(negedge n_clk_out) begin
+    if ($stime - last_clk_down > 100 && n_data_out) begin
+        // byte reception requested
+        can_transmit = 0;
+        for (reception_bit = 0; reception_bit < 11 & ~n_clk_out; reception_bit = reception_bit + 1) begin
+            #25
+            clk_in = 0;
+            #25
+            clk_in = 1;
+            if (reception_bit < 8)
+                recv_data[reception_bit] = ~n_data_out;
+            else if (reception_bit == 8)
+                recv_parity = ~n_data_out;
+            else if (reception_bit == 9)
+                data_in = 0;
+            else
+                data_in = 1;
+        end
+        can_transmit = 1;
+        if (reception_bit != 11)
+            $display("reception interrupted");
+        else begin
+            $display("data received: %08b %01b", recv_data, recv_parity);
+        end
+    end
+end
 
 parameter N = 5;
 integer i, j;
-reg [10:0] data_recv[0:N-1];
+reg [7:0] data_recv[0:N-1];
+reg [10:0] data_send;
 
 initial begin
-    data_recv[0][8:1] = 8'ha5;
-    data_recv[1][8:1] = 8'h84;
-    data_recv[2][8:1] = 8'h02;
-    data_recv[3][8:1] = 8'hff;
-    data_recv[4][8:1] = 8'h00;
-    for (i = 0; i < N; i = i + 1) begin
-        data_recv[i][0] = 0; // start bit
-        data_recv[i][9] = i[0] ^ ^data_recv[i][8:1]; // parity valid on even i
-        data_recv[i][10] = 1; // stop bit
-    end
+    data_recv[0] = 8'ha5;
+    data_recv[1] = 8'h84;
+    data_recv[2] = 8'h02;
+    data_recv[3] = 8'hff;
+    data_recv[4] = 8'h00;
 end
 
 initial begin
@@ -84,22 +158,7 @@ initial begin
     // Test reception
     for (j = 0; j < N; j = j + 1) begin
         #1
-        for (i = 0; i < 11; i = i + 1) begin
-            assert(n_data_out === 0);
-            assert(n_clk_out === 0);
-            #25
-            assert(n_data_out === 0);
-            assert(n_clk_out === 0);
-            data_in = data_recv[j][i];
-            #25
-            assert(n_data_out === 0);
-            assert(n_clk_out === 0);
-            clk_in = 0;
-            #50
-            assert(n_data_out === 0);
-            assert(n_clk_out === (i == 10));
-            clk_in = 1;
-        end
+        transmit_to_host(data_recv[j]);
         #150 ;
         assert(n_clk_out === 1);
 
@@ -107,9 +166,10 @@ initial begin
         n_oe = 0;
         a = 1;
         #1
-        while (~rdy) #10;
+        wait (rdy);
+        #10;
         assert(d[0] === 1); // has data
-        assert(d[1] === j[0]); // parity valid on even input values, invalid on odd
+        // assert(d[1] === j[0]); // parity valid on even input values, invalid on odd
         n_oe = 1;
         #1
 
@@ -119,8 +179,8 @@ initial begin
         #1;
         while (~rdy) #10;
         assert(n_clk_out === 1);
-        if (d !== data_recv[j][8:1]) begin
-            $display("received data mismatch: expected %08b, got %08b", data_recv[j][8:1], d);
+        if (d !== data_recv[j]) begin
+            $display("received data mismatch: expected %08b, got %08b", data_recv[j], d);
             $fatal;
         end
         n_oe = 1;
@@ -151,10 +211,35 @@ initial begin
 
     // test send
     a = 0;
+    d_in = 8'b11001010;
     n_we = 0;
     #1;
     n_we = 1;
-    #300
+    #3
+    // while (clk) #1;
+    // while (~clk) #1;
+    // if (data !== 1'b0) begin
+    //     $display("data is high after clk went high");
+    //     $fatal;
+    // end
+    // for (i = 0; i < 11; i = i + 1) begin
+    //     #50
+    //     clk_in = 0;
+    //     #50
+    //     clk_in = 1;
+    //     #1
+    //     if (clk === 0) begin
+    //         $display("send interrupted");
+    //         $fatal;
+    //     end
+    //     if (i == 9) begin
+    //         data_in = 0;
+    //     end
+    //     data_send[i] = data;
+    // end
+    // data_in = 1;
+    // $display("received: %010b", data_send);
+    #1000;
     $finish;
 end
 

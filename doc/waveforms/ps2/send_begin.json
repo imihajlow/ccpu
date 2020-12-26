@@ -1,0 +1,14 @@
+/* https://wavedrom.com/editor.html */
+{signal: [
+  {name: "n_we", wave: "101..............", node: "..a"},
+  {name: "send_ena", wave: "0..1.............", node: "...b"},
+  {name: "send_req", wave: "0...1........0...", node: "....c........d"},
+  {name: "n_send_clk_out", wave: "0....1..........0", node: ".....e..........f"},
+  {name: "data_out_ena", wave: "0.............1..", node: "..............g"},
+  {name: "n_data_out", wave: "0..............1.", node: "...............h"},
+  {name: "clk_in", wave: "x.....0..........", node: "......i"},
+  {name: "send_clk_ena", wave: "0......1.........", node: ".......j"},
+],
+  edge: ["a~>b", "b~>c", "c~>d 100µS", "c~>e", "d~>g", "g~>h", "e~>i", "e~>j 1µS", "h~>f"],
+  head: {text: "PS/2 transmission begin"},
+}

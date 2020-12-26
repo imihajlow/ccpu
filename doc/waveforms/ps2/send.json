@@ -1,0 +1,17 @@
+/* https://wavedrom.com/editor.html */
+{signal: [
+  {name: "clk_in", wave: "h.l...h.lhlhlhlhlhlhlhlhlhlhlh."},
+  {name: "data_in", wave: "1....0..2.2.2.2.2.2.2.2.2.12.1.", data: "d0 d1 d2 d3 d4 d5 d6 d7 p ack"},
+  {name: "a", wave: "x0.x..........................."},
+  {name: "n_oe", wave: "1.............................."},
+  {name: "n_we", wave: "101............................"},
+  {},
+  {name: "send_clk", wave: "l.....h.lhlhlhlhlhlhlhlhlhlhl.."},
+  {name: "send_cnt", wave: "2.......2.2.2.2.2.2.2.2.2.2.2..", data: "0 1 2 3 4 5 6 7 8 9 10 0"},
+  {name: "n_data_out", wave: "0.....1.2.2.2.2.2.2.2.2.2.0....", data: "~d0 ~d1 ~d2 ~d3 ~d4 ~d5 ~d6 ~d7 ~p"},
+  {},
+  {name: "send_rdy", wave: "1.0.........................1.."},
+  {},
+],
+  head: {text: "PS/2 send (clk_in-controlled)"}
+}

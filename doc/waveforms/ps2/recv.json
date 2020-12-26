@@ -1,0 +1,23 @@
+{signal: [
+  ["Input",
+  {name: "clk_in",  wave: "h..lhlhlhlhlhlhlhlhlhlhl....h."},
+  {name: "data_in", wave: "1.0.2.2.2.2.2.2.2.2.2.1.......", data: "d0 d1 d2 d3 d4 d5 d6 d7 p"},
+  {name: "a",       wave: "x..........................1.x"},
+  {name: "n_oe",    wave: "1............................."},
+  {name: "n_we",    wave: "1...........................01"},
+  ],
+  ["Output",
+   {name: "recv_rdy", wave: "1..0...................1......"},
+   {name: "n_recv_clk_out", wave: "0......................1....0.", node: ".......................c"}
+  ],
+  {},
+  ["Internal control",
+  {name: "recv_clk",  wave: "l..hlhlhlhlhlhlhlhlhlhlh....l."},
+  {name: "recv_cnt",  wave: "2..2.2.2.2.2.2.2.2.2.2.2......", data: "0 1 2 3 4 5 6 7 8 9 10 0", node: ".......................a"},
+  {},
+  {name: "has_data", wave: "0......................1....0."},
+  {name: "recv_clk_ena", wave: "1......................0....1.", node: ".......................b"},
+  ],
+],
+  head: {text: "PS/2 recv (has_data = 0)"}
+}
