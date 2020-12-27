@@ -30,7 +30,7 @@ input wire a; // 0 - data, 1 - status
 // =========================================
 // Receiving part
 wire recv_clk;
-wire recv_shift_clk = recv_clk & n_send_ena;
+wire recv_shift_clk = recv_clk & n_has_data;
 wire [15:0] recv_reg_q;
 wire [15:0] recv_reg_d;
 register_74273 reg_recv_lo(
