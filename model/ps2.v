@@ -8,8 +8,8 @@ module ps2(/*autoport*/
             rdy,
 //input
             n_rst,
-            clk_in,
-            data_in,
+            n_clk_in,
+            n_data_in,
             n_oe,
             n_we,
             n_sel,
@@ -17,8 +17,8 @@ module ps2(/*autoport*/
 input wire n_rst;
 output wire n_clk_out;
 output wire n_data_out;
-input wire clk_in;
-input wire data_in;
+input wire n_clk_in;
+input wire n_data_in;
 
 output wire rdy;
 inout wire [7:0] d;
@@ -27,6 +27,8 @@ input wire n_we;
 input wire n_sel;
 input wire a; // 0 - data, 1 - status
 
+wire #10 clk_in = ~n_clk_in; // 74lv14a
+wire #10 data_in = ~n_data_in; // 74lv14a
 // =========================================
 // Receiving part
 wire recv_clk;
@@ -48,7 +50,7 @@ register_74273 reg_recv_hi(
 
 assign recv_reg_d[9:0] = recv_reg_q[10:1]; // shift in LSB first
 assign recv_reg_d[10] = data_in;
-assign recv_reg_d[15:11] = 5'h0; // unused
+assign recv_reg_d[15:11] = 5'h1f; // unused
 
 wire [7:0] recv_byte = recv_reg_q[8:1];
 wire recv_par = recv_reg_q[9];

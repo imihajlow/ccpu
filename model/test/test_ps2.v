@@ -22,14 +22,16 @@ reg data_in;
 
 wire #0.01 clk = clk_in & ~n_clk_out;  // simulated open-drain
 wire #0.01 data = data_in & ~n_data_out; // simulated open-drain
+wire #0.01 n_clk = ~clk; // 74lv14a
+wire #0.01 n_data = ~data; // 74lv14a
 ps2 inst(
     .d(d),
     .n_clk_out(n_clk_out),
     .n_data_out(n_data_out),
     .rdy(rdy),
     .n_rst(n_rst),
-    .clk_in(clk),
-    .data_in(data),
+    .n_clk_in(n_clk),
+    .n_data_in(n_data),
     .n_oe(n_oe),
     .n_we(n_we),
     .n_sel(n_sel),
