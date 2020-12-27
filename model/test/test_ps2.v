@@ -202,6 +202,7 @@ initial begin
         // reset for the next reception
         #1
         a = 1;
+        #1
         n_we = 0;
         #1
         assert(n_clk_out === 0);

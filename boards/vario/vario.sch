@@ -3,7 +3,7 @@ EELAYER 30 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
-Sheet 1 2
+Sheet 1 3
 Title "Various IO module"
 Date "2020-12-23"
 Rev "1"
@@ -14,10 +14,10 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Connector_Generic:Conn_02x20_Odd_Even J?
+L Connector_Generic:Conn_02x20_Odd_Even J1
 U 1 1 5FE386D6
 P 2000 2550
-F 0 "J?" H 2050 3667 50  0000 C CNN
+F 0 "J1" H 2050 3667 50  0000 C CNN
 F 1 "Conn_02x20_Odd_Even" H 2050 3576 50  0000 C CNN
 F 2 "" H 2000 2550 50  0001 C CNN
 F 3 "~" H 2000 2550 50  0001 C CNN
@@ -25,10 +25,10 @@ F 3 "~" H 2000 2550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR01
 U 1 1 5FE3D97F
 P 1800 1650
-F 0 "#PWR?" H 1800 1500 50  0001 C CNN
+F 0 "#PWR01" H 1800 1500 50  0001 C CNN
 F 1 "VCC" V 1815 1777 50  0000 L CNN
 F 2 "" H 1800 1650 50  0001 C CNN
 F 3 "" H 1800 1650 50  0001 C CNN
@@ -36,10 +36,10 @@ F 3 "" H 1800 1650 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR03
 U 1 1 5FE3E59A
 P 2300 1650
-F 0 "#PWR?" H 2300 1400 50  0001 C CNN
+F 0 "#PWR03" H 2300 1400 50  0001 C CNN
 F 1 "GND" V 2305 1522 50  0000 R CNN
 F 2 "" H 2300 1650 50  0001 C CNN
 F 3 "" H 2300 1650 50  0001 C CNN
@@ -47,10 +47,10 @@ F 3 "" H 2300 1650 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:VCC #PWR?
+L power:VCC #PWR04
 U 1 1 5FE3E980
 P 2300 3550
-F 0 "#PWR?" H 2300 3400 50  0001 C CNN
+F 0 "#PWR04" H 2300 3400 50  0001 C CNN
 F 1 "VCC" V 2315 3678 50  0000 L CNN
 F 2 "" H 2300 3550 50  0001 C CNN
 F 3 "" H 2300 3550 50  0001 C CNN
@@ -58,10 +58,10 @@ F 3 "" H 2300 3550 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR?
+L power:GND #PWR02
 U 1 1 5FE3F7E0
 P 1800 3550
-F 0 "#PWR?" H 1800 3300 50  0001 C CNN
+F 0 "#PWR02" H 1800 3300 50  0001 C CNN
 F 1 "GND" V 1805 3422 50  0000 R CNN
 F 2 "" H 1800 3550 50  0001 C CNN
 F 3 "" H 1800 3550 50  0001 C CNN
@@ -134,10 +134,10 @@ d5
 Text Label 2300 2450 0    50   ~ 0
 d7
 $Comp
-L Connector:SD_Card J?
+L Connector:SD_Card J2
 U 1 1 5FE3BA45
 P 17700 6350
-F 0 "J?" H 17700 7015 50  0000 C CNN
+F 0 "J2" H 17700 7015 50  0000 C CNN
 F 1 "SD_Card" H 17700 6924 50  0000 C CNN
 F 2 "" H 17700 6350 50  0001 C CNN
 F 3 "http://portal.fciconnect.com/Comergent//fci/drawing/10067847.pdf" H 17700 6350 50  0001 C CNN
@@ -145,15 +145,15 @@ F 3 "http://portal.fciconnect.com/Comergent//fci/drawing/10067847.pdf" H 17700 6
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:Mini-DIN-6 J?
+L Connector:Mini-DIN-6 J3
 U 1 1 5FE41893
-P 17700 9650
-F 0 "J?" H 17700 10017 50  0000 C CNN
-F 1 "Mini-DIN-6" H 17700 9926 50  0000 C CNN
-F 2 "" H 17700 9650 50  0001 C CNN
-F 3 "http://service.powerdynamics.com/ec/Catalog17/Section%2011.pdf" H 17700 9650 50  0001 C CNN
-	1    17700 9650
-	1    0    0    -1  
+P 7600 2250
+F 0 "J3" H 7600 2617 50  0000 C CNN
+F 1 "Mini-DIN-6" H 7600 2526 50  0000 C CNN
+F 2 "" H 7600 2250 50  0001 C CNN
+F 3 "http://service.powerdynamics.com/ec/Catalog17/Section%2011.pdf" H 7600 2250 50  0001 C CNN
+	1    7600 2250
+	0    1    1    0   
 $EndComp
 $Sheet
 S 4550 5600 1350 1200
@@ -161,4 +161,113 @@ U 5FE5ABE2
 F0 "SPI" 50
 F1 "SPI.sch" 50
 $EndSheet
+$Sheet
+S 5600 2000 950  1400
+U 5FE853A4
+F0 "ps2" 50
+F1 "ps2.sch" 50
+F2 "ps2_clk" T R 6550 2850 50 
+F3 "ps2_data" T R 6550 2700 50 
+F4 "d[0..7]" B L 5600 2150 50 
+F5 "~oe" I L 5600 2250 50 
+F6 "~we" I L 5600 2350 50 
+F7 "~sel" I L 5600 2450 50 
+F8 "a" I L 5600 2550 50 
+$EndSheet
+Text GLabel 2950 1750 2    50   Input ~ 0
+~rst
+Wire Wire Line
+	2950 1750 2300 1750
+NoConn ~ 7500 1950
+NoConn ~ 7700 1950
+Wire Wire Line
+	6550 2850 7700 2850
+Wire Wire Line
+	7700 2850 7700 2550
+Wire Wire Line
+	6550 2700 7500 2700
+Wire Wire Line
+	7500 2700 7500 2550
+$Comp
+L power:VCC #PWR0101
+U 1 1 6003D229
+P 7600 1950
+F 0 "#PWR0101" H 7600 1800 50  0001 C CNN
+F 1 "VCC" H 7615 2123 50  0000 C CNN
+F 2 "" H 7600 1950 50  0001 C CNN
+F 3 "" H 7600 1950 50  0001 C CNN
+	1    7600 1950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 6003DAC3
+P 7600 2550
+F 0 "#PWR0102" H 7600 2300 50  0001 C CNN
+F 1 "GND" H 7605 2377 50  0000 C CNN
+F 2 "" H 7600 2550 50  0001 C CNN
+F 3 "" H 7600 2550 50  0001 C CNN
+	1    7600 2550
+	1    0    0    -1  
+$EndComp
+Text Label 5600 2150 2    50   ~ 0
+d[0..7]
+Text Label 5600 2250 2    50   ~ 0
+~oe
+Text Label 5600 2350 2    50   ~ 0
+~we
+Text Label 5600 2550 2    50   ~ 0
+a0
+Entry Wire Line
+	4100 2550 4200 2450
+Entry Wire Line
+	4100 2650 4200 2550
+Entry Wire Line
+	4100 2750 4200 2650
+Entry Wire Line
+	4100 2850 4200 2750
+Entry Wire Line
+	4100 2950 4200 2850
+Entry Wire Line
+	4100 3050 4200 2950
+Entry Wire Line
+	4100 3150 4200 3050
+Entry Wire Line
+	4100 3250 4200 3150
+Text Label 3900 3250 2    50   ~ 0
+d7
+Text Label 3900 3150 2    50   ~ 0
+d6
+Text Label 3900 3050 2    50   ~ 0
+d5
+Text Label 3900 2950 2    50   ~ 0
+d4
+Text Label 3900 2850 2    50   ~ 0
+d3
+Text Label 3900 2750 2    50   ~ 0
+d2
+Text Label 3900 2650 2    50   ~ 0
+d1
+Text Label 3900 2550 2    50   ~ 0
+d0
+Wire Wire Line
+	4100 2550 3900 2550
+Wire Wire Line
+	3900 2650 4100 2650
+Wire Wire Line
+	4100 2750 3900 2750
+Wire Wire Line
+	3900 2850 4100 2850
+Wire Wire Line
+	4100 2950 3900 2950
+Wire Wire Line
+	3900 3050 4100 3050
+Wire Wire Line
+	4100 3150 3900 3150
+Wire Wire Line
+	3900 3250 4100 3250
+Wire Bus Line
+	4200 2150 5600 2150
+Wire Bus Line
+	4200 2150 4200 3150
 $EndSCHEMATC
