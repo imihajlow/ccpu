@@ -69,7 +69,7 @@ test_spi: test_spi.v ../spi.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_spi
 
-test_ps2: test_ps2.v ../ps2.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74xx/counter_74161.v ../74xx/buffer_74244.v ../74xx/d_ff_7474.v
+test_ps2: test_ps2.v ../ps2.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74xx/counter_74161.v ../74xx/buffer_74244.v ../74xx/d_ff_7474.v ../74xx/parity_74280.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_ps2
 

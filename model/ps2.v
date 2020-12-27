@@ -50,11 +50,13 @@ assign recv_reg_d[9:0] = recv_reg_q[10:1]; // shift in LSB first
 assign recv_reg_d[10] = data_in;
 assign recv_reg_d[15:11] = 5'h0; // unused
 
+wire [7:0] recv_byte = recv_reg_q[8:1];
+wire recv_par = recv_reg_q[9];
 
 wire #10 n_data_oe = n_oe | n_sel | a;
 buffer_74244 buf_data_out(
     .o(d),
-    .i(recv_reg_q[8:1]),
+    .i(recv_byte),
     .n_oe1(n_data_oe),
     .n_oe2(n_data_oe)
 );
@@ -204,7 +206,10 @@ mux_74151 mux_send_hi(
     .y(send_data_out_hi),
     .w(n_send_data_out_hi));
 assign send_data[0] = 1'b0;
-assign send_data[9] = ~^send_data[8:1];
+parity_74280 par_send(
+    .i({1'b0, send_data[8:1]}),
+    .pe(send_data[9])
+);
 assign send_data[15:10] = 6'b111111;
 
 register_74273 reg_send(
@@ -246,7 +251,11 @@ buffer_74244 buf_status_out(
     .n_oe2(n_status_oe)
 );
 
-wire #40 recv_valid = ^recv_reg_q[9:1];
+wire recv_valid;
+parity_74280 par_recv(
+    .i({recv_par, recv_byte}),
+    .po(recv_valid)
+);
 assign status = {5'h0, send_ack, recv_valid, has_data};
 
 endmodule
