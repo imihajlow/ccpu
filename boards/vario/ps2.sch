@@ -27,7 +27,7 @@ Text HLabel 1100 2650 0    50   Input ~ 0
 ~sel
 Text HLabel 1100 2800 0    50   Input ~ 0
 a
-Text GLabel 1100 1150 0    50   Input ~ 0
+Text GLabel 1100 1150 0    50   Output ~ 0
 ~rst
 Text Label 1100 1150 0    50   ~ 0
 ~rst
@@ -153,12 +153,12 @@ $EndComp
 $Comp
 L 74xx:74HC14 U7
 U 2 1 5FE912BF
-P 12200 2000
-F 0 "U7" H 12200 1683 50  0000 C CNN
-F 1 "74HC14" H 12200 1774 50  0000 C CNN
-F 2 "" H 12200 2000 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 12200 2000 50  0001 C CNN
-	2    12200 2000
+P 15250 4600
+F 0 "U7" H 15250 4283 50  0000 C CNN
+F 1 "74HC14" H 15250 4374 50  0000 C CNN
+F 2 "" H 15250 4600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74HC14" H 15250 4600 50  0001 C CNN
+	2    15250 4600
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -226,8 +226,6 @@ Text Label 12850 3150 2    50   ~ 0
 ~data_in
 Wire Wire Line
 	12500 2000 12850 2000
-Text Label 11900 2000 2    50   ~ 0
-clk_in
 Wire Wire Line
 	12500 3150 12850 3150
 Text Label 11900 3150 2    50   ~ 0
@@ -1997,7 +1995,7 @@ Text Label 8200 5950 2    50   ~ 0
 recv_cnt3
 Text Label 9400 5550 0    50   ~ 0
 ~recv_rdy
-Text GLabel 1100 1400 0    50   Input ~ 0
+Text GLabel 1100 1400 0    50   3State ~ 0
 ~rdy
 Text Label 1100 1400 0    50   ~ 0
 ~rdy
@@ -3386,6 +3384,10 @@ F 3 "" H 14050 5650 50  0001 C CNN
 	1    14050 5650
 	1    0    0    -1  
 $EndComp
+NoConn ~ 2650 12700
+NoConn ~ 7550 10950
+NoConn ~ 11050 8600
+NoConn ~ 6500 12750
 Wire Bus Line
 	1550 2200 1550 3200
 $EndSCHEMATC

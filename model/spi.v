@@ -30,12 +30,10 @@ always begin
     forever #1200 int_clk = ~int_clk;
 end
 
-wire n_int_clk = ~int_clk;
-
-wire n_clk = ~clk;
+wire #7 n_int_clk = ~int_clk; // 74lv14a
 
 wire [7:0] reg_send_q;
-wire reg_send_cp = n_sel | n_we;
+wire #7 reg_send_cp = n_sel | n_we; // 74lv32a
 register_74273 reg_send(
     .q(reg_send_q),
     .d(d),
@@ -60,8 +58,8 @@ mux_74151 mux_send(
     .y(mosi)
 );
 
-
-wire n_int_rst = ~count[3] & n_rst;
+wire #7 n_count3 = ~count[3]; // 74lv14a
+wire #7 n_int_rst = n_count3 & n_rst; // 74lv08a
 counter_74161 counter_send(
   .clk(n_clk),
   .clr_n(n_int_rst),
@@ -80,7 +78,7 @@ register_74273 reg_recv(
     .cp(clk)
 );
 
-wire n_oe_to_d = n_sel | n_oe;
+wire #7 n_oe_to_d = n_sel | n_oe; // 74lv32a
 buffer_74244 buf_out(
     .o(d),
     .i(reg_recv_q),
@@ -100,16 +98,18 @@ d_ff_7474 ff_rdy(
 );
 
 wire clk_ena;
-assign clk = int_clk & clk_ena;
-
+wire n_clk_ena;
 d_ff_7474 ff_clk_ena(
     .q(clk_ena),
+    .n_q(n_clk_ena),
     .d(n_rdy_int),
     .cp(n_int_clk),
     .n_cd(n_int_rst),
     .n_sd(1'b1)
 );
+wire #7 n_clk = n_int_clk | n_clk_ena; // 74lv32a
+assign #7 clk = ~n_clk;
 
-wire rdy = rdy_int | n_sel;
-assign n_rdy = ~rdy;
+wire #7 rdy = rdy_int | n_sel; // 74lv32a
+assign #10 n_rdy = ~rdy; // P-MOSFET
 endmodule

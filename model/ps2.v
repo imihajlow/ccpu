@@ -27,7 +27,6 @@ input wire n_we;
 input wire n_sel;
 input wire a; // 0 - data, 1 - status
 
-wire #10 clk_in = ~n_clk_in; // 74lv14a
 wire #10 data_in = ~n_data_in; // 74lv14a
 // =========================================
 // Receiving part

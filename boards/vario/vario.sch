@@ -156,10 +156,17 @@ F 3 "http://service.powerdynamics.com/ec/Catalog17/Section%2011.pdf" H 7600 2250
 	0    1    1    0   
 $EndComp
 $Sheet
-S 4550 5600 1350 1200
+S 4550 5600 700  950 
 U 5FE5ABE2
 F0 "SPI" 50
 F1 "SPI.sch" 50
+F2 "clk" O R 5250 5750 50 
+F3 "mosi" O R 5250 5850 50 
+F4 "miso" I R 5250 5950 50 
+F5 "d[0..7]" B L 4550 5750 50 
+F6 "~oe" I L 4550 5900 50 
+F7 "~we" I L 4550 6000 50 
+F8 "~sel" I L 4550 6100 50 
 $EndSheet
 $Sheet
 S 5600 2000 950  1400
@@ -174,7 +181,7 @@ F6 "~we" I L 5600 2350 50
 F7 "~sel" I L 5600 2450 50 
 F8 "a" I L 5600 2550 50 
 $EndSheet
-Text GLabel 2950 1750 2    50   Input ~ 0
+Text GLabel 2950 1750 2    50   Output ~ 0
 ~rst
 Wire Wire Line
 	2950 1750 2300 1750
@@ -268,6 +275,60 @@ Wire Wire Line
 	3900 3250 4100 3250
 Wire Bus Line
 	4200 2150 5600 2150
+Text GLabel 1400 1850 0    50   3State ~ 0
+~rdy
+Wire Wire Line
+	1400 1850 1800 1850
+Text Label 4550 6000 2    50   ~ 0
+~we
+Text Label 4550 5900 2    50   ~ 0
+~oe
 Wire Bus Line
-	4200 2150 4200 3150
+	4550 5750 4200 5750
+Wire Bus Line
+	4200 2150 4200 5750
+$Comp
+L power:PWR_FLAG #FLG0101
+U 1 1 5FF7DC16
+P 1650 4600
+F 0 "#FLG0101" H 1650 4675 50  0001 C CNN
+F 1 "PWR_FLAG" H 1650 4773 50  0000 C CNN
+F 2 "" H 1650 4600 50  0001 C CNN
+F 3 "~" H 1650 4600 50  0001 C CNN
+	1    1650 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0181
+U 1 1 5FF7E163
+P 1650 4600
+F 0 "#PWR0181" H 1650 4350 50  0001 C CNN
+F 1 "GND" V 1655 4472 50  0000 R CNN
+F 2 "" H 1650 4600 50  0001 C CNN
+F 3 "" H 1650 4600 50  0001 C CNN
+	1    1650 4600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:PWR_FLAG #FLG0102
+U 1 1 5FF7E866
+P 1950 4650
+F 0 "#FLG0102" H 1950 4725 50  0001 C CNN
+F 1 "PWR_FLAG" H 1950 4823 50  0000 C CNN
+F 2 "" H 1950 4650 50  0001 C CNN
+F 3 "~" H 1950 4650 50  0001 C CNN
+	1    1950 4650
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:VCC #PWR0182
+U 1 1 5FF7EE14
+P 1950 4650
+F 0 "#PWR0182" H 1950 4500 50  0001 C CNN
+F 1 "VCC" V 1965 4778 50  0000 L CNN
+F 2 "" H 1950 4650 50  0001 C CNN
+F 3 "" H 1950 4650 50  0001 C CNN
+	1    1950 4650
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
