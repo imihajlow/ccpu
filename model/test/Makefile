@@ -55,13 +55,16 @@ test_vga_ctrl: test_vga_ctrl.v ../vga_ctrl.v ../74xx/d_ff_7474.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_vga_ctrl
 
-test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_74157.v ../74xx/buffer_74244.v ../74xx/register_74273.v ../74xx/mux_74151.v ../async_ram.v ../rom_28c256.v  ../74xx/d_ff_7474.v
-	iverilog -o $@ $^
+test_vga: test_vga.v ../vga.v ../vga_ctrl.v ../74xx/counter_74161.v ../74xx/mux_74157.v ../74xx/buffer_74244.v ../74xx/register_74273.v ../74xx/mux_74151.v ../async_ram.v ../rom_28c256.v  ../74xx/d_ff_7474.v cg.hex
+	iverilog -o $@ $(filter %.v,$^)
 	./verilog-verify.sh ./test_vga
 
 test_io: test_io.v ../io.v ../74xx/mux_74151.v ../74xx/decoder_74139.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_io
+
+cg.hex: ../../app/font/font.txt
+	../../tools/fontgen.py --mode hex $^ $@
 
 %.hex: %.asm ../../tools/asm.py
 	../../tools/asm.py -o $(@:.hex=.o) $<
