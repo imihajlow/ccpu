@@ -527,13 +527,13 @@ Text HLabel 11300 2500 2    50   Output ~ 0
 clk
 Text HLabel 11300 2600 2    50   Output ~ 0
 mosi
-Text HLabel 11300 2700 2    50   Input ~ 0
-miso
+Text HLabel 11300 3000 2    50   Input ~ 0
+~miso
 Text Label 11300 2600 2    50   ~ 0
 mosi
 Text Label 11300 2500 2    50   ~ 0
 clk
-Text Label 11300 2700 2    50   ~ 0
+Text Label 9150 3000 2    50   ~ 0
 miso
 Text HLabel 1250 2050 0    50   BiDi ~ 0
 d[0..7]
@@ -914,13 +914,13 @@ $EndComp
 $Comp
 L 74xx:74LS14 U31
 U 5 1 5FEBABC1
-P 14100 6150
-F 0 "U31" H 14100 6467 50  0000 C CNN
-F 1 "74LS14" H 14100 6376 50  0000 C CNN
-F 2 "" H 14100 6150 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74LS14" H 14100 6150 50  0001 C CNN
-	5    14100 6150
-	1    0    0    -1  
+P 9450 3000
+F 0 "U31" H 9450 3317 50  0000 C CNN
+F 1 "74LS14" H 9450 3226 50  0000 C CNN
+F 2 "" H 9450 3000 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS14" H 9450 3000 50  0001 C CNN
+	5    9450 3000
+	-1   0    0    1   
 $EndComp
 $Comp
 L 74xx:74LS14 U31
@@ -1405,6 +1405,8 @@ Wire Wire Line
 NoConn ~ 13800 8300
 NoConn ~ 13750 8850
 NoConn ~ 6750 8500
+Wire Wire Line
+	11300 3000 9750 3000
 Wire Bus Line
 	1700 2050 1700 3050
 $EndSCHEMATC
