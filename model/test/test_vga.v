@@ -4,8 +4,6 @@ module test_vga();
 /*
     This test bench checks for HSYNC and VSYNC timings
     and produces an output (vga.txt) which can be parsed by the VGA simulator (https://ericeastwood.com/lab/vga-simulator/).
-
-    cg.hex is not included for licensing reasons.
  */
 task assert;
     input v;
