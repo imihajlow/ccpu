@@ -1,5 +1,10 @@
 .section text
     nop
+    ; enable all memory segments
+    ldi ph, 0xff
+    ldi pl, 0x02
+    ldi a, 0xf8
+    st a
 start:
     ldi b, 0x80
     ldi a, 0x00
@@ -211,7 +216,7 @@ loop:
     ldi pl, lo(loop)
     jmp
 fail:
-    ; check if failed address is 0xff00 and repeat the loop
+    ; check if failed address is 0xf000 and repeat the loop
     ldi ph, hi(error)
     ldi pl, lo(error)
     add a, 0

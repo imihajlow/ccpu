@@ -3,7 +3,7 @@ NATRIX=$(NATRIX_DIR)/natrix.py
 ALU_REVISION=2
 FREQUENCY=1350kHz
 
-all: calc.rom io_test.rom test.bin natest.bin main.rom alutest.rom
+all: calc.rom io_test.rom test.bin natest.bin main.rom alutest.rom memcheck.rom locheck.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s $(NATRIX_DIR)/runtime/natrix_runtime.o
@@ -39,6 +39,12 @@ main.bin: main.o maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natri
 alutest.bin: test/alutest.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
+memcheck.bin: memcheck/memcheck.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+locheck.bin: memcheck/locheck.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtime.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
 %.o: %.asm
 	../tools/asm.py --alu-revision=$(ALU_REVISION) -o $@ $^
 
@@ -51,4 +57,3 @@ alutest.bin: test/alutest.o
 
 %.rom: %.bin
 	cp $^ $@
-	../tools/flip67.py $@
