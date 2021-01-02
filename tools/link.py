@@ -32,6 +32,7 @@ def link(objects):
     ip = 0
     globalSymbols = set()
     exportedSymbolValues = {}
+    segments = {}
     # place sections into segments and keep track of globals
     for segment in layout.layout:
         if segment["begin"] is not None:
@@ -46,14 +47,37 @@ def link(objects):
                     s.offset = align(ip, s.align)
                     ip = s.offset + len(s.text)
                     if segment["end"] is not None and ip > segment["end"]:
-                        raise LinkerError("segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
+                        raise LinkerError("Segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
                     if ip > 0xffff:
                         raise LinkerError("64k overflow", o, s)
         if segment["end"] is not None:
+            end = segment["end"]
+            if end < ip:
+                raise LinkerError("Segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
             ip = segment["end"]
-        print("Segment {}: {} bytes (0x{:04X}-0x{:04X})".format(segment["name"], ip - segBegin, segBegin, ip))
-        exportedSymbolValues["__seg_{}_begin".format(segment["name"])] = segBegin
-        exportedSymbolValues["__seg_{}_end".format(segment["name"])] = ip
+        segments[segment["name"]] = segBegin, ip
+    # update origin segments sizes
+    ip = 0
+    for i, segment in enumerate(layout.layout):
+        segName = segment["name"]
+        target = segment["target"]
+        begin, end = segments[segName]
+        if begin < ip:
+            raise LinkerError("Segment `{}' is overlapped".format(segName))
+        if target is not None:
+            if begin != end:
+                raise LinkerError("Non-empty origin segment `{}'".format(segment["name"]))
+            targetBegin, targetEnd = segments[target]
+            targetSize = targetEnd - targetBegin
+            end = begin + targetSize
+            segments[segName] = begin, end
+    # report segment sizes
+    for name in segments:
+        begin, end = segments[name]
+        if begin != end:
+            print("Segment {}: {} bytes (0x{:04X}-0x{:04X})".format(name, end - begin, begin, end))
+        exportedSymbolValues["__seg_{}_begin".format(name)] = begin
+        exportedSymbolValues["__seg_{}_end".format(name)] = end
     # assign global symbol values
     for o in objects:
         for label in o.exportSymbols:
@@ -92,16 +116,22 @@ def link(objects):
                     s.text[offs] = value & 255
                 except BaseException as e:
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
-    return symbolMap
+    return symbolMap, segments
 
-def createRom(objects):
+def createRom(objects, segments):
     rom = [None] * 65536
     for o in objects:
         for s in o.sections:
             if s.offset is None:
                 raise LinkerError("section wasn't laid out", o, s)
+            seg = layout.findSegment(s.name)
+            segBegin = segments[s.name][0]
             for i,v in enumerate(s.text):
                 rom[s.offset + i] = v
+                if seg["shadow"] is not None:
+                    offsetInsideSegment = s.offset + i - segBegin
+                    shadowBegin = segments[seg["shadow"]][0]
+                    rom[shadowBegin + offsetInsideSegment] = v
     return rom
 
 def load(filename):
@@ -142,8 +172,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     try:
         objects = [load(filename) for filename in args.file]
-        symbolMap = link(objects)
-        rom = createRom(objects)
+        symbolMap, segments = link(objects)
+        rom = createRom(objects, segments)
         save(rom, args.o, args.type, args.full, args.filler)
         saveLabels(args.m, symbolMap)
     except LinkerError as e:
