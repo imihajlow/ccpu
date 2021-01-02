@@ -36,3 +36,8 @@ sub a, b
 The noice happens when the `sub` instruction is executed. Noice can be checked on any VCC pin on the ALU board or on the sa or sb buses.
 
 To overcome this problem, solder a 10 pF capacitor between pins 1 and 7 of U36. Somehow it helps.
+
+# IO rev. 2
+Expansion boards can't be connected: connectors J2 and J6 are placed too deep into the board.
+
+Workaround: cut ~5 mm of the board from the right side. Solder pin 6 of J6 to VCC with a wire. This way one board can be connected.
