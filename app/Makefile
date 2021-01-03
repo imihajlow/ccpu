@@ -45,7 +45,7 @@ memcheck.bin: memcheck/memcheck.o
 locheck.bin: memcheck/locheck.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtime.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o
+vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm

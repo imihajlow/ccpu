@@ -1,4 +1,40 @@
+#include <keyboard.h>
+
+#define CHAR_RAM 0xe000u16
+#define COLOR_RAM 0xd000u16
+
+u8 fill(u8 char, u8 color) {
+	u8 *char_ram = (u8*)CHAR_RAM;
+	u8 *color_ram = (u8*)COLOR_RAM;
+	u16 row = 0u16;
+	while (row < 30u16) {
+		u16 column = 0u16;
+		while (column < 80u16) {
+			u16 index = (row << 7u8) + column;
+			char_ram[index] = char;
+			color_ram[index] = color;
+			column += 1u16;
+		}
+		row += 1u16;
+	}
+}
+
 export u8 main() {
+	u8 key;
+	u8 char = 'A';
+	u8 color = 0x0Fu8;
 	while (1u8) {
+		key = keyboard_wait_key_released();
+
+		if (key == KEY_DOWN) {
+			char += 1u8;
+		} else if (key == KEY_UP) {
+			char -= 1u8;
+		} else if (key == KEY_LEFT) {
+			color -= 1u8;
+		} else if (key == KEY_RIGHT) {
+			color += 1u8;
+		}
+		fill(char, color);
 	}
 }
