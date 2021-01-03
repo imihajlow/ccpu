@@ -1,0 +1,4 @@
+export u8 main() {
+	while (1u8) {
+	}
+}

@@ -29,7 +29,7 @@ layout = [
     },
     {
         "name": "stack",
-        "end": 0xf000,
+        "end": 0xd000,
         "init": False
     }
 ]
