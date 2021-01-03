@@ -343,7 +343,7 @@ def genPutIndirect(resultAddrLoc, srcLoc):
     if resultAddrLoc.getType().isUnknown():
         resultAddrLoc = resultAddrLoc.removeUnknown(srcLoc.getType())
     if resultAddrLoc.getType().deref() != srcLoc.getType():
-        raise SemanticError(resultLoc.getLocation() - srcLoc.getLocation(),
+        raise SemanticError(resultAddrLoc.getLocation() - srcLoc.getLocation(),
             "Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
     t = srcLoc.getType()
     isWord = t.getSize() == 2
