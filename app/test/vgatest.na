@@ -1,40 +1,43 @@
 #include <keyboard.h>
+#include <vga.h>
 
-#define CHAR_RAM 0xe000u16
-#define COLOR_RAM 0xd000u16
+u8 display_frame(u8 x0, u8 y0, u8 x1, u8 y1) {
+	// corners
+	vga_char_seg[VGA_OFFSET(x0, y0)] = 0xc9u8;
+	vga_char_seg[VGA_OFFSET(x0, y1)] = 0xc8u8;
+	vga_char_seg[VGA_OFFSET(x1, y0)] = 0xbbu8;
+	vga_char_seg[VGA_OFFSET(x1, y1)] = 0xbcu8;
 
-u8 fill(u8 char, u8 color) {
-	u8 *char_ram = (u8*)CHAR_RAM;
-	u8 *color_ram = (u8*)COLOR_RAM;
-	u16 row = 0u16;
-	while (row < 30u16) {
-		u16 column = 0u16;
-		while (column < 80u16) {
-			u16 index = (row << 7u8) + column;
-			char_ram[index] = char;
-			color_ram[index] = color;
-			column += 1u16;
-		}
-		row += 1u16;
+	// edges
+	u8 i = x0 + 1u8;
+	while (i < x1) {
+		vga_char_seg[VGA_OFFSET(i, y0)] = 0xcdu8;
+		vga_char_seg[VGA_OFFSET(i, y1)] = 0xcdu8;
+		i += 1u8;
+	}
+	i = y0 + 1u8;
+	while (i < y1) {
+		vga_char_seg[VGA_OFFSET(x0, i)] = 0xbau8;
+		vga_char_seg[VGA_OFFSET(x1, i)] = 0xbau8;
+		i += 1u8;
 	}
 }
 
 export u8 main() {
 	u8 key;
-	u8 char = 'A';
-	u8 color = 0x0Fu8;
+	u8 bg = 0u8;
+	vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
 	while (1u8) {
 		key = keyboard_wait_key_released();
 
 		if (key == KEY_DOWN) {
-			char += 1u8;
+			bg = (bg + 1u8) & 0x0fu8;
+			vga_clear(COLOR(COLOR_GRAY, bg));
 		} else if (key == KEY_UP) {
-			char -= 1u8;
-		} else if (key == KEY_LEFT) {
-			color -= 1u8;
-		} else if (key == KEY_RIGHT) {
-			color += 1u8;
+			bg = (bg - 1u8) & 0x0fu8;
+			vga_clear(COLOR(COLOR_GRAY, bg));
 		}
-		fill(char, color);
+		display_frame(12u8, 9u8, 27u8, 11u8);
+		vga_put_text(14u8, 10u8, "Hello World!");
 	}
 }

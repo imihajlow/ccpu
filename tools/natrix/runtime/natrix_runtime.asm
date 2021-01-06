@@ -27,10 +27,10 @@
     ; start-up code
     .section init
     nop
-    ; enable all memory segments
+    ; enable all memory segments except for d and e
     ldi ph, 0xff
     ldi pl, 0x02
-    ldi a, 0xf8
+    ldi a, 0x38
     st a
     ; point SP to the end of stack segment
     ldi pl, lo(__cc_r_sp)
