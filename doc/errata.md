@@ -41,3 +41,15 @@ To overcome this problem, solder a 10 pF capacitor between pins 1 and 7 of U36. 
 Expansion boards can't be connected: connectors J2 and J6 are placed too deep into the board.
 
 Workaround: cut ~5 mm of the board from the right side. Solder pin 6 of J6 to VCC with a wire. This way one board can be connected.
+
+# VGA rev. 1
+The `rdy_out` signal is incorrect. The following formula must be implemented:
+```
+new_rdy_out = ~ext_sel | n_we | old_rdy_out
+```
+The signal `new_rdy_out` goes to the gate of Q1 instead of `rdy_out`. The `old_rdy_out` is the signal that is produced by the pin 3 of U24. Cut the wire coming from the gate of Q1.
+
+The formula can be implemented with three additional N-MOSFETs (2N7002 work fine):
+![VGA fix](vga_1_fix.png)
+
+There are still glitches remaining even after this fix. Their root cause is a subject to further investigation.
