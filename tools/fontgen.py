@@ -41,8 +41,9 @@ def store(filename, data, mode):
                 else:
                     f.write(" ")
     elif mode == 'bin':
+        b = data + [0] * (32768 - len(data))
         with open(filename, "wb") as f:
-            f.write(bytearray(data))
+            f.write(bytearray(b))
     elif mode == 'png':
         import png
         with open(filename, "wb") as f:
