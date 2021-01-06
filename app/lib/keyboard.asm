@@ -59,7 +59,7 @@
     .const key_f2 = 18
     .const key_f1 = 19
 
-    .const keyboard = 0xf000
+    .const keyboard = 0xff00
 
     .section bss
     .align 2
