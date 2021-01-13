@@ -43,6 +43,8 @@ Expansion boards can't be connected: connectors J2 and J6 are placed too deep in
 Workaround: cut ~5 mm of the board from the right side. Solder pin 6 of J6 to VCC with a wire. This way one board can be connected.
 
 # VGA rev. 1
+
+## RDY
 The `rdy_out` signal is incorrect. The following formula must be implemented:
 ```
 new_rdy_out = ~ext_sel | n_we | old_rdy_out
@@ -52,4 +54,10 @@ The signal `new_rdy_out` goes to the gate of Q1 instead of `rdy_out`. The `old_r
 The formula can be implemented with three additional N-MOSFETs (2N7002 work fine):
 ![VGA fix](vga_1_fix.png)
 
-There are still glitches remaining even after this fix. Their root cause is a subject to further investigation.
+## RST crosstalk
+Heavy bus activity (espectially on `~we` and `a12`-`a15` lines) causes the vertical counter to randomly reset, which leads to an unstable video signal. This is caused by a crosstalk to the `~rst` line. To work around:
+1. Cut the `~rst` track on the back side of the board under U30, north from the via. This way, the affected chips (U30, U16, U23) are disconnected from the old faulty line.
+2. Solder pins 14 and 13 of U16 together.
+
+# Control rev. 3
+The wait for memory system is glitchy or just wrong. Sometimes the whole system resets, sometimes behaves just wrong. Without the change of `~RDY` signal everything works fine.
