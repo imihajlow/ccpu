@@ -2,31 +2,48 @@
 #include <vga.h>
 #include <string.h>
 #include "life/quasipixel.h"
+#include "life/life.h"
 
 export u8 main() {
-    memset((u8*)qp_fb, 0u8, QP_SIZE);
     qp_init(COLOR_MAGENTA, COLOR_BROWN);
-    qp_render_all();
+    life_init();
+    qp_render();
     qp_set_cursor_enabled(1u8);
+    u8 running = 0u8;
     while (1u8) {
         u8 key;
-        key = keyboard_wait_key_released();
-        if (key == KEY_UP) {
-            qp_move_cursor(0s8, -1s8);
-        } else if (key == KEY_DOWN) {
-            qp_move_cursor(0s8, 1s8);
-        } else if (key == KEY_LEFT) {
-            qp_move_cursor(-1s8, 0s8);
-        } else if (key == KEY_RIGHT) {
-            qp_move_cursor(1s8, 0s8);
-        } else if (key == KEY_ENT) {
-            qp_fb[QP_INDEX(qp_cursor_x, qp_cursor_y)] = 1u8;
-            qp_render_one(qp_cursor_x, qp_cursor_y);
-        } else if (key == KEY_ESC) {
-            qp_fb[QP_INDEX(qp_cursor_x, qp_cursor_y)] = 0u8;
-            qp_render_one(qp_cursor_x, qp_cursor_y);
-        } else if (key == KEY_F1) {
-            qp_render_all();
+        if (!running) {
+            // drawing mode
+            key = keyboard_wait_key_released();
+            if (key == KEY_UP || key == KEY_8) {
+                qp_move_cursor(0s8, -1s8);
+            } else if (key == KEY_DOWN || key == KEY_0) {
+                qp_move_cursor(0s8, 1s8);
+            } else if (key == KEY_LEFT) {
+                qp_move_cursor(-1s8, 0s8);
+            } else if (key == KEY_RIGHT) {
+                qp_move_cursor(1s8, 0s8);
+            } else if (key == KEY_ENT) {
+                qp_set_and_render(qp_cursor_x, qp_cursor_y, 1u8);
+                life_set(qp_cursor_x, qp_cursor_y, 1u8);
+            } else if (key == KEY_ESC) {
+                qp_set_and_render(qp_cursor_x, qp_cursor_y, 0u8);
+                life_set(qp_cursor_x, qp_cursor_y, 0u8);
+            } else if (key == KEY_STAR) {
+                qp_render_all();
+            } else if (key == KEY_F1) {
+                running = 1u8;
+                qp_set_cursor_enabled(0u8);
+            }
+        } else {
+            // running mode
+            key = keyboard_get_if_pressed();
+            if (key == KEY_NO_KEY) {
+                life_step_and_render();
+            } else {
+                running = 0u8;
+                qp_set_cursor_enabled(1u8);
+            }
         }
     }
 }

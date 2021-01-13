@@ -3,7 +3,7 @@ NATRIX=$(NATRIX_DIR)/natrix.py
 ALU_REVISION=2
 FREQUENCY=1350kHz
 
-all: calc.rom io_test.rom test.bin natest.bin main.rom alutest.rom memcheck.rom locheck.rom vgatest.rom vgatest_asm.rom
+all: calc.rom io_test.rom test.bin natest.bin main.rom alutest.rom memcheck.rom locheck.rom vgatest.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s $(NATRIX_DIR)/runtime/natrix_runtime.o
@@ -33,7 +33,7 @@ test.bin: test/test.o lib/display.o $(DELAY_OBJ) lib/keyboard.o lib/bcdf.o lib/b
 io_test.bin: test/io_test.o lib/display.o $(DELAY_OBJ) lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-main.bin: main.o life/quasipixel.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/string.o lib/keyboard.o lib/vga.o
+main.bin: main.o life/quasipixel.o life/life.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/string.o lib/keyboard.o lib/vga.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 alutest.bin: test/alutest.o
@@ -46,9 +46,6 @@ locheck.bin: memcheck/locheck.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtim
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o
-	../tools/link.py -o $@ -m $(@:.bin=.map) $^
-
-bus_test.bin: test/bus_test.o lib/keyboard.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm

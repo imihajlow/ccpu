@@ -1,0 +1,101 @@
+#include "life.h"
+#include <string.h>
+#include "quasipixel.h"
+
+#define WIDTH 80u8
+#define HEIGHT 60u8
+#define SIZE (80u16 * 60u16)
+#define OFFSET(x, y) ((u16)(x) + (u16)WIDTH * (u16)(y))
+
+#define CELL_DEAD 0u8
+#define CELL_ALIVE 1u8
+#define CELL_FLIPPED 2u8
+#define CELL_CURRENT_MASK 1u8
+
+u8 life_buf[SIZE];
+
+export u8 life_init() {
+    memset((u8*)life_buf, CELL_DEAD, SIZE);
+}
+
+export u8 life_set(u8 x, u8 y, u8 v) {
+    if (v) {
+        v = CELL_ALIVE;
+    }
+    life_buf[OFFSET(x, y)] = v;
+}
+
+u8 get_neighbors(u8 x, u8 y, u16 u_offset) {
+    s16 offset = (s16)u_offset;
+
+    s16 left = -1s16;
+    s16 right = 1s16;
+    s16 up = -(s16)WIDTH;
+    s16 down = (s16)WIDTH;
+    // torus topology
+    if (x == 0u8) {
+        left += (s16)WIDTH;
+    }
+    if (x == WIDTH - 1u8) {
+        right -= (s16)WIDTH;
+    }
+    if (y == 0u8) {
+        up += (s16)SIZE;
+    }
+    if (y == HEIGHT - 1u8) {
+        down -= (s16)SIZE;
+    }
+
+    u8 result = 0u8;
+    result += life_buf[offset + left + up] & CELL_CURRENT_MASK;
+    result += life_buf[offset + left] & CELL_CURRENT_MASK;
+    result += life_buf[offset + left + down] & CELL_CURRENT_MASK;
+
+    result += life_buf[offset + up] & CELL_CURRENT_MASK;
+    result += life_buf[offset + down] & CELL_CURRENT_MASK;
+
+    result += life_buf[offset + right + up] & CELL_CURRENT_MASK;
+    result += life_buf[offset + right] & CELL_CURRENT_MASK;
+    result += life_buf[offset + right + down] & CELL_CURRENT_MASK;
+    return result;
+}
+
+export u8 life_step_and_render() {
+    u8 y = 0u8;
+    u16 offset = 0u16;
+    while (y < HEIGHT) {
+        u8 x = 0u8;
+        while (x < WIDTH) {
+            u8 value = life_buf[offset];
+            u8 neighbors;
+            neighbors = get_neighbors(x, y, offset);
+
+            if (value) {
+                if (neighbors < 2u8 || neighbors > 3u8) {
+                    life_buf[offset] = CELL_FLIPPED | CELL_ALIVE;
+                    qp_set(x, y, 0u8);
+                }
+            } else {
+                if (neighbors == 3u8) {
+                    life_buf[offset] = CELL_FLIPPED | CELL_DEAD;
+                    qp_set(x, y, 1u8);
+                }
+            }
+            offset += 1u16;
+            x += 1u8;
+        }
+        y += 1u8;
+    }
+
+    offset = 0u16;
+    while (offset < SIZE) {
+        value = life_buf[offset];
+        u8 flip = value >> 1u8;
+        value = (value & CELL_CURRENT_MASK) ^ flip;
+        life_buf[offset] = value;
+
+        offset += 1u16;
+    }
+    qp_render();
+}
+
