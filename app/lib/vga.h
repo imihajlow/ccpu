@@ -1,5 +1,8 @@
 #pragma once
 
+#define VGA_ROWS 30u8
+#define VGA_COLS 80u8
+
 #define COLOR_BLACK 0u8
 #define COLOR_BLUE 1u8
 #define COLOR_GREEN 2u8
@@ -20,8 +23,22 @@
 #define COLOR(fg, bg) ((fg) + ((bg) << 4u8))
 #define VGA_OFFSET(col, row) ((u16)(col) + ((u16)(row) << 7u8))
 
+// TODO: before RDY is fixed on board, never write to these addresses directly,
+// use vga_set() instead
 import u8 vga_char_seg[4096];
 import u8 vga_color_seg[4096];
 
+/*
+    Clear the screen with the given color and char 0.
+ */
 import u8 vga_clear(u8 color);
+
+/*
+    Display a null-terminated string. Colors are not modified.
+ */
 import u8 vga_put_text(u8 col, u8 row, u8 *text);
+
+/*
+    A workaround for non-working RDY: put a value into memory address 20 times.
+ */
+import u8 vga_set(u8 *offset, u8 c);
