@@ -21,6 +21,14 @@
 #define KEY_F2 18u8
 #define KEY_F1 19u8
 
+#define KEY_NO_KEY 0xffu8
+
 import u8 keyboard_wait_key_released();
 
+/*
+    Same as keyboard_wait_key_released(), but does not wait for the key press.
+    If no keys are pressed, just returns 0xff.
+    If a key is pressed, waits for release and returns the key code.
+*/
+import u8 keyboard_get_if_pressed();
 import u8 bit_mask_to_index[32];

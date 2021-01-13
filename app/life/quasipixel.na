@@ -1,0 +1,117 @@
+#include "quasipixel.h"
+#include <vga.h>
+
+#define CHAR_NONE 0u8
+#define CHAR_TOP 223u8
+#define CHAR_BOTTOM 220u8
+#define CHAR_BOTH 219u8
+
+export u8 qp_fb[QP_SIZE];
+
+u8 cursor_enabled;
+export u8 qp_cursor_x;
+export u8 qp_cursor_y;
+u8 fg_color;
+u8 bg_color;
+
+export u8 qp_init(u8 fg, u8 bg) {
+    cursor_enabled = 0u8;
+    qp_cursor_x = 0u8;
+    qp_cursor_y = 0u8;
+    fg_color = fg;
+    bg_color = bg;
+}
+
+u8 render_one_char(u8 c, u8 r, u16 offset) {
+    u8 top_pixel = qp_fb[offset];
+    u8 bot_pixel = qp_fb[offset + (u16)QP_WIDTH];
+
+    u8 cursor_on_col = cursor_enabled && qp_cursor_x == c;
+    u8 cursor_on_top = cursor_on_col && qp_cursor_y == (r << 1u8);
+    u8 cursor_on_bot = cursor_on_col && qp_cursor_y == (r << 1u8) + 1u8;
+
+    u8 top_color;
+    u8 bot_color;
+
+    if (top_pixel) {
+        top_color = fg_color;
+    } else {
+        top_color = bg_color;
+    }
+
+    if (bot_pixel) {
+        bot_color = fg_color;
+    } else {
+        bot_color = bg_color;
+    }
+
+    if (cursor_on_top) {
+        top_color = top_color ^ 8u8;
+    }
+    if (cursor_on_bot) {
+        bot_color = bot_color ^ 8u8;
+    }
+    vga_set((u8*)vga_color_seg + VGA_OFFSET(c, r), COLOR(bot_color, top_color));
+    vga_set((u8*)vga_char_seg + VGA_OFFSET(c, r), CHAR_BOTTOM);
+}
+
+export u8 qp_render_all() {
+    u8 r = 0u8;
+    u16 offset = 0u16;
+    while (r < VGA_ROWS) {
+        u8 c = 0u8;
+        while (c < VGA_COLS) {
+            render_one_char(c, r, offset);
+
+            offset += 1u16;
+            c += 1u8;
+        }
+        offset += (u16)VGA_COLS;
+        r += 1u8;
+    }
+}
+
+export u8 qp_render_one(u8 x, u8 y) {
+    u16 offset = QP_INDEX(x, y & 0xfeu8);
+    render_one_char(x, y >> 1u8, offset);
+}
+
+export u8 qp_set_cursor_enabled(u8 enabled) {
+    cursor_enabled = enabled;
+    qp_render_one(qp_cursor_x, qp_cursor_y);
+}
+
+export u8 qp_set_cursor_pos(u8 x, u8 y) {
+    if (cursor_enabled) {
+        u8 old_enabled = cursor_enabled;
+        cursor_enabled = 0u8;
+        qp_render_one(qp_cursor_x, qp_cursor_y);
+        qp_cursor_x = x;
+        qp_cursor_y = y;
+        cursor_enabled = old_enabled;
+        qp_render_one(qp_cursor_x, qp_cursor_y);
+    } else {
+        qp_cursor_x = x;
+        qp_cursor_y = y;
+    }
+}
+
+export u8 qp_move_cursor(s8 dx, s8 dy) {
+    s8 new_x = (s8)qp_cursor_x + dx;
+    s8 new_y = (s8)qp_cursor_y + dy;
+    if (new_x < 0s8) {
+        new_x = 0s8;
+    }
+    if (new_y < 0s8) {
+        new_y = 0s8;
+    }
+    if (new_x >= (s8)QP_WIDTH) {
+        new_x = (s8)QP_WIDTH - 1s8;
+    }
+    if (new_y >= (s8)QP_HEIGHT) {
+        new_y = (s8)QP_HEIGHT - 1s8;
+    }
+    qp_set_cursor_pos((u8)new_x, (u8)new_y);
+}
+
+

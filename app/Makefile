@@ -33,7 +33,7 @@ test.bin: test/test.o lib/display.o $(DELAY_OBJ) lib/keyboard.o lib/bcdf.o lib/b
 io_test.bin: test/io_test.o lib/display.o $(DELAY_OBJ) lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-main.bin: main.o maze/main.o maze/maze.o maze/game.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/display.o $(DELAY_OBJ) lib/bcdf.o lib/string.o lib/random.o lib/keyboard.o lib/entropy.o calc/calc.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o
+main.bin: main.o life/quasipixel.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/string.o lib/keyboard.o lib/vga.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 alutest.bin: test/alutest.o
@@ -46,6 +46,9 @@ locheck.bin: memcheck/locheck.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtim
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+bus_test.bin: test/bus_test.o lib/keyboard.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm

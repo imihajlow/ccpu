@@ -37,6 +37,8 @@
     .export keyboard_wait_key_released
     .export keyboard_wait_key_released_result
     .export keyboard_wait_key_released_ret
+    .export keyboard_get_if_pressed
+    .export keyboard_get_if_pressed_ret
 
     .const key_ent = 0
     .const key_right = 1
@@ -64,6 +66,7 @@
     .section bss
     .align 2
 keyboard_wait_key_released_ret:
+keyboard_get_if_pressed_ret:
 keyboard_wait_key_released_result: res 1
     .section text
 keyboard_wait_key_released:
@@ -77,6 +80,11 @@ keyboard_wait_key_released:
     inc pl
     adc ph, a
     st b
+
+    ldi pl, lo(repeat_scan)
+    ldi ph, hi(repeat_scan)
+    ldi a, 1
+    st a
 
     ; scan rows until a key is pressed (a column value is not 0xff)
 keyboard_wait_key_released__wait_press:
@@ -131,10 +139,28 @@ keyboard_wait_key_released__wait_press:
     ld b
     inc b
     ldi a, 16
-    ; last condition - jump to the loop begin
+    ldi pl, lo(keyboard_wait_key_released__pressed)
+    ldi ph, hi(keyboard_wait_key_released__pressed)
+    jnz
+
+    ; no keys are pressed: repeat the loop if needed
+    ldi pl, lo(repeat_scan)
+    ldi ph, hi(repeat_scan)
+    ld a
+    add a, 0
     ldi pl, lo(keyboard_wait_key_released__wait_press)
     ldi ph, hi(keyboard_wait_key_released__wait_press)
-    jz
+    jnz
+
+    ; no keys are pressed, return 0xff
+    ldi pl, lo(keyboard_wait_key_released_result)
+    ldi ph, hi(keyboard_wait_key_released_result)
+    ldi a, 0xff
+    st a
+
+    ldi pl, lo(finish)
+    ldi ph, hi(finish)
+    jmp
 
 keyboard_wait_key_released__pressed:
     ; a - row * 4
@@ -174,6 +200,7 @@ keyboard_wait_key_released__wait_release:
     ldi ph, hi(keyboard_wait_key_released_result)
     st a
 
+finish:
     ; return
     ldi pl, lo(keyboard_ret)
     ldi ph, hi(keyboard_ret)
@@ -182,6 +209,26 @@ keyboard_wait_key_released__wait_release:
     ld ph
     mov pl, a
     jmp
+
+keyboard_get_if_pressed:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(keyboard_ret)
+    ldi ph, hi(keyboard_ret)
+    st b
+    inc pl
+    st a
+
+    ldi pl, lo(repeat_scan)
+    ldi ph, hi(repeat_scan)
+    mov a, 0
+    st a
+
+    ldi pl, lo(keyboard_wait_key_released__wait_press)
+    ldi ph, hi(keyboard_wait_key_released__wait_press)
+    jmp
+
 
 ; mapping from a col mask to a col index: lower index has priority
     .align 32 ; guarantees no ph overflow
@@ -247,3 +294,4 @@ keyboard_key_digit_map:
     .align 2
 keyboard_ret: res 2
 tmp: res 1
+repeat_scan: res 1

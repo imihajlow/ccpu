@@ -1,23 +1,32 @@
 #include <keyboard.h>
-#include <display.h>
-#include <entropy.h>
-#include "../maze/main.h"
-#include "../calc/main.h"
+#include <vga.h>
+#include <string.h>
+#include "life/quasipixel.h"
 
 export u8 main() {
-    display_init();
-
+    memset((u8*)qp_fb, 0u8, QP_SIZE);
+    qp_init(COLOR_MAGENTA, COLOR_BROWN);
+    qp_render_all();
+    qp_set_cursor_enabled(1u8);
     while (1u8) {
-        display_clear();
-        display_print("1. CALC");
-        display_set_address(DISPLAY_LINE_2);
-        display_print("2. MAZE");
-        u8 k;
-        k = keyboard_wait_key_released_entropy();
-        if (k == KEY_1) {
-            calc_main();
-        } else if (k == KEY_2) {
-            maze_main();
+        u8 key;
+        key = keyboard_wait_key_released();
+        if (key == KEY_UP) {
+            qp_move_cursor(0s8, -1s8);
+        } else if (key == KEY_DOWN) {
+            qp_move_cursor(0s8, 1s8);
+        } else if (key == KEY_LEFT) {
+            qp_move_cursor(-1s8, 0s8);
+        } else if (key == KEY_RIGHT) {
+            qp_move_cursor(1s8, 0s8);
+        } else if (key == KEY_ENT) {
+            qp_fb[QP_INDEX(qp_cursor_x, qp_cursor_y)] = 1u8;
+            qp_render_one(qp_cursor_x, qp_cursor_y);
+        } else if (key == KEY_ESC) {
+            qp_fb[QP_INDEX(qp_cursor_x, qp_cursor_y)] = 0u8;
+            qp_render_one(qp_cursor_x, qp_cursor_y);
+        } else if (key == KEY_F1) {
+            qp_render_all();
         }
     }
 }
