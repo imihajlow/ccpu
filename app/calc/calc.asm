@@ -1,14 +1,19 @@
     .export calc_main
     .export calc_main_ret
 
-    .global display_init
-    .global display_clear
-    .global display_print
-    .global display_print_byte
-    .global display_print_char
-    .global display_print_arg
-    .global display_set_address
-    .global display_set_address_arg
+    .global vga_console_init
+    .global vga_console_init_arg0
+
+    .global vga_console_newline
+
+    .global vga_console_print
+    .global vga_console_print_arg0
+
+    .global vga_console_putchar
+    .global vga_console_putchar_arg0
+
+    .global vga_console_return
+
     .global keyboard_wait_key_released
     .global keyboard_wait_key_released_result
 
@@ -35,9 +40,9 @@
 
     .global keyboard_key_digit_map
 
-    .global display_print_bcdf
-    .global display_print_bcdf_arg
-    .global display_print_bcdf_width
+    .global vga_console_print_bcdf
+    .global vga_console_print_bcdf_arg
+    .global vga_console_print_bcdf_width
 
     .global bcdf_normalize
     .global bcdf_normalize_arg
@@ -52,15 +57,15 @@
     .global bcdf_div
 
     .section text
-    nop
-
-    ldi pl, lo(display_init)
-    ldi ph, hi(display_init)
-    jmp
-
 calc_main:
-    ldi pl, lo(display_clear)
-    ldi ph, hi(display_clear)
+
+    ldi a, 0x02 ; green over black
+    ldi pl, lo(vga_console_init_arg0)
+    ldi ph, hi(vga_console_init_arg0)
+    st a
+
+    ldi pl, lo(vga_console_init)
+    ldi ph, hi(vga_console_init)
     jmp
 
     ldi pl, lo(number_string + 16)
@@ -68,8 +73,8 @@ calc_main:
     mov a, 0
     st a
 
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
+    ldi pl, lo(vga_console_print_bcdf_width)
+    ldi ph, hi(vga_console_print_bcdf_width)
     ldi b, 14
     st b
 
@@ -89,23 +94,19 @@ r_init_loop:
     ldi ph, hi(display_result)
     jmp
 input_op:
-    ldi pl, lo(display_set_address_arg)
-    ldi ph, hi(display_set_address_arg)
-    ldi a, 0x40 ; second line, first character
-    st a
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
+    ldi pl, lo(vga_console_newline)
+    ldi ph, hi(vga_console_newline)
     jmp
 
-    ldi pl, lo(display_print_arg)
-    ldi ph, hi(display_print_arg)
+    ldi pl, lo(vga_console_print_arg0)
+    ldi ph, hi(vga_console_print_arg0)
     ldi a, lo(op_prompt)
     st a
     inc pl
     ldi a, hi(op_prompt)
     st a
-    ldi pl, lo(display_print)
-    ldi ph, hi(display_print)
+    ldi pl, lo(vga_console_print)
+    ldi ph, hi(vga_console_print)
     jmp
 input_op_loop:
     ldi pl, lo(keyboard_wait_key_released)
@@ -210,31 +211,18 @@ op_div:
 
 init:
     ; display op
-    ldi pl, lo(display_set_address_arg)
-    ldi ph, hi(display_set_address_arg)
-    ldi a, 15 ; first line, last char
-    st a
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
-    jmp
-
     ldi pl, lo(op)
     ldi ph, hi(op)
     ld a
-    ldi pl, lo(display_print_arg)
-    ldi ph, hi(display_print_arg)
+    ldi pl, lo(vga_console_putchar_arg0)
+    ldi ph, hi(vga_console_putchar_arg0)
     st a
-    ldi pl, lo(display_print_char)
-    ldi ph, hi(display_print_char)
+    ldi pl, lo(vga_console_putchar)
+    ldi ph, hi(vga_console_putchar)
     jmp
 
-    ldi pl, lo(display_set_address_arg)
-    ldi ph, hi(display_set_address_arg)
-    ldi a, 0x40 ; second line, first character
-    st a
-
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
+    ldi pl, lo(vga_console_newline)
+    ldi ph, hi(vga_console_newline)
     jmp
 
     mov a, 0
@@ -478,8 +466,8 @@ result_copy_loop:
         ldi pl, lo(bcdf_op_r)
         add pl, a
         ld b
-        ldi ph, hi(display_print_bcdf_arg)
-        ldi pl, lo(display_print_bcdf_arg)
+        ldi ph, hi(vga_console_print_bcdf_arg)
+        ldi pl, lo(vga_console_print_bcdf_arg)
         add pl, a
         st b
         dec a
@@ -487,20 +475,8 @@ result_copy_loop:
         ldi ph, hi(result_copy_loop)
         jnc
 
-    ldi pl, lo(display_clear)
-    ldi ph, hi(display_clear)
-    jmp
-
-    ldi pl, lo(display_set_address_arg)
-    ldi ph, hi(display_set_address_arg)
-    ldi a, 0
-    st a
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
-    jmp
-
-    ldi pl, lo(display_print_bcdf)
-    ldi ph, hi(display_print_bcdf)
+    ldi pl, lo(vga_console_print_bcdf)
+    ldi ph, hi(vga_console_print_bcdf)
     jmp
 
     ldi pl, lo(input_op)
@@ -641,19 +617,19 @@ display_entered_number_loop_end:
     jnz
 
 display_entered_number_end:
-    ldi pl, lo(display_set_address)
-    ldi ph, hi(display_set_address)
+    ldi pl, lo(vga_console_return)
+    ldi ph, hi(vga_console_return)
     jmp
 
     ldi a, lo(number_string)
     ldi b, hi(number_string)
-    ldi pl, lo(display_print_arg)
-    ldi ph, hi(display_print_arg)
+    ldi pl, lo(vga_console_print_arg0)
+    ldi ph, hi(vga_console_print_arg0)
     st a
     inc pl
     st b
-    ldi pl, lo(display_print)
-    ldi ph, hi(display_print)
+    ldi pl, lo(vga_console_print)
+    ldi ph, hi(vga_console_print)
     jmp
 
     ldi pl, lo(ret)
@@ -668,7 +644,7 @@ display_entered_number_end:
     jmp
 
 op_prompt:
-    ascii "OP?             "
+    ascii "OP? "
     db 0
 
     .section bss

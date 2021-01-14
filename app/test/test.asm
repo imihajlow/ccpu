@@ -30,9 +30,9 @@
 
     .global keyboard_key_digit_map
 
-    .global display_print_bcdf
-    .global display_print_bcdf_arg
-    .global display_print_bcdf_width
+    .global vga_console_print_bcdf
+    .global vga_console_print_bcdf_arg
+    .global vga_console_print_bcdf_width
 
     .global bcdf_normalize
     .global bcdf_normalize_arg
@@ -48,8 +48,8 @@
     .section text
     nop
 test:
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
+    ldi pl, lo(vga_console_print_bcdf_width)
+    ldi ph, hi(vga_console_print_bcdf_width)
     ldi b, 16
     st b
 
@@ -93,8 +93,8 @@ copy_loop_r:
     ldi pl, lo(bcdf_op_r)
     add pl, a
     ld b
-    ldi ph, hi(display_print_bcdf_arg)
-    ldi pl, lo(display_print_bcdf_arg)
+    ldi ph, hi(vga_console_print_bcdf_arg)
+    ldi pl, lo(vga_console_print_bcdf_arg)
     add pl, a
     st b
     dec a
@@ -103,13 +103,13 @@ copy_loop_r:
     jnc
 
     ; print the result with different width
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
+    ldi pl, lo(vga_console_print_bcdf_width)
+    ldi ph, hi(vga_console_print_bcdf_width)
     ldi a, 6
     st a
 display_loop:
-    ldi pl, lo(display_print_bcdf_width)
-    ldi ph, hi(display_print_bcdf_width)
+    ldi pl, lo(vga_console_print_bcdf_width)
+    ldi ph, hi(vga_console_print_bcdf_width)
     ld a
     inc a
     st a
@@ -123,8 +123,8 @@ display_loop:
     ldi ph, hi(display_set_address)
     jmp ; cause newline in the simulator
 
-    ldi pl, lo(display_print_bcdf)
-    ldi ph, hi(display_print_bcdf)
+    ldi pl, lo(vga_console_print_bcdf)
+    ldi ph, hi(vga_console_print_bcdf)
     jmp
 
     ldi pl, lo(display_loop)

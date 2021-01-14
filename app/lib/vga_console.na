@@ -1,0 +1,38 @@
+#include "vga_console.h"
+
+
+u16 offset;
+
+u8 color;
+
+export u8 vga_console_init(u8 color_) {
+    offset = 0u16;
+    color = color_;
+    vga_clear(color);
+}
+
+export u8 vga_console_print(u8 *text) {
+    while (*text) {
+        vga_set((u8*)vga_char_seg + offset, *text);
+        offset += 1u16;
+        text += 1u8;
+    }
+}
+
+export u8 vga_console_newline() {
+    offset &= 0xff80u16; // clear the column counter
+    offset += 128u16;
+    if (offset >= (30u16 << 7u8)) {
+        vga_clear(color);
+        offset = 0u16;
+    }
+}
+
+export u8 vga_console_putchar(u8 c) {
+    vga_set((u8*)vga_char_seg + offset, c);
+    offset += 1u16;
+}
+
+export u8 vga_console_return() {
+    offset &= 0xff80u16; // clear the column counter
+}
