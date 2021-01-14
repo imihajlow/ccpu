@@ -23,13 +23,19 @@ def _const(location, t, value):
     mask = ~(~0 << (t.getSize() * 8))
     return Value(location, t, 0, int(value) & mask)
 
-def binary(tree, op, overrideType=None):
+def sameTypeChecker(a, b):
+    return a.getType() == b.getType()
+
+def shiftTypeChecker(a, b):
+    return b.getType().isInteger()
+
+def binary(tree, op, overrideType=None, typeChecker=sameTypeChecker):
     a, b = tree.children
     if isinstance(a, Tree) or isinstance(b, Tree):
         return tree
     else:
         # not checking levels and sources because only constants are possible now
-        if a.getType() == b.getType():
+        if typeChecker(a, b):
             newType = a.getType()
             if overrideType is not None:
                 newType = overrideType
@@ -118,10 +124,10 @@ class ConstTransformer(Transformer):
         return binary(tree, operator.floordiv)
 
     def shl(self, tree):
-        return binary(tree, operator.lshift)
+        return binary(tree, operator.lshift, typeChecker=shiftTypeChecker)
 
     def shr(self, tree):
-        return binary(tree, operator.rshift)
+        return binary(tree, operator.rshift, typeChecker=shiftTypeChecker)
 
     def neg(self, tree):
         return unary(tree, operator.neg)
