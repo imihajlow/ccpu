@@ -17,7 +17,7 @@ def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if op == 'add':
         return genAdd(resultLoc, src1Loc, src2Loc)
     elif op == 'sub':
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "sub", "sbb", "({}) - ({})", operator.sub)
+        return genSub(resultLoc, src1Loc, src2Loc)
     elif op == 'band':
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "and", "and", "({}) & ({})", operator.and_)
     elif op == 'bor':
@@ -285,7 +285,6 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     '''.format(rs)
     return resultLoc, result
 
-# TODO _genSubPtr
 def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
         raise SemanticError(src2Loc.getLocation(),
@@ -415,20 +414,183 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                 result += '''
                     ldi pl, lo({0})
                     ldi ph, hi({0})
-                    ld pl
+                    ld pl ; pl = p_l
                     mov a, 0
-                    shl b
+                    shl b ; b = i_l
                     adc a, 0
-                    mov ph, a
+                    mov ph, a ; ph = i_h
                     mov a, pl
-                    add b, a
+                    add b, a ; b = p_l + i_l = r_l
                     mov a, 0
-                    adc a, 0
-                    add a, ph
+                    adc a, 0 ; a = c
+                    add a, ph ; a = i_h + c
                     ldi pl, lo({0} + 1)
                     ldi ph, hi({0} + 1)
                     ld pl
-                    adc a, pl
+                    add a, pl ; a = i_h + c + p_h = r_h
+                '''.format(src1Loc.getSource())
+        else:
+            raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            st b
+            inc pl
+            st a
+        '''.format(resultLoc.getSource())
+    return resultLoc, result
+
+def _genSubPtr(resultLoc, src1Loc, src2Loc):
+    if not src2Loc.getType().isInteger():
+        raise SemanticError(src2Loc.getLocation(),
+            "Can only subtract ponters and integers, not pointers and other types")
+    memberSize = src1Loc.getType().deref().getSize()
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    t = resultLoc.getType()
+    result = '; {} = {} - {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
+    isWord = src2Loc.getType().getSize() == 2
+    if isWord:
+        if memberSize == 1:
+            # no multiplication, just subtract
+            loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "sub", "sbb", "({}) - ({})", operator.sub)
+            return loc, result + code
+        elif memberSize == 2:
+            if src2Loc.getIndirLevel() == 0:
+                loc = src1Loc.getLocation() - src2Loc.getLocation()
+                if isinstance(s2, int):
+                    offset = s2 * 2
+                else:
+                    offset = "({}) * 2".format(s2)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "sub", "sbb", "({}) - ({})", operator.sub)
+                return loc, result + code
+            else:
+                result += '''
+                    ldi pl, lo({0})
+                    ldi ph, hi({0})
+                    ld b
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    ld a
+                    shl a
+                    shl b
+                    adc a, 0
+                '''.format(s2) # TODO optimize aligned
+                if src1Loc.getIndirLevel() == 1:
+                    result += '''
+                        xor a, b
+                        xor b, a
+                        xor a, b
+                        ldi pl, lo({0})
+                        ldi ph, hi({0})
+                        ld pl
+                        sub pl, a
+                        mov a, pl
+                        ldi ph, hi({0} + 1)
+                        ldi pl, lo({0} + 1)
+                        ld pl
+                        mov ph, a
+                        mov a, pl
+                        sbb a, b
+                        mov b, a
+                        mov a, ph
+                        ldi pl, lo({1})
+                        ldi ph, hi({1})
+                        st a
+                        inc pl
+                        st b
+                    '''.format(s1, rs)
+                else:
+                    # a:b - index
+                    result += '''
+                        mov ph, a
+                        ldi a, lo({0})
+                        sub b, a
+                        ldi a, hi({0})
+                        sbb ph, a
+                        mov a, ph
+                        ldi pl, lo({1})
+                        ldi ph, hi({1})
+                        st b
+                        inc pl
+                        st a
+                    '''.format(s1, rs)
+        else:
+            raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
+    else:
+        if src2Loc.getIndirLevel() == 0:
+            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            if src2Loc.getType().getSign():
+                s2 = signExpandByte(s2)
+            if isinstance(s2, int):
+                offset = s2 * memberSize
+            else:
+                offset = "({}) * {}".format(s2, memberSize)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "sub", "sbb", "({}) - ({})", operator.sub)
+            return loc, result + code
+        if src2Loc.getType().getSign():
+            raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
+        # s2.indirLevel == 1
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld b
+        '''.format(src2Loc.getSource())
+        if memberSize == 1:
+            if src1Loc.getIndirLevel() == 0:
+                result += '''
+                    ldi a, lo({0})
+                    sub a, b
+                    mov b, a
+                    ldi a, hi({0})
+                    sbb a, 0
+                '''.format(src1Loc.getSource())
+            else:
+                result += '''
+                    ldi pl, lo({0})
+                    ldi ph, hi({0})
+                    ld a
+                    sub a, b
+                    mov b, a
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    ld a
+                    sbb a, 0
+                '''.format(src1Loc.getSource())
+        elif memberSize == 2:
+            if src1Loc.getIndirLevel() == 0:
+                result += '''
+                    mov a, 0
+                    mov pl, a
+                    shl b
+                    adc pl, a
+                    ldi a, lo({0})
+                    sub a, b
+                    mov b, a
+                    ldi a, hi({0})
+                    sbb a, pl
+                '''.format(src1Loc.getSource())
+            else:
+                result += '''
+                    ldi pl, lo({0})
+                    ldi ph, hi({0})
+                    ld pl ; pl = p_l
+                    mov a, 0
+                    shl b ; b = i_l
+                    adc a, 0
+                    mov ph, a ; ph = i_h
+                    mov a, pl ; a = p_l
+                    sub a, b ; a = r_l
+                    mov b, a ; b = r_l
+                    mov a, 0
+                    adc a, 0 ; a = c
+                    add a, ph ; a = i_h + c
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    ld pl ; pl = p_h
+                    sub pl, a
+                    mov a, pl ; a = p_h - (i_h + c) = r_h
                 '''.format(src1Loc.getSource())
         else:
             raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
@@ -451,3 +613,14 @@ def genAdd(resultLoc, src1Loc, src2Loc):
         return _genAddPtr(resultLoc, src1Loc, src2Loc)
     else:
         return _genIntBinary(resultLoc, src1Loc, src2Loc, "add", "adc", "({}) + ({})", operator.add)
+
+def genSub(resultLoc, src1Loc, src2Loc):
+    if resultLoc.getType().isUnknown():
+        resultLoc = resultLoc.removeUnknown(src1Loc.getType())
+    if resultLoc.getType() != src1Loc.getType():
+        raise SemanticError(resultLoc.getLocation(),
+            "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
+    if src1Loc.getType().isPointer():
+        return _genSubPtr(resultLoc, src1Loc, src2Loc)
+    else:
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "sub", "sbb", "({}) - ({})", operator.sub)

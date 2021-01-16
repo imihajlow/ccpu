@@ -5,7 +5,7 @@ test: test.bin
 	rm -f test.o
 	coverage html
 
-test.bin: test.o ../runtime/natrix_runtime.o ../../../app/lib/display.o ../../../app/lib/bcdf.o
+test.bin: test.o ../runtime/natrix_runtime.o ../../../app/lib/display.o delay_stub.o
 	../../link.py -o $@ -m test.map $^
 
 %.o: %.asm

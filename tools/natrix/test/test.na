@@ -248,7 +248,7 @@ u8 test_bool_binary() {
     ASSERT_FALSE(a && b);
 }
 
-u8 test_pointer_add() {
+u8 test_pointer_addsub() {
     s16 a16[260];
     s8 a8[260];
     a16[0] = 10;
@@ -276,63 +276,72 @@ u8 test_pointer_add() {
     x16 = 2;
     p8 += x16;
     ASSERT_TRUE(*p8 == (s8)30);
-    x16 = -2;
-    p8 += x16;
+    p8 -= x16;
     ASSERT_TRUE(*p8 == (s8)10);
     x16 = 128;
     p8 += x16;
     ASSERT_TRUE(*p8 == (s8)12);
-    x16 = -x16;
-    p8 += x16;
+    p8 -= x16;
     ASSERT_TRUE(*p8 == (s8)10);
     x16 = 256;
     p8 += x16;
     ASSERT_TRUE(*p8 == (s8)25);
+    p8 -= x16;
+    ASSERT_TRUE(*p8 == (s8)10);
 
     p8 = (s8*)a8;
     x8 = (u8)2;
     p8 += x8;
     ASSERT_TRUE(*p8 == (s8)30);
-    p8 = (s8*)a8;
+    p8 -= x8;
     ASSERT_TRUE(*p8 == (s8)10);
     x8 = (u8)128;
     p8 += x8;
     ASSERT_TRUE(*p8 == (s8)12);
     p8 += x8;
     ASSERT_TRUE(*p8 == (s8)25);
+    p8 -= x8;
+    ASSERT_TRUE(*p8 == (s8)12);
+    p8 -= x8;
+    ASSERT_TRUE(*p8 == (s8)10);
 
     // s16*
     x16 = 2;
     p16 += x16;
     ASSERT_TRUE(*p16 == 30);
-    x16 = -2;
-    p16 += x16;
+    p16 -= x16;
     ASSERT_TRUE(*p16 == 10);
     x16 = 128;
     p16 += x16;
     ASSERT_TRUE(*p16 == 1280);
-    x16 = -x16;
-    p16 += x16;
+    p16 -= x16;
     ASSERT_TRUE(*p16 == 10);
     x16 = 256;
     p16 += x16;
     ASSERT_TRUE(*p16 == 2560);
+    p16 -= x16;
+    ASSERT_TRUE(*p16 == 10);
 
     p16 = (s16*)a16;
     x8 = (u8)2;
     p16 += x8;
     ASSERT_TRUE(*p16 == 30);
-    p16 = (s16*)a16;
+    p16 -= x8;
     ASSERT_TRUE(*p16 == 10);
     x8 = (u8)128;
     p16 += x8;
     ASSERT_TRUE(*p16 == 1280);
     p16 += x8;
     ASSERT_TRUE(*p16 == 2560);
+    p16 -= x8;
+    ASSERT_TRUE(*p16 == 1280);
 
     p16 = (s16*)a16;
     ASSERT_TRUE(*(p16 + (u8)1) == 20);
     ASSERT_TRUE(*(p16 + (s8)2) == 30);
+    p16 = (s16*)a16 + 2;
+    ASSERT_TRUE(*(p16 - (u8)1) == 20);
+    ASSERT_TRUE(*(p16 - (s8)2) == 10);
     x8 = (u8)128;
     ASSERT_TRUE(a8[x8] == (s8)12);
 }
@@ -901,7 +910,7 @@ export u8 main() {
     test_unary();
     test_binary();
     test_bool_binary();
-    test_pointer_add();
+    test_pointer_addsub();
     test_compare_unsigned();
     test_compare_signed();
     test_shr_byte();
