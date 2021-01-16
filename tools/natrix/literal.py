@@ -4,8 +4,10 @@ from location import Location
 from type import IntType, PtrType
 from value import Value
 
-def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True):
-    s = s[1:-1]
+def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True, findLastQuote=False):
+    s = s[1:]
+    if not findLastQuote:
+        s = s[:-1]
     escape = False
     result = ""
     for c in s:
@@ -13,6 +15,8 @@ def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True):
             if c == '\\':
                 escape = True
             else:
+                if findLastQuote and c == quote:
+                    return result
                 if ord(c) > 127:
                     raise ValueError("only 127 ASCII characters are supported")
                 result += c

@@ -8,7 +8,7 @@ from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
 from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer
 from literal import LiteralTransformer
-from lineinfo import LineInfoTransformer
+from lineinfo import LineInfo
 import subprocess
 import ccpu.code
 from gen import Generator
@@ -59,14 +59,15 @@ if __name__ == '__main__':
             sys.stderr.write("Preprocessing of {} failed\n".format(args.file))
             sys.exit(1)
 
+    lit = LineInfo(args.file, code)
+
     try:
         t = parser.parse(code)
     except LarkError as e:
-        sys.stderr.write("Syntax error in {}: {}\n".format(args.file, str(e)))
+        file, line = lit.translateLine(e.line)
+        sys.stderr.write("Syntax error in {}: {}:{}\n".format(file, line, e.column))
         sys.exit(1)
 
-    lit = LineInfoTransformer(args.file)
-    t = lit.transform(t)
     try:
         t = DeclarationTransformer().transform(t)
         t = CompoundTransformer().transform(t)

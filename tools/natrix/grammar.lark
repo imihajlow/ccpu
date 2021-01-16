@@ -1,4 +1,4 @@
-start: (cpp_line_info | function_definition | forward_declaration | gl_decl_var)*
+start: (function_definition | forward_declaration | gl_decl_var)*
 
 ?forward_declaration: function_declaration ";"
 
@@ -20,7 +20,7 @@ arg_declarations: (arg_declaration ("," arg_declaration)*)?
 
 arg_declaration: type IDENTIFIER
 
-function_body: "{" (statement | cpp_line_info)* "}"
+function_body: "{" statement* "}"
 
 ?statement: _basic_statement ";"
     | block
@@ -139,8 +139,6 @@ number: DEC_NUMBER -> n10
 ?literal: ESCAPED_STRING -> string_literal
     | "{" expression ("," expression)* "}" -> array_literal
 
-cpp_line_info: "#" DEC_NUMBER ESCAPED_STRING (DEC_NUMBER)*
-
 IDENTIFIER: /[a-z_]\w*/i
 
 DEC_NUMBER: /[+-]?[1-9]\d*([su](8|16)?)?/i
@@ -156,6 +154,7 @@ CHAR_LITERAL: /'(\\[^\\']|[^\\']|\\\\)'/
 
 COMMENT: "/*" /(.|\n|\r)*/"*/"
     | "//" /[^\n]*/ NEWLINE
+    | "#" /[^\n]*/ NEWLINE
 
 %import common.WS
 %import common.ESCAPED_STRING

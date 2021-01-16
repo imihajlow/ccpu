@@ -2,27 +2,32 @@ from lark import Transformer, v_args, Discard
 from literal import unescapeString
 from location import Location
 
-class LineInfoTransformer(Transformer):
-	def __init__(self, filename):
+class LineInfo():
+	def __init__(self, filename, code):
 		self._directives = []
 		self._defaultFilename = filename
+		self._parse(code)
 
 	def translateLocation(self, loc):
+		return self.translateLine(loc.getLine())
+
+	def translateLine(self, raw_line):
 		# TODO bisect
 		file = self._defaultFilename
 		line = 0
 		dirLine = -1
 		for l, f, vl in self._directives:
-			if l > loc.getLine():
+			if l > raw_line:
 				break
 			file = f
 			line = vl
 			dirLine = l
-		return file, line + (loc.getLine() - dirLine) - 1
+		return file, line + (raw_line - dirLine) - 1
 
-	@v_args(tree = True)
-	def cpp_line_info(self, t):
-		line = int(str(t.children[0]))
-		file = unescapeString(str(t.children[1]))
-		self._directives += [(t.line, file, line)]
-		raise Discard
+	def _parse(self, code):
+		for raw_ln, line in enumerate(code.split("\n")):
+			line = line.strip()
+			if len(line) > 0 and line[0] == '#':
+				_, ln, filename = line.split(' ', 2)
+				filename = unescapeString(filename, findLastQuote=True)
+				self._directives += [(raw_ln, filename, int(ln) - 1)]
