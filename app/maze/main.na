@@ -49,7 +49,7 @@ u8 maze_loop() {
     u8 n = (u8)3;
     u8 k, r;
 
-    while (n < 50u8) {
+    while (n < (u8)MAZE_MAX_SIDE) {
         print_level_greeting(n);
         game_init(n);
         game_print_state();

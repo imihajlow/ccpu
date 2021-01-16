@@ -4,7 +4,6 @@
 #include <vga.h>
 
 #define CHAR_EMPTY '.'
-#define CHAR_WALL '#'
 #define CHAR_PLAYER '@'
 #define CHAR_KEY 'J'
 #define CHAR_DOOR '>'
@@ -16,6 +15,8 @@ import s8 trap();
 u8 maze_data[MAZE_ARRAY_SIZE];
 u8 width;
 u8 height;
+
+u8 get_wall_char(u8 top, u8 bottom, u8 left, u8 right);
 
 export u8 maze_init(u8 w, u8 h)
 {
@@ -127,7 +128,28 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
             u8 c = CHAR_EMPTY;
             u8 e = maze_data[maze_offset];
             if (e == MAZE_WALL) {
-                c = CHAR_WALL;
+                u8 l, r, t, b;
+                if (x == 0u8) {
+                    l = 1u8;
+                } else {
+                    l = maze_data[maze_offset - 1u16] == MAZE_WALL;
+                }
+                if (x == width - 1u8) {
+                    r = 1u8;
+                } else {
+                    r = maze_data[maze_offset + 1u16] == MAZE_WALL;
+                }
+                if (y == 0u8) {
+                    t = 1u8;
+                } else {
+                    t = maze_data[maze_offset - (u16)width] == MAZE_WALL;
+                }
+                if (y == height - 1u8) {
+                    b = 1u8;
+                } else {
+                    b = maze_data[maze_offset + (u16)width] == MAZE_WALL;
+                }
+                c = get_wall_char(t, b, l, r);
             } else if (e == MAZE_KEY) {
                 c = CHAR_KEY;
             } else if (e == MAZE_EXIT) {
@@ -141,6 +163,59 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
         screen_offset += 128u8;
         screen_offset -= (s16)width;
     }
+
+    // draw frame
+    if (top > 0u8) {
+        screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top - 1u8);
+        maze_offset = 0u16;
+        vga_set(screen_offset, 218u8);
+        screen_offset += 1u8;
+        for (x = 0u8; x < width; x += 1u8) {
+            c = 196u8;
+            if (maze_data[maze_offset] == MAZE_WALL) {
+                c = 194u8;
+            }
+            vga_set(screen_offset, c);
+            maze_offset += 1u16;
+            screen_offset += 1u8;
+        }
+        vga_set(screen_offset, 191u8);
+    }
+    if (top + height < VGA_COLS) {
+        screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top + height);
+        maze_offset = (u16)width * (u16)(height - 1u8);
+        vga_set(screen_offset, 192u8);
+        screen_offset += 1u8;
+        for (x = 0u8; x < width; x += 1u8) {
+            c = 196u8;
+            if (maze_data[maze_offset] == MAZE_WALL) {
+                c = 193u8;
+            }
+            vga_set(screen_offset, c);
+            maze_offset += 1u16;
+            screen_offset += 1u8;
+        }
+        vga_set(screen_offset, 217u8);
+    }
+    screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top);
+    maze_offset = 0u16;
+    for (y = 0u8; y < height; y += 1u8) {
+        c = 179u8;
+        if (maze_data[maze_offset] == MAZE_WALL) {
+            c = 195u8;
+        }
+        vga_set(screen_offset, c);
+        maze_offset += (u16)(width - 1u8);
+        screen_offset += width + 1u8;
+
+        c = 179u8;
+        if (maze_data[maze_offset] == MAZE_WALL) {
+            c = 180u8;
+        }
+        vga_set(screen_offset, c);
+        maze_offset += 1u16;
+        screen_offset += 128u8 - 1u8 - width;
+    }
     vga_set((u8*)vga_char_seg + VGA_OFFSET(left + player_x, top + player_y), CHAR_PLAYER);
 }
 
@@ -151,4 +226,32 @@ export u8 maze_show_player_move(u8 from_x, u8 from_y, u8 to_x, u8 to_y)
 
     vga_set((u8*)vga_char_seg + VGA_OFFSET(left + to_x, top + to_y), CHAR_PLAYER);
     vga_set((u8*)vga_char_seg + VGA_OFFSET(left + from_x, top + from_y), CHAR_EMPTY);
+}
+
+u8 get_wall_char(u8 top, u8 bottom, u8 left, u8 right)
+{
+    u8 index = top | (bottom << 1u8) | (left << 2u8) | (right << 3u8);
+    // NSWE
+    u8 *map = {
+        254u8, // lone wall
+        179u8, // N
+        179u8, // S
+        179u8, // NS
+
+        196u8, // W
+        217u8, // NW
+        191u8, // SW
+        180u8, // NSW
+
+        196u8, // E
+        192u8, // NE
+        218u8, // SE
+        195u8, // NSE
+
+        196u8, // WE
+        193u8, // NWE
+        194u8, // SWE
+        197u8 // NSWE
+    };
+    return map[index];
 }
