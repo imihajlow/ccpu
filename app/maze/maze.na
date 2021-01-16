@@ -1,7 +1,13 @@
 #include "maze.h"
 #include <string.h>
 #include <random.h>
-#include <display.h>
+#include <vga.h>
+
+#define CHAR_EMPTY '.'
+#define CHAR_WALL '#'
+#define CHAR_PLAYER '@'
+#define CHAR_KEY 'J'
+#define CHAR_DOOR '>'
 
 import s8 trap();
 
@@ -11,20 +17,6 @@ u8 maze_data[MAZE_ARRAY_SIZE];
 u8 width;
 u8 height;
 
-u8 last_player_top;
-u8 last_player_bottom;
-u8 last_key_top;
-u8 last_key_bottom;
-u8 last_exit_top;
-u8 last_exit_bottom;
-
-u8 new_player_top;
-u8 new_player_bottom;
-u8 new_key_top;
-u8 new_key_bottom;
-u8 new_exit_top;
-u8 new_exit_bottom;
-
 export u8 maze_init(u8 w, u8 h)
 {
     memset((u8*)maze_data, MAZE_WALL, (u16)w * (u16)h);
@@ -32,7 +24,7 @@ export u8 maze_init(u8 w, u8 h)
     height = h;
 }
 
-#define DFS_STACK_SIZE 8192
+#define DFS_STACK_SIZE 4096
 
 export u8 maze_dfs(u8 ux, u8 uy)
 {
@@ -123,248 +115,40 @@ export u8 maze_set(u8 x, u8 y, u8 v)
     maze_data[(u16)x + (u16)y * (u16)width] = v;
 }
 
-u8 maze_get_with_orientation(s8 x, s8 y, u8 orientation, s8 offset_parallel, s8 offset_orthogonal)
+export u8 maze_show_all(u8 player_x, u8 player_y)
 {
-    if (orientation == NORTH) {
-        return maze_get(x + offset_parallel, y + offset_orthogonal);
-    } else if (orientation == EAST) {
-        return maze_get(x - offset_orthogonal, y + offset_parallel);
-    } else if (orientation == SOUTH) {
-        return maze_get(x - offset_parallel, y - offset_orthogonal);
-    } else if (orientation == WEST) {
-        return maze_get(x + offset_orthogonal, y - offset_parallel);
+    u8 left = (VGA_COLS - width) >> 1u8;
+    u8 top = (VGA_ROWS - width) >> 1u8;
+
+    u8* screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left, top);
+    u16 maze_offset = 0u16;
+    for (u8 y = 0u8; y < height; y += 1u8) {
+        for (u8 x = 0u8; x < width; x += 1u8) {
+            u8 c = CHAR_EMPTY;
+            u8 e = maze_data[maze_offset];
+            if (e == MAZE_WALL) {
+                c = CHAR_WALL;
+            } else if (e == MAZE_KEY) {
+                c = CHAR_KEY;
+            } else if (e == MAZE_EXIT) {
+                c = CHAR_DOOR;
+            }
+            vga_set(screen_offset, c);
+
+            maze_offset += 1u16;
+            screen_offset += 1u8;
+        }
+        screen_offset += 128u8;
+        screen_offset -= (s16)width;
     }
+    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + player_x, top + player_y), CHAR_PLAYER);
 }
 
-u8 maze_print_cell(u8 center, u8 top, u8 bottom)
+export u8 maze_show_player_move(u8 from_x, u8 from_y, u8 to_x, u8 to_y)
 {
-    u8 c;
-    if (center == MAZE_PASSAGE) {
-        if (top) {
-            if (bottom) {
-                c = CHAR_PASSAGE_UPDN;
-            } else {
-                c = CHAR_PASSAGE_UP;
-            }
-        } else {
-            if (bottom) {
-                c = CHAR_PASSAGE_DN;
-            } else {
-                c = CHAR_PASSAGE;
-            }
-        }
-    } else if (center == MAZE_KEY) {
-        c = CHAR_KEY;
-        new_key_top = !top;
-        new_key_bottom = !bottom;
-    } else if (center == MAZE_EXIT) {
-        c = CHAR_EXIT;
-        new_exit_top = !top;
-        new_exit_bottom = !bottom;
-    } else {
-        c = CHAR_WALL;
-    }
-    display_print_char(c);
-}
+    u8 left = (VGA_COLS - width) >> 1u8;
+    u8 top = (VGA_ROWS - width) >> 1u8;
 
-u8 maze_update_cgram()
-{
-    u8 *full = {0b11111u8};
-    u8 *empty = {0b00000u8};
-    if (new_player_top != last_player_top) {
-        if (new_player_top)
-            display_load_cg_ram(full, (CHAR_PLAYER - 8u8) * 8u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_PLAYER - 8u8) * 8u8, 1u8);
-    }
-    if (new_player_bottom != last_player_bottom) {
-        if (new_player_bottom)
-            display_load_cg_ram(full, (CHAR_PLAYER - 8u8) * 8u8 + 7u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_PLAYER - 8u8) * 8u8 + 7u8, 1u8);
-    }
-    if (new_key_top != last_key_top) {
-        if (new_key_top)
-            display_load_cg_ram(full, (CHAR_KEY - 8u8) * 8u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_KEY - 8u8) * 8u8, 1u8);
-    }
-    if (new_key_bottom != last_key_bottom) {
-        if (new_key_bottom)
-            display_load_cg_ram(full, (CHAR_KEY - 8u8) * 8u8 + 7u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_KEY - 8u8) * 8u8 + 7u8, 1u8);
-    }
-    if (new_exit_top != last_exit_top) {
-        if (new_exit_top)
-            display_load_cg_ram(full, (CHAR_EXIT - 8u8) * 8u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_EXIT - 8u8) * 8u8, 1u8);
-    }
-    if (new_exit_bottom != last_exit_bottom) {
-        if (new_exit_bottom)
-            display_load_cg_ram(full, (CHAR_EXIT - 8u8) * 8u8 + 7u8, 1u8);
-        else
-            display_load_cg_ram(empty, (CHAR_EXIT - 8u8) * 8u8 + 7u8, 1u8);
-    }
-    last_player_top = new_player_top;
-    last_player_bottom = new_player_bottom;
-    last_key_top = new_key_top;
-    last_key_bottom = new_key_bottom;
-    last_exit_top = new_exit_top;
-    last_exit_bottom = new_exit_bottom;
-}
-
-export u8 maze_print(u8 x, u8 y, u8 orientation)
-{
-    s8 i;
-    s8 length;
-    s8 offset;
-    u8 center;
-    u8 top;
-    u8 bottom;
-    s8 coordinate;
-
-    display_set_address(DISPLAY_LINE_2);
-
-    if (orientation & 1u8) {
-        length = (s8)height;
-        coordinate = (s8)y;
-    } else {
-        length = (s8)width;
-        coordinate = (s8)x;
-    }
-
-    s8 f; // absolute coordinate of the very left character
-    s8 left_offset; // parralel_offset of the left character
-    if (length < (s8)DISPLAY_WIDTH - 2s8) {
-        if (orientation & 0x2u8) { // SOUTH or WEST
-            f = length + (((s8)DISPLAY_WIDTH - length) >> 1u);
-            // x - left_offset = f
-            left_offset = coordinate - f;
-        } else {
-            // NORTH or EAST
-            f = -(((s8)DISPLAY_WIDTH - length - 1s8) >> 1u) - 1s8;
-            // x + left_offset = f
-            left_offset = f - coordinate;
-        }
-    } else {
-        if (orientation & 0x2u8) { // SOUTH or WEST
-            if (coordinate > length - (s8)DISPLAY_WIDTH / 2s8) {
-                f = length;
-            } else if (coordinate < (s8)DISPLAY_WIDTH / 2s8 - 2s8) {
-                f = (s8)DISPLAY_WIDTH - 2s8;
-            } else {
-                f = coordinate + (s8)DISPLAY_WIDTH / 2s8;
-            }
-            left_offset = coordinate - f;
-        } else {
-            // NORTH or EAST
-            if (coordinate < (s8)DISPLAY_WIDTH / 2s8 - 1s8) {
-                f = -1s8;
-            } else if (coordinate >= length - (s8)DISPLAY_WIDTH / 2s8 + 2s8) {
-                f = length - (s8)DISPLAY_WIDTH + 1s8;
-            } else {
-                f = coordinate - (s8)DISPLAY_WIDTH / 2s8;
-            }
-            left_offset = f - coordinate;
-        }
-    }
-    i = 0s8;
-    while (i < 16s8) {
-        s8 offset = i + left_offset;
-        top = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, -(s8)1);
-        bottom = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)1);
-        if (offset != (s8)0) {
-            center = maze_get_with_orientation((s8)x, (s8)y, orientation, offset, (s8)0);
-            maze_print_cell(center, top, bottom);
-        } else {
-            display_print_char(CHAR_PLAYER);
-            new_player_top = !top;
-            new_player_bottom = !bottom;
-        }
-        i += 1s8;
-    }
-    maze_update_cgram();
-}
-
-export u8 maze_load_cgram() {
-    // Passage with no walls - space
-    // Passage with a wall below - 0x0a
-    // Passage with a wall above - 0x08
-    // Passage with two walls - 0x09
-    // Player - 0x0b
-    // Key - 0xd2 (static, for the status line) and 0x0c (for the maze)
-    // Exit - 0xfc (static, for the status line) and 0x0d (for the maze)
-    // Wall - 0xff
-    display_load_cg_ram({
-        // Passage with a wall above - 0x08
-        0b11111u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        // Passage with two walls - 0x09
-        0b11111u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b11111u8,
-        // Passage with a wall below - 0x0a
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b00000u8,
-        0b11111u8,
-        // Player - 0x0b
-        0b00000u8,
-        0b00000u8,
-        0b00100u8,
-        0b01110u8,
-        0b00100u8,
-        0b01010u8,
-        0b00000u8,
-        0b00000u8,
-        // Key - same as 0xd2 - 0x0c
-        0b00000u8,
-        0b00001u8,
-        0b00001u8,
-        0b01010u8,
-        0b00100u8,
-        0b01010u8,
-        0b10000u8,
-        0b00000u8,
-        // Door - same as 0xfc - 0x0d
-        0b00000u8,
-        0b00000u8,
-        0b11111u8,
-        0b10101u8,
-        0b11111u8,
-        0b10001u8,
-        0b10001u8,
-        0b00000u8
-    }, 0u8, 6u8 * 8u8);
-
-    last_player_top = 0u8;
-    last_player_bottom = 0u8;
-    last_key_top = 0u8;
-    last_key_bottom = 0u8;
-    last_exit_top = 0u8;
-    last_exit_bottom = 0u8;
-
-    new_player_top = 0u8;
-    new_player_bottom = 0u8;
-    new_key_top = 0u8;
-    new_key_bottom = 0u8;
-    new_exit_top = 0u8;
-    new_exit_bottom = 0u8;
+    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + to_x, top + to_y), CHAR_PLAYER);
+    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + from_x, top + from_y), CHAR_EMPTY);
 }

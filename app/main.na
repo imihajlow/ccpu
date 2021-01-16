@@ -1,9 +1,11 @@
 #include <keyboard.h>
 #include <vga.h>
 #include <string.h>
+#include <entropy.h>
 #include "life/quasipixel.h"
 #include "life/life.h"
 #include "calc/main.h"
+#include "maze/main.h"
 
 u8 life_main() {
     qp_init(COLOR_MAGENTA, COLOR_BROWN);
@@ -54,7 +56,7 @@ u8 life_main() {
     }
 }
 
-u8 display_frame(u8 x0, u8 y0, u8 x1, u8 y1) {
+export u8 display_frame(u8 x0, u8 y0, u8 x1, u8 y1) {
     // corners
     vga_set((u8*)vga_char_seg + VGA_OFFSET(x0, y0), 0xc9u8);
     vga_set((u8*)vga_char_seg + VGA_OFFSET(x0, y1), 0xc8u8);
@@ -83,15 +85,18 @@ export u8 main() {
         vga_clear(COLOR(COLOR_WHITE, COLOR_BLUE));
         vga_put_text(34u8, 13u8, "1. Calculator");
         vga_put_text(34u8, 15u8, "2. Life");
-        display_frame(32u8, 11u8, 49u8, 17u8);
+        vga_put_text(34u8, 16u8, "3. Maze");
+        display_frame(32u8, 11u8, 49u8, 18u8);
         u8 key = KEY_NO_KEY;
-        while (key != KEY_1 && key != KEY_2) {
-            key = keyboard_wait_key_released();
+        while (key != KEY_1 && key != KEY_2 && key != KEY_3) {
+            key = keyboard_wait_key_released_entropy();
         }
         if (key == KEY_2) {
             life_main();
         } else if (key == KEY_1) {
             calc_main();
+        } else if (key == KEY_3) {
+            maze_main();
         }
     }
 }

@@ -1,6 +1,6 @@
 #include "game.h"
 #include <random.h>
-#include <display.h>
+#include <vga.h>
 #include "maze.h"
 
 u8 game_side;
@@ -10,8 +10,6 @@ u8 player_y;
 
 u8 has_key;
 u8 on_exit;
-
-u8 orientation;
 
 import u8 trap();
 
@@ -24,7 +22,6 @@ export u8 game_init(u8 side) {
 
     has_key = 0u8;
     on_exit = 0u8;
-    orientation = NORTH;
 
     u8 exit_y = 0u8;
     u8 exit_x = 0u8;
@@ -49,46 +46,12 @@ export u8 game_init(u8 side) {
 
     maze_set(exit_x, exit_y, MAZE_EXIT);
     maze_set(key_x, key_y, MAZE_KEY);
+
+    vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+    maze_show_all(player_x, player_y);
 }
 
 export u8 game_print_state() {
-    display_set_address(DISPLAY_LINE_1);
-    display_print_byte(player_x);
-    display_print_char(' ');
-    display_print_byte(player_y);
-    if (has_key) {
-        display_print_char(' ');
-        display_print_char(CHAR_KEY_STATIC);
-    } else if (on_exit) {
-        display_print(" NO KEY");
-    } else {
-        display_print("       ");
-    }
-
-    display_set_address(DISPLAY_LINE_1 + 14u8);
-    display_print_char('N');
-    if (orientation == NORTH) {
-        display_print_char('^');
-    } else if (orientation == EAST) {
-        display_print_char('<');
-    } else if (orientation == SOUTH) {
-        display_print_char('v');
-    } else {
-        display_print_char('>');
-    }
-
-    display_set_address(DISPLAY_LINE_2);
-    maze_print(player_x, player_y, orientation);
-}
-
-export u8 game_rotate_cw() {
-    orientation = (orientation - 1u8) & 3u8;
-    return 1u8;
-}
-
-export u8 game_rotate_ccw() {
-    orientation = (orientation + 1u8) & 3u8;
-    return 1u8;
 }
 
 u8 move(s8 xn, s8 yn) {
@@ -97,6 +60,7 @@ u8 move(s8 xn, s8 yn) {
     if (!v) {
         return RESULT_NO;
     }
+    maze_show_player_move(player_x, player_y, (u8)xn, (u8)yn);
     player_x = (u8)xn;
     player_y = (u8)yn;
     on_exit = 0u8;
@@ -114,56 +78,24 @@ u8 move(s8 xn, s8 yn) {
 
 export u8 game_move_left() {
     s8 xn = (s8)player_x, yn = (s8)player_y;
-    if (orientation == NORTH) {
-        xn -= 1s8;
-    } else if (orientation == EAST) {
-        yn -= 1s8;
-    } else if (orientation == SOUTH) {
-        xn += 1s8;
-    } else {
-        yn += 1s8;
-    }
+    xn -= 1s8;
     return move(xn, yn);
 }
 
 export u8 game_move_right() {
     s8 xn = (s8)player_x, yn = (s8)player_y;
-    if (orientation == NORTH) {
-        xn += 1s8;
-    } else if (orientation == EAST) {
-        yn += 1s8;
-    } else if (orientation == SOUTH) {
-        xn -= 1s8;
-    } else {
-        yn -= 1s8;
-    }
+    xn += 1s8;
     return move(xn, yn);
 }
 
 export u8 game_move_up() {
     s8 xn = (s8)player_x, yn = (s8)player_y;
-    if (orientation == NORTH) {
-        yn -= 1s8;
-    } else if (orientation == EAST) {
-        xn += 1s8;
-    } else if (orientation == SOUTH) {
-        yn += 1s8;
-    } else {
-        xn -= 1s8;
-    }
+    yn -= 1s8;
     return move(xn, yn);
 }
 
 export u8 game_move_down() {
     s8 xn = (s8)player_x, yn = (s8)player_y;
-    if (orientation == NORTH) {
-        yn += 1s8;
-    } else if (orientation == EAST) {
-        xn -= 1s8;
-    } else if (orientation == SOUTH) {
-        yn -= 1s8;
-    } else {
-        xn += 1s8;
-    }
+    yn += 1s8;
     return move(xn, yn);
 }

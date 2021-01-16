@@ -1,6 +1,6 @@
 #include "entropy.h"
 
-#define KEYBOARD_ADDR 0xf000u
+#define KEYBOARD_ADDR 0xff00u
 #define KEYBOARD_PORT *((u8*)KEYBOARD_ADDR)
 
 #define FIRST_ROW 0b11111110u8

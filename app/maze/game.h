@@ -12,5 +12,3 @@ import u8 game_move_left();
 import u8 game_move_right();
 import u8 game_move_up();
 import u8 game_move_down();
-import u8 game_rotate_cw();
-import u8 game_rotate_ccw();
