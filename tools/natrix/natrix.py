@@ -65,7 +65,7 @@ if __name__ == '__main__':
         t = parser.parse(code)
     except LarkError as e:
         file, line = lit.translateLine(e.line)
-        sys.stderr.write("Syntax error in {}: {}:{}\n".format(file, line, e.column))
+        sys.stderr.write("Syntax error in {}:{}:{}\n".format(file, line, e.column))
         sys.exit(1)
 
     try:
@@ -92,5 +92,6 @@ if __name__ == '__main__':
         sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.msg))
         sys.exit(1)
     except LarkError as e:
-        sys.stderr.write("Syntax error in {}: {}\n".format(args.file, str(e)))
+        file, line = lit.translateLine(e.line)
+        sys.stderr.write("Syntax error in {}:{} {}\n".format(file, line, str(e)))
         sys.exit(1)
