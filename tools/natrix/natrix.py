@@ -6,7 +6,7 @@ from lark import Lark, Transformer, v_args, Tree, LarkError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
-from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer
+from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer
 from literal import LiteralTransformer
 from lineinfo import LineInfoTransformer
 import subprocess
@@ -78,6 +78,7 @@ if __name__ == '__main__':
         lt = LiteralTransformer()
         t = lt.transform(t)
         t = SubscriptTransformer().transform(t)
+        t = ForTransformer().transform(t)
         if args.tree:
             print(t.pretty())
         cg = CallGraph()
