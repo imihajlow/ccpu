@@ -17,7 +17,7 @@ import u8 maze_init(u8 w, u8 h);
 import u8 maze_dfs(u8 x, u8 y);
 
 import u8 maze_show_all(u8 player_x, u8 player_y);
-import u8 maze_show_player_move(u8 from_x, u8 from_y, u8 to_x, u8 to_y);
+import u8 maze_show_los(u8 player_x, u8 player_y);
 
 import u8 maze_set(u8 x, u8 y, u8 v);
 import u8 maze_get(s8 x, s8 y);

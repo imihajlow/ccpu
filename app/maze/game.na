@@ -48,7 +48,8 @@ export u8 game_init(u8 side) {
     maze_set(key_x, key_y, MAZE_KEY);
 
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
-    maze_show_all(player_x, player_y);
+    // maze_show_all(player_x, player_y);
+    maze_show_los(player_x, player_y);
 }
 
 export u8 game_print_state() {
@@ -60,7 +61,8 @@ u8 move(s8 xn, s8 yn) {
     if (!v) {
         return RESULT_NO;
     }
-    maze_show_player_move(player_x, player_y, (u8)xn, (u8)yn);
+    // maze_show_player_move(player_x, player_y, (u8)xn, (u8)yn);
+    maze_show_los((u8)xn, (u8)yn);
     player_x = (u8)xn;
     player_y = (u8)yn;
     on_exit = 0u8;

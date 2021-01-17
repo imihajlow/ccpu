@@ -107,13 +107,132 @@ export u8 maze_get(s8 x, s8 y)
     if (x >= (s8)0 && x < (s8)width && y >= (s8)0 && y < (s8)height) {
         return maze_data[(u16)x + (u16)y * (u16)width];
     } else {
-        return MAZE_WALL;
+        if (x < -1s8 || y < -1s8 || x > (s8)width || y > (s8)height) {
+            return MAZE_PASSAGE;
+        } else {
+            return MAZE_WALL;
+        }
     }
 }
 
 export u8 maze_set(u8 x, u8 y, u8 v)
 {
     maze_data[(u16)x + (u16)y * (u16)width] = v;
+}
+
+u8 show_one(s8 x, s8 y)
+{
+    u8 left = (VGA_COLS - width) >> 1u8;
+    u8 top = (VGA_ROWS - width) >> 1u8;
+
+    u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(left + (u8)x, top + (u8)y);
+    u8 center;
+    center = maze_get(x, y);
+    u8 c = '?';
+    if (center == MAZE_WALL) {
+        u8 t;
+        t = maze_get(x, y - 1s8);
+        u8 b;
+        b = maze_get(x, y + 1s8);
+        u8 l;
+        l = maze_get(x - 1s8, y);
+        u8 r;
+        r = maze_get(x + 1s8, y);
+        c = get_wall_char(t == MAZE_WALL, b == MAZE_WALL, l == MAZE_WALL, r == MAZE_WALL);
+    } else if (center == MAZE_KEY) {
+        c = CHAR_KEY;
+    } else if (center == MAZE_EXIT) {
+        c = CHAR_DOOR;
+    } else if (center == MAZE_PASSAGE) {
+        c = CHAR_EMPTY;
+    }
+    vga_set(vga_offset, c);
+}
+
+u8 show_player(u8 x, u8 y)
+{
+    u8 left = (VGA_COLS - width) >> 1u8;
+    u8 top = (VGA_ROWS - width) >> 1u8;
+
+    u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(left + x, top + y);
+    vga_set(vga_offset, CHAR_PLAYER);
+}
+
+export u8 maze_show_los(u8 player_x, u8 player_y)
+{
+    u8 t = 1u8;
+    u8 b = 1u8;
+    u8 l = 1u8;
+    u8 r = 1u8;
+
+    s8 v_up_x = 0s8;
+    s8 v_up_y = 1s8;
+    s8 v_right_x = 1s8;
+    s8 v_right_y = 0s8;
+
+    u8 e1, e2, e3, e4, e5;
+    /*
+    Octant cells numbering:
+    6  7  8  9
+    3  4  5
+    1  2
+    0
+    */
+    for (u8 octant = 0u8; octant < 8u8; octant += 1u8) {
+        e1 = maze_get((s8)player_x + v_up_x, (s8)player_y + v_up_y);
+        e2 = maze_get((s8)player_x + v_up_x + v_right_x, (s8)player_y + v_up_y + v_right_y);
+        e3 = maze_get((s8)player_x + v_up_x * 2s8, (s8)player_y + v_up_y * 2s8);
+        e4 = maze_get((s8)player_x + v_up_x * 2s8 + v_right_x, (s8)player_y + v_up_y * 2s8 + v_right_y);
+        e5 = maze_get((s8)player_x + (v_up_x + v_right_x) * 2s8, (s8)player_y + (v_up_y + v_right_y) * 2s8);
+
+        if (octant & 1u8) {
+            // draw the vertical line
+            show_one((s8)player_x + v_up_x, (s8)player_y + v_up_y);
+            if (e1) {
+                show_one((s8)player_x + v_up_x * 2s8, (s8)player_y + v_up_y * 2s8);
+                if (e3) {
+                    show_one((s8)player_x + v_up_x * 3s8, (s8)player_y + v_up_y * 3s8);
+                }
+            }
+
+            // draw the diagonal
+            show_one((s8)player_x + v_up_x + v_right_x, (s8)player_y + v_up_y + v_right_y);
+            if (e2) {
+                show_one((s8)player_x + 2s8 * (v_up_x + v_right_x), (s8)player_y + 2s8 * (v_up_y + v_right_y));
+                if (e5) {
+                    show_one((s8)player_x + 3s8 * (v_up_x + v_right_x), (s8)player_y + 3s8 * (v_up_y + v_right_y));
+                }
+            }
+        }
+
+        // draw 4, 7 and 8
+        if (e1 || e2) {
+            show_one((s8)player_x + 2s8 * v_up_x + v_right_x, (s8)player_y + 2s8 * v_up_y + v_right_y);
+        }
+        if (e1 && (e3 || e4)) {
+            show_one((s8)player_x + 3s8 * v_up_x + v_right_x, (s8)player_y + 3s8 * v_up_y + v_right_y);
+        }
+        if (e2 && (e5 || (e1 && e4))) {
+            show_one((s8)player_x + 3s8 * v_up_x + 2s8 * v_right_x, (s8)player_y + 3s8 * v_up_y + 2s8 * v_right_y);
+        }
+
+        // swap axes
+        s8 tmp = v_right_x;
+        v_right_x = v_up_x;
+        v_up_x = tmp;
+        tmp = v_right_y;
+        v_right_y = v_up_y;
+        v_up_y = tmp;
+        if (octant & 1u8) {
+            // rotate the direction
+            v_right_x = v_up_x;
+            v_right_y = v_up_y;
+
+            v_up_x = -v_up_y;
+            v_up_y = v_right_x;
+        }
+    }
+    show_player(player_x, player_y);
 }
 
 export u8 maze_show_all(u8 player_x, u8 player_y)
@@ -217,15 +336,6 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
         screen_offset += 128u8 - 1u8 - width;
     }
     vga_set((u8*)vga_char_seg + VGA_OFFSET(left + player_x, top + player_y), CHAR_PLAYER);
-}
-
-export u8 maze_show_player_move(u8 from_x, u8 from_y, u8 to_x, u8 to_y)
-{
-    u8 left = (VGA_COLS - width) >> 1u8;
-    u8 top = (VGA_ROWS - width) >> 1u8;
-
-    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + to_x, top + to_y), CHAR_PLAYER);
-    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + from_x, top + from_y), CHAR_EMPTY);
 }
 
 u8 get_wall_char(u8 top, u8 bottom, u8 left, u8 right)
