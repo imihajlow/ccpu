@@ -1,7 +1,21 @@
 #!/usr/bin/env python3
+from abc import ABC, abstractmethod
 
 WATCH_READ = 1
 WATCH_WRITE = 2
+
+class MemoryModule(ABC):
+    @abstractmethod
+    def isAddressHandled(self, address):
+        return False
+
+    @abstractmethod
+    def set(self, address, value):
+        pass
+
+    @abstractmethod
+    def get(self, address):
+        return 0
 
 class Memory:
     def __init__(self, rom, keyboard, display):
@@ -13,11 +27,18 @@ class Memory:
         self.emulateIo = True
         self.keyboard = keyboard
         self.display = display
+        self.modules = []
+
+    def registerModule(self, module):
+        self.modules += [module]
 
     def setVerbose(self, verbose):
         self.verbose = verbose
 
     def set(self, address, value, watch=True):
+        for module in self.modules:
+            if module.isAddressHandled(address):
+                module.set(address, value)
         if address < 0x8000 and self.protectRom:
             return
         if address >= 0xf000 and self.emulateIo:
@@ -42,6 +63,9 @@ class Memory:
 
     def get(self, address):
         self.__checkWatch(address, WATCH_READ)
+        for module in self.modules:
+            if module.isAddressHandled(address):
+                return module.get(address)
         if address >= 0xf000 and self.emulateIo:
             if not bool(address & 0x2) and self.keyboard is not None:
                 return self.keyboard.read()

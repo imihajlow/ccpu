@@ -7,6 +7,7 @@ from machine import Machine
 from memory import Memory
 from keyboard import Keyboard
 from lcd16x2 import Display
+from vga import VgaModule
 
 def load(file):
     ba = file.read()
@@ -41,8 +42,10 @@ def loop(program, labels, initialCommand, aluRevision):
     labelAddresses = sorted(rlabels.keys())
     keyboard = Keyboard()
     display = Display()
+    vgaMod = VgaModule()
     memory = Memory(program, keyboard, display)
     memory.setVerbose(False)
+    memory.registerModule(vgaMod)
     m = Machine(memory, aluRevision)
     newState = True
     while True:
@@ -160,6 +163,8 @@ def loop(program, labels, initialCommand, aluRevision):
                 v = bool(tokens[1])
                 memory.setVerbose(v)
                 print("Memory verbose = {}".format(str(v)))
+        elif cmd == 'vga':
+            vgaMod.dump()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Simulator')
