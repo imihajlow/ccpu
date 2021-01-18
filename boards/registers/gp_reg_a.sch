@@ -31,9 +31,9 @@ AR Path="/5E73B7F6/5EA6BD49" Ref="U?"  Part="1"
 AR Path="/5E7CA397/5EA6BD49" Ref="U?"  Part="1" 
 AR Path="/5E9FD18D/5EA6BD49" Ref="U29"  Part="1" 
 F 0 "U29" H 7650 1150 50  0000 C CNN
-F 1 "SN74ACT244PW" H 7550 1050 50  0000 C CNN
+F 1 "MC74HC244ADT" H 7550 1050 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7250 1700 50  0001 C CNN
-F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT244.pdf" H 7250 1700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878565.pdf" H 7250 1700 50  0001 C CNN
 	1    7250 1700
 	1    0    0    -1  
 $EndComp
@@ -221,9 +221,9 @@ AR Path="/5E73B7F6/5EA6BDD0" Ref="U?"  Part="1"
 AR Path="/5E7CA397/5EA6BDD0" Ref="U?"  Part="1" 
 AR Path="/5E9FD18D/5EA6BDD0" Ref="U28"  Part="1" 
 F 0 "U28" H 5150 1150 50  0000 C CNN
-F 1 "MC74AC273DTR2G" H 5100 1050 50  0000 C CNN
+F 1 "MC74HC273ADT" H 5100 1050 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 4750 1700 50  0001 C CNN
-F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT273.pdf" H 4750 1700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 4750 1700 50  0001 C CNN
 	1    4750 1700
 	1    0    0    -1  
 $EndComp
