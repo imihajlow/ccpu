@@ -21,8 +21,6 @@ Text HLabel 4700 3850 0    50   Input ~ 0
 ir[0..7]
 Text HLabel 4700 3550 0    50   Input ~ 0
 flags[0..3]
-Text HLabel 6250 4000 2    50   Input ~ 0
-~mem_rdy
 Text HLabel 6250 4600 2    50   Output ~ 0
 ~we_mem
 Text HLabel 5550 3000 0    50   Output ~ 0
@@ -201,8 +199,6 @@ Connection ~ 4800 3550
 Wire Bus Line
 	4800 3550 4800 3600
 Wire Wire Line
-	6250 4000 6150 4000
-Wire Wire Line
 	6150 4100 6250 4100
 NoConn ~ 5650 4000
 NoConn ~ 5650 2900
@@ -243,6 +239,7 @@ Wire Wire Line
 	5550 3200 5650 3200
 Wire Wire Line
 	5650 3300 5550 3300
+NoConn ~ 6150 4000
 Wire Bus Line
 	4800 3700 4800 3850
 Wire Bus Line

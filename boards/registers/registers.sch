@@ -5,8 +5,8 @@ $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 10
 Title "CPU registers and memory module"
-Date "2019-12-28"
-Rev "1"
+Date "2021-01-18"
+Rev "2"
 Comp ""
 Comment1 "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)"
 Comment2 ""
@@ -1413,32 +1413,29 @@ F2 "clk" I L 7450 3250 50
 F3 "~rst" I L 7450 3350 50 
 F4 "ir[0..7]" I L 7450 3450 50 
 F5 "flags[0..3]" I L 7450 3550 50 
-F6 "~mem_rdy" I L 7450 3650 50 
-F7 "~oe_mem" O R 8600 3250 50 
-F8 "~we_mem" O R 8600 3350 50 
-F9 "~oe_d_di" O R 8600 3450 50 
-F10 "we_ir" O R 8600 3550 50 
-F11 "inc_ip" O R 8600 3650 50 
-F12 "addr_dp" O R 8600 3750 50 
-F13 "~we_pl" O R 8600 3950 50 
-F14 "~we_ph" O R 8600 4050 50 
-F15 "we_a" O R 8600 4150 50 
-F16 "we_b" O R 8600 4250 50 
-F17 "~oe_ph_alu" O R 8600 4350 50 
-F18 "~oe_pl_alu" O R 8600 4450 50 
-F19 "~oe_a_d" O R 8600 4650 50 
-F20 "~oe_b_d" O R 8600 4750 50 
-F21 "~we_flags" O R 8600 4850 50 
-F22 "~oe_alu" O R 8600 4950 50 
-F23 "~oe_b_alu" O R 8600 4550 50 
-F24 "p_selector" O R 8600 3850 50 
+F6 "~oe_mem" O R 8600 3250 50 
+F7 "~we_mem" O R 8600 3350 50 
+F8 "~oe_d_di" O R 8600 3450 50 
+F9 "we_ir" O R 8600 3550 50 
+F10 "inc_ip" O R 8600 3650 50 
+F11 "addr_dp" O R 8600 3750 50 
+F12 "~we_pl" O R 8600 3950 50 
+F13 "~we_ph" O R 8600 4050 50 
+F14 "we_a" O R 8600 4150 50 
+F15 "we_b" O R 8600 4250 50 
+F16 "~oe_ph_alu" O R 8600 4350 50 
+F17 "~oe_pl_alu" O R 8600 4450 50 
+F18 "~oe_a_d" O R 8600 4650 50 
+F19 "~oe_b_d" O R 8600 4750 50 
+F20 "~we_flags" O R 8600 4850 50 
+F21 "~oe_alu" O R 8600 4950 50 
+F22 "~oe_b_alu" O R 8600 4550 50 
+F23 "p_selector" O R 8600 3850 50 
 $EndSheet
 Wire Wire Line
 	7450 3250 7300 3250
 Wire Wire Line
 	7450 3350 7300 3350
-Wire Wire Line
-	7450 3650 7300 3650
 Wire Wire Line
 	8600 3250 8750 3250
 Wire Wire Line
@@ -1485,8 +1482,6 @@ Wire Bus Line
 	6500 6200 6500 3550
 Wire Bus Line
 	6500 3550 7450 3550
-Text Label 7300 3650 2    50   ~ 0
-~mem_rdy
 Text Label 8750 3250 0    50   ~ 0
 ~oe
 Text Label 8750 3350 0    50   ~ 0
@@ -1540,9 +1535,9 @@ F2 "a[0..15]" I L 7500 7550 50
 F3 "d[0..7]" B L 7500 7700 50 
 F4 "~oe" I L 7500 7850 50 
 F5 "~we" I L 7500 7950 50 
-F6 "~rdy" O L 7500 8050 50 
-F7 "clk" I L 7500 8200 50 
-F8 "~rst" I L 7500 8300 50 
+F6 "clk" I L 7500 8200 50 
+F7 "~rst" I L 7500 8300 50 
+F8 "rdy" O L 7500 8050 50 
 $EndSheet
 Wire Bus Line
 	7500 7550 7350 7550
@@ -1565,33 +1560,18 @@ Wire Wire Line
 Text Label 7350 8200 2    50   ~ 0
 clk
 Text Label 7350 8300 2    50   ~ 0
-~rst
+~ext_rst
 Text Label 7350 8050 2    50   ~ 0
-~mem_rdy
+mem_rdy
 Text Label 7350 7850 2    50   ~ 0
 ~oe
 Text Label 7350 7950 2    50   ~ 0
 ~we
-$Sheet
-S 7500 950  550  600 
-U 5EF05415
-F0 "pwr_and_clk" 50
-F1 "pwr_and_clk.sch" 50
-F2 "clk" O R 8050 1100 50 
-F3 "~rst" O R 8050 1450 50 
-F4 "~clk" O R 8050 1200 50 
-$EndSheet
-Wire Wire Line
-	8050 1100 8150 1100
-Wire Wire Line
-	8150 1200 8050 1200
-Wire Wire Line
-	8150 1450 8050 1450
-Text Label 8150 1100 0    50   ~ 0
+Text Label 8300 1100 0    50   ~ 0
 clk
-Text Label 8150 1200 0    50   ~ 0
+Text Label 8300 1200 0    50   ~ 0
 ~clk
-Text Label 8150 1450 0    50   ~ 0
+Text Label 8300 1450 0    50   ~ 0
 ~rst
 Wire Bus Line
 	14400 4550 13750 4550
@@ -1744,6 +1724,31 @@ F 3 "" H 2350 10700 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 NoConn ~ 2950 10600
+$Sheet
+S 7500 950  700  600 
+U 5EF05415
+F0 "pwr_and_clk" 50
+F1 "pwr_and_clk.sch" 50
+F2 "clk" O R 8200 1100 50 
+F3 "~rst" O R 8200 1450 50 
+F4 "~clk" O R 8200 1200 50 
+F5 "~ext_rst" O R 8200 1350 50 
+F6 "mem_rdy" I L 7500 1100 50 
+$EndSheet
+Wire Wire Line
+	8300 1450 8200 1450
+Wire Wire Line
+	8300 1200 8200 1200
+Wire Wire Line
+	8200 1100 8300 1100
+Text Label 8300 1350 0    50   ~ 0
+~ext_rst
+Wire Wire Line
+	8300 1350 8200 1350
+Text Label 7400 1100 2    50   ~ 0
+mem_rdy
+Wire Wire Line
+	7400 1100 7500 1100
 Wire Bus Line
 	13750 4550 13750 5950
 Wire Bus Line

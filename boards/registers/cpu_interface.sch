@@ -5,7 +5,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 9 10
 Title "CPU interface"
-Date "2020-01-27"
+Date "2021-01-18"
 Rev "2"
 Comp ""
 Comment1 "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)"
@@ -22,7 +22,7 @@ Text HLabel 1500 1700 0    50   Input ~ 0
 Text HLabel 1500 1800 0    50   Input ~ 0
 ~we
 Text HLabel 1500 1900 0    50   Output ~ 0
-~rdy
+rdy
 Text HLabel 1500 2000 0    50   Input ~ 0
 clk
 Text HLabel 1500 2100 0    50   Input ~ 0
@@ -184,7 +184,7 @@ clk
 Text Label 1500 2100 0    50   ~ 0
 ~rst
 Text Label 1850 1900 2    50   ~ 0
-~rdy
+rdy
 Wire Bus Line
 	2800 1200 1500 1200
 Entry Wire Line
@@ -285,7 +285,7 @@ Text Label 5650 1800 2    50   ~ 0
 Text Label 6150 1800 0    50   ~ 0
 ~we
 Text Label 5650 1700 2    50   ~ 0
-~rdy
+rdy
 Text Label 5650 1600 2    50   ~ 0
 clk
 Text Label 6150 1600 0    50   ~ 0
