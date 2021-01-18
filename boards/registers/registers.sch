@@ -650,7 +650,7 @@ Wire Wire Line
 Wire Wire Line
 	1800 5450 1600 5450
 Text Label 1600 5250 2    50   ~ 0
-clk
+~clk
 Text Label 1600 5450 2    50   ~ 0
 we_ir
 $Sheet
