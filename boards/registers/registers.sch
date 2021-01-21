@@ -84,14 +84,6 @@ Entry Wire Line
 Text Label 4400 4500 3    50   ~ 0
 ir_out[0..7]
 Wire Wire Line
-	3850 3650 4300 3650
-Wire Wire Line
-	3850 3750 4300 3750
-Wire Wire Line
-	3850 3850 4300 3850
-Wire Wire Line
-	3850 3950 4300 3950
-Wire Wire Line
 	3850 4050 4300 4050
 Wire Wire Line
 	3850 4150 4300 4150
@@ -99,21 +91,29 @@ Wire Wire Line
 	3850 4250 4300 4250
 Wire Wire Line
 	3850 4350 4300 4350
-Text Label 4250 3650 2    50   ~ 0
-ir_out3
-Text Label 4250 3750 2    50   ~ 0
-ir_out2
-Text Label 4250 3850 2    50   ~ 0
-ir_out1
-Text Label 4250 3950 2    50   ~ 0
-ir_out0
+Wire Wire Line
+	3850 3650 4300 3650
+Wire Wire Line
+	3850 3750 4300 3750
+Wire Wire Line
+	3850 3850 4300 3850
+Wire Wire Line
+	3850 3950 4300 3950
 Text Label 4250 4050 2    50   ~ 0
-ir_out4
+ir_out3
 Text Label 4250 4150 2    50   ~ 0
-ir_out5
+ir_out2
 Text Label 4250 4250 2    50   ~ 0
-ir_out6
+ir_out1
 Text Label 4250 4350 2    50   ~ 0
+ir_out0
+Text Label 4250 3650 2    50   ~ 0
+ir_out4
+Text Label 4250 3750 2    50   ~ 0
+ir_out5
+Text Label 4250 3850 2    50   ~ 0
+ir_out6
+Text Label 4250 3950 2    50   ~ 0
 ir_out7
 Entry Wire Line
 	4400 5200 4500 5100
@@ -460,14 +460,6 @@ Text Label 11050 1250 2    50   ~ 0
 Text Label 11050 1150 2    50   ~ 0
 ~clk
 Entry Wire Line
-	2400 1150 2500 1050
-Entry Wire Line
-	2400 1250 2500 1150
-Entry Wire Line
-	2400 1350 2500 1250
-Entry Wire Line
-	2400 1450 2500 1350
-Entry Wire Line
 	2400 1550 2500 1450
 Entry Wire Line
 	2400 1650 2500 1550
@@ -475,6 +467,14 @@ Entry Wire Line
 	2400 1750 2500 1650
 Entry Wire Line
 	2400 1850 2500 1750
+Entry Wire Line
+	2400 1150 2500 1050
+Entry Wire Line
+	2400 1250 2500 1150
+Entry Wire Line
+	2400 1350 2500 1250
+Entry Wire Line
+	2400 1450 2500 1350
 Entry Wire Line
 	2400 3750 2500 3650
 Entry Wire Line
@@ -492,14 +492,6 @@ Entry Wire Line
 Entry Wire Line
 	2400 4450 2500 4350
 Wire Wire Line
-	2850 4350 2500 4350
-Wire Wire Line
-	2500 4250 2850 4250
-Wire Wire Line
-	2850 4150 2500 4150
-Wire Wire Line
-	2500 4050 2850 4050
-Wire Wire Line
 	2850 3950 2500 3950
 Wire Wire Line
 	2500 3850 2850 3850
@@ -508,13 +500,13 @@ Wire Wire Line
 Wire Wire Line
 	2500 3650 2850 3650
 Wire Wire Line
-	2500 1050 2850 1050
+	2850 4350 2500 4350
 Wire Wire Line
-	2850 1150 2500 1150
+	2500 4250 2850 4250
 Wire Wire Line
-	2500 1250 2850 1250
+	2850 4150 2500 4150
 Wire Wire Line
-	2850 1350 2500 1350
+	2500 4050 2850 4050
 Wire Wire Line
 	2500 1450 2850 1450
 Wire Wire Line
@@ -524,51 +516,49 @@ Wire Wire Line
 Wire Wire Line
 	2850 1750 2500 1750
 Wire Wire Line
+	2500 1050 2850 1050
+Wire Wire Line
+	2850 1150 2500 1150
+Wire Wire Line
+	2500 1250 2850 1250
+Wire Wire Line
+	2850 1350 2500 1350
+Wire Wire Line
 	2850 1950 2850 2000
 Text Label 2400 3000 3    50   ~ 0
 d[0..7]
-Text Label 2500 1050 0    50   ~ 0
-d0
-Text Label 2500 1150 0    50   ~ 0
-d1
-Text Label 2500 1250 0    50   ~ 0
-d2
-Text Label 2500 1350 0    50   ~ 0
-d3
 Text Label 2500 1450 0    50   ~ 0
-d4
-Text Label 2500 1550 0    50   ~ 0
-d5
-Text Label 2500 1650 0    50   ~ 0
-d6
-Text Label 2500 1750 0    50   ~ 0
-d7
-Text Label 2500 3650 0    50   ~ 0
-d3
-Text Label 2500 3750 0    50   ~ 0
-d2
-Text Label 2500 3850 0    50   ~ 0
-d1
-Text Label 2500 3950 0    50   ~ 0
 d0
-Text Label 2500 4050 0    50   ~ 0
+Text Label 2500 1550 0    50   ~ 0
+d1
+Text Label 2500 1650 0    50   ~ 0
+d2
+Text Label 2500 1750 0    50   ~ 0
+d3
+Text Label 2500 1050 0    50   ~ 0
 d4
-Text Label 2500 4150 0    50   ~ 0
+Text Label 2500 1150 0    50   ~ 0
 d5
-Text Label 2500 4250 0    50   ~ 0
+Text Label 2500 1250 0    50   ~ 0
 d6
-Text Label 2500 4350 0    50   ~ 0
+Text Label 2500 1350 0    50   ~ 0
 d7
-Entry Wire Line
-	4350 1050 4450 950 
-Entry Wire Line
-	4350 1150 4450 1050
-Entry Wire Line
-	4350 1250 4450 1150
-Entry Wire Line
-	4350 1350 4450 1250
-Entry Wire Line
-	4350 1450 4450 1350
+Text Label 2500 4050 0    50   ~ 0
+d3
+Text Label 2500 4150 0    50   ~ 0
+d2
+Text Label 2500 4250 0    50   ~ 0
+d1
+Text Label 2500 4350 0    50   ~ 0
+d0
+Text Label 2500 3650 0    50   ~ 0
+d4
+Text Label 2500 3750 0    50   ~ 0
+d5
+Text Label 2500 3850 0    50   ~ 0
+d6
+Text Label 2500 3950 0    50   ~ 0
+d7
 Entry Wire Line
 	4350 1550 4450 1450
 Entry Wire Line
@@ -578,20 +568,12 @@ Entry Wire Line
 Text Label 4450 850  0    50   ~ 0
 di[0..7]
 Text Label 4200 1050 0    50   ~ 0
-di0
-Text Label 4200 1150 0    50   ~ 0
-di1
-Text Label 4200 1250 0    50   ~ 0
-di2
-Text Label 4200 1350 0    50   ~ 0
-di3
-Text Label 4200 1450 0    50   ~ 0
 di4
-Text Label 4200 1550 0    50   ~ 0
+Text Label 4200 1150 0    50   ~ 0
 di5
-Text Label 4200 1650 0    50   ~ 0
+Text Label 4200 1250 0    50   ~ 0
 di6
-Text Label 4200 1750 0    50   ~ 0
+Text Label 4200 1350 0    50   ~ 0
 di7
 Wire Wire Line
 	2850 2000 2650 2000
@@ -1671,14 +1653,6 @@ Wire Wire Line
 	3850 1250 4350 1250
 Wire Wire Line
 	3850 1350 4350 1350
-Wire Wire Line
-	3850 1450 4350 1450
-Wire Wire Line
-	3850 1550 4350 1550
-Wire Wire Line
-	3850 1650 4350 1650
-Wire Wire Line
-	3850 1750 4350 1750
 $Comp
 L 74xx:74LS161 U4
 U 1 1 5E857F06
@@ -1809,6 +1783,34 @@ Wire Wire Line
 Connection ~ 2350 10600
 Wire Wire Line
 	2350 10600 2350 10700
+Wire Wire Line
+	3850 1750 4350 1750
+Wire Wire Line
+	3850 1650 4350 1650
+Wire Wire Line
+	3850 1550 4350 1550
+Wire Wire Line
+	3850 1450 4350 1450
+Text Label 4200 1750 0    50   ~ 0
+di3
+Text Label 4200 1650 0    50   ~ 0
+di2
+Text Label 4200 1550 0    50   ~ 0
+di1
+Text Label 4200 1450 0    50   ~ 0
+di0
+Entry Wire Line
+	4350 1450 4450 1350
+Entry Wire Line
+	4350 1350 4450 1250
+Entry Wire Line
+	4350 1250 4450 1150
+Entry Wire Line
+	4350 1150 4450 1050
+Entry Wire Line
+	4350 1050 4450 950 
+Text Label 2600 5150 1    50   ~ 0
+ir_w_clk
 Wire Bus Line
 	13750 4550 13750 5950
 Wire Bus Line

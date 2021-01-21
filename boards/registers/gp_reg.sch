@@ -160,14 +160,6 @@ Entry Wire Line
 Entry Wire Line
 	5950 4150 6050 4050
 Wire Wire Line
-	6050 4050 6300 4050
-Wire Wire Line
-	6300 3950 6050 3950
-Wire Wire Line
-	6050 3850 6300 3850
-Wire Wire Line
-	6300 3750 6050 3750
-Wire Wire Line
 	6050 3650 6300 3650
 Wire Wire Line
 	6300 3550 6050 3550
@@ -175,6 +167,14 @@ Wire Wire Line
 	6050 3450 6300 3450
 Wire Wire Line
 	6300 3350 6050 3350
+Wire Wire Line
+	6050 4050 6300 4050
+Wire Wire Line
+	6300 3950 6050 3950
+Wire Wire Line
+	6050 3850 6300 3850
+Wire Wire Line
+	6300 3750 6050 3750
 Entry Wire Line
 	7900 3350 8000 3250
 Entry Wire Line
@@ -191,21 +191,21 @@ Entry Wire Line
 	7900 3950 8000 3850
 Entry Wire Line
 	7900 4050 8000 3950
-Text Label 6050 3350 0    50   ~ 0
-d0
-Text Label 6050 3450 0    50   ~ 0
-d1
-Text Label 6050 3550 0    50   ~ 0
-d2
-Text Label 6050 3650 0    50   ~ 0
-d3
 Text Label 6050 3750 0    50   ~ 0
-d4
+d0
 Text Label 6050 3850 0    50   ~ 0
-d5
+d1
 Text Label 6050 3950 0    50   ~ 0
-d6
+d2
 Text Label 6050 4050 0    50   ~ 0
+d3
+Text Label 6050 3350 0    50   ~ 0
+d4
+Text Label 6050 3450 0    50   ~ 0
+d5
+Text Label 6050 3550 0    50   ~ 0
+d6
+Text Label 6050 3650 0    50   ~ 0
 d7
 $Comp
 L power:GND #PWR?
@@ -251,21 +251,21 @@ Text Label 7650 1750 0    50   ~ 0
 doa6
 Text Label 7650 1850 0    50   ~ 0
 doa7
-Text Label 7650 3350 0    50   ~ 0
-dob0
-Text Label 7650 3450 0    50   ~ 0
-dob1
-Text Label 7650 3550 0    50   ~ 0
-dob2
-Text Label 7650 3650 0    50   ~ 0
-dob3
 Text Label 7650 3750 0    50   ~ 0
-dob4
+dob0
 Text Label 7650 3850 0    50   ~ 0
-dob5
+dob1
 Text Label 7650 3950 0    50   ~ 0
-dob6
+dob2
 Text Label 7650 4050 0    50   ~ 0
+dob3
+Text Label 7650 3350 0    50   ~ 0
+dob4
+Text Label 7650 3450 0    50   ~ 0
+dob5
+Text Label 7650 3550 0    50   ~ 0
+dob6
+Text Label 7650 3650 0    50   ~ 0
 dob7
 Wire Bus Line
 	9250 3100 8000 3100
@@ -844,14 +844,6 @@ Wire Wire Line
 Wire Wire Line
 	7300 1850 7900 1850
 Wire Wire Line
-	7300 3350 7900 3350
-Wire Wire Line
-	7300 3450 7900 3450
-Wire Wire Line
-	7300 3550 7900 3550
-Wire Wire Line
-	7300 3650 7900 3650
-Wire Wire Line
 	7300 3750 7900 3750
 Wire Wire Line
 	7300 3850 7900 3850
@@ -859,6 +851,14 @@ Wire Wire Line
 	7300 3950 7900 3950
 Wire Wire Line
 	7300 4050 7900 4050
+Wire Wire Line
+	7300 3350 7900 3350
+Wire Wire Line
+	7300 3450 7900 3450
+Wire Wire Line
+	7300 3550 7900 3550
+Wire Wire Line
+	7300 3650 7900 3650
 Text Label 3600 1650 0    50   ~ 0
 di6
 $Comp

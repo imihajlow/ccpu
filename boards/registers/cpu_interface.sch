@@ -286,8 +286,6 @@ Text Label 6150 1800 0    50   ~ 0
 ~we
 Text Label 5650 1700 2    50   ~ 0
 rdy
-Text Label 5650 1600 2    50   ~ 0
-clk
 Text Label 6150 1600 0    50   ~ 0
 ~rst
 Text Label 5650 2000 2    50   ~ 0
@@ -313,6 +311,7 @@ NoConn ~ 6150 2400
 NoConn ~ 6150 1900
 NoConn ~ 5650 1900
 NoConn ~ 6150 1700
+NoConn ~ 5650 1600
 Wire Bus Line
 	4500 1300 4500 2350
 Wire Bus Line
