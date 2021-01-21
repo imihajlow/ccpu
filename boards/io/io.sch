@@ -727,9 +727,7 @@ Text Label 12750 1500 3    50   ~ 0
 Text Label 12750 1000 1    50   ~ 0
 ~we
 Text Label 12650 1500 3    50   ~ 0
-~rdy
-Text Label 12550 1500 3    50   ~ 0
-clk
+rdy
 Text Label 12550 1000 1    50   ~ 0
 ~rst
 Text Label 12950 1500 3    50   ~ 0
@@ -2389,7 +2387,7 @@ Text Label 900  5800 2    50   ~ 0
 Text Label 1400 5800 0    50   ~ 0
 ~we
 Text Label 900  5700 2    50   ~ 0
-~rdy
+rdy
 Text Label 1400 5600 0    50   ~ 0
 ~rst
 Text Label 900  6000 2    50   ~ 0
@@ -2519,7 +2517,7 @@ Text Label 21300 5850 2    50   ~ 0
 Text Label 21800 5850 0    50   ~ 0
 ~we
 Text Label 21300 5750 2    50   ~ 0
-~rdy
+rdy
 Text Label 21800 5650 0    50   ~ 0
 ~rst
 Text Label 21300 6050 2    50   ~ 0
