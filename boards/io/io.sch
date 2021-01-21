@@ -5,8 +5,8 @@ $Descr A2 23386 16535
 encoding utf-8
 Sheet 1 1
 Title "IO and memory board"
-Date "2020-12-06"
-Rev "2"
+Date "2021-01-21"
+Rev "3"
 Comp ""
 Comment1 "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)"
 Comment2 ""
@@ -395,9 +395,9 @@ L 74xx:74LS32 U1
 U 1 1 5E61782F
 P 12050 11000
 F 0 "U1" H 12050 11325 50  0000 C CNN
-F 1 "74LV32APWJ" H 12050 11234 50  0000 C CNN
+F 1 "74HC32PW" H 12050 11234 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 12050 11000 50  0001 C CNN
-F 3 "https://www.mouser.de/datasheet/2/916/74LV32A-1597772.pdf" H 12050 11000 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 12050 11000 50  0001 C CNN
 	1    12050 11000
 	1    0    0    -1  
 $EndComp
@@ -406,9 +406,9 @@ L 74xx:74LS32 U1
 U 2 1 5E61C502
 P 8900 8200
 F 0 "U1" H 8900 8525 50  0000 C CNN
-F 1 "74LV32APWJ" H 8900 8434 50  0000 C CNN
+F 1 "74HC32PW" H 8900 8434 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 8200 50  0001 C CNN
-F 3 "https://www.mouser.de/datasheet/2/916/74LV32A-1597772.pdf" H 8900 8200 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 8900 8200 50  0001 C CNN
 	2    8900 8200
 	1    0    0    -1  
 $EndComp
@@ -417,9 +417,9 @@ L 74xx:74LS32 U1
 U 5 1 5E6599D6
 P 2650 14100
 F 0 "U1" H 2880 14146 50  0000 L CNN
-F 1 "74LV32APWJ" H 2880 14055 50  0000 L CNN
+F 1 "74HC32PW" H 2880 14055 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 2650 14100 50  0001 C CNN
-F 3 "https://www.mouser.de/datasheet/2/916/74LV32A-1597772.pdf" H 2650 14100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 2650 14100 50  0001 C CNN
 	5    2650 14100
 	1    0    0    -1  
 $EndComp
@@ -428,9 +428,9 @@ L 74xx:74HC273 U7
 U 1 1 5E66F13D
 P 9900 4950
 F 0 "U7" H 10300 4400 50  0000 C CNN
-F 1 "SN74LV273APW" H 10300 4250 50  0000 C CNN
+F 1 "MC74HC273ADT" H 10300 4250 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 9900 4950 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv273a.pdf" H 9900 4950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 9900 4950 50  0001 C CNN
 	1    9900 4950
 	1    0    0    -1  
 $EndComp
@@ -461,9 +461,9 @@ L 74xx:74HC244 U8
 U 1 1 5E6773D1
 P 13600 4950
 F 0 "U8" H 14000 4400 50  0000 C CNN
-F 1 "SN74LV244APW" H 13950 4250 50  0000 C CNN
+F 1 "MC74HC244ADT" H 13950 4250 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 13600 4950 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv244a.pdf" H 13600 4950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878565.pdf" H 13600 4950 50  0001 C CNN
 	1    13600 4950
 	1    0    0    -1  
 $EndComp
@@ -550,9 +550,9 @@ L 74xx:74LS32 U1
 U 3 1 5E6A5783
 P 10800 10450
 F 0 "U1" H 10800 10775 50  0000 C CNN
-F 1 "74LV32APWJ" H 10800 10684 50  0000 C CNN
+F 1 "74HC32PW" H 10800 10684 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10800 10450 50  0001 C CNN
-F 3 "https://www.mouser.de/datasheet/2/916/74LV32A-1597772.pdf" H 10800 10450 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 10800 10450 50  0001 C CNN
 	3    10800 10450
 	1    0    0    -1  
 $EndComp
@@ -561,9 +561,9 @@ L 74xx:74LS32 U1
 U 4 1 5E6AA547
 P 10800 11000
 F 0 "U1" H 10800 11325 50  0000 C CNN
-F 1 "74LV32APWJ" H 10800 11234 50  0000 C CNN
+F 1 "74HC32PW" H 10800 11234 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10800 11000 50  0001 C CNN
-F 3 "https://www.mouser.de/datasheet/2/916/74LV32A-1597772.pdf" H 10800 11000 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 10800 11000 50  0001 C CNN
 	4    10800 11000
 	1    0    0    -1  
 $EndComp
@@ -2788,9 +2788,9 @@ L 74xx:74HC273 U11
 U 1 1 5FE29ECC
 P 7550 4950
 F 0 "U11" H 7950 4400 50  0000 C CNN
-F 1 "SN74LV273APW" H 7950 4250 50  0000 C CNN
+F 1 "MC74HC273ADT" H 7950 4250 50  0000 C CNN
 F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7550 4950 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv273a.pdf" H 7550 4950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 7550 4950 50  0001 C CNN
 	1    7550 4950
 	1    0    0    -1  
 $EndComp
@@ -3512,9 +3512,9 @@ L 74xx:74LS139 U14
 U 1 1 5FE61366
 P 9300 10450
 F 0 "U14" H 9300 10817 50  0000 C CNN
-F 1 "SN74LV139APW" H 9300 10726 50  0000 C CNN
+F 1 "SN74HC139PW" H 9300 10726 50  0000 C CNN
 F 2 "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" H 9300 10450 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv139a.pdf" H 9300 10450 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn54hc139-sp.pdf" H 9300 10450 50  0001 C CNN
 	1    9300 10450
 	1    0    0    -1  
 $EndComp
@@ -3523,9 +3523,9 @@ L 74xx:74LS139 U14
 U 2 1 5FE639A8
 P 8700 13250
 F 0 "U14" H 8700 13617 50  0000 C CNN
-F 1 "SN74LV139APW" H 8700 13526 50  0000 C CNN
+F 1 "SN74HC139PW" H 8700 13526 50  0000 C CNN
 F 2 "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" H 8700 13250 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv139a.pdf" H 8700 13250 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn54hc139-sp.pdf" H 8700 13250 50  0001 C CNN
 	2    8700 13250
 	1    0    0    -1  
 $EndComp
@@ -3534,9 +3534,9 @@ L 74xx:74LS139 U14
 U 3 1 5FE65BC6
 P 6750 14100
 F 0 "U14" H 6980 14146 50  0000 L CNN
-F 1 "SN74LV139APW" H 6980 14055 50  0000 L CNN
+F 1 "SN74HC139PW" H 6980 14055 50  0000 L CNN
 F 2 "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" H 6750 14100 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv139a.pdf" H 6750 14100 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn54hc139-sp.pdf" H 6750 14100 50  0001 C CNN
 	3    6750 14100
 	1    0    0    -1  
 $EndComp
@@ -3611,9 +3611,9 @@ L 74xx:74LS00 U2
 U 1 1 5FE9F41C
 P 7950 8700
 F 0 "U2" H 7950 9025 50  0000 C CNN
-F 1 "SN74LV00APW" H 7950 8934 50  0000 C CNN
+F 1 "74HC00PW" H 7950 8934 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 7950 8700 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 7950 8700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1649009.pdf" H 7950 8700 50  0001 C CNN
 	1    7950 8700
 	1    0    0    -1  
 $EndComp
@@ -3622,9 +3622,9 @@ L 74xx:74LS00 U2
 U 2 1 5FEAA144
 P 8900 8800
 F 0 "U2" H 8900 9125 50  0000 C CNN
-F 1 "SN74LV00APW" H 8900 9034 50  0000 C CNN
+F 1 "74HC00PW" H 8900 9034 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8900 8800 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 8900 8800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1649009.pdf" H 8900 8800 50  0001 C CNN
 	2    8900 8800
 	1    0    0    -1  
 $EndComp
@@ -3633,9 +3633,9 @@ L 74xx:74LS00 U2
 U 3 1 5FEADB49
 P 10000 14700
 F 0 "U2" H 10000 15025 50  0000 C CNN
-F 1 "SN74LV00APW" H 10000 14934 50  0000 C CNN
+F 1 "74HC00PW" H 10000 14934 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10000 14700 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 10000 14700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1649009.pdf" H 10000 14700 50  0001 C CNN
 	3    10000 14700
 	1    0    0    -1  
 $EndComp
@@ -3644,9 +3644,9 @@ L 74xx:74LS00 U2
 U 4 1 5FEB116E
 P 10000 14150
 F 0 "U2" H 10000 14475 50  0000 C CNN
-F 1 "SN74LV00APW" H 10000 14384 50  0000 C CNN
+F 1 "74HC00PW" H 10000 14384 50  0000 C CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10000 14150 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 10000 14150 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1649009.pdf" H 10000 14150 50  0001 C CNN
 	4    10000 14150
 	1    0    0    -1  
 $EndComp
@@ -3655,9 +3655,9 @@ L 74xx:74LS00 U2
 U 5 1 5FEB4935
 P 5600 14100
 F 0 "U2" H 5830 14146 50  0000 L CNN
-F 1 "SN74LV00APW" H 5830 14055 50  0000 L CNN
+F 1 "74HC00PW" H 5830 14055 50  0000 L CNN
 F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5600 14100 50  0001 C CNN
-F 3 "https://www.ti.com/lit/ds/symlink/sn74lv00a.pdf" H 5600 14100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1649009.pdf" H 5600 14100 50  0001 C CNN
 	5    5600 14100
 	1    0    0    -1  
 $EndComp
