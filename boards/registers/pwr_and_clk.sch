@@ -733,7 +733,7 @@ $EndComp
 Text HLabel 6650 950  2    50   Input ~ 0
 mem_rdy
 Wire Wire Line
-	6650 950  6050 950 
+	6650 950  6450 950 
 $Comp
 L power:VCC #PWR082
 U 1 1 6009337F
@@ -743,6 +743,31 @@ F 1 "VCC" H 5767 1623 50  0000 C CNN
 F 2 "" H 5750 1450 50  0001 C CNN
 F 3 "" H 5750 1450 50  0001 C CNN
 	1    5750 1450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R3
+U 1 1 600B21B7
+P 6450 800
+F 0 "R3" H 6700 750 50  0000 R CNN
+F 1 "10k" H 6700 850 50  0000 R CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 6380 800 50  0001 C CNN
+F 3 "~" H 6450 800 50  0001 C CNN
+	1    6450 800 
+	-1   0    0    1   
+$EndComp
+Connection ~ 6450 950 
+Wire Wire Line
+	6450 950  6050 950 
+$Comp
+L power:VCC #PWR08
+U 1 1 600B2FB1
+P 6450 650
+F 0 "#PWR08" H 6450 500 50  0001 C CNN
+F 1 "VCC" H 6550 750 50  0000 C CNN
+F 2 "" H 6450 650 50  0001 C CNN
+F 3 "" H 6450 650 50  0001 C CNN
+	1    6450 650 
 	1    0    0    -1  
 $EndComp
 $EndSCHEMATC
