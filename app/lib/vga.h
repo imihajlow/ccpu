@@ -20,6 +20,9 @@
 #define COLOR_YELLOW 14u8
 #define COLOR_WHITE 15u8
 
+#define VGA_OFFSET_COL 1u8
+#define VGA_OFFSET_ROW 128u8
+
 #define COLOR(fg, bg) ((fg) + ((bg) << 4u8))
 #define VGA_OFFSET(col, row) ((u16)(col) + ((u16)(row) << 7u8))
 

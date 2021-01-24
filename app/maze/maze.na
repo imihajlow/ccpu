@@ -3,6 +3,8 @@
 #include <random.h>
 #include <vga.h>
 
+#define MEMORIZED_LENGTH 5u8
+
 #define CHAR_EMPTY '.'
 #define CHAR_PLAYER '@'
 #define CHAR_KEY 'J'
@@ -123,7 +125,7 @@ export u8 maze_set(u8 x, u8 y, u8 v)
 u8 show_one(s8 x, s8 y)
 {
     u8 left = (VGA_COLS - width) >> 1u8;
-    u8 top = (VGA_ROWS - width) >> 1u8;
+    u8 top = (VGA_ROWS - height) >> 1u8;
 
     u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(left + (u8)x, top + (u8)y);
     u8 center;
@@ -152,7 +154,7 @@ u8 show_one(s8 x, s8 y)
 u8 show_player(u8 x, u8 y)
 {
     u8 left = (VGA_COLS - width) >> 1u8;
-    u8 top = (VGA_ROWS - width) >> 1u8;
+    u8 top = (VGA_ROWS - height) >> 1u8;
 
     u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(left + x, top + y);
     vga_set(vga_offset, CHAR_PLAYER);
@@ -238,7 +240,7 @@ export u8 maze_show_los(u8 player_x, u8 player_y)
 export u8 maze_show_all(u8 player_x, u8 player_y)
 {
     u8 left = (VGA_COLS - width) >> 1u8;
-    u8 top = (VGA_ROWS - width) >> 1u8;
+    u8 top = (VGA_ROWS - height) >> 1u8;
 
     u8* screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left, top);
     u16 maze_offset = 0u16;
@@ -279,7 +281,7 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
             maze_offset += 1u16;
             screen_offset += 1u8;
         }
-        screen_offset += 128u8;
+        screen_offset += VGA_OFFSET_ROW;
         screen_offset -= (s16)width;
     }
 
@@ -333,7 +335,7 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
         }
         vga_set(screen_offset, c);
         maze_offset += 1u16;
-        screen_offset += 128u8 - 1u8 - width;
+        screen_offset += VGA_OFFSET_ROW - 1u8 - width;
     }
     vga_set((u8*)vga_char_seg + VGA_OFFSET(left + player_x, top + player_y), CHAR_PLAYER);
 }
@@ -364,4 +366,73 @@ u8 get_wall_char(u8 top, u8 bottom, u8 left, u8 right)
         197u8 // NSWE
     };
     return map[index];
+}
+
+export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
+{
+    u8 left = (VGA_COLS - width) >> 1u8;
+    u8 top = (VGA_ROWS - height) >> 1u8;
+    u8 screen_x = player_x + left;
+    u8 screen_y = player_y + top;
+    if (direction & 1u8) {
+        // EAST or WEST
+        u8 col_x;
+        if (direction == EAST) {
+            if (screen_x < MEMORIZED_LENGTH) {
+                return;
+            }
+            col_x = screen_x - MEMORIZED_LENGTH;
+        } else {
+            // WEST
+            col_x = screen_x + MEMORIZED_LENGTH;
+            if (col_x >= VGA_COLS) {
+                return;
+            }
+        }
+        u8 col_start;
+        if (screen_y < MEMORIZED_LENGTH) {
+            col_start = 0u8;
+        } else {
+            col_start = screen_y - MEMORIZED_LENGTH;
+        }
+        u8 col_end = screen_y + MEMORIZED_LENGTH;
+        if (col_end > VGA_ROWS) {
+            col_end = VGA_ROWS;
+        }
+        u8 *vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col_x, col_start);
+        for (; col_start < col_end; col_start += 1u8) {
+            vga_set(vga_offset, 0u8);
+            vga_offset += VGA_OFFSET_ROW;
+        }
+    } else {
+        // NORTH or SOUTH
+        u8 row_y;
+        if (direction == NORTH) {
+            if (screen_y < MEMORIZED_LENGTH) {
+                return;
+            }
+            row_y = screen_y - MEMORIZED_LENGTH;
+        } else {
+            // SOUTH
+            row_y = screen_y + MEMORIZED_LENGTH;
+            if (row_y >= VGA_ROWS) {
+                return;
+            }
+        }
+        u8 row_start;
+        if (screen_x < MEMORIZED_LENGTH) {
+            row_start = 0u8;
+        } else {
+            row_start = screen_x - MEMORIZED_LENGTH;
+        }
+        u8 row_end = screen_x + MEMORIZED_LENGTH;
+        if (row_end > VGA_COLS) {
+            row_end = VGA_COLS;
+        }
+        u8 *vga_offset = (u8*)vga_char_seg + VGA_OFFSET(row_start, row_y);
+        for (; row_start < row_end; row_start += 1u8) {
+            vga_set(vga_offset, 0u8);
+            vga_offset += VGA_OFFSET_COL;
+        }
+    }
 }

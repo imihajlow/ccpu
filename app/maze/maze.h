@@ -18,6 +18,7 @@ import u8 maze_dfs(u8 x, u8 y);
 
 import u8 maze_show_all(u8 player_x, u8 player_y);
 import u8 maze_show_los(u8 player_x, u8 player_y);
+import u8 maze_forget(u8 player_x, u8 player_y, u8 direction); // forget a row/column of tiles when moving in giving direction
 
 import u8 maze_set(u8 x, u8 y, u8 v);
 import u8 maze_get(s8 x, s8 y);
