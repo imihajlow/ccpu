@@ -12,7 +12,7 @@
 
 import s8 trap();
 
-#define MAZE_ARRAY_SIZE (MAZE_MAX_SIDE * MAZE_MAX_SIDE)
+#define MAZE_ARRAY_SIZE (MAZE_MAX_WIDTH * MAZE_MAX_HEIGHT)
 
 u8 maze_data[MAZE_ARRAY_SIZE];
 u8 width;

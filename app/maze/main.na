@@ -49,7 +49,7 @@ u8 maze_loop() {
     u8 n = (u8)3;
     u8 k, r;
 
-    while (n < (u8)MAZE_MAX_SIDE) {
+    while (n < (u8)MAZE_MAX_WIDTH) {
         print_level_greeting(n);
         game_init(n);
         game_print_state();
@@ -71,6 +71,8 @@ u8 maze_loop() {
             } else if (k == KEY_F1) {
                 n -= 4u8;
                 break;
+            } else if (k == KEY_HASH) {
+                game_show_all();
             } else {
                 r = 0u8;
             }

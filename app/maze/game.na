@@ -3,8 +3,6 @@
 #include <vga.h>
 #include "maze.h"
 
-u8 game_side;
-
 u8 player_x;
 u8 player_y;
 
@@ -14,8 +12,12 @@ u8 on_exit;
 import u8 trap();
 
 export u8 game_init(u8 side) {
-    game_side = side;
-    maze_init(side, side);
+    u8 width = side;
+    u8 height = side;
+    if (height > VGA_ROWS) {
+        height = VGA_ROWS - 1u8;
+    }
+    maze_init(width, height);
     maze_dfs(0u8, 0u8);
     player_x = 0u8;
     player_y = 0u8;
@@ -25,12 +27,13 @@ export u8 game_init(u8 side) {
 
     u8 exit_y = 0u8;
     u8 exit_x = 0u8;
-    u16 rand_range = ((u16)side >> 1u) + 1u;
+    u16 rand_range_w = ((u16)width >> 1u) + 1u;
+    u16 rand_range_h = ((u16)height >> 1u) + 1u;
     u16 r;
     while (!(exit_x || exit_y)) {
-        r = random(rand_range);
+        r = random(rand_range_w);
         exit_x = (u8)r << 1u;
-        r = random(rand_range);
+        r = random(rand_range_h);
         exit_y = (u8)r << 1u;
         trap();
     }
@@ -38,9 +41,9 @@ export u8 game_init(u8 side) {
     u8 key_y = 0u8;
     u8 key_x = 0u8;
     while (!(key_x || key_y) || (exit_x == key_x && exit_y == key_y)) {
-        r = random(rand_range);
+        r = random(rand_range_w);
         key_x = (u8)r << 1u;
-        r = random(rand_range);
+        r = random(rand_range_h);
         key_y = (u8)r << 1u;
     }
 
@@ -101,4 +104,8 @@ export u8 game_move_down() {
     s8 xn = (s8)player_x, yn = (s8)player_y;
     yn += 1s8;
     return move(xn, yn, NORTH);
+}
+
+export u8 game_show_all() {
+    maze_show_all(player_x, player_y);
 }

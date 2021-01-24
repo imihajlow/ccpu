@@ -5,7 +5,8 @@
 #define SOUTH 2u8
 #define WEST 3u8
 
-#define MAZE_MAX_SIDE 30
+#define MAZE_MAX_WIDTH 79
+#define MAZE_MAX_HEIGHT 29
 
 #define MAZE_WALL 0u8
 #define MAZE_PASSAGE 1u8
