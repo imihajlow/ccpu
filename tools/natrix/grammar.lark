@@ -1,4 +1,8 @@
-start: (function_definition | forward_declaration | gl_decl_var)*
+start: (function_definition | forward_declaration | gl_decl_var | struct_declaration)*
+
+struct_declaration: "struct" IDENTIFIER "{" field_declaration* "}"
+
+?field_declaration: type IDENTIFIER ";"
 
 ?forward_declaration: function_declaration ";"
 
@@ -62,6 +66,7 @@ declarator: IDENTIFIER -> decl_var
 
 ?type: INT_TYPE -> int_type
     | type "*" -> ptr
+    | "struct" IDENTIFIER -> struct_type
 
 assignment: lvalue "=" expression
     | lvalue "=" function_call -> assignment_function
@@ -129,7 +134,8 @@ _arguments: expression ("," expression)*
     | var
     | var "[" expression "]" -> subscript
 
-var: IDENTIFIER
+var: IDENTIFIER -> var
+    | value "." IDENTIFIER -> member_access
 
 number: DEC_NUMBER -> n10
     | HEX_NUMBER -> n16

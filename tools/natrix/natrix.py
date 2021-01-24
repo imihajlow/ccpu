@@ -9,6 +9,7 @@ from type import TypeTransformer, CastTransformer
 from value import VarTransformerStageOne, VarTransformerStageTwo
 from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
 from literal import LiteralTransformer
+from structure import StructDeclarationTransformer
 from function import NameInterpreter
 from lineinfo import LineInfo
 import subprocess
@@ -71,12 +72,16 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if args.tree:
-        print("Tree before transform")
+        print("Tree before transform:")
         print(t.pretty())
     try:
         t = DeclarationTransformer().transform(t)
         t = ConstTransformer(False).transform(t)
-        t = TypeTransformer().transform(t)
+        tt = TypeTransformer()
+        t = tt.transform(t)
+        sdt = StructDeclarationTransformer()
+        t = sdt.transform(t)
+        sdt.populateTypes(tt.getStructs())
         t = ConstTransformer(True).transform(t)
         t = DefinitionTransformer().transform(t)
         t = VarTransformerStageOne().transform(t)
@@ -91,7 +96,7 @@ if __name__ == '__main__':
         t = ForTransformer().transform(t)
         if args.tree:
             print()
-            print("Tree after transform")
+            print("Tree after transform:")
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)

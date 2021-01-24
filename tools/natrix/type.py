@@ -20,6 +20,9 @@ class Type(ABC):
     def isInteger(self):
         return False
 
+    def isStruct(self):
+        return False
+
     def getReserveSize(self):
         return self.getSize()
 
@@ -144,6 +147,65 @@ class ArrayType(PtrType):
         else:
             return False
 
+class StructType(Type):
+    def __init__(self, name, fields=None):
+        self._name = name
+        self._fields = fields
+
+    def setFields(self, fields):
+        self._fields = fields
+
+    def getStructName(self):
+        return self._name
+
+    def getSize(self):
+        if self._fields is None:
+            raise ValueError(f"Size of struct {self._name} is not known")
+        return sum(t.getReserveSize() for t,_ in self._fields)
+
+    def getFieldType(self, name):
+        if self._fields == None:
+            raise ValueError(f"Struct {self._name}'s fields ar not known")
+        for t,n in self._fields:
+            if name == n:
+                return t
+        raise LookupError(name)
+
+    def getFieldOffset(self, name):
+        if self._fields == None:
+            raise ValueError(f"Struct {self._name}'s fields ar not known")
+        offset = 0
+        for t,n in self._fields:
+            if name == n:
+                return offset
+            offset += t.getReserveSize()
+        raise LookupError(name)
+
+    def getSign(self):
+        return False
+
+    def isPointer(self):
+        return False
+
+    def isUnknown(self):
+        return False
+
+    def removeUnknown(self, other):
+        raise NonImplementedError()
+
+    def __str__(self):
+        if self._fields is None:
+            return f"struct {self._name} (unknown)"
+        else:
+            return f"struct {self._name}"
+
+    def __eq__(self, other):
+        if isinstance(other, StructType):
+            return self._name == other._name
+        else:
+            return False
+
+
 class UnknownType(Type):
     def __init__(self):
         pass
@@ -170,6 +232,13 @@ class UnknownType(Type):
         return False
 
 class TypeTransformer(Transformer):
+    def __init__(self):
+        super().__init__()
+        self._structsToPopulate = []
+
+    def getStructs(self):
+        return self._structsToPopulate
+
     @v_args(inline = True)
     def ptr(self, t):
         return PtrType(t)
@@ -180,6 +249,12 @@ class TypeTransformer(Transformer):
             return IntType.parse(s)
         except ValueError as e:
             raise SemanticError(Location.fromAny(t), str(e))
+
+    @v_args(tree = True)
+    def struct_type(self, t):
+        st = StructType(t.children[0])
+        self._structsToPopulate += [(st, Location.fromAny(t))]
+        return st
 
     @v_args(tree = True)
     def decl_array(self, t):
