@@ -1,7 +1,7 @@
 from lark import Lark, Transformer, v_args, Tree
 from exceptions import SemanticError
 from value import Value
-from type import Type, BoolType
+from type import Type, BoolType, UnknownType, PtrType
 from function import Function
 from location import Location
 import labelname
@@ -71,6 +71,25 @@ class Generator:
                     offset, type = self.backend.getField(rv.getType().deref(), fields)
                     resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
                     return resultLoc, argCode + derefCode
+                else:
+                    raise NotImplementedError()
+            elif t.data == "member_address":
+                obj = ch[0]
+                fields = ch[1:]
+                if isinstance(obj, Value):
+                    rv = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    return self.backend.genMemberAddress(resultLoc, rv, fields)
+                elif obj.data == "deref":
+                    # &(*expr).field
+                    ptr = obj.children[0]
+                    print(f"deref {ptr} into {resultLoc}")
+                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                    rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
+                    print(f"derefed into {rv}")
+                    offset, type = self.backend.getField(rv.getType().deref(), fields)
+                    print(str(type))
+                    rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
+                    return rv, argCode + offsetCode
                 else:
                     raise NotImplementedError()
             elif len(ch) == 2:

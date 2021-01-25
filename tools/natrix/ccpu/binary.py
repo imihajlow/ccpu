@@ -603,6 +603,9 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
         '''.format(resultLoc.getSource())
     return resultLoc, result
 
+def genAddPointerOffset(resultLoc, src, offset):
+    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset), "add", "adc", "({}) + ({})", operator.add)
+
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
