@@ -135,7 +135,7 @@ _arguments: expression ("," expression)*
     | var "[" expression "]" -> subscript
 
 var: IDENTIFIER -> var
-    | value "." IDENTIFIER -> member_access
+    | value ("." IDENTIFIER)+ -> member_access
 
 number: DEC_NUMBER -> n10
     | HEX_NUMBER -> n16

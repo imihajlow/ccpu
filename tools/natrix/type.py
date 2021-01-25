@@ -152,6 +152,9 @@ class StructType(Type):
         self._name = name
         self._fields = fields
 
+    def isStruct(self):
+        return True
+
     def setFields(self, fields):
         self._fields = fields
 
@@ -161,12 +164,12 @@ class StructType(Type):
     def getSize(self):
         if self._fields is None:
             raise ValueError(f"Size of struct {self._name} is not known")
-        return sum(t.getReserveSize() for t,_ in self._fields)
+        return sum(t.getReserveSize() for _,t in self._fields)
 
     def getFieldType(self, name):
         if self._fields == None:
             raise ValueError(f"Struct {self._name}'s fields ar not known")
-        for t,n in self._fields:
+        for n,t in self._fields:
             if name == n:
                 return t
         raise LookupError(name)
@@ -175,7 +178,7 @@ class StructType(Type):
         if self._fields == None:
             raise ValueError(f"Struct {self._name}'s fields ar not known")
         offset = 0
-        for t,n in self._fields:
+        for n,t in self._fields:
             if name == n:
                 return offset
             offset += t.getReserveSize()

@@ -56,6 +56,23 @@ class Generator:
                         Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
                 return resultLoc, argCode + myCode
+            elif t.data == "member_access":
+                obj = ch[0]
+                fields = ch[1:]
+                if isinstance(obj, Value):
+                    rv = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    return self.backend.genMemberAccess(resultLoc, rv, fields)
+                elif obj.data == "deref":
+                    # (*expr).field
+                    ptr = obj.children[0]
+                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                    rv, argCode = self.generateExpression(ptr, minTempVarIndex,
+                        Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
+                    offset, type = self.backend.getField(rv.getType().deref(), fields)
+                    resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
+                    return resultLoc, argCode + derefCode
+                else:
+                    raise NotImplementedError()
             elif len(ch) == 2:
                 hasFirstArg = False
                 if isinstance(ch[0], Value):
@@ -88,11 +105,6 @@ class Generator:
             simply generate the expression into var
         2. *(e1) = e2
             generate e1 into tmp0 (address)
-            generate e2 into tmp1
-            put indirect tmp1 at tmp0
-        3. var[e1] = e2
-            generate e1 into tmp0
-            tmp0 += var
             generate e2 into tmp1
             put indirect tmp1 at tmp0
         '''

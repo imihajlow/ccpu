@@ -13,8 +13,8 @@ s8 x;       x -> Value(IntType(True, 1), 1, Symbol("x"))
             &x -> Value(PtrType(IntType(True, 1)), 0, Symbol("x"))
 s8 *p;      p -> Value(PtrType(IntType(True, 1)), 1, Symbol("p"))
             *p -> Value(IntType(True, 1), 2, Symbol("p"))
-s8 a[10];   p -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
-            p[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
+s8 a[10];   a -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
+            a[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
 '''
 class Value:
     def __init__(self, location, type, indirLevel, src):

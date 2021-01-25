@@ -4,10 +4,10 @@ import operator
 import labelname
 from exceptions import SemanticError
 
-def genDeref(resultLoc, srcLoc):
+def genDeref(resultLoc, srcLoc, offset=0):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType().deref())
-    if srcLoc.getType().deref() != resultLoc.getType():
+    if srcLoc.getType().deref() != resultLoc.getType() and not srcLoc.getType().deref().isStruct():
         raise SemanticError(srcLoc.getLocation(),
             "Incompatible types for deref: {} and {}".format(srcLoc.getType().deref(), resultLoc.getType()))
     assert(srcLoc.getIndirLevel() <= 1)
@@ -18,16 +18,32 @@ def genDeref(resultLoc, srcLoc):
     if srcLoc.getIndirLevel() == 0:
         return Value(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource()), ""
 
-    result = '; {} = deref {}\n'.format(resultLoc, srcLoc)
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        ld a
-        ldi pl, lo({0} + 1)
-        ldi ph, hi({0} + 1)
-        ld ph
-        mov pl, a
-    '''.format(srcLoc.getSource()) # TODO optimize aligned
+    result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
+    if offset == 0:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
+            ld ph
+            mov pl, a
+        '''.format(srcLoc.getSource()) # TODO optimize aligned
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+            ldi b, lo({1})
+            add b, a
+            ldi pl, lo({0} + 1)
+            ldi ph, hi({0} + 1)
+            ld a
+            ldi ph, hi({1})
+            adc ph, a
+            mov a, b
+            mov pl, a
+        '''.format(srcLoc.getSource(), offset)
     # TODO: s8 x; s8 a[10]; x = *a;
     result += '''
         ld b
