@@ -338,7 +338,7 @@ def _loadBHi(loc):
         '''.format(loc.getSource())
     return result
 
-def genPutIndirect(resultAddrLoc, srcLoc):
+def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     if srcLoc.getType().isUnknown():
         raise SemanticError(srcLoc.getLocation(), "Unknown source type")
     if resultAddrLoc.getType().isUnknown():
@@ -350,17 +350,17 @@ def genPutIndirect(resultAddrLoc, srcLoc):
     isWord = t.getSize() == 2
     s = srcLoc.getSource()
     rs = resultAddrLoc.getSource()
-    result = "; *{} = {}\n".format(resultAddrLoc, srcLoc)
+    result = "; *({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
     if not isWord:
         result += _loadAB(srcLoc) # only b is used
-        result += _loadP(resultAddrLoc) # a is overwritten
+        result += _loadP(resultAddrLoc, offset) # a is overwritten
         result += 'st b\n'
     else:
         result += _loadBLow(srcLoc)
-        result += _loadP(resultAddrLoc)
+        result += _loadP(resultAddrLoc, offset)
         result += 'st b\n'
         result += _loadBHi(srcLoc)
-        result += _loadP(resultAddrLoc, 1)
+        result += _loadP(resultAddrLoc, offset + 1)
         result += 'st b\n'
     return result
 

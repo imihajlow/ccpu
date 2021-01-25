@@ -82,10 +82,8 @@ class Generator:
                 elif obj.data == "deref":
                     # &(*expr).field
                     ptr = obj.children[0]
-                    print(f"deref {ptr} into {resultLoc}")
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
-                    print(f"derefed into {rv}")
                     offset, type = self.backend.getField(rv.getType().deref(), fields)
                     print(str(type))
                     rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
@@ -169,7 +167,15 @@ class Generator:
                     return codeAccess + codeExpr + codeMove
             elif obj.data == 'deref':
                 # case 4: member of a derefed struct
-                raise NotImplementedError()
+                ptr = obj.children[0]
+                self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
+                rvPtr, codePtr = self.generateExpression(ptr, 0,
+                    Value.variable(Location.fromAny(ptr), labelname.getTempName(0)), curFn)
+                offset, type = self.backend.getField(rvPtr.getType().deref(), fields)
+                rvR, codeR = self.generateExpression(r, 1,
+                                        Value.variable(Location.fromAny(r), labelname.getTempName(1)), curFn)
+                codePutIndirect = self.backend.genPutIndirect(rvPtr.withType(PtrType(type)), rvR, offset)
+                return codePtr + codeR + codePutIndirect
         else:
             raise RuntimeError("Unknown assignment case")
 
