@@ -11,7 +11,7 @@ def getField(t, fields):
         t = t.getFieldType(field)
     return offset, t
 
-def genMemberAccess(resultLoc, val, fields):
+def genMemberAccess(val, fields):
     fieldOffset, fieldType = getField(val.getType(), fields)
     if val.getIndirLevel() == 1:
         if fieldOffset == 0:

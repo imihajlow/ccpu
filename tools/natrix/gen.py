@@ -61,7 +61,7 @@ class Generator:
                 fields = ch[1:]
                 if isinstance(obj, Value):
                     rv = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
-                    return self.backend.genMemberAccess(resultLoc, rv, fields)
+                    return self.backend.genMemberAccess(rv, fields)
                 elif obj.data == "deref":
                     # (*expr).field
                     ptr = obj.children[0]
@@ -126,6 +126,8 @@ class Generator:
             generate e1 into tmp0 (address)
             generate e2 into tmp1
             put indirect tmp1 at tmp0
+        3. var.field = expresssion
+        4. (*var).field = expression
         '''
         if isinstance(l, Value):
             # case 1: simple variable
@@ -150,6 +152,24 @@ class Generator:
                         Value.variable(Location.fromAny(r), labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
+        elif l.data == 'member_access':
+            obj = l.children[0]
+            fields = l.children[1:]
+            if isinstance(obj, Value):
+                # case 3: simple struct member
+                obj = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                dest, codeAccess = self.backend.genMemberAccess(obj, fields)
+                resultLoc, codeExpr = self.generateExpression(r, 0, dest, curFn)
+                if resultLoc == dest:
+                    # already assigned where needed
+                    return codeAccess + codeExpr
+                else:
+                    # need to copy
+                    _, codeMove = self.backend.genMove(dest, resultLoc, False)
+                    return codeAccess + codeExpr + codeMove
+            elif obj.data == 'deref':
+                # case 4: member of a derefed struct
+                raise NotImplementedError()
         else:
             raise RuntimeError("Unknown assignment case")
 

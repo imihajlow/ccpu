@@ -98,5 +98,7 @@ class VarTransformerStageTwo(Transformer):
         val = t.children[0]
         if isinstance(val, Value):
             return val.takeAddress(Location.fromAny(t))
+        elif val.data == "member_access":
+            return Tree("member_address", val.children, t.meta)
         else:
             raise SemanticError(Location.fromAny(t), "Cannot get address")
