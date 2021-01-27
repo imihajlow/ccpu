@@ -8,20 +8,15 @@ import labelname
 import sys
 
 class Generator:
-    def __init__(self, callgraph, literalPool, backend):
+    def __init__(self, callgraph, literalPool, nameInfo, backend):
         self.maxTempVarIndex = -1
-        self.paramVars = {} # name -> (type, index)
-        self.localVars = {} # name -> type
-        self.globalVars = {} # name -> type
-        self.functions = {} # name -> Function
         self.labelIndex = 0
         self.breakLabel = [] # stack
         self.continueLabel = [] # stack
         self.callgraph = callgraph
         self.backend = backend
         self.literalPool = literalPool
-        self.varExports = [] # name
-        self.varImports = [] # name
+        self.nameInfo = nameInfo
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -38,14 +33,13 @@ class Generator:
         :return: the actual location of the result
         '''
         if isinstance(t, Value):
-            src = t.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
-            return self.backend.genMove(resultLoc, src, True)
+            return self.backend.genMove(resultLoc, t, True)
         else:
             ch = t.children
             if len(ch) == 1:
                 if isinstance(ch[0], Value):
                     argCode = ""
-                    rv = ch[0].resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    rv = ch[0]
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
@@ -55,7 +49,7 @@ class Generator:
             elif t.data == "type_cast":
                 if isinstance(ch[1], Value):
                     argCode = ""
-                    rv = ch[1].resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    rv = ch[1]
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
@@ -65,7 +59,7 @@ class Generator:
             elif len(ch) == 2:
                 hasFirstArg = False
                 if isinstance(ch[0], Value):
-                    rv1 = ch[0].resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    rv1 = ch[0]
                     argCode1 = ""
                 else:
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
@@ -74,7 +68,7 @@ class Generator:
                     hasFirstArg = True
 
                 if isinstance(ch[1], Value):
-                    rv2 = ch[1].resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+                    rv2 = ch[1]
                     argCode2 = ""
                 else:
                     indexIncrement = 1 if hasFirstArg else 0
@@ -106,7 +100,7 @@ class Generator:
             # case 1: simple variable
             if not l.isLValue():
                 raise SemanticError(l.getLocation(), "Cannot assign to an r-value")
-            dest = l.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
+            dest = l
             resultLoc, codeExpr = self.generateExpression(r, 0, dest, curFn)
             if resultLoc == dest:
                 # already assigned where needed
@@ -160,9 +154,9 @@ class Generator:
             + codeBody + self.backend.genJump(labelBegin) + self.backend.genLabel(labelEnd)
 
     def generateFunctionCall(self, location, name, args, curFn):
-        if name not in self.functions:
+        if name not in self.nameInfo.functions:
             raise SemanticError(location, "Undefined function: {}".format(name))
-        f = self.functions[name]
+        f = self.nameInfo.functions[name]
         if len(args) != len(f.args):
             raise SemanticError(location, "Incorrect argument count for {}".format(name))
         result = ""
@@ -181,7 +175,7 @@ class Generator:
 
     def generateFunctionAssignment(self, lloc, rloc, dest, name, args, curFn):
         codeCall = self.generateFunctionCall(rloc, name, args, curFn)
-        f = self.functions[name]
+        f = self.nameInfo.functions[name]
         resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType, final=True)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
@@ -190,8 +184,6 @@ class Generator:
             l, r = t.children
             return self.generateAssignment(l, r, curFn)
         elif t.data == 'decl_var':
-            typ, nam = t.children
-            self.localVars[str(nam)] = typ
             return ""
         elif t.data == 'block':
             return "".join(self.generateStatement(child, curFn) for child in t.children)
@@ -214,81 +206,30 @@ class Generator:
             return self.generateFunctionAssignment(Location.fromAny(t.children[0]), Location.fromAny(call),
                 t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
-            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType, final=True)
             return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
             return self.backend.genReturn(curFn)
         elif t.data == 'return_fc_statement':
             call = t.children[0]
-            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.functions[curFn].retType, final=True)
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType, final=True)
             callCode = self.generateFunctionAssignment(Location.fromAny(t), Location.fromAny(call),
                 dest, str(call.children[0]), call.children[1:], curFn)
             retCode = self.backend.genReturn(curFn)
             return callCode + retCode
 
-    def addFunctionDeclaration(self, location, attrs, type, name, args, allowAttrOverride=False):
-        try:
-            f = Function(name, type, attrs, args)
-        except ValueError as e:
-            raise SemanticError(location, str(e))
-        if name in self.functions and not f.equal(self.functions[name], allowAttrOverride):
-            raise SemanticError(location, "conflicting declarations of {}".format(name))
-        self.functions[name] = f
-        return f
-
-    def addGlobalVarDeclaration(self, location, attrs, type, name):
-        if name in self.globalVars:
-            if not name in self.varImports:
-                raise SemanticError(location, "conflicting declarations of {}".format(name))
-            else:
-                i = self.varImports.index(name)
-                del self.varImports[i]
-        self.globalVars[name] = type
-        isImported = False
-        isExported = False
-        for a in attrs:
-            if a.data == "attr_import":
-                isImported = True
-            elif a.data == "attr_export":
-                isExported = True
-            elif a.data == "attr_always_recursion":
-                raise SemanticError(location, "a variable can't be a traitor")
-            else:
-                raise RuntimeError("unhandled attribute {}".format(a.data))
-        if isImported and isExported:
-            raise SemanticError(location, "nothing can be imported and exported at the same time")
-        if isImported:
-            self.varImports += [name]
-        if isExported:
-            self.varExports += [name]
-
     def generateFunctionDefinition(self, decl, body):
-        attrs, type, name, args = decl.children
-        name = str(name)
-        args = args.children
-        attrs = attrs.children
-        f = self.addFunctionDeclaration(Location.fromAny(decl), attrs, type, name, args, True)
-        if f.isImported:
-            raise SemanticError(Location.fromAny(decl), "Cannot define an imported function")
-        self.localVars = {}
-        self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
+        name = str(decl.children[2])
         result = self.backend.genFunctionPrologue(name)
         result += "".join(self.generateStatement(child, name) for child in body.children)
         result += self.backend.genReturn(name)
-        f.localVars = self.localVars
         return result
 
     def generateToplevel(self, t):
         if t.data == 'function_definition':
             decl, body = t.children
             return self.generateFunctionDefinition(decl, body)
-        elif t.data == 'function_declaration':
-            attrs, type, name, args = t.children
-            self.addFunctionDeclaration(Location.fromAny(t), attrs.children, type, str(name), args.children)
-            return ""
-        elif t.data == 'gl_decl_var':
-            attrs, type, name = t.children
-            self.addGlobalVarDeclaration(Location.fromAny(t), attrs.children, type, str(name))
+        else:
             return ""
 
     def generateStart(self, t):
@@ -298,25 +239,25 @@ class Generator:
             raise RuntimeError("Wrong root node")
 
     def getImports(self):
-        for name in self.functions:
-            f = self.functions[name]
+        for name in self.nameInfo.functions:
+            f = self.nameInfo.functions[name]
             if f.isImported:
                 yield name
                 yield labelname.getReturnName(name)
                 for n in range(len(f.args)):
                     yield labelname.getArgumentName(name, n)
-        for name in self.varImports:
+        for name in self.nameInfo.varImports:
             yield name
 
     def getExports(self):
-        for name in self.functions:
-            f = self.functions[name]
+        for name in self.nameInfo.functions:
+            f = self.nameInfo.functions[name]
             if f.isExported:
                 yield name
                 yield labelname.getReturnName(name)
                 for n in range(len(f.args)):
                     yield labelname.getArgumentName(name, n)
-        for name in self.varExports:
+        for name in self.nameInfo.varExports:
             yield name
 
     def generateFunctionReserve(self, fn):
@@ -331,8 +272,8 @@ class Generator:
         return result
 
     def generateReserve(self):
-        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.functions[name]) for name in self.functions) \
-            + self.backend.reserveGlobalVars(self.globalVars, self.varImports)
+        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
+            + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports)
 
     def generate(self, t):
         execCode = self.generateStart(t)

@@ -105,6 +105,8 @@ class NameInterpreter(Interpreter):
     def function_definition(self, t):
         decl, body = t.children
         fn = self._addFunction(decl, True)
+        if fn.isImported:
+            raise SemanticError(Location.fromAny(decl), "Cannot define an imported function")
         self._currentFunction = fn
         self.visit(body)
         self._currentFunction = None

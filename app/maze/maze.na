@@ -374,6 +374,7 @@ export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
     u8 top = (VGA_ROWS - height) >> 1u8;
     u8 screen_x = player_x + left;
     u8 screen_y = player_y + top;
+    u8 *vga_offset;
     if (direction & 1u8) {
         // EAST or WEST
         u8 col_x;
@@ -399,7 +400,7 @@ export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
         if (col_end > VGA_ROWS) {
             col_end = VGA_ROWS;
         }
-        u8 *vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col_x, col_start);
+        vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col_x, col_start);
         for (; col_start < col_end; col_start += 1u8) {
             vga_set(vga_offset, 0u8);
             vga_offset += VGA_OFFSET_ROW;
@@ -429,7 +430,7 @@ export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
         if (row_end > VGA_COLS) {
             row_end = VGA_COLS;
         }
-        u8 *vga_offset = (u8*)vga_char_seg + VGA_OFFSET(row_start, row_y);
+        vga_offset = (u8*)vga_char_seg + VGA_OFFSET(row_start, row_y);
         for (; row_start < row_end; row_start += 1u8) {
             vga_set(vga_offset, 0u8);
             vga_offset += VGA_OFFSET_COL;

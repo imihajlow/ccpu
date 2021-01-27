@@ -95,7 +95,7 @@ if __name__ == '__main__':
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(cg, lt, ccpu.code)
+        g = Generator(cg, lt, ni, ccpu.code)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:
