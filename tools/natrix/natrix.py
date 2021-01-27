@@ -3,6 +3,7 @@ import argparse
 import sys
 import os
 from lark import Lark, Transformer, v_args, Tree, LarkError
+from lark.visitors import VisitError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
@@ -68,6 +69,9 @@ if __name__ == '__main__':
         sys.stderr.write("Syntax error in {}:{}:{}\n".format(file, line, e.column))
         sys.exit(1)
 
+    if args.tree:
+        print("Tree before transform")
+        print(t.pretty())
     try:
         t = DeclarationTransformer().transform(t)
         t = CompoundTransformer().transform(t)
@@ -81,6 +85,8 @@ if __name__ == '__main__':
         t = SubscriptTransformer().transform(t)
         t = ForTransformer().transform(t)
         if args.tree:
+            print()
+            print("Tree after transform")
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
@@ -90,6 +96,10 @@ if __name__ == '__main__':
     except NatrixError as e:
         file, line = lit.translateLocation(e.location)
         sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.msg))
+        sys.exit(1)
+    except VisitError as e:
+        file, line = lit.translateLocation(e.orig_exc.location)
+        sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.orig_exc.msg))
         sys.exit(1)
     except LarkError as e:
         file, line = lit.translateLine(e.line)

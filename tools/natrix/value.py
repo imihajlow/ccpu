@@ -93,4 +93,4 @@ class ValueTransformer(Transformer):
         if isinstance(val, Value):
             return val.takeAddress(Location.fromAny(t))
         else:
-            return t
+            raise SemanticError(Location.fromAny(t), "Cannot get address")
