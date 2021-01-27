@@ -193,11 +193,6 @@ class Generator:
             typ, nam = t.children
             self.localVars[str(nam)] = typ
             return ""
-        elif t.data == 'def_var':
-            type, name, r = t.children
-            self.localVars[str(name)] = type
-            dest = Value.variable(Location.fromAny(name), str(name))
-            return self.generateAssignment(dest, r, curFn)
         elif t.data == 'block':
             return "".join(self.generateStatement(child, curFn) for child in t.children)
         elif t.data == 'conditional':
