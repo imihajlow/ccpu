@@ -6,10 +6,10 @@ from lark import Lark, Transformer, v_args, Tree, LarkError
 from lark.visitors import VisitError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
-from value import ValueTransformer, VarUnwrapper
+from value import VarTransformerStageOne, VarTransformerStageTwo
 from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
 from literal import LiteralTransformer
-from function import FunctionVisitor
+from function import NameInterpreter
 from lineinfo import LineInfo
 import subprocess
 import ccpu.code
@@ -79,10 +79,10 @@ if __name__ == '__main__':
         t = TypeTransformer().transform(t)
         t = ConstTransformer(True).transform(t)
         t = DefinitionTransformer().transform(t)
-        t = ValueTransformer().transform(t)
-        fv = FunctionVisitor()
-        fv.visit(t)
-        t = VarUnwrapper().transform(t)
+        t = VarTransformerStageOne().transform(t)
+        ni = NameInterpreter()
+        ni.visit(t)
+        t = VarTransformerStageTwo().transform(t)
         t = CompoundTransformer().transform(t)
         t = CastTransformer().transform(t)
         lt = LiteralTransformer()

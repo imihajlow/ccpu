@@ -86,13 +86,13 @@ class Value:
     def isFinal(self):
         return self._isFinal
 
-class ValueTransformer(Transformer): # TODO rename this
+class VarTransformerStageOne(Transformer):
     @v_args(tree = True)
     def var(self, t):
         sym = t.children[0]
         return Tree("var", [Value(Location.fromAny(t), UnknownType(), 1, str(sym))], t.meta) # will be processed later
 
-class VarUnwrapper(Transformer): # TODO rename this
+class VarTransformerStageTwo(Transformer):
     @v_args(inline = True)
     def var(self, val):
         return val

@@ -39,10 +39,11 @@ class Function:
 
 
 @v_args(tree = True)
-class FunctionVisitor(Interpreter): # TODO rename this
+class NameInterpreter(Interpreter):
     '''
     Collects all function declarations and definitions, checks for conflicting declarations.
     Collects local and global variables.
+    Resolves variable names.
     '''
     def __init__(self):
         self.functions = {} # name -> Function
