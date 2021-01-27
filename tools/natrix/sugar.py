@@ -21,6 +21,22 @@ class DeclarationTransformer(Transformer):
         type = t.children[0]
         return Tree("block", [_transformDecl(type, c) for c in t.children[1:]], t.meta)
 
+@v_args(tree = Tree)
+class DefinitionTransformer(Transformer):
+    def def_var(self, t):
+        # Transform t a = x; -> { t a; a = x; }
+        type = t.children[0]
+        var = t.children[1]
+        value = t.children[2]
+        return Tree("block", [Tree("decl_var", [type, var], t.meta), Tree("assignment", [Tree("var", [var], t.meta), value], t.meta)], t.meta)
+
+    def def_var_fn(self, t):
+        # Transform t a = f(...); -> { t a; a = f(...); }
+        type = t.children[0]
+        var = t.children[1]
+        value = t.children[2]
+        return Tree("block", [Tree("decl_var", [type, var], t.meta), Tree("assignment_function", [Tree("var", [var], t.meta), value], t.meta)], t.meta)
+
 
 class CompoundTransformer(Transformer):
     @v_args(tree = True)

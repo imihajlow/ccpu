@@ -7,7 +7,7 @@ from lark.visitors import VisitError
 from const import ConstTransformer
 from type import TypeTransformer, CastTransformer
 from value import ValueTransformer
-from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer
+from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
 from literal import LiteralTransformer
 from lineinfo import LineInfo
 import subprocess
@@ -74,6 +74,7 @@ if __name__ == '__main__':
         print(t.pretty())
     try:
         t = DeclarationTransformer().transform(t)
+        t = DefinitionTransformer().transform(t)
         t = CompoundTransformer().transform(t)
         t = ConstTransformer(False).transform(t)
         t = TypeTransformer().transform(t)

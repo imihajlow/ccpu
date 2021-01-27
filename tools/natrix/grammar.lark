@@ -57,6 +57,7 @@ _declarator_list: declarator ("," declarator)*
 
 declarator: IDENTIFIER -> decl_var
     | IDENTIFIER "=" expression -> def_var
+    | IDENTIFIER "=" function_call -> def_var_fn
     | IDENTIFIER "[" expression "]" -> decl_array
 
 ?type: INT_TYPE -> int_type
