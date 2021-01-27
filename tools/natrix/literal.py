@@ -51,7 +51,7 @@ class LiteralTransformer(Transformer):
     def _addLiteral(self, loc, t, v):
         label = self._allocLiteralLabel()
         self._literals += [(label, t, v)]
-        return Value(loc, PtrType(t), 0, label, final=True)
+        return Value(loc, PtrType(t), 0, label)
 
     @v_args(inline = True)
     def string_literal(self, lt):

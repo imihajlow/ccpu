@@ -222,7 +222,7 @@ def genCast(resultLoc, t, srcLoc):
             # cast a constant
             if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource()), False), True)
+                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource())), True)
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         if resultLoc.getType().getSize() > srcLoc.getType().getSize():

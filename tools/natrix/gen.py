@@ -162,7 +162,7 @@ class Generator:
         result = ""
         for n, expr in enumerate(args):
             result += self.generateAssignment(
-                Value.variable(Location.fromAny(expr), labelname.getArgumentName(name, n), f.args[n], final=True), expr, curFn)
+                Value.variable(Location.fromAny(expr), labelname.getArgumentName(name, n), f.args[n]), expr, curFn)
         isRecursive = self.callgraph.isRecursive(curFn, name)
         if isRecursive:
             sys.stderr.write("Warning: {}: recursion\n".format(location)) # TODO warning function in a different module
@@ -176,7 +176,7 @@ class Generator:
     def generateFunctionAssignment(self, lloc, rloc, dest, name, args, curFn):
         codeCall = self.generateFunctionCall(rloc, name, args, curFn)
         f = self.nameInfo.functions[name]
-        resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType, final=True)
+        resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
     def generateStatement(self, t, curFn):
@@ -206,13 +206,13 @@ class Generator:
             return self.generateFunctionAssignment(Location.fromAny(t.children[0]), Location.fromAny(call),
                 t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
-            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType, final=True)
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
             return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
             return self.backend.genReturn(curFn)
         elif t.data == 'return_fc_statement':
             call = t.children[0]
-            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType, final=True)
+            dest = Value.variable(Location.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
             callCode = self.generateFunctionAssignment(Location.fromAny(t), Location.fromAny(call),
                 dest, str(call.children[0]), call.children[1:], curFn)
             retCode = self.backend.genReturn(curFn)

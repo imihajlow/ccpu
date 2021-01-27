@@ -224,6 +224,6 @@ class CastTransformer(Transformer):
                     s = s & 0xff
                 else:
                     s = "lo({})".format(s)
-            return Value(Location.fromAny(t), type, 0, s, v.isFinal())
+            return Value(Location.fromAny(t), type, 0, s)
         else:
             return t
