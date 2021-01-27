@@ -1,8 +1,10 @@
 from lark import Transformer, v_args, Tree
+from lark.visitors import Interpreter
 from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import labelname
 from location import Location
+from function import Function
 
 '''
 Value class
@@ -53,13 +55,13 @@ class Value:
         else:
             if self._src in localVars:
                 t = localVars[self._src]
-                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src))
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src), True)
             elif self._src in paramVars:
                 t, n = paramVars[self._src]
-                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n))
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n), True)
             elif self._src in globalVars:
                 t = globalVars[self._src]
-                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src)
+                return Value(self._location, self._type.removeUnknown(t), self._level + t.getIndirectionOffset(), self._src, True)
             else:
                 raise SemanticError(self._location, "Undeclared variable {}".format(self._src))
 
@@ -74,18 +76,26 @@ class Value:
 
     def takeAddress(self, newLocation=None):
         if self._level > 0:
-            return Value(self._location if newLocation is None else newLocation, PtrType(self._type), self._level - 1, self._src)
+            return Value(self._location if newLocation is None else newLocation, PtrType(self._type), self._level - 1, self._src, self._isFinal)
         else:
             raise SemanticError(self._location, "Cannot get address of this: {}".format(str(self)))
 
     def isConst(self):
         return self._level == 0 and isinstance(self._src, int)
 
-class ValueTransformer(Transformer):
+    def isFinal(self):
+        return self._isFinal
+
+class ValueTransformer(Transformer): # TODO rename this
     @v_args(tree = True)
     def var(self, t):
         sym = t.children[0]
-        return Value(Location.fromAny(t), UnknownType(), 1, str(sym))
+        return Tree("var", [Value(Location.fromAny(t), UnknownType(), 1, str(sym))], t.meta) # will be processed later
+
+class VarUnwrapper(Transformer): # TODO rename this
+    @v_args(inline = True)
+    def var(self, val):
+        return val
 
     @v_args(tree = True)
     def addr(self, t):
