@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+import importlib
 import argparse
 import json
 import re
 import sys
 from object import Object
 from expression import evaluate
-import layout
 
 class LinkerError(Exception):
     def __init__(self, message, obj=None, section=None):
@@ -28,7 +28,7 @@ def align(ip, alignment):
     else:
         return ip
 
-def link(objects):
+def link(objects, layout):
     ip = 0
     globalSymbols = set()
     exportedSymbolValues = {}
@@ -167,12 +167,14 @@ if __name__ == '__main__':
     parser.add_argument('--type', choices=["hex", "bin"], default="bin", help='output file type (default: bin)')
     parser.add_argument('--filler', type=int, default=0xff, help="value to fill uninitialized memory (bin output type only)")
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
+    parser.add_argument('--layout', choices=["default", "sim"], default="default", help='memory layout')
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
+    layout = importlib.import_module("." + args.layout, "layouts")
     try:
         objects = [load(filename) for filename in args.file]
-        symbolMap, segments = link(objects)
+        symbolMap, segments = link(objects, layout)
         rom = createRom(objects, segments)
         save(rom, args.o, args.type, args.full, args.filler)
         saveLabels(args.m, symbolMap)

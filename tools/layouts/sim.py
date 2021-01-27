@@ -1,3 +1,5 @@
+# Flat memory layout to use on simulator
+
 layout = [
     {
         "name": "init",
@@ -15,7 +17,6 @@ layout = [
     },
     {
         "name": "data",
-        "begin": 0x8000,
         "init": False
     },
     {
