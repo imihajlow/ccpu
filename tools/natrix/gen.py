@@ -4,6 +4,7 @@ from value import Value
 from type import Type, BoolType, UnknownType, PtrType
 from function import Function
 from location import Location
+import structure
 import labelname
 import sys
 
@@ -56,40 +57,23 @@ class Generator:
                         Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
                 resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
                 return resultLoc, argCode + myCode
-            elif t.data == "member_access":
-                obj = ch[0]
+            elif t.data == "arrow":
+                ptr = ch[0]
                 fields = ch[1:]
-                if isinstance(obj, Value):
-                    rv = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
-                    return self.backend.genMemberAccess(rv, fields)
-                elif obj.data == "deref":
-                    # (*expr).field
-                    ptr = obj.children[0]
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                    rv, argCode = self.generateExpression(ptr, minTempVarIndex,
-                        Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
-                    offset, type = self.backend.getField(rv.getType().deref(), fields)
-                    resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
-                    return resultLoc, argCode + derefCode
-                else:
-                    raise NotImplementedError()
-            elif t.data == "member_address":
-                obj = ch[0]
+                self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                rv, argCode = self.generateExpression(ptr, minTempVarIndex,
+                    Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
+                offset, type = structure.getField(rv.getType().deref(), fields)
+                resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
+                return resultLoc, argCode + derefCode
+            elif t.data == "p_arrow":
+                ptr = ch[0]
                 fields = ch[1:]
-                if isinstance(obj, Value):
-                    rv = obj.resolveName(curFn, self.localVars, self.globalVars, self.paramVars)
-                    return self.backend.genMemberAddress(resultLoc, rv, fields)
-                elif obj.data == "deref":
-                    # &(*expr).field
-                    ptr = obj.children[0]
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                    rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
-                    offset, type = self.backend.getField(rv.getType().deref(), fields)
-                    print(str(type))
-                    rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
-                    return rv, argCode + offsetCode
-                else:
-                    raise NotImplementedError()
+                self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
+                offset, type = structure.getField(rv.getType().deref(), fields)
+                rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
+                return rv, argCode + offsetCode
             elif len(ch) == 2:
                 hasFirstArg = False
                 if isinstance(ch[0], Value):

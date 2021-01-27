@@ -1,9 +1,15 @@
 from lark import Transformer, v_args, Tree, Discard
 from value import Value
-from type import StructType
+from type import StructType, PtrType
 from location import Location
 from exceptions import SemanticError
 
+def getField(t, fields):
+    offset = 0
+    for field in fields:
+        offset += t.getFieldOffset(field)
+        t = t.getFieldType(field)
+    return offset, t
 
 @v_args(tree = True)
 class StructDeclarationTransformer(Transformer):
@@ -34,3 +40,37 @@ class StructDeclarationTransformer(Transformer):
                 raise SemanticError(l, f"Undeclared struct {name}")
             fields = self._dict[name]
             s.setFields(fields)
+
+@v_args(tree = True)
+class MemberAccessTransformer(Transformer):
+    def member_access(self, t):
+        obj = t.children[0]
+        fields = t.children[1:]
+        if isinstance(obj, Value):
+            try:
+                offset, type = getField(obj.getType(), fields)
+            except ValueError as e:
+                raise SemanticError(Location.fromAny(t), str(e))
+            if obj.getIndirLevel() != 1:
+                raise RuntimeError("WTF is that")
+            return Value.withOffset(Location.fromAny(t), type, 1, obj.getSource(), False, offset)
+        elif obj.data == 'deref':
+            return Tree("arrow", [obj.children[0]] + fields, t.meta)
+        else:
+            raise RuntimeError("Unhandled member_access case")
+
+    def member_address(self, t):
+        obj = t.children[0]
+        fields = t.children[1:]
+        if isinstance(obj, Value):
+            try:
+                offset, type = getField(obj.getType(), fields)
+            except ValueError as e:
+                raise SemanticError(Location.fromAny(t), str(e))
+            if obj.getIndirLevel() != 1:
+                raise RuntimeError("WTF is that")
+            return Value.withOffset(Location.fromAny(t), PtrType(type), 0, obj.getSource(), True, offset)
+        elif obj.data == 'deref':
+            return Tree("p_arrow", [obj.children[0]] + fields, t.meta)
+        else:
+            raise RuntimeError("Unhandled member_access case")

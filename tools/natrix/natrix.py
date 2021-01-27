@@ -9,7 +9,7 @@ from type import TypeTransformer, CastTransformer
 from value import VarTransformerStageOne, VarTransformerStageTwo
 from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
 from literal import LiteralTransformer
-from structure import StructDeclarationTransformer
+from structure import StructDeclarationTransformer, MemberAccessTransformer
 from function import NameInterpreter
 from lineinfo import LineInfo
 import subprocess
@@ -71,6 +71,7 @@ if __name__ == '__main__':
         sys.stderr.write("Syntax error in {}:{}:{}\n".format(file, line, e.column))
         sys.exit(1)
 
+    backend = ccpu.code
     if args.tree:
         print("Tree before transform:")
         print(t.pretty())
@@ -87,20 +88,21 @@ if __name__ == '__main__':
         t = VarTransformerStageOne().transform(t)
         ni = NameInterpreter()
         ni.visit(t)
-        t = VarTransformerStageTwo().transform(t)
+        t = VarTransformerStageTwo(backend).transform(t)
         t = CompoundTransformer().transform(t)
         t = CastTransformer().transform(t)
         lt = LiteralTransformer()
         t = lt.transform(t)
         t = SubscriptTransformer().transform(t)
         t = ForTransformer().transform(t)
+        t = MemberAccessTransformer().transform(t)
         if args.tree:
             print()
             print("Tree after transform:")
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(cg, lt, ni, ccpu.code)
+        g = Generator(cg, lt, ni, backend)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:

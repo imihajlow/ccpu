@@ -25,6 +25,16 @@ class Value:
         self._isAligned = aligned
 
     @staticmethod
+    def withOffset(location, type, indirLevel, src, aligned, offset):
+        source = src
+        if offset != 0:
+            if isinstance(src, int):
+                source = src + offset
+            else:
+                source = f"({src}) + {offset}"
+        return Value(location, type, indirLevel, source, aligned)
+
+    @staticmethod
     def variable(location, name, type=UnknownType()):
         return Value(location, type, 1, name, True)
 

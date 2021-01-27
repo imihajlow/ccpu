@@ -8,7 +8,6 @@ from .unary import *
 from .shift import *
 from .common import *
 from .stack import *
-from .structure import *
 from exceptions import SemanticError
 
 def startCodeSection():
