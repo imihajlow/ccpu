@@ -16,9 +16,10 @@ def genDeref(resultLoc, srcLoc, offset=0):
     assert(0 < t.getSize() <= 2)
 
     if srcLoc.getIndirLevel() == 0:
-        return Value(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource()), ""
+        return Value(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource(), True), ""
 
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
+    result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")
     if offset == 0:
         result += '''
             ldi pl, lo({0})
@@ -98,7 +99,7 @@ def genBNot(resultLoc, srcLoc):
             c = ~c
         else:
             c = '~({})'.format(c) # Warning
-        return Value(srcLoc.getLocation(), t, 0, c), result
+        return Value(srcLoc.getLocation(), t, 0, c, True), result
     else:
         # var
         result += '''
@@ -144,7 +145,7 @@ def genLNot(resultLoc, srcLoc):
             c = int(not bool(c))
         else:
             c = 'int(not bool({}))'.format(c) # Warning
-        return Value(srcLoc.getLocation(), BoolType(), 0, c), result
+        return Value(srcLoc.getLocation(), BoolType(), 0, c, True), result
     else:
         # var
         result += '''
@@ -181,7 +182,7 @@ def genNeg(resultLoc, srcLoc):
             c = -c & (0xff if t.getSize() == 1 else 0xffff)
         else:
             c = '-({})'.format(c) # Warning
-        return Value(srcLoc.getLocation(), t, 0, c), result
+        return Value(srcLoc.getLocation(), t, 0, c, True), result
     else:
         # var
         result += '''

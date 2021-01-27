@@ -21,7 +21,7 @@ def signExpand(t, value):
 
 def _const(location, t, value):
     mask = ~(~0 << (t.getSize() * 8))
-    return Value(location, t, 0, int(value) & mask)
+    return Value(location, t, 0, int(value) & mask, True)
 
 def sameTypeChecker(a, b):
     return a.getType() == b.getType()

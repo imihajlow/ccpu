@@ -59,7 +59,7 @@ class CompoundTransformer(Transformer):
 @v_args(tree = True)
 class ForTransformer(Transformer):
     def for_condition(self, t):
-        return Value(Location(0,0,0,0), IntType(False, 1), 0, 1)
+        return Value(Location(0,0,0,0), IntType(False, 1), 0, 1, True)
 
     def for_loop(self, t):
         condition = t.children[1]

@@ -23,6 +23,9 @@ class Type(ABC):
     def isStruct(self):
         return False
 
+    def isAlignedByDefault(self):
+        return True
+
     def getReserveSize(self):
         return self.getSize()
 
@@ -193,6 +196,9 @@ class StructType(Type):
     def isUnknown(self):
         return False
 
+    def isAlignedByDefault(self):
+        return False
+
     def removeUnknown(self, other):
         raise NonImplementedError()
 
@@ -302,6 +308,6 @@ class CastTransformer(Transformer):
                     s = s & 0xff
                 else:
                     s = "lo({})".format(s)
-            return Value(Location.fromAny(t), type, 0, s)
+            return Value(Location.fromAny(t), type, 0, s, True)
         else:
             return t

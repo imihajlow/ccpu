@@ -73,9 +73,9 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
                 cr = cr & 0xffff
             else:
                 cr = cr & 0xff
-            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, cr), result
+            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, cr, True), result
         else:
-            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, pyPattern.format(c1, c2)), result
+            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, pyPattern.format(c1, c2), True), result
     elif l2 == 0:
         # var + const
         result += '''
@@ -84,10 +84,13 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             ld b
         '''.format(src1Loc.getSource())
         if isWord:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-            '''.format(src1Loc.getSource()) # TODO optimize aligned
+            if src1Loc.isAligned():
+                result += 'inc pl\n'
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                '''.format(src1Loc.getSource())
         c = src2Loc.getSource()
         if isinstance(c, int):
             l = lo(c)
@@ -120,10 +123,17 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             st b
         '''.format(rs)
         if isWord:
-            result += '''
-                inc pl
-                st a
-            '''
+            if resultLoc.isAligned():
+                result += '''
+                    inc pl
+                    st a
+                '''
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    st a
+                '''.format(rs)
     elif l1 == 0:
         # const + var
         result += '''
@@ -132,10 +142,13 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             ld a
         '''.format(src2Loc.getSource())
         if isWord:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-            '''.format(src2Loc.getSource()) # TODO optimize aligned
+            if src2Loc.isAligned():
+                result += 'inc pl\n'
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                '''.format(src2Loc.getSource())
         c = src1Loc.getSource()
         if isinstance(c, int):
             l = lo(c)
@@ -166,10 +179,17 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             st b
         '''.format(rs)
         if isWord:
-            result += '''
-                inc pl
-                st a
-            '''
+            if resultLoc.isAligned():
+                result += '''
+                    inc pl
+                    st a
+                '''
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    st a
+                '''.format(rs)
     else:
         # var + var
         s1 = src1Loc.getSource()
@@ -199,10 +219,17 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
             st b
         '''.format(rs)
         if isWord:
-            result += '''
-                inc pl
-                st a
-            '''
+            if resultLoc.isAligned():
+                result += '''
+                    inc pl
+                    st a
+                '''
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    st a
+                '''.format(rs)
     return resultLoc, result
 
 def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
@@ -228,9 +255,9 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(loc, BoolType(), 0, int(constLambda(bool(s1), bool(s2)))), result
+            return Value(loc, BoolType(), 0, int(constLambda(bool(s1), bool(s2))), True), result
         else:
-            return Value(loc, BoolType(), 0, pyPattern.format(src1Loc, src2Loc)), result
+            return Value(loc, BoolType(), 0, pyPattern.format(src1Loc, src2Loc), True), result
     elif l1 == 0 or l2 == 0:
         # var and const
         if l1 == 0:
@@ -241,10 +268,10 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
                 if s2 == 0:
                     return src1Loc, ""
                 else:
-                    return Value(loc, BoolType(), 0, 1), ""
+                    return Value(loc, BoolType(), 0, 1, True), ""
             elif op == 'and':
                 if s2 == 0:
-                    return Value(loc, BoolType(), 0, 0), ""
+                    return Value(loc, BoolType(), 0, 0, True), ""
                 else:
                     return src1Loc, result
             else:
@@ -308,20 +335,26 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "add", "adc", "({}) + ({})", operator.add)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
                 return loc, result + code
             else:
                 result += '''
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld b
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
+                    inc pl
+                '''.format(s2)
+                if not src2Loc.isAligned():
+                    result += '''
+                        mov a, 0
+                        adc ph, a
+                    '''
+                result += '''
                     ld a
                     shl a
                     shl b
                     adc a, 0
-                '''.format(s2) # TODO optimize aligned
+                '''
                 if src1Loc.getIndirLevel() == 1:
                     result += '''
                         xor a, b
@@ -338,12 +371,21 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                         mov a, pl
                         adc b, a
                         mov a, ph
-                        ldi pl, lo({1})
-                        ldi ph, hi({1})
+                    '''.format(s1)
+                    result += '''
+                        ldi pl, lo({0})
+                        ldi ph, hi({0})
                         st a
                         inc pl
+                    '''.format(rs)
+                    if not resultLoc.isAligned():
+                        result += '''
+                            mov a, 0
+                            adc ph, a
+                        '''
+                    result += '''
                         st b
-                    '''.format(s1, rs)
+                    '''
                 else:
                     # a:b - index
                     result += '''
@@ -352,15 +394,35 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                         add b, a
                         ldi a, hi({0})
                         adc a, ph
-                        ldi pl, lo({1})
-                        ldi ph, hi({1})
+                    '''.format(s1)
+                    result += '''
+                        ldi pl, lo({0})
+                        ldi ph, hi({0})
                         st b
-                        inc pl
-                        st a
-                    '''.format(s1, rs)
+                    '''.format(rs)
+                    if resultLoc.isAligned():
+                        result += '''
+                            inc pl
+                            st a
+                        '''
+                    else:
+                        result += '''
+                            ldi pl, lo({0} + 1)
+                            ldi ph, hi({0} + 1)
+                            st a
+                        '''.format(rs)
         else:
-            raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
-    else:
+            if src2Loc.getIndirLevel() == 0:
+                loc = src1Loc.getLocation() - src2Loc.getLocation()
+                if isinstance(s2, int):
+                    offset = s2 * memberSize
+                else:
+                    offset = "({}) * {}".format(s2, memberSize)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
+                return loc, result + code
+            else:
+                raise NotImplementedError()
+    else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             loc = src1Loc.getLocation() - src2Loc.getLocation()
             if src2Loc.getType().getSign():
@@ -369,7 +431,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "add", "adc", "({}) + ({})", operator.add)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
             return loc, result + code
         if src2Loc.getType().getSign():
             raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
@@ -430,14 +492,25 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     add a, pl ; a = i_h + c + p_h = r_h
                 '''.format(src1Loc.getSource())
         else:
-            raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st b
-            inc pl
-            st a
-        '''.format(resultLoc.getSource())
+            # src1loc + (u16)b * memberSize
+            raise NotImplementedError()
+        if resultLoc.isAligned():
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                st b
+                inc pl
+                st a
+            '''.format(resultLoc.getSource())
+        else:
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                st b
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
+                st a
+            '''.format(resultLoc.getSource())
     return resultLoc, result
 
 def _genSubPtr(resultLoc, src1Loc, src2Loc):
@@ -463,20 +536,27 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "sub", "sbb", "({}) - ({})", operator.sub)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub)
                 return loc, result + code
             else:
                 result += '''
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld b
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
+                '''.format(s2)
+                if src2Loc.isAligned():
+                    result += 'inc pl\n'
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                    '''.format(s2)
+                result += '''
                     ld a
                     shl a
                     shl b
                     adc a, 0
-                '''.format(s2) # TODO optimize aligned
+                '''
                 if src1Loc.getIndirLevel() == 1:
                     result += '''
                         xor a, b
@@ -495,12 +575,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                         sbb a, b
                         mov b, a
                         mov a, ph
-                        ldi pl, lo({1})
-                        ldi ph, hi({1})
-                        st a
-                        inc pl
-                        st b
-                    '''.format(s1, rs)
+                    '''.format(s1)
                 else:
                     # a:b - index
                     result += '''
@@ -510,15 +585,22 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                         ldi a, hi({0})
                         sbb ph, a
                         mov a, ph
-                        ldi pl, lo({1})
-                        ldi ph, hi({1})
-                        st b
-                        inc pl
-                        st a
-                    '''.format(s1, rs)
+                    '''.format(s1)
+                result += '''
+                    ldi pl, lo({0})
+                    ldi ph, hi({0})
+                    st a
+                    inc pl
+                '''.format(rs)
+                if not resultLoc.isAligned():
+                    result += '''
+                        mov a, 0
+                        adc ph, a
+                    '''
+                result += 'st b\n'
         else:
-            raise RuntimeError("Other sizes than 1 and 2 are not supported for pointer indexing")
-    else:
+            raise NotImplementedError("Other sizes than 1 and 2 are not supported for pointer indexing")
+    else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             loc = src1Loc.getLocation() - src2Loc.getLocation()
             if src2Loc.getType().getSign():
@@ -527,7 +609,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset), "sub", "sbb", "({}) - ({})", operator.sub)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub)
             return loc, result + code
         if src2Loc.getType().getSign():
             raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
@@ -598,13 +680,19 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
             ldi pl, lo({0})
             ldi ph, hi({0})
             st b
-            inc pl
-            st a
         '''.format(resultLoc.getSource())
+        if resultLoc.isAligned():
+            result += 'inc pl\n'
+        else:
+            result += '''
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
+            '''.format(resultLoc.getSource())
+        result += 'st a\n'
     return resultLoc, result
 
 def genAddPointerOffset(resultLoc, src, offset):
-    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset), "add", "adc", "({}) + ({})", operator.add)
+    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():

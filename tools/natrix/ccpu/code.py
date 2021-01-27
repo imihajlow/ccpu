@@ -162,22 +162,27 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                     ld b
                     '''.format(srcLoc.getSource())
                 if size > 1:
-                    loadCode += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                    ld a
-                    '''.format(srcLoc.getSource()) # TODO optimize aligned
+                    loadCode += 'inc pl\n'
+                    if not srcLoc.isAligned():
+                        loadCode += '''
+                            mov a, 0
+                            adc ph, a
+                        '''.format(srcLoc.getSource())
+                    loadCode += 'ld a\n'
             storeCode = '''
                 ldi pl, lo({0})
                 ldi ph, hi({0})
                 st b
                 '''.format(resultLoc.getSource())
             if size > 1:
-                storeCode += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                    st a
-                    '''.format(resultLoc.getSource()) # TODO optimize aligned
+                if resultLoc.isAligned():
+                    storeCode += 'inc pl\n'
+                else:
+                    storeCode += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                        '''.format(resultLoc.getSource())
+                storeCode += 'st a\n'
             return resultLoc, loadCode + storeCode
 
 def genCast(resultLoc, t, srcLoc):
@@ -195,16 +200,23 @@ def genCast(resultLoc, t, srcLoc):
             # widen
             if srcLoc.getType().getSign():
                 # sign expand
-                return resultLoc, result + '''
+                code = '''
                     ; widening cast, sign expand
                     ldi pl, lo({0})
                     ldi ph, hi({0})
                     ld a
                     shl a
                     exp a
-                    inc pl
-                    st a
+                '''.format(srcLoc.getSource())
+                if resultLoc.isAligned():
+                    code += 'inc pl\n'
+                else:
+                    code += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
                     '''.format(srcLoc.getSource())
+                code += 'st a\n'
+                return resultLoc, result + code
             else:
                 # zero expand
                 return resultLoc, result + '''
@@ -240,9 +252,16 @@ def genCast(resultLoc, t, srcLoc):
                     st a
                     shl a
                     exp a
-                    inc pl
-                    st a
                     '''.format(srcLoc.getSource(), resultLoc.getSource())
+
+                if resultLoc.isAligned():
+                    result += 'inc pl\n'
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                    '''.format(resultLoc.getSource())
+                result += 'st a\n'
             else:
                 # zero expand
                 result += '''
@@ -253,10 +272,12 @@ def genCast(resultLoc, t, srcLoc):
                     ldi pl, lo({1})
                     ldi ph, hi({1})
                     st a
-                    inc pl
                     mov a, 0
-                    st a
-                    '''.format(srcLoc.getSource(), resultLoc.getSource())
+                    inc pl
+                '''.format(srcLoc.getSource(), resultLoc.getSource())
+                if not resultLoc.isAligned():
+                    result += 'adc ph, a\n'
+                result += 'st a\n'
             return resultLoc, result
         else:
             # same size or narrower
@@ -274,11 +295,18 @@ def _loadP(loc, offset=0):
             ldi pl, lo({0})
             ldi ph, hi({0})
             ld a
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
+        '''.format(loc.getSource())
+        if loc.isAligned():
+            result += 'inc pl\n'
+        else:
+            result += '''
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
+            '''.format(loc.getSource())
+        result += '''
             ld ph
             mov pl, a
-        '''.format(loc.getSource()) # TODO optimize aligned
+        '''
         if offset != 0:
             l = lo(offset)
             h = hi(offset)
@@ -307,11 +335,13 @@ def _loadAB(loc):
             ld b
         '''.format(loc.getSource())
         if isWord:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-                ld a
-            '''.format(loc.getSource())
+            result += 'inc pl\n'
+            if not loc.isAligned():
+                result += '''
+                    mov a, 0
+                    adc ph, a
+                '''
+            result += 'ld a\n'
     return result
 
 def _loadBLow(loc):

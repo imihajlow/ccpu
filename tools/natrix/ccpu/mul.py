@@ -31,24 +31,24 @@ def _genMulVCByte(rs, v, c):
     return result
 
 def _genMulVCWord(rs, v, c):
-    result = '; {} = {} * {} (word)\n'.format(rs, v, c)
+    result = '; {} = {} * {} (word)\n'.format(rs.getSource(), v.getSource(), c)
     # TODO optimize
-    result += copyW(v, "__cc_r_a", False, True)
+    result += copyW(v.getSource(), "__cc_r_a", v.isAligned(), True)
     result += storeConstW(c, "__cc_r_b", True)
     result += call("__cc_mul_word")
-    result += copyW("__cc_r_r", rs, True, False)
+    result += copyW("__cc_r_r", rs.getSource(), True, rs.isAligned())
     return result
 
 def _genMulVC(resultLoc, v, c):
     if c == 0:
-        return Value(resultLoc.getLocation(), v.getType(), 0, 0), ""
+        return Value(resultLoc.getLocation(), v.getType(), 0, 0, True), ""
     elif c == 1:
         return v, ""
     t = resultLoc.getType()
     if t.getSize() == 1:
         return resultLoc, _genMulVCByte(resultLoc.getSource(), v.getSource(), c)
     else:
-        return resultLoc, _genMulVCWord(resultLoc.getSource(), v.getSource(), c)
+        return resultLoc, _genMulVCWord(resultLoc, v, c)
 
 def genMul(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
@@ -76,10 +76,10 @@ def genMul(resultLoc, src1Loc, src2Loc):
         result = '; {} = {} * {}\n'.format(resultLoc, src1Loc, src2Loc)
         isWord = t.getSize() == 2
         if isWord:
-            result += copyW(src1Loc.getSource(), "__cc_r_a", False, True)
-            result += copyW(src2Loc.getSource(), "__cc_r_b", False, True)
+            result += copyW(src1Loc.getSource(), "__cc_r_a", src1Loc.isAligned(), True)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", src2Loc.isAligned(), True)
             result += call("__cc_mul_word")
-            result += copyW("__cc_r_r", resultLoc.getSource(), True, False)
+            result += copyW("__cc_r_r", resultLoc.getSource(), True, resultLoc.isAligned())
         else:
             result += copyB(src1Loc.getSource(), "__cc_r_a")
             result += copyB(src2Loc.getSource(), "__cc_r_b")

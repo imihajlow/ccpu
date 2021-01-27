@@ -102,9 +102,9 @@ def genEq(resultLoc, src1Loc, src2Loc):
         # const == const
         loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(loc, BoolType(), 0, int(s1 == s2)), result
+            return Value(loc, BoolType(), 0, int(s1 == s2), True), result
         else:
-            return Value(loc, BoolType(), 0, "int(({}) == ({}))".format(s1, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) == ({}))".format(s1, s2), True), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
     result += '''
@@ -135,9 +135,9 @@ def genNe(resultLoc, src1Loc, src2Loc):
         # const == const
         loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(loc, BoolType(), 0, int(s1 != s2)), result
+            return Value(loc, BoolType(), 0, int(s1 != s2), True), result
         else:
-            return Value(loc, BoolType(), 0, "int(({}) != ({}))".format(s1, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) != ({}))".format(s1, s2), True), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
     result += '''
@@ -181,7 +181,7 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 ld a
                 ldi pl, {0}
                 sbb pl, a
-            '''.format(h, s2) # TODO optimize aligned
+            '''.format(h, s2)
         else:
             result += 'sub b, a\n'
             if op == 'le' or op == 'gt':
@@ -208,7 +208,7 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 ld pl
                 ldi a, {0}
                 sbb pl, a
-            '''.format(h, s1) # TODO optimize aligned
+            '''.format(h, s1)
         else:
             result += 'sub b, a\n'
             if op == 'le' or op == 'gt':
@@ -223,15 +223,22 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 ldi pl, lo({1})
                 ldi ph, hi({1})
                 ld a
-                ldi pl, lo({1} + 1)
-                ldi ph, hi({1} + 1)
+            '''.format(s1, s2)
+            if src2Loc.isAligned():
+                result += 'inc pl\n'
+            else:
+                result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                '''.format(s2)
+            result += '''
                 sub b, a
                 ld a
                 ldi pl, lo({0} + 1)
                 ldi ph, hi({0} + 1)
                 ld pl
                 sbb pl, a
-            '''.format(s1, s2) # TODO optimize aligned
+            '''.format(s1)
         else:
             result += '''
                 ldi pl, lo({0})
@@ -260,10 +267,10 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
         loc = src1Loc.getLocation() - src2Loc.getLocation()
         if isinstance(s1, int) and isinstance(s2, int):
             pyop = {"gt": operator.gt, "lt": operator.lt, "ge": operator.ge, "le": operator.le}[op]
-            return Value(loc, BoolType(), 0, int(pyop(s1, s2))), result
+            return Value(loc, BoolType(), 0, int(pyop(s1, s2)), True), result
         else:
             pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
-            return Value(loc, BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2)), result
+            return Value(loc, BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2), True), result
     else:
         result += _genCmpSub(src1Loc, src2Loc, op)
     # C = carry flag
