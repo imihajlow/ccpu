@@ -16,7 +16,7 @@ def genDeref(resultLoc, srcLoc, offset=0):
     assert(0 < t.getSize() <= 2)
 
     if srcLoc.getIndirLevel() == 0:
-        return Value(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource(), True), ""
+        return Value.withOffset(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource(), True, offset), ""
 
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
     result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")

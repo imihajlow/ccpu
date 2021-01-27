@@ -902,6 +902,102 @@ u8 test_stack() {
     f(20);
 }
 
+struct A {
+    u8 v8;
+    u16 v16;
+}
+
+struct B {
+    s8 v8;
+    struct A a;
+}
+
+struct C {
+    s16 v16;
+    u8 v8;
+    u16 v16_2;
+}
+
+// data @ 254: 0x99 0xa1 0x05 0x06 0x07 0x08 0x09
+import struct A aligned_255_1;
+import struct B aligned_255_2;
+import struct A aligned_255_3[2];
+import struct C aligned_255_4;
+
+import struct A aligned_254_1;
+
+u8 test_struct() {
+    ASSERT_TRUE(aligned_255_1.v8 == 0xa1u8);
+    ASSERT_TRUE(aligned_255_1.v16 == 0x0605u16);
+
+    ASSERT_TRUE(aligned_255_2.v8 == 0xa1s8);
+    ASSERT_TRUE(aligned_255_2.a.v8 == 0x05u8);
+    ASSERT_TRUE(aligned_255_2.a.v16 == 0x0706u16);
+
+    ASSERT_TRUE(aligned_255_3[1].v8 == 0x07u8);
+    ASSERT_TRUE(aligned_255_3[1].v16 == 0x0908u16);
+
+    ASSERT_TRUE(aligned_255_4.v16 == 0x05a1s16);
+    ASSERT_TRUE(aligned_255_4.v8 == 0x06u8);
+    ASSERT_TRUE(aligned_255_4.v16_2 == 0x0807u16);
+
+    ASSERT_TRUE(aligned_254_1.v16 == 0x05a1u16);
+
+    aligned_254_1.v16 = (u16)C1_16;
+    ASSERT_TRUE(aligned_254_1.v16 == (u16)C1_16);
+
+    aligned_255_4.v16 = 0x3377s16;
+    aligned_255_4.v8 = 0x55u8;
+    ASSERT_TRUE(aligned_255_1.v8 == 0x77u8);
+    ASSERT_TRUE(aligned_255_1.v16 == 0x5533u16);
+
+    aligned_255_3[0].v16 = (u16)C1_16;
+    ASSERT_TRUE(aligned_255_1.v16 == (u16)C1_16);
+
+    struct C *pc = &aligned_255_4;
+    aligned_255_4.v16 = C2_16;
+    ASSERT_TRUE((*pc).v16 == C2_16);
+    aligned_255_4.v8 = (u8)C2_8;
+    ASSERT_TRUE((*pc).v8 == (u8)C2_8);
+
+    struct A *pa = &aligned_254_1;
+    aligned_254_1.v16 = (u16)C3_16;
+    ASSERT_TRUE((*pa).v16 == (u16)C3_16);
+    (*pa).v16 = (u16)C2_16;
+    ASSERT_TRUE(aligned_254_1.v16 == (u16)C2_16);
+
+    aligned_254_1.v16 += 0x01ffu16;
+    ASSERT_TRUE(aligned_254_1.v16 == (u16)C2_16 + 0x01ffu16);
+
+    aligned_254_1.v16 = 0x01ffu16 + aligned_254_1.v16;
+    ASSERT_TRUE(aligned_254_1.v16 == (u16)C2_16 + 0x01ffu16 + 0x01ffu16);
+
+    u16 x = (u16)C1_16;
+    u16 y = (u16)C2_16;
+    aligned_254_1.v16 = x + y;
+    ASSERT_TRUE(aligned_254_1.v16 == (u16)C1_16 + (u16)C2_16);
+
+    aligned_254_1.v16 = 1u16;
+    s16 a16[2];
+    a16[1] = C2_16;
+    ASSERT_TRUE(a16[aligned_254_1.v16] == C2_16);
+
+    aligned_255_3[1].v16 = (u16)a16[aligned_254_1.v16];
+    ASSERT_TRUE(aligned_255_3[1].v16 == (u16)C2_16);
+
+    aligned_254_1.v16 = (u16)C3_16;
+    x = aligned_254_1.v16;
+    ASSERT_TRUE(x == (u16)C3_16);
+
+    s8 vs8 = -2s8;
+    aligned_255_4.v16 = (s16)vs8;
+    ASSERT_TRUE(aligned_255_4.v16 == -2s16);
+
+    aligned_255_4.v16 = 0xfds16;
+    aligned_255_4.v16 = (s16)(s8)aligned_255_4.v16;
+    ASSERT_TRUE(aligned_255_4.v16 == 0xfffds16);
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
@@ -916,6 +1012,7 @@ export u8 main() {
     test_shr_byte();
     test_shr_word();
     test_shl();
+    test_struct();
     display_print("Success!");
     success();
 }
