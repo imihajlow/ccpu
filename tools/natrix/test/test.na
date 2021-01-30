@@ -998,6 +998,52 @@ u8 test_struct() {
     ASSERT_TRUE(aligned_255_4.v16 == 0xfffds16);
 }
 
+u8 test_sizeof() {
+    // sizeof type
+    ASSERT_TRUE(sizeof(u8) == 1u16);
+    ASSERT_TRUE(sizeof(u16) == 2u16);
+    ASSERT_TRUE(sizeof(s8) == 1u16);
+    ASSERT_TRUE(sizeof(s16) == 2u16);
+    ASSERT_TRUE(sizeof(u8*) == 2u16);
+    ASSERT_TRUE(sizeof(struct A) == 3u16);
+    ASSERT_TRUE(sizeof(struct B) == sizeof(struct A) + 1u16);
+    ASSERT_TRUE(sizeof(struct A*) == 2u16);
+
+    // sizeof expression
+    u16 v16;
+    s8 v8;
+    u8 *p8;
+    struct A a;
+    struct B *pb;
+    u16 a16[3];
+    struct A aa[5];
+    ASSERT_TRUE(sizeof(v16) == 2u16);
+    ASSERT_TRUE(sizeof(v8) == 1u16);
+    ASSERT_TRUE(sizeof(p8) == 2u16);
+    ASSERT_TRUE(sizeof(a) == 3u16);
+    ASSERT_TRUE(sizeof(a16) == 3u16 * 2u16);
+    ASSERT_TRUE(sizeof(aa) == 5u16 * sizeof(struct A));
+
+    ASSERT_TRUE(sizeof(v16 + v16) == 2u16);
+    ASSERT_TRUE(sizeof(v16 / v16) == 2u16);
+    ASSERT_TRUE(sizeof((u8)v8 + aa[3].v8) == 1u16);
+    ASSERT_TRUE(sizeof(v16 == v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 != v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 >= v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 <= v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 > v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 < v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 || v16) == 1u16);
+    ASSERT_TRUE(sizeof(v16 && v16) == 1u16);
+    ASSERT_TRUE(sizeof(!v16) == 1u16);
+    ASSERT_TRUE(sizeof(~v16) == 2u16);
+    ASSERT_TRUE(sizeof(v16 >> v16) == 2u16);
+    ASSERT_TRUE(sizeof(v16 << v16) == 2u16);
+    ASSERT_TRUE(sizeof(*pb) == sizeof(struct B));
+    ASSERT_TRUE(sizeof(-v16) == 2u16);
+    ASSERT_TRUE(sizeof(&aa[4].v8) == 2u16);
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
@@ -1013,6 +1059,7 @@ export u8 main() {
     test_shr_word();
     test_shl();
     test_struct();
+    test_sizeof();
     display_print("Success!");
     success();
 }

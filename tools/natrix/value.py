@@ -94,7 +94,13 @@ class Value:
             raise SemanticError(self._location, "Cannot get address of this: {}".format(str(self)))
 
     def isConst(self):
+        return self._level == 0
+
+    def isConstNumber(self):
         return self._level == 0 and isinstance(self._src, int)
+
+    def isConstLabel(self):
+        return self._level == 0 and not isinstance(self._src, int)
 
     def isAligned(self):
         return self._isAligned

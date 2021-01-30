@@ -17,7 +17,6 @@ class StructDeclarationTransformer(Transformer):
         self._dict = dict()
 
     def struct_declaration(self, t):
-        # print(t.children)
         name = t.children[0]
         fields = []
         for c in t.children[1:]:
@@ -33,7 +32,6 @@ class StructDeclarationTransformer(Transformer):
         return self._dict[name]
 
     def populateTypes(self, tps):
-        print(tps)
         for s, l in tps:
             name = s.getStructName()
             if name not in self._dict:

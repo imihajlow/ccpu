@@ -46,6 +46,9 @@ class Type(ABC):
     def deref(self):
         raise ValueError("Cannot dereference a non-pointer type")
 
+    def isBool(self):
+        return self.isInteger() or self.isPointer()
+
 class IntType(Type):
     def __init__(self, sign, size):
         self._sign = sign
@@ -175,7 +178,7 @@ class StructType(Type):
         for n,t in self._fields:
             if name == n:
                 return t
-        raise LookupError(name)
+        raise LookupError(f"{name} is not a member of struct {self._name}")
 
     def getFieldOffset(self, name):
         if self._fields == None:
@@ -185,7 +188,7 @@ class StructType(Type):
             if name == n:
                 return offset
             offset += t.getReserveSize()
-        raise LookupError(name)
+        raise LookupError(f"{name} is not a member of struct {self._name}")
 
     def getSign(self):
         return False

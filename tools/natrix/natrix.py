@@ -4,7 +4,7 @@ import sys
 import os
 from lark import Lark, Transformer, v_args, Tree, LarkError
 from lark.visitors import VisitError
-from const import ConstTransformer
+from const import ConstTransformer, SizeofExprTransformer
 from type import TypeTransformer, CastTransformer
 from value import VarTransformerStageOne, VarTransformerStageTwo
 from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
@@ -91,11 +91,13 @@ if __name__ == '__main__':
         t = VarTransformerStageTwo(backend).transform(t)
         t = CompoundTransformer().transform(t)
         t = CastTransformer().transform(t)
-        lt = LiteralTransformer()
-        t = lt.transform(t)
         t = SubscriptTransformer().transform(t)
         t = ForTransformer().transform(t)
         t = MemberAccessTransformer().transform(t)
+        t = SizeofExprTransformer().transform(t)
+        t = ConstTransformer(True).transform(t)
+        lt = LiteralTransformer()
+        t = lt.transform(t)
         if args.tree:
             print()
             print("Tree after transform:")

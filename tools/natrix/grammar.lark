@@ -134,6 +134,7 @@ _arguments: expression ("," expression)*
     | var
     | var "[" expression "]" -> subscript
     | "sizeof" "(" type ")" -> sizeof_type
+    | "sizeof" "(" expression ")" -> sizeof_expr
 
 var: IDENTIFIER -> var
     | value ("." IDENTIFIER)+ -> member_access
