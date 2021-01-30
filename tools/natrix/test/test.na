@@ -956,14 +956,14 @@ u8 test_struct() {
 
     struct C *pc = &aligned_255_4;
     aligned_255_4.v16 = C2_16;
-    ASSERT_TRUE((*pc).v16 == C2_16);
+    ASSERT_TRUE(pc->v16 == C2_16);
     aligned_255_4.v8 = (u8)C2_8;
-    ASSERT_TRUE((*pc).v8 == (u8)C2_8);
+    ASSERT_TRUE(pc->v8 == (u8)C2_8);
 
     struct A *pa = &aligned_254_1;
     aligned_254_1.v16 = (u16)C3_16;
-    ASSERT_TRUE((*pa).v16 == (u16)C3_16);
-    (*pa).v16 = (u16)C2_16;
+    ASSERT_TRUE(pa->v16 == (u16)C3_16);
+    pa->v16 = (u16)C2_16;
     ASSERT_TRUE(aligned_254_1.v16 == (u16)C2_16);
 
     aligned_254_1.v16 += 0x01ffu16;

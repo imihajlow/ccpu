@@ -138,6 +138,7 @@ _arguments: expression ("," expression)*
 
 var: IDENTIFIER -> var
     | value ("." IDENTIFIER)+ -> member_access
+    | value "->" IDENTIFIER ("." IDENTIFIER)* -> arrow
 
 number: DEC_NUMBER -> n10
     | HEX_NUMBER -> n16
