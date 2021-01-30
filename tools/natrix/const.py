@@ -190,3 +190,10 @@ class ConstTransformer(Transformer):
         if isinstance(v, Tree):
             return tree
         return _const(Location.fromAny(tree), t, cast(v.getSource(), v.getType(), t))
+
+    def sizeof_type(self, t):
+        if self._transformCast:
+            type = t.children[0]
+            return _const(Location.fromAny(t), IntType(False, 2), type.getReserveSize())
+        else:
+            return t

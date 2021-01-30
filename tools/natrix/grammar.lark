@@ -133,6 +133,7 @@ _arguments: expression ("," expression)*
     | literal
     | var
     | var "[" expression "]" -> subscript
+    | "sizeof" "(" type ")" -> sizeof_type
 
 var: IDENTIFIER -> var
     | value ("." IDENTIFIER)+ -> member_access
