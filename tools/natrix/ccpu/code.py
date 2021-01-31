@@ -187,6 +187,7 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                 if srcLoc.getIndirLevel() == 0:
                     raise RuntimeError("struct const")
                 result = ""
+                # TODO loop on large objects
                 for offset in range(size):
                     result += f'''
                         ldi pl, lo(({srcLoc.getSource()}) + {offset})

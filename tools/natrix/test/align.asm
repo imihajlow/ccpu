@@ -11,7 +11,7 @@
 	db 0xf7
 	db 0xf8
 	db 0xf9
-	res 251
+	res 249
 aligned_254_1:
 	db 0x99
 aligned_255_1:

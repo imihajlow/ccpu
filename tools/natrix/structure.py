@@ -51,7 +51,7 @@ class MemberAccessTransformer(Transformer):
                 raise SemanticError(Location.fromAny(t), str(e))
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
-            return Value.withOffset(Location.fromAny(t), type, 1, obj.getSource(), False, offset)
+            return Value.withOffset(Location.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)
         elif obj.data == 'deref':
             return Tree("arrow", [obj.children[0]] + fields, t.meta)
         else:
@@ -67,7 +67,7 @@ class MemberAccessTransformer(Transformer):
                 raise SemanticError(Location.fromAny(t), str(e))
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
-            return Value.withOffset(Location.fromAny(t), PtrType(type), 0, obj.getSource(), True, offset)
+            return Value.withOffset(Location.fromAny(t), PtrType(type), 0 + type.getIndirectionOffset(), obj.getSource(), True, offset)
         elif obj.data == 'deref':
             return Tree("p_arrow", [obj.children[0]] + fields, t.meta)
         else:

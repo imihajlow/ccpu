@@ -3,6 +3,7 @@ start: (function_definition | forward_declaration | gl_decl_var | struct_declara
 struct_declaration: "struct" IDENTIFIER "{" field_declaration* "}"
 
 ?field_declaration: type IDENTIFIER ";"
+    | type IDENTIFIER "[" expression "]" ";" -> array_field_declaration
 
 ?forward_declaration: function_declaration ";"
 

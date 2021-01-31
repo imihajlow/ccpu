@@ -18,6 +18,8 @@ s8 a[10];   a -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
 '''
 class Value:
     def __init__(self, location, type, indirLevel, src, aligned):
+        if indirLevel < 0:
+            raise SemanticError(location, "Cannot take address")
         self._location = location
         self._type = type
         self._level = indirLevel
@@ -46,6 +48,9 @@ class Value:
 
     def withType(self, t):
         return Value(self._location, t, self._level, self._src, self._isAligned)
+
+    def withIndirectionOffset(self, offset):
+        return Value(self._location, self._type, self._level + offset, self._src, self._isAligned)
 
     def getIndirLevel(self):
         '''

@@ -918,6 +918,13 @@ struct C {
     u16 v16_2;
 }
 
+struct D {
+    s16 v16;
+    s8 v8;
+    s16 v16_2;
+    u8 a[5];
+}
+
 // data @ 254: 0x99 0xa1 0x05 0x06 0x07 0x08 0x09
 import struct A aligned_255_1;
 import struct B aligned_255_2;
@@ -1006,6 +1013,11 @@ u8 test_struct() {
     ASSERT_TRUE(src.v8 == aligned_255_2.v8);
     ASSERT_TRUE(src.a.v8 == aligned_255_2.a.v8);
     ASSERT_TRUE(src.a.v8 == aligned_255_2.a.v8);
+
+    // test p_arrow
+    ASSERT_TRUE((u16)&pc->v16_2 == (u16)pc + 3u16);
+    struct D *pd;
+    ASSERT_TRUE((u16)pd->a == (u16)pd + 5u16);
 }
 
 u8 test_sizeof() {
@@ -1054,6 +1066,25 @@ u8 test_sizeof() {
     ASSERT_TRUE(sizeof(&aa[4].v8) == 2u16);
 }
 
+struct Fat {
+    u8 a[10];
+}
+
+u8 test_copy() {
+    struct Fat src, dst;
+    for (u8 i = 0u8; i < (u8)sizeof(src); i += 1u8) {
+        src.a[i] = i;
+        dst.a[i] = i + 20u8;
+    }
+    for (i = 0u8; i < (u8)sizeof(src); i += 1u8) {
+        ASSERT_FALSE(src.a[i] == dst.a[i]);
+    }
+    dst = src;
+    for (i = 0u8; i < (u8)sizeof(src); i += 1u8) {
+        ASSERT_TRUE(src.a[i] == dst.a[i]);
+    }
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
@@ -1070,6 +1101,7 @@ export u8 main() {
     test_shl();
     test_struct();
     test_sizeof();
+    test_copy();
     display_print("Success!");
     success();
 }

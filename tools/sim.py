@@ -11,8 +11,6 @@ from vga import VgaModule
 
 def load(file):
     ba = file.read()
-    if len(ba) != 32768:
-        raise ValueError("Wrong program file size (must be 32768)")
     return list(ba)
 
 def loadLabels(file):

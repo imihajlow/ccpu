@@ -294,6 +294,16 @@ class TypeTransformer(Transformer):
                     return Tree("gl_decl_var", [attrs, ArrayType(type, size.getSource()), name], t.meta)
         raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
 
+    @v_args(tree = True)
+    def array_field_declaration(self, t):
+        type, name, size = t.children
+        from value import Value
+        if isinstance(size, Value):
+            if isinstance(size.getSource(), int):
+                if size.getIndirLevel() == 0 and size.getSource() > 0:
+                    return Tree("field_declaration", [ArrayType(type, size.getSource()), name], t.meta)
+        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+
 class CastTransformer(Transformer):
     @v_args(tree = True)
     def type_cast(self, t):
@@ -301,7 +311,10 @@ class CastTransformer(Transformer):
         from value import Value
         if isinstance(v, Value) and v.getIndirLevel() == 0:
             s = v.getSource()
-            # TODO type size > 2 when structs
+            if type.getSize() > 2:
+                raise SemanticError(Location.fromAny(t), f"{str(type)} has size > 2, cannot cast")
+            if v.getType().getSize() > 2:
+                raise SemanticError(Location.fromAny(t), f"{str(v.getType())} has size > 2, cannot cast")
             if type.getSize() > v.getType().getSize():
                 # widening cast
                 if isinstance(s, int):

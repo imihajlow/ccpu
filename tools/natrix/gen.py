@@ -65,14 +65,22 @@ class Generator:
                     rv, argCode = self.generateExpression(ptr, minTempVarIndex,
                         Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
                     offset, type = structure.getField(rv.getType().deref(), fields)
-                    resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
-                    return resultLoc, argCode + derefCode
+                    if type.getIndirectionOffset() == 0:
+                        resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
+                        return resultLoc, argCode + derefCode
+                    elif type.getIndirectionOffset() == -1:
+                        rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(type), rv.withType(type), offset)
+                        return rv, argCode + offsetCode
+                    else:
+                        raise RuntimeError("Wrong indirection offset")
                 elif t.data == "p_arrow":
                     ptr = ch[0]
                     fields = ch[1:]
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
                     offset, type = structure.getField(rv.getType().deref(), fields)
+                    if type.getIndirectionOffset() < 0:
+                        raise SemanticError(Location.fromAny(t), "Cannot get address")
                     rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
                     return rv, argCode + offsetCode
                 elif len(ch) == 2:
@@ -146,6 +154,8 @@ class Generator:
             rvPtr, codePtr = self.generateExpression(ptr, 0,
                 Value.variable(Location.fromAny(ptr), labelname.getTempName(0)), curFn)
             offset, type = structure.getField(rvPtr.getType().deref(), fields)
+            if type.getIndirectionOffset() < 0:
+                raise SemanticError(Location.fromAny(l), "Cannot assign to an r-value")
             rvR, codeR = self.generateExpression(r, 1,
                                     Value.variable(Location.fromAny(r), labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr.withType(PtrType(type)), rvR, offset)
