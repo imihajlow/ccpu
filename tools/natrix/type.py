@@ -170,25 +170,30 @@ class StructType(Type):
     def getSize(self):
         if self._fields is None:
             raise ValueError(f"Size of struct {self._name} is not known")
-        return sum(t.getReserveSize() for _,t in self._fields)
+        try:
+            return sum(t.getReserveSize() for _,t in self._fields)
+        except RecursionError as e:
+            raise ValueError(f"Cannot get size of a recursive struct {self._name}")
 
     def getFieldType(self, name):
         if self._fields == None:
             raise ValueError(f"Struct {self._name}'s fields ar not known")
+        if not any(n == name for n,_ in self._fields):
+            raise LookupError(f"{name} is not a member of struct {self._name}")
         for n,t in self._fields:
             if name == n:
                 return t
-        raise LookupError(f"{name} is not a member of struct {self._name}")
 
     def getFieldOffset(self, name):
         if self._fields == None:
             raise ValueError(f"Struct {self._name}'s fields ar not known")
         offset = 0
+        if not any(n == name for n,_ in self._fields):
+            raise LookupError(f"{name} is not a member of struct {self._name}")
         for n,t in self._fields:
             if name == n:
                 return offset
             offset += t.getReserveSize()
-        raise LookupError(f"{name} is not a member of struct {self._name}")
 
     def getSign(self):
         return False

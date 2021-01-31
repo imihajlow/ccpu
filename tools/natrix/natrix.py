@@ -119,3 +119,6 @@ if __name__ == '__main__':
         file, line = lit.translateLine(e.line)
         sys.stderr.write("Syntax error in {}:{} {}\n".format(file, line, str(e)))
         sys.exit(1)
+    except ValueError as e:
+        sys.stderr.write("Error: {}\n".format(str(e)))
+        sys.exit(1)

@@ -33,71 +33,76 @@ class Generator:
         :param curFn: name of the current function.
         :return: the actual location of the result
         '''
-        if isinstance(t, Value):
-            return self.backend.genMove(resultLoc, t, True)
-        else:
-            ch = t.children
-            if len(ch) == 1:
-                if isinstance(ch[0], Value):
-                    argCode = ""
-                    rv = ch[0]
-                else:
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                    rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
-                resultLoc, myCode = self.backend.genUnary(t.data, resultLoc, rv)
-                return resultLoc, argCode + myCode
-            elif t.data == "type_cast":
-                if isinstance(ch[1], Value):
-                    argCode = ""
-                    rv = ch[1]
-                else:
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                    rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
-                        Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
-                resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
-                return resultLoc, argCode + myCode
-            elif t.data == "arrow":
-                ptr = ch[0]
-                fields = ch[1:]
-                self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                rv, argCode = self.generateExpression(ptr, minTempVarIndex,
-                    Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
-                offset, type = structure.getField(rv.getType().deref(), fields)
-                resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
-                return resultLoc, argCode + derefCode
-            elif t.data == "p_arrow":
-                ptr = ch[0]
-                fields = ch[1:]
-                self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
-                offset, type = structure.getField(rv.getType().deref(), fields)
-                rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
-                return rv, argCode + offsetCode
-            elif len(ch) == 2:
-                hasFirstArg = False
-                if isinstance(ch[0], Value):
-                    rv1 = ch[0]
-                    argCode1 = ""
-                else:
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                    rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex,
-                        Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
-                    hasFirstArg = True
-
-                if isinstance(ch[1], Value):
-                    rv2 = ch[1]
-                    argCode2 = ""
-                else:
-                    indexIncrement = 1 if hasFirstArg else 0
-                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
-                    rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
-                        Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
-
-                resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
-                return resultLoc, argCode1 + argCode2 + myCode
+        try:
+            if isinstance(t, Value):
+                return self.backend.genMove(resultLoc, t, True)
             else:
-                raise RuntimeError("Too many children")
+                ch = t.children
+                if len(ch) == 1:
+                    if isinstance(ch[0], Value):
+                        argCode = ""
+                        rv = ch[0]
+                    else:
+                        self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                        rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
+                            Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
+                    resultLoc, myCode = self.backend.genUnary(t.data, resultLoc, rv)
+                    return resultLoc, argCode + myCode
+                elif t.data == "type_cast":
+                    if isinstance(ch[1], Value):
+                        argCode = ""
+                        rv = ch[1]
+                    else:
+                        self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                        rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
+                            Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
+                    resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
+                    return resultLoc, argCode + myCode
+                elif t.data == "arrow":
+                    ptr = ch[0]
+                    fields = ch[1:]
+                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                    rv, argCode = self.generateExpression(ptr, minTempVarIndex,
+                        Value.variable(Location.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
+                    offset, type = structure.getField(rv.getType().deref(), fields)
+                    resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
+                    return resultLoc, argCode + derefCode
+                elif t.data == "p_arrow":
+                    ptr = ch[0]
+                    fields = ch[1:]
+                    self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                    rv, argCode = self.generateExpression(ptr, minTempVarIndex, resultLoc.withType(UnknownType()), curFn)
+                    offset, type = structure.getField(rv.getType().deref(), fields)
+                    rv, offsetCode = self.backend.genAddPointerOffset(resultLoc.withType(PtrType(type)), rv.withType(PtrType(type)), offset)
+                    return rv, argCode + offsetCode
+                elif len(ch) == 2:
+                    hasFirstArg = False
+                    if isinstance(ch[0], Value):
+                        rv1 = ch[0]
+                        argCode1 = ""
+                    else:
+                        self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
+                        rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex,
+                            Value.variable(Location.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
+                        hasFirstArg = True
+
+                    if isinstance(ch[1], Value):
+                        rv2 = ch[1]
+                        argCode2 = ""
+                    else:
+                        indexIncrement = 1 if hasFirstArg else 0
+                        self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
+                        rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
+                            Value.variable(Location.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
+
+                    resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
+                    return resultLoc, argCode1 + argCode2 + myCode
+                else:
+                    raise RuntimeError("Too many children")
+        except LookupError as e:
+            raise SemanticError(Location.fromAny(t), str(e))
+        except ValueError as e:
+            raise SemanticError(Location.fromAny(t), str(e))
 
     def generateAssignment(self, l, r, curFn):
         '''
