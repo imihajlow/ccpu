@@ -205,7 +205,7 @@ class StructType(Type):
         return False
 
     def isAlignedByDefault(self):
-        return False
+        return all(t.isAlignedByDefault() and t.getReserveSize() % 2 == 0 for _, t in self._fields)
 
     def removeUnknown(self, other):
         raise NonImplementedError()
