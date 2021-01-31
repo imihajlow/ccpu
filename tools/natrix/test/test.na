@@ -996,6 +996,16 @@ u8 test_struct() {
     aligned_255_4.v16 = 0xfds16;
     aligned_255_4.v16 = (s16)(s8)aligned_255_4.v16;
     ASSERT_TRUE(aligned_255_4.v16 == 0xfffds16);
+
+    // test struct copy
+    struct B src;
+    src.v8 = (s8)C1_8;
+    src.a.v8 = (u8)C2_8;
+    src.a.v16 = (u16)C1_16;
+    aligned_255_2 = src;
+    ASSERT_TRUE(src.v8 == aligned_255_2.v8);
+    ASSERT_TRUE(src.a.v8 == aligned_255_2.a.v8);
+    ASSERT_TRUE(src.a.v8 == aligned_255_2.a.v8);
 }
 
 u8 test_sizeof() {

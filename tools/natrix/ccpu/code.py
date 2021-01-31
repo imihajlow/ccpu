@@ -147,42 +147,56 @@ def genMove(resultLoc, srcLoc, avoidCopy):
             if resultLoc.getIndirLevel() != 1:
                 raise RuntimeError("Compiler error: move destination level of indirection is not 1")
             size = srcLoc.getType().getSize()
-            assert(size == 1 or size == 2)
-            loadCode = "; {} := {}\n".format(resultLoc, srcLoc)
-            if srcLoc.getIndirLevel() == 0:
-                # var := const
-                c = srcLoc.getSource()
-                loadCode += _loadConst(size, c)
-            else:
-                # var := var
-                loadCode += '''
+            if size <= 2:
+                loadCode = "; {} := {}\n".format(resultLoc, srcLoc)
+                if srcLoc.getIndirLevel() == 0:
+                    # var := const
+                    c = srcLoc.getSource()
+                    loadCode += _loadConst(size, c)
+                else:
+                    # var := var
+                    loadCode += '''
+                        ldi pl, lo({0})
+                        ldi ph, hi({0})
+                        ld b
+                        '''.format(srcLoc.getSource())
+                    if size > 1:
+                        loadCode += 'inc pl\n'
+                        if not srcLoc.isAligned():
+                            loadCode += '''
+                                mov a, 0
+                                adc ph, a
+                            '''.format(srcLoc.getSource())
+                        loadCode += 'ld a\n'
+                storeCode = '''
                     ldi pl, lo({0})
                     ldi ph, hi({0})
-                    ld b
-                    '''.format(srcLoc.getSource())
+                    st b
+                    '''.format(resultLoc.getSource())
                 if size > 1:
-                    loadCode += 'inc pl\n'
-                    if not srcLoc.isAligned():
-                        loadCode += '''
-                            mov a, 0
-                            adc ph, a
-                        '''.format(srcLoc.getSource())
-                    loadCode += 'ld a\n'
-            storeCode = '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st b
-                '''.format(resultLoc.getSource())
-            if size > 1:
-                if resultLoc.isAligned():
-                    storeCode += 'inc pl\n'
-                else:
-                    storeCode += '''
-                        ldi pl, lo({0} + 1)
-                        ldi ph, hi({0} + 1)
-                        '''.format(resultLoc.getSource())
-                storeCode += 'st a\n'
-            return resultLoc, loadCode + storeCode
+                    if resultLoc.isAligned():
+                        storeCode += 'inc pl\n'
+                    else:
+                        storeCode += '''
+                            ldi pl, lo({0} + 1)
+                            ldi ph, hi({0} + 1)
+                            '''.format(resultLoc.getSource())
+                    storeCode += 'st a\n'
+                return resultLoc, loadCode + storeCode
+            else:
+                if srcLoc.getIndirLevel() == 0:
+                    raise RuntimeError("struct const")
+                result = ""
+                for offset in range(size):
+                    result += f'''
+                        ldi pl, lo(({srcLoc.getSource()}) + {offset})
+                        ldi ph, hi(({srcLoc.getSource()}) + {offset})
+                        ld a
+                        ldi pl, lo(({resultLoc.getSource()}) + {offset})
+                        ldi ph, hi(({resultLoc.getSource()}) + {offset})
+                        st a
+                    '''
+                return resultLoc, result
 
 def genCast(resultLoc, t, srcLoc):
     resultLoc = resultLoc.withType(t)
