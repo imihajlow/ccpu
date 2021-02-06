@@ -59,15 +59,20 @@ fill_row_loop:
             xor pl, a
             xor a, pl
             st a
+            inc pl
+            st a
 
             ldi a, 0x10
             add ph, a
             mov a, 0
             st a
+            dec pl
+            st a
 
             ldi pl, lo(col)
             ldi ph, hi(col)
             ld a
+            inc a
             inc a
             st a
             ldi b, 80
