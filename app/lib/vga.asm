@@ -2,11 +2,6 @@
 .export vga_clear_arg0
 .export vga_clear_ret
 
-.export vga_set
-.export vga_set_arg0
-.export vga_set_arg1
-.export vga_set_ret
-
 .export vga_put_text
 .export vga_put_text_arg0
 .export vga_put_text_arg1
@@ -64,54 +59,10 @@ fill_row_loop:
             xor pl, a
             xor a, pl
             st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
-            st a
 
             ldi a, 0x10
             add ph, a
             mov a, 0
-            st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
-            st a
-
-            st a
-            st a
-            st a
-            st a
             st a
 
             ldi pl, lo(col)
@@ -205,28 +156,6 @@ vga_put_text_loop:
     ld ph
     mov pl, a
     st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
 
     ; increment position
     ldi pl, lo(pos)
@@ -259,71 +188,13 @@ vga_put_text_end:
     mov pl, a
     jmp
 
-vga_set:
-    mov a, pl
-    mov b, a
-    mov a, ph
-    ldi pl, lo(ret)
-    ldi ph, hi(ret)
-    st b
-    inc pl
-    st a
-
-    ldi pl, lo(vga_set_arg1)
-    ldi ph, hi(vga_set_arg1)
-    .align 8
-    nop
-    ld b
-    ldi pl, lo(vga_set_arg0)
-    ld a
-    inc pl
-    ld ph
-    mov pl, a
-vga_set_st:
-    ; workaround for non-working RDY: set the value MANY times
-    ; visible area: 25 uS
-    ; st instuction (2 cycles) @ 1350 kHz: 1.5 uS
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    st b
-    st b
-    st b
-    st b
-    st b
-
-    ldi pl, lo(ret)
-    ldi ph, hi(ret)
-    ld a
-    inc pl
-    ld ph
-    mov pl, a
-    jmp
 
 .section bss
 .align 8
 vga_clear_arg0: ; color
 vga_clear_ret:
-vga_set_arg1:
-vga_set_ret:
 color: res 1
 pos:
-vga_set_arg0:
 row: res 2
 vga_put_text_arg0: ; col
 col: res 1

@@ -13,7 +13,7 @@ export u8 vga_console_init(u8 color_) {
 
 export u8 vga_console_print(u8 *text) {
     while (*text) {
-        vga_set((u8*)vga_char_seg + offset, *text);
+        vga_char_seg[offset] = *text;
         offset += 1u16;
         text += 1u8;
     }
@@ -29,7 +29,7 @@ export u8 vga_console_newline() {
 }
 
 export u8 vga_console_putchar(u8 c) {
-    vga_set((u8*)vga_char_seg + offset, c);
+    vga_char_seg[offset] = c;
     offset += 1u16;
 }
 

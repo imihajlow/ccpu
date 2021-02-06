@@ -71,8 +71,8 @@ u8 render_one_char(u8 c, u8 r, u16 offset, u8 force) {
     if (cursor_on_bot) {
         bot_color = bot_color ^ 8u8;
     }
-    vga_set((u8*)vga_color_seg + VGA_OFFSET(c, r), COLOR(bot_color, top_color));
-    vga_set((u8*)vga_char_seg + VGA_OFFSET(c, r), CHAR_BOTTOM);
+    vga_color_seg[VGA_OFFSET(c, r)] = COLOR(bot_color, top_color);
+    vga_char_seg[VGA_OFFSET(c, r)] = CHAR_BOTTOM;
 }
 
 export u8 qp_render() {

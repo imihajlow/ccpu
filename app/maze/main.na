@@ -11,15 +11,15 @@ import u8 trap();
 u8 print_decimal(u8 col, u8 row, u8 x) {
     u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col, row);
     if (x >= 100u8) {
-        vga_set(vga_offset, '0' + x / 100u8);
+        *vga_offset = '0' + x / 100u8;
         x = x % 100u8;
-        vga_set(vga_offset + 1u8, '0' + x / 10u8);
-        vga_set(vga_offset + 2u8, '0' + x % 10u8);
+        vga_offset[1u8] = '0' + x / 10u8;
+        vga_offset[2u8] = '0' + x % 10u8;
     } else if (x >= 10u8) {
-        vga_set(vga_offset, '0' + x / 10u8);
-        vga_set(vga_offset + 1u8, '0' + x % 10u8);
+        *vga_offset = '0' + x / 10u8;
+        vga_offset[1u8] = '0' + x % 10u8;
     } else {
-        vga_set(vga_offset, '0' + x);
+        *vga_offset = '0' + x;
     }
 }
 
@@ -33,7 +33,7 @@ u8 print_level_greeting(u8 n) {
 
 u8 print_success() {
     for (u8* offset = (u8*)vga_color_seg; offset != (u8*)vga_color_seg + VGA_OFFSET(VGA_COLS, VGA_ROWS); offset += 1u8) {
-        vga_set(offset, COLOR(COLOR_WHITE, COLOR_GREEN));
+        *offset = COLOR(COLOR_WHITE, COLOR_GREEN);
     }
 }
 

@@ -148,7 +148,7 @@ u8 show_one(s8 x, s8 y)
     } else if (center == MAZE_PASSAGE) {
         c = CHAR_EMPTY;
     }
-    vga_set(vga_offset, c);
+    *vga_offset = c;
 }
 
 u8 show_player(u8 x, u8 y)
@@ -157,7 +157,7 @@ u8 show_player(u8 x, u8 y)
     u8 top = (VGA_ROWS - height) >> 1u8;
 
     u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(left + x, top + y);
-    vga_set(vga_offset, CHAR_PLAYER);
+    *vga_offset = CHAR_PLAYER;
 }
 
 export u8 maze_show_los(u8 player_x, u8 player_y)
@@ -276,7 +276,7 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
             } else if (e == MAZE_EXIT) {
                 c = CHAR_DOOR;
             }
-            vga_set(screen_offset, c);
+            *screen_offset = c;
 
             maze_offset += 1u16;
             screen_offset += 1u8;
@@ -289,34 +289,34 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
     if (top > 0u8) {
         screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top - 1u8);
         maze_offset = 0u16;
-        vga_set(screen_offset, 218u8);
+        *screen_offset = 218u8;
         screen_offset += 1u8;
         for (x = 0u8; x < width; x += 1u8) {
             c = 196u8;
             if (maze_data[maze_offset] == MAZE_WALL) {
                 c = 194u8;
             }
-            vga_set(screen_offset, c);
+            *screen_offset = c;
             maze_offset += 1u16;
             screen_offset += 1u8;
         }
-        vga_set(screen_offset, 191u8);
+        *screen_offset = 191u8;
     }
     if (top + height < VGA_COLS) {
         screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top + height);
         maze_offset = (u16)width * (u16)(height - 1u8);
-        vga_set(screen_offset, 192u8);
+        *screen_offset = 192u8;
         screen_offset += 1u8;
         for (x = 0u8; x < width; x += 1u8) {
             c = 196u8;
             if (maze_data[maze_offset] == MAZE_WALL) {
                 c = 193u8;
             }
-            vga_set(screen_offset, c);
+            *screen_offset = c;
             maze_offset += 1u16;
             screen_offset += 1u8;
         }
-        vga_set(screen_offset, 217u8);
+        *screen_offset = 217u8;
     }
     screen_offset = (u8*)vga_char_seg + VGA_OFFSET(left - 1u8, top);
     maze_offset = 0u16;
@@ -325,7 +325,7 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
         if (maze_data[maze_offset] == MAZE_WALL) {
             c = 195u8;
         }
-        vga_set(screen_offset, c);
+        *screen_offset = c;
         maze_offset += (u16)(width - 1u8);
         screen_offset += width + 1u8;
 
@@ -333,11 +333,11 @@ export u8 maze_show_all(u8 player_x, u8 player_y)
         if (maze_data[maze_offset] == MAZE_WALL) {
             c = 180u8;
         }
-        vga_set(screen_offset, c);
+        *screen_offset = c;
         maze_offset += 1u16;
         screen_offset += VGA_OFFSET_ROW - 1u8 - width;
     }
-    vga_set((u8*)vga_char_seg + VGA_OFFSET(left + player_x, top + player_y), CHAR_PLAYER);
+    vga_char_seg[VGA_OFFSET(left + player_x, top + player_y)] = CHAR_PLAYER;
 }
 
 u8 get_wall_char(u8 top, u8 bottom, u8 left, u8 right)
@@ -402,7 +402,7 @@ export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
         }
         vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col_x, col_start);
         for (; col_start < col_end; col_start += 1u8) {
-            vga_set(vga_offset, 0u8);
+            *vga_offset = 0u8;
             vga_offset += VGA_OFFSET_ROW;
         }
     } else {
@@ -432,7 +432,7 @@ export u8 maze_forget(u8 player_x, u8 player_y, u8 direction)
         }
         vga_offset = (u8*)vga_char_seg + VGA_OFFSET(row_start, row_y);
         for (; row_start < row_end; row_start += 1u8) {
-            vga_set(vga_offset, 0u8);
+            *vga_offset = 0u8;
             vga_offset += VGA_OFFSET_COL;
         }
     }
