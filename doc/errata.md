@@ -54,6 +54,9 @@ The signal `new_rdy_out` goes to the gate of Q1 instead of `rdy_out`. The `old_r
 The formula can be implemented with three additional N-MOSFETs (2N7002 work fine):
 ![VGA fix](vga_1_fix.png)
 
+### Registers rev. 2
+Registers rev. 2 implement the new direct (not inversed) `RDY` signal. The VGA fix remains the same, but the `new_rdy_out` signal should go directly to the `RDY` line. Q1 should be unsoldered.
+
 ## RST crosstalk
 Heavy bus activity (espectially on `~we` and `a12`-`a15` lines) causes the vertical counter to randomly reset, which leads to an unstable video signal. This is caused by a crosstalk to the `~rst` line. To work around:
 1. Cut the `~rst` track on the back side of the board under U30, north from the via. This way, the affected chips (U30, U16, U23) are disconnected from the old faulty line.
@@ -61,3 +64,5 @@ Heavy bus activity (espectially on `~we` and `a12`-`a15` lines) causes the verti
 
 # Control rev. 3
 The wait for memory system is glitchy or just wrong. Sometimes the whole system resets, sometimes behaves just wrong. Without the change of `~RDY` signal everything works fine.
+
+This is fixed with Registers rev. 2: the `RDY` signal is handled by the clock generator.
