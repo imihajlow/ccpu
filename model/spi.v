@@ -58,6 +58,7 @@ mux_74151 mux_send(
     .y(mosi)
 );
 
+wire #7 n_clk = n_int_clk | n_clk_ena; // 74lv32a
 wire #7 n_count3 = ~count[3]; // 74lv14a
 wire #7 n_int_rst = n_count3 & n_rst; // 74lv08a
 counter_74161 counter_send(
@@ -107,7 +108,6 @@ d_ff_7474 ff_clk_ena(
     .n_cd(n_int_rst),
     .n_sd(1'b1)
 );
-wire #7 n_clk = n_int_clk | n_clk_ena; // 74lv32a
 assign #7 clk = ~n_clk;
 
 wire #7 rdy = rdy_int | n_sel; // 74lv32a
