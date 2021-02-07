@@ -905,25 +905,25 @@ u8 test_stack() {
 struct A {
     u8 v8;
     u16 v16;
-}
+};
 
 struct B {
     s8 v8;
     struct A a;
-}
+};
 
 struct C {
     s16 v16;
     u8 v8;
     u16 v16_2;
-}
+};
 
 struct D {
     s16 v16;
     s8 v8;
     s16 v16_2;
     u8 a[5];
-}
+};
 
 // data @ 254: 0x99 0xa1 0x05 0x06 0x07 0x08 0x09
 import struct A aligned_255_1;
@@ -1068,7 +1068,7 @@ u8 test_sizeof() {
 
 struct Fat {
     u8 a[10];
-}
+};
 
 u8 test_copy() {
     struct Fat src, dst;

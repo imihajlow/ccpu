@@ -68,7 +68,7 @@ if __name__ == '__main__':
         t = parser.parse(code)
     except LarkError as e:
         file, line = lit.translateLine(e.line)
-        sys.stderr.write("Syntax error in {}:{}:{}\n".format(file, line, e.column))
+        sys.stderr.write("Syntax error in {}:{}:{} {}\n".format(file, line, e.column, str(e)))
         sys.exit(1)
 
     backend = ccpu.code

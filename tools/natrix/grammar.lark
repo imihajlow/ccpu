@@ -1,6 +1,4 @@
-start: (function_definition | forward_declaration | gl_decl_var | struct_declaration)*
-
-struct_declaration: "struct" IDENTIFIER "{" field_declaration* "}"
+start: (function_definition | forward_declaration | gl_decl_var)*
 
 ?field_declaration: type IDENTIFIER ";"
     | type IDENTIFIER "[" expression "]" ";" -> array_field_declaration
@@ -13,6 +11,7 @@ function_declaration: attributes type IDENTIFIER "(" arg_declarations ")"
 
 gl_decl_var: attributes type IDENTIFIER ";"
     | attributes type IDENTIFIER "[" expression "]" ";" -> gl_decl_array
+    | attributes type ";" -> gl_decl_type
 
 attributes: attribute*
 
@@ -68,6 +67,7 @@ declarator: IDENTIFIER -> decl_var
 ?type: INT_TYPE -> int_type
     | type "*" -> ptr
     | "struct" IDENTIFIER -> struct_type
+    | "struct" IDENTIFIER "{" field_declaration* "}" -> struct_declaration
 
 assignment: lvalue "=" expression
     | lvalue "=" function_call -> assignment_function
