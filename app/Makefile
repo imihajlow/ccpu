@@ -32,7 +32,7 @@ natest.bin: test/natest.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib
 io_test.bin: test/io_test.o lib/display.o $(DELAY_OBJ) lib/keyboard.o lib/bcdf.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-main.bin: main.o life/quasipixel.o life/life.o calc/calc.o maze/maze.o maze/game.o maze/main.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/string.o lib/keyboard.o lib/vga.o lib/vga_console.o $(BCDF_OBJECTS) lib/random.o lib/entropy.o
+main.bin: main.o life/quasipixel.o life/life.o calc/calc.o maze/maze.o maze/game.o maze/main.o $(NATRIX_DIR)/runtime/natrix_runtime.o test/trap.o lib/string.o lib/keyboard.o lib/vga.o lib/vga_console.o $(BCDF_OBJECTS) lib/random.o lib/entropy.o vga_demo.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 alutest.bin: test/alutest.o

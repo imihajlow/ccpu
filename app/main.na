@@ -7,6 +7,8 @@
 #include "calc/main.h"
 #include "maze/main.h"
 
+import u8 vga_demo();
+
 u8 life_main() {
     qp_init(COLOR_MAGENTA, COLOR_BROWN);
     life_init();
@@ -83,12 +85,13 @@ export u8 display_frame(u8 x0, u8 y0, u8 x1, u8 y1) {
 export u8 main() {
     while (1u8) {
         vga_clear(COLOR(COLOR_WHITE, COLOR_BLUE));
-        vga_put_text(34u8, 13u8, "1. Calculator");
-        vga_put_text(34u8, 15u8, "2. Life");
-        vga_put_text(34u8, 17u8, "3. Maze");
-        display_frame(32u8, 11u8, 49u8, 19u8);
+        vga_put_text(34u8, 11u8, "1. Calculator");
+        vga_put_text(34u8, 13u8, "2. Life");
+        vga_put_text(34u8, 15u8, "3. Maze");
+        vga_put_text(34u8, 17u8, "4. VGA stripes");
+        display_frame(32u8, 9u8, 49u8, 19u8);
         u8 key = KEY_NO_KEY;
-        while (key != KEY_1 && key != KEY_2 && key != KEY_3) {
+        while (key != KEY_1 && key != KEY_2 && key != KEY_3 && key != KEY_4) {
             key = keyboard_wait_key_released();
         }
         if (key == KEY_2) {
@@ -97,6 +100,8 @@ export u8 main() {
             calc_main();
         } else if (key == KEY_3) {
             maze_main();
+        } else if (key == KEY_4) {
+            vga_demo();
         }
     }
 }
