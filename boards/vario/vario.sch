@@ -72,7 +72,7 @@ NoConn ~ 1800 1750
 Text Label 2300 1750 0    50   ~ 0
 ~rst
 Text Label 1800 1850 2    50   ~ 0
-~rdy
+rdy
 Text Label 2300 1850 0    50   ~ 0
 ena
 Text Label 1800 1950 2    50   ~ 0
@@ -276,7 +276,7 @@ Wire Wire Line
 Wire Bus Line
 	4200 2150 5600 2150
 Text GLabel 1400 1850 0    50   3State ~ 0
-~rdy
+rdy
 Wire Wire Line
 	1400 1850 1800 1850
 Text Label 4550 6000 2    50   ~ 0
@@ -434,17 +434,6 @@ Connection ~ 8950 6250
 Wire Wire Line
 	8950 6250 8950 6300
 $Comp
-L Device:Q_NMOS_DSG Q5
-U 1 1 5FEDCEB8
-P 6000 7550
-F 0 "Q5" H 6205 7596 50  0000 L CNN
-F 1 "Q_NMOS_DSG" H 6205 7505 50  0000 L CNN
-F 2 "" H 6200 7650 50  0001 C CNN
-F 3 "~" H 6000 7550 50  0001 C CNN
-	1    6000 7550
-	-1   0    0    -1  
-$EndComp
-$Comp
 L Device:R R9
 U 1 1 5FEE1EBB
 P 5900 7200
@@ -483,7 +472,6 @@ Wire Wire Line
 	5500 7350 5500 6450
 Wire Wire Line
 	5500 6450 5250 6450
-Connection ~ 5900 7350
 Text Label 5350 6450 0    50   ~ 0
 ~miso
 $Comp
@@ -1114,4 +1102,16 @@ Wire Wire Line
 	9250 10150 9250 10250
 Wire Bus Line
 	4200 2150 4200 5750
+$Comp
+L Device:Q_NMOS_GSD Q?
+U 1 1 6021BDC6
+P 6000 7550
+F 0 "Q?" H 6205 7596 50  0000 L CNN
+F 1 "Q_NMOS_GSD" H 6205 7505 50  0000 L CNN
+F 2 "" H 6200 7650 50  0001 C CNN
+F 3 "~" H 6000 7550 50  0001 C CNN
+	1    6000 7550
+	-1   0    0    -1  
+$EndComp
+Connection ~ 5900 7350
 $EndSCHEMATC

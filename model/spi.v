@@ -6,7 +6,7 @@ module spi(/*autoport*/
 //output
             clk,
             mosi,
-            n_rdy,
+            rdy,
 //input
             n_rst,
             miso,
@@ -18,7 +18,7 @@ output wire clk;
 output wire mosi;
 input wire miso;
 
-output wire n_rdy;
+output wire rdy;
 inout wire [7:0] d;
 input wire n_oe;
 input wire n_we;
@@ -110,6 +110,7 @@ d_ff_7474 ff_clk_ena(
 );
 assign #7 clk = ~n_clk;
 
-wire #7 rdy = rdy_int | n_sel; // 74lv32a
-assign #10 n_rdy = ~rdy; // P-MOSFET
+wire #7 rdy_out = rdy_int | n_sel; // 74lv32a
+wire #7 n_rdy_out = ~rdy_out;
+assign #10 rdy = ~n_rdy_out; // N-MOSFET
 endmodule

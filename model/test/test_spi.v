@@ -32,7 +32,7 @@ wire clk;
 wire mosi;
 wire miso;
 
-wire n_rdy;
+wire rdy;
 wire [7:0] d;
 reg n_oe;
 reg n_we;
@@ -41,7 +41,7 @@ spi inst(
     .d(d),
     .clk(clk),
     .mosi(mosi),
-    .n_rdy(n_rdy),
+    .rdy(rdy),
     .n_rst(n_rst),
     .miso(miso),
     .n_oe(n_oe),
@@ -92,12 +92,12 @@ initial begin
         n_oe = 1;
         n_we = 0;
         #1
-        while (n_rdy) #1 ;
+        while (~rdy) #1 ;
         n_we = 1;
         #1
         n_oe = 0;
         #1
-        while (n_rdy) #1 ;
+        while (~rdy) #1 ;
         #1
         if (d !== values_out[i]) begin
             $display("read wrong value from the bus: @%0d %08b instead of %08b", i, d, values_out[i]);
