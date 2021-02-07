@@ -1,0 +1,74 @@
+#include <vga.h>
+#include <random.h>
+#include <keyboard.h>
+
+#define N_TRACERS 32u8
+#define CHAR_STEP 57u8
+
+struct Pos {
+    u8 col;
+    s8 row;
+};
+
+u8 c;
+
+struct Pos tracers[N_TRACERS];
+struct Pos erasers[N_TRACERS];
+
+u8 new_tracer(u8 i) {
+    u16 col = random((u16)VGA_COLS);
+    u16 row = random(5u16);
+    u16 length = random(20u16);
+    tracers[i].col = (u8)col;
+    tracers[i].row = -(s8)row;
+
+    erasers[i].col = (u8)col;
+    erasers[i].row = -(s8)row - (s8)length - 5s8;
+}
+
+export u8 matrix_code_rain() {
+    vga_clear(COLOR(COLOR_GREEN, COLOR_BLACK));
+
+    c = 'a';
+    for (u8 i = 0u8; i < N_TRACERS; i += 1u8) {
+        new_tracer(i);
+    }
+
+    while (1u8) {
+        u8 key = keyboard_get_if_pressed();
+        if (key != KEY_NO_KEY) {
+            break;
+        }
+
+        for (i = 0u8; i < N_TRACERS; i += 1u8) {
+            u8 col = erasers[i].col;
+            s8 row = erasers[i].row;
+            if (row >= 0s8) {
+                vga_char_seg[VGA_OFFSET(col, row)] = 0u8;
+            }
+            row += 1s8;
+            if (row < (s8)VGA_ROWS) {
+                erasers[i].row = row;
+            } else {
+                new_tracer(i);
+            }
+        }
+        for (i = 0u8; i < N_TRACERS; i += 1u8) {
+            row = tracers[i].row;
+            if (row < (s8)VGA_ROWS) {
+                col = tracers[i].col;
+                if (row >= 0s8) {
+                    vga_color_seg[VGA_OFFSET(col, row)] = COLOR(COLOR_GREEN, COLOR_BLACK);
+                }
+                row += 1s8;
+                tracers[i].row = row;
+                if (row >= 0s8) {
+                    u16 offset = VGA_OFFSET(col, row);
+                    vga_color_seg[offset] = COLOR(COLOR_WHITE, COLOR_BLACK);
+                    vga_char_seg[offset] = c;
+                    c = (c + CHAR_STEP) & 0x7fu8;
+                }
+            }
+        }
+    }
+}
