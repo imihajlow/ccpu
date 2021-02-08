@@ -12,8 +12,8 @@ wire rdy;
 wire [7:0] d;
 reg n_oe;
 reg n_we;
-reg n_sel;
-reg a;
+reg n_data_sel;
+reg n_status_sel;
 
 wire n_clk_out;
 wire n_data_out;
@@ -34,8 +34,8 @@ ps2 inst(
     .n_data_in(n_data),
     .n_oe(n_oe),
     .n_we(n_we),
-    .n_sel(n_sel),
-    .a(a)
+    .n_data_sel(n_data_sel),
+    .n_status_sel(n_status_sel)
 );
 
 reg [7:0] d_in;
@@ -149,10 +149,10 @@ initial begin
     n_rst = 0;
     n_oe = 1;
     n_we = 1;
-    n_sel = 0;
+    n_data_sel = 1;
+    n_status_sel = 1;
     clk_in = 1;
     data_in = 1;
-    a = 0;
 
     #200
     n_rst = 1;
@@ -160,7 +160,8 @@ initial begin
 
     // read status
     n_oe = 0;
-    a = 1;
+    n_data_sel = 1;
+    n_status_sel = 0;
     #1
     wait (rdy);
     assert(d[0] === 0); // no data
@@ -176,7 +177,8 @@ initial begin
 
         // read status
         n_oe = 0;
-        a = 1;
+        n_data_sel = 1;
+        n_status_sel = 0;
         #1
         wait (rdy);
         #10;
@@ -187,7 +189,8 @@ initial begin
 
         // read data
         n_oe = 0;
-        a = 0;
+        n_data_sel = 0;
+        n_status_sel = 1;
         #1;
         wait (rdy);
         assert(n_clk_out === 1);
@@ -201,19 +204,22 @@ initial begin
 
         // reset for the next reception
         #1
-        a = 1;
+        n_data_sel = 1;
+        n_status_sel = 0;
         #1
         n_we = 0;
         #1
         assert(n_clk_out === 0);
         n_we = 1;
-        a = 0;
+        n_data_sel = 0;
+        n_status_sel = 1;
         #1
         assert(n_clk_out === 0);
 
         // read status
         n_oe = 0;
-        a = 1;
+        n_data_sel = 1;
+        n_status_sel = 0;
         #1
         wait (rdy);
         assert(d[0] === 0); // no data
@@ -224,14 +230,16 @@ initial begin
 
     // test send
     recv_template = 8'b11001010;
-    a = 0;
+    n_data_sel = 0;
+    n_status_sel = 1;
     d_in = recv_template;
     n_we = 0;
     #1;
     n_we = 1;
     #1
     // read status
-    a = 1;
+    n_data_sel = 1;
+    n_status_sel = 0;
     n_oe = 0;
     wait(rdy);
     assert(~d[0]); // no data in recv register
@@ -240,19 +248,22 @@ initial begin
     // send when data is received
     transmit_to_host(8'h4c, 1);
     #1
-    a = 1;
+    n_data_sel = 1;
+    n_status_sel = 0;
     n_oe = 0;
     wait(rdy);
     assert(d[0]); // has data
     assert(d[1]); // parity valid
-    a = 0;
+    n_data_sel = 0;
+    n_status_sel = 1;
     #1
     wait(rdy);
     assert(d === 8'h4c);
 
     #1
     n_oe = 1;
-    a = 0;
+    n_data_sel = 0;
+    n_status_sel = 1;
     #1
     recv_template = 8'hc5;
     d_in = recv_template;
@@ -262,7 +273,8 @@ initial begin
     n_we = 1;
     #1
     // read status
-    a = 1;
+    n_data_sel = 1;
+    n_status_sel = 0;
     n_oe = 0;
     wait(rdy);
     assert(d[0]); // has data
@@ -272,7 +284,8 @@ initial begin
     assert(n_clk_out); // reception is still inhibited
 
     // read data
-    a = 0;
+    n_data_sel = 0;
+    n_status_sel = 1;
     #1
     wait(rdy);
     assert(d === 8'h4c);

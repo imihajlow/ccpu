@@ -178,8 +178,8 @@ F3 "ps2_data" T R 6550 2700 50
 F4 "d[0..7]" B L 5600 2150 50 
 F5 "~oe" I L 5600 2250 50 
 F6 "~we" I L 5600 2350 50 
-F7 "~sel" I L 5600 2450 50 
-F8 "a" I L 5600 2550 50 
+F7 "~data_sel" I L 5600 2650 50 
+F8 "~status_sel" I L 5600 2750 50 
 $EndSheet
 Text GLabel 2950 1750 2    50   Output ~ 0
 ~rst
@@ -223,8 +223,6 @@ Text Label 5600 2250 2    50   ~ 0
 ~oe
 Text Label 5600 2350 2    50   ~ 0
 ~we
-Text Label 5600 2550 2    50   ~ 0
-a0
 Entry Wire Line
 	4100 2550 4200 2450
 Entry Wire Line
@@ -1100,8 +1098,6 @@ Text Label 9250 10150 2    50   ~ 0
 ~card_status_oe
 Wire Wire Line
 	9250 10150 9250 10250
-Wire Bus Line
-	4200 2150 4200 5750
 $Comp
 L Device:Q_NMOS_GSD Q?
 U 1 1 6021BDC6
@@ -1114,4 +1110,28 @@ F 3 "~" H 6000 7550 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 Connection ~ 5900 7350
+Wire Bus Line
+	4200 2150 4200 5750
+$Comp
+L 74xx:74LS30 U?
+U 1 1 6022739C
+P 1950 6500
+F 0 "U?" H 1950 7025 50  0000 C CNN
+F 1 "74LS30" H 1950 6934 50  0000 C CNN
+F 2 "" H 1950 6500 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS30" H 1950 6500 50  0001 C CNN
+	1    1950 6500
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS30 U?
+U 2 1 602286DA
+P 2650 13600
+F 0 "U?" H 2880 13646 50  0000 L CNN
+F 1 "74LS30" H 2880 13555 50  0000 L CNN
+F 2 "" H 2650 13600 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74LS30" H 2650 13600 50  0001 C CNN
+	2    2650 13600
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

@@ -12,8 +12,8 @@ module ps2(/*autoport*/
             n_data_in,
             n_oe,
             n_we,
-            n_sel,
-            a);
+            n_data_sel,
+            n_status_sel);
 input wire n_rst;
 output wire n_clk_out;
 output wire n_data_out;
@@ -24,8 +24,8 @@ output wire rdy;
 inout wire [7:0] d;
 input wire n_oe;
 input wire n_we;
-input wire n_sel;
-input wire a; // 0 - data, 1 - status
+input wire n_data_sel;
+input wire n_status_sel;
 
 wire #10 data_in = ~n_data_in; // 74lv14a
 // =========================================
@@ -246,9 +246,7 @@ wire #7 n_send_data_out = n_send_data_out_lo & n_send_data_out_hi; // 74lv08a
 // =========================================
 // Common part
 
-wire #7 n_data_sel = n_sel | a; // 74lv32a
-wire #7 n_a = ~a; // 74lv04a
-wire #7 n_status_sel = n_sel | n_a; // 74lv32a
+wire #7 n_sel = n_data_sel & n_status_sel; // 74lv08a
 
 assign #7 n_data_out = n_send_data_out & data_out_ena; // 74lv08a
 
