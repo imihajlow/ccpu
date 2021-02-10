@@ -1625,8 +1625,6 @@ F 3 "" H 750 2000 50  0001 C CNN
 	1    750  2000
 	1    0    0    -1  
 $EndComp
-Wire Bus Line
-	4200 2150 4200 5750
 $Comp
 L power:VCC #PWR0229
 U 1 1 602257F4
@@ -1638,4 +1636,6 @@ F 3 "" H 750 1700 50  0001 C CNN
 	1    750  1700
 	1    0    0    -1  
 $EndComp
+Wire Bus Line
+	4200 2150 4200 5750
 $EndSCHEMATC

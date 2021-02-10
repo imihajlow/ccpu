@@ -625,12 +625,12 @@ $EndComp
 $Comp
 L 74xx:74HC74 U13
 U 2 1 5FF12600
-P 10750 8700
-F 0 "U13" H 11100 8500 50  0000 C CNN
-F 1 "74HC74PW" H 11050 8400 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10750 8700 50  0001 C CNN
-F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 10750 8700 50  0001 C CNN
-	2    10750 8700
+P 7250 8600
+F 0 "U13" H 7600 8400 50  0000 C CNN
+F 1 "74HC74PW" H 7550 8300 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 7250 8600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 7250 8600 50  0001 C CNN
+	2    7250 8600
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -788,12 +788,12 @@ Text Notes 3550 9950 0    50   ~ 0
 $Comp
 L 74xx:74HC74 U15
 U 1 1 5FF3A4FD
-P 7250 8600
-F 0 "U15" H 7550 8350 50  0000 C CNN
-F 1 "74HC74PW" H 7600 8250 50  0000 C CNN
-F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 7250 8600 50  0001 C CNN
-F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 7250 8600 50  0001 C CNN
-	1    7250 8600
+P 10750 8700
+F 0 "U15" H 11050 8450 50  0000 C CNN
+F 1 "74HC74PW" H 11100 8350 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10750 8700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 10750 8700 50  0001 C CNN
+	1    10750 8700
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1226,49 +1226,23 @@ $EndComp
 $Comp
 L 74xx:74HC273 U18
 U 1 1 5FFAC1BC
-P 9800 11900
-F 0 "U18" H 10250 11350 50  0000 C CNN
-F 1 "74HC273PW" H 10300 11250 50  0000 C CNN
-F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 9800 11900 50  0001 C CNN
-F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 9800 11900 50  0001 C CNN
-	1    9800 11900
+P 9600 11900
+F 0 "U18" H 10050 11350 50  0000 C CNN
+F 1 "74HC273PW" H 10100 11250 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 9600 11900 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 9600 11900 50  0001 C CNN
+	1    9600 11900
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	10300 11400 11100 11400
-Wire Wire Line
-	10300 11500 11100 11500
-Wire Wire Line
-	10300 11600 11100 11600
-Wire Wire Line
-	10300 11700 11100 11700
-Wire Wire Line
-	10300 11800 11100 11800
-Wire Wire Line
-	10300 11900 11100 11900
-Wire Wire Line
-	10300 12000 11100 12000
-Wire Wire Line
-	10300 12100 10700 12100
-Wire Wire Line
-	10700 12100 10700 14250
-Wire Wire Line
-	10700 14250 11100 14250
-Text Label 10400 11400 0    50   ~ 0
+Text Label 11100 11400 2    50   ~ 0
 send_data1
-Text Label 10400 11500 0    50   ~ 0
+Text Label 11100 11500 2    50   ~ 0
 send_data2
-Text Label 10400 11600 0    50   ~ 0
+Text Label 11100 11600 2    50   ~ 0
 send_data3
-Text Label 10400 11700 0    50   ~ 0
+Text Label 11100 11700 2    50   ~ 0
 send_data4
-Text Label 10400 11800 0    50   ~ 0
-send_data5
-Text Label 10400 11900 0    50   ~ 0
-send_data6
-Text Label 10400 12000 0    50   ~ 0
-send_data7
-Text Label 10700 13250 1    50   ~ 0
+Text Label 11100 14250 2    50   ~ 0
 send_data8
 $Comp
 L power:VCC #PWR065
@@ -1299,44 +1273,44 @@ Wire Wire Line
 $Comp
 L power:GND #PWR061
 U 1 1 5FFD0172
-P 9800 12700
-F 0 "#PWR061" H 9800 12450 50  0001 C CNN
-F 1 "GND" H 9805 12527 50  0000 C CNN
-F 2 "" H 9800 12700 50  0001 C CNN
-F 3 "" H 9800 12700 50  0001 C CNN
-	1    9800 12700
+P 9600 12700
+F 0 "#PWR061" H 9600 12450 50  0001 C CNN
+F 1 "GND" H 9605 12527 50  0000 C CNN
+F 2 "" H 9600 12700 50  0001 C CNN
+F 3 "" H 9600 12700 50  0001 C CNN
+	1    9600 12700
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:VCC #PWR060
 U 1 1 5FFD069A
-P 9800 11100
-F 0 "#PWR060" H 9800 10950 50  0001 C CNN
-F 1 "VCC" H 9815 11273 50  0000 C CNN
-F 2 "" H 9800 11100 50  0001 C CNN
-F 3 "" H 9800 11100 50  0001 C CNN
-	1    9800 11100
+P 9600 11100
+F 0 "#PWR060" H 9600 10950 50  0001 C CNN
+F 1 "VCC" H 9615 11273 50  0000 C CNN
+F 2 "" H 9600 11100 50  0001 C CNN
+F 3 "" H 9600 11100 50  0001 C CNN
+	1    9600 11100
 	1    0    0    -1  
 $EndComp
-Text Label 9300 11400 2    50   ~ 0
+Text Label 9100 11800 2    50   ~ 0
 d0
-Text Label 9300 11500 2    50   ~ 0
+Text Label 9100 11900 2    50   ~ 0
 d1
-Text Label 9300 11600 2    50   ~ 0
+Text Label 9100 12000 2    50   ~ 0
 d2
-Text Label 9300 11700 2    50   ~ 0
+Text Label 9100 12100 2    50   ~ 0
 d3
-Text Label 9300 11800 2    50   ~ 0
+Text Label 9100 11400 2    50   ~ 0
 d4
-Text Label 9300 11900 2    50   ~ 0
+Text Label 9100 11500 2    50   ~ 0
 d5
-Text Label 9300 12000 2    50   ~ 0
+Text Label 9100 11600 2    50   ~ 0
 d6
-Text Label 9300 12100 2    50   ~ 0
+Text Label 9100 11700 2    50   ~ 0
 d7
-Text Label 9300 12400 2    50   ~ 0
+Text Label 9100 12400 2    50   ~ 0
 ~rst
-Text Label 9300 12300 2    50   ~ 0
+Text Label 9100 12300 2    50   ~ 0
 send_ena_clk
 $Comp
 L 74xx:74LS280 U19
@@ -2844,34 +2818,34 @@ $EndComp
 $Comp
 L Device:C C19
 U 1 1 60447330
-P 9400 10900
-F 0 "C19" H 9515 10946 50  0000 L CNN
-F 1 "0.1" H 9515 10855 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric" H 9438 10750 50  0001 C CNN
-F 3 "~" H 9400 10900 50  0001 C CNN
-	1    9400 10900
+P 9200 10900
+F 0 "C19" H 9315 10946 50  0000 L CNN
+F 1 "0.1" H 9315 10855 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 9238 10750 50  0001 C CNN
+F 3 "~" H 9200 10900 50  0001 C CNN
+	1    9200 10900
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR0131
 U 1 1 60447336
-P 9400 11050
-F 0 "#PWR0131" H 9400 10800 50  0001 C CNN
-F 1 "GND" H 9405 10877 50  0000 C CNN
-F 2 "" H 9400 11050 50  0001 C CNN
-F 3 "" H 9400 11050 50  0001 C CNN
-	1    9400 11050
+P 9200 11050
+F 0 "#PWR0131" H 9200 10800 50  0001 C CNN
+F 1 "GND" H 9205 10877 50  0000 C CNN
+F 2 "" H 9200 11050 50  0001 C CNN
+F 3 "" H 9200 11050 50  0001 C CNN
+	1    9200 11050
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:VCC #PWR0130
 U 1 1 6044733C
-P 9400 10750
-F 0 "#PWR0130" H 9400 10600 50  0001 C CNN
-F 1 "VCC" H 9415 10923 50  0000 C CNN
-F 2 "" H 9400 10750 50  0001 C CNN
-F 3 "" H 9400 10750 50  0001 C CNN
-	1    9400 10750
+P 9200 10750
+F 0 "#PWR0130" H 9200 10600 50  0001 C CNN
+F 1 "VCC" H 9215 10923 50  0000 C CNN
+F 2 "" H 9200 10750 50  0001 C CNN
+F 3 "" H 9200 10750 50  0001 C CNN
+	1    9200 10750
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -3319,6 +3293,28 @@ F 3 "" H 7350 5150 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6750 5450 6750 5150
+Text Label 10100 11800 0    50   ~ 0
+send_data1
+Text Label 10100 11900 0    50   ~ 0
+send_data2
+Text Label 10100 12000 0    50   ~ 0
+send_data3
+Text Label 10100 12100 0    50   ~ 0
+send_data4
+Text Label 11100 12000 2    50   ~ 0
+send_data7
+Text Label 11100 11900 2    50   ~ 0
+send_data6
+Text Label 11100 11800 2    50   ~ 0
+send_data5
+Text Label 10100 11600 0    50   ~ 0
+send_data7
+Text Label 10100 11500 0    50   ~ 0
+send_data6
+Text Label 10100 11400 0    50   ~ 0
+send_data5
 Wire Bus Line
 	1550 2200 1550 3200
+Text Label 10100 11700 0    50   ~ 0
+send_data8
 $EndSCHEMATC

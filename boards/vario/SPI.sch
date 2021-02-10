@@ -26,37 +26,37 @@ F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 4450 4150 50  0001 C CNN
 	1    4450 4150
 	1    0    0    -1  
 $EndComp
-Text Label 3950 3650 2    50   ~ 0
-d0
-Text Label 3950 3750 2    50   ~ 0
-d1
-Text Label 3950 3850 2    50   ~ 0
-d2
-Text Label 3950 3950 2    50   ~ 0
-d3
 Text Label 3950 4050 2    50   ~ 0
-d4
+d0
 Text Label 3950 4150 2    50   ~ 0
-d5
+d1
 Text Label 3950 4250 2    50   ~ 0
-d6
+d2
 Text Label 3950 4350 2    50   ~ 0
+d3
+Text Label 3950 3650 2    50   ~ 0
+d4
+Text Label 3950 3750 2    50   ~ 0
+d5
+Text Label 3950 3850 2    50   ~ 0
+d6
+Text Label 3950 3950 2    50   ~ 0
 d7
-Text Label 4950 3650 0    50   ~ 0
-reg_send_q0
-Text Label 4950 3750 0    50   ~ 0
-reg_send_q1
-Text Label 4950 3850 0    50   ~ 0
-reg_send_q2
-Text Label 4950 3950 0    50   ~ 0
-reg_send_q3
 Text Label 4950 4050 0    50   ~ 0
-reg_send_q4
+reg_send_q0
 Text Label 4950 4150 0    50   ~ 0
-reg_send_q5
+reg_send_q1
 Text Label 4950 4250 0    50   ~ 0
-reg_send_q6
+reg_send_q2
 Text Label 4950 4350 0    50   ~ 0
+reg_send_q3
+Text Label 4950 3650 0    50   ~ 0
+reg_send_q4
+Text Label 4950 3750 0    50   ~ 0
+reg_send_q5
+Text Label 4950 3850 0    50   ~ 0
+reg_send_q6
+Text Label 4950 3950 0    50   ~ 0
 reg_send_q7
 $Comp
 L power:GND #PWR?
@@ -1391,8 +1391,6 @@ F 3 "~" H 7400 8500 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	6750 8500 7250 8500
-Wire Bus Line
-	1700 2050 1700 3050
 $Comp
 L Device:R R19
 U 1 1 60397E60
@@ -1417,4 +1415,6 @@ F 3 "" H 7850 8500 50  0001 C CNN
 	1    7850 8500
 	0    -1   -1   0   
 $EndComp
+Wire Bus Line
+	1700 2050 1700 3050
 $EndSCHEMATC
