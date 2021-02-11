@@ -170,16 +170,7 @@ d_ff_7474 ff_send_clk_ena(
 
 wire #7 n_send_clk = n_clk_in | n_send_clk_ena; // 74lv08a
 
-wire send_rdy;
-wire n_send_rdy;
-d_ff_7474 ff_send_rdy(
-    .q(n_send_rdy),
-    .n_q(send_rdy),
-    .d(1'b1),
-    .cp(send_ena_clk),
-    .n_cd(n_send_rst),
-    .n_sd(1'b1)
-);
+wire n_send_rdy = send_ena;
 
 wire [3:0] send_cnt;
 counter_74161 cnt_send(

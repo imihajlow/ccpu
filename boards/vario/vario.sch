@@ -1179,13 +1179,13 @@ Text Label 5600 2750 2    50   ~ 0
 ~ps2_status_sel
 Text Label 4550 6100 2    50   ~ 0
 ~spi_data_sel
-Text Label 3050 7100 2    50   ~ 0
-a0
 Text Label 3050 7200 2    50   ~ 0
+a0
+Text Label 3050 7100 2    50   ~ 0
 a1
-Text Label 1700 7300 2    50   ~ 0
-a8
 Text Label 1700 7400 2    50   ~ 0
+a8
+Text Label 1700 7300 2    50   ~ 0
 a9
 Text Label 950  7300 2    50   ~ 0
 a10
