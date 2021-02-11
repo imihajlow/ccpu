@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 9)
+    (drawings 10)
     (tracks 3545)
     (zones 0)
     (modules 121)
@@ -6345,6 +6345,9 @@
     )
   )
 
+  (gr_text "Licensed under the TAPR Open Hardware License\n(www.tapr.org/OHL)" (at 174.7 100.5 90) (layer B.SilkS)
+    (effects (font (size 1 1) (thickness 0.15)) (justify mirror))
+  )
   (gr_text SPI (at 139 52.5) (layer F.SilkS)
     (effects (font (size 1 1) (thickness 0.15)))
   )
