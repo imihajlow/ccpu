@@ -9,4 +9,10 @@ $CMP AT28C256-PLCC32
 F http://ww1.microchip.com/downloads/en/DeviceDoc/doc0006.pdf
 $ENDCMP
 #
+$CMP IFX54441EJV33
+D Low dropout voltage regulator
+K regulator
+F https://www.mouser.de/datasheet/2/196/Infineon-IFX54441-DS-v01_01-EN-1226726.pdf
+$ENDCMP
+#
 #End Doc Library

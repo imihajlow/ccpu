@@ -62,6 +62,8 @@ wire #5 hx_or_654 = hx_or_65 | hx[4]; // 74lv32a
 wire #5 hx_6_0_ge_0010000 = hx_or_654; // 74lv32a
 wire #7 hsync_int = ~(hx[9] & hx[7] & hx_6_0_ge_0010000 & hx_6_0_lt_1110000); // 74lv20a
 
+wire #5 n_hx2 = ~(hx[2] & hx[2]); // 74lv00a
+
 d_ff_7474 ff_hsync(
       .q(hsync_out),
       .n_q(n_hsync_out),
@@ -129,8 +131,6 @@ assign #6 n_color_ram_cs = a_sel & n_color_ram_we; // 74lv08a
 
 wire #5 rdy_out = ~(n_text_ram_we & n_color_ram_we); // 74lv00a
 assign #5 n_rdy = ~rdy_out; // P-MOSFET
-
-wire #5 n_hx2 = ~(hx[2] & hx[2]); // 74lv00a
 
 // always output when pixel area
 assign n_text_ram_oe = a_sel;

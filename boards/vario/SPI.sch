@@ -1,0 +1,1420 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A2 16535 23386 portrait
+encoding utf-8
+Sheet 2 3
+Title "SPI controller"
+Date "2020-12-23"
+Rev "1"
+Comp "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L 74xx:74HC273 U?
+U 1 1 5FE61758
+P 4450 4150
+AR Path="/5FE61758" Ref="U?"  Part="1" 
+AR Path="/5FE5ABE2/5FE61758" Ref="U1"  Part="1" 
+F 0 "U1" H 4850 3600 50  0000 C CNN
+F 1 "74HC273PW" H 4850 3450 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 4450 4150 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 4450 4150 50  0001 C CNN
+	1    4450 4150
+	1    0    0    -1  
+$EndComp
+Text Label 3950 4050 2    50   ~ 0
+d0
+Text Label 3950 4150 2    50   ~ 0
+d1
+Text Label 3950 4250 2    50   ~ 0
+d2
+Text Label 3950 4350 2    50   ~ 0
+d3
+Text Label 3950 3650 2    50   ~ 0
+d4
+Text Label 3950 3750 2    50   ~ 0
+d5
+Text Label 3950 3850 2    50   ~ 0
+d6
+Text Label 3950 3950 2    50   ~ 0
+d7
+Text Label 4950 4050 0    50   ~ 0
+reg_send_q0
+Text Label 4950 4150 0    50   ~ 0
+reg_send_q1
+Text Label 4950 4250 0    50   ~ 0
+reg_send_q2
+Text Label 4950 4350 0    50   ~ 0
+reg_send_q3
+Text Label 4950 3650 0    50   ~ 0
+reg_send_q4
+Text Label 4950 3750 0    50   ~ 0
+reg_send_q5
+Text Label 4950 3850 0    50   ~ 0
+reg_send_q6
+Text Label 4950 3950 0    50   ~ 0
+reg_send_q7
+$Comp
+L power:GND #PWR?
+U 1 1 5FE6176E
+P 4450 4950
+AR Path="/5FE6176E" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE6176E" Ref="#PWR09"  Part="1" 
+F 0 "#PWR09" H 4450 4700 50  0001 C CNN
+F 1 "GND" V 4455 4822 50  0000 R CNN
+F 2 "" H 4450 4950 50  0001 C CNN
+F 3 "" H 4450 4950 50  0001 C CNN
+	1    4450 4950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE61774
+P 4450 3350
+AR Path="/5FE61774" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE61774" Ref="#PWR08"  Part="1" 
+F 0 "#PWR08" H 4450 3200 50  0001 C CNN
+F 1 "VCC" V 4465 3478 50  0000 L CNN
+F 2 "" H 4450 3350 50  0001 C CNN
+F 3 "" H 4450 3350 50  0001 C CNN
+	1    4450 3350
+	1    0    0    -1  
+$EndComp
+Text Label 3950 4650 2    50   ~ 0
+~rst
+$Comp
+L 74xx:74LS151 U?
+U 1 1 5FE6177B
+P 7150 4200
+AR Path="/5FE6177B" Ref="U?"  Part="1" 
+AR Path="/5FE5ABE2/5FE6177B" Ref="U5"  Part="1" 
+F 0 "U5" H 7550 3450 50  0000 C CNN
+F 1 "MC74HC151ADTR2G" H 7550 3300 50  0000 C CNN
+F 2 "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" H 7150 4200 50  0001 C CNN
+F 3 "https://www.onsemi.com/pub/Collateral/MC74HC151A-D.PDF" H 7150 4200 50  0001 C CNN
+	1    7150 4200
+	1    0    0    -1  
+$EndComp
+Text Label 6650 4300 2    50   ~ 0
+reg_send_q0
+Text Label 6650 4200 2    50   ~ 0
+reg_send_q1
+Text Label 6650 4100 2    50   ~ 0
+reg_send_q2
+Text Label 6650 4000 2    50   ~ 0
+reg_send_q3
+Text Label 6650 3900 2    50   ~ 0
+reg_send_q4
+Text Label 6650 3800 2    50   ~ 0
+reg_send_q5
+Text Label 6650 3700 2    50   ~ 0
+reg_send_q6
+Text Label 6650 3600 2    50   ~ 0
+reg_send_q7
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE61789
+P 7150 3300
+AR Path="/5FE61789" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE61789" Ref="#PWR019"  Part="1" 
+F 0 "#PWR019" H 7150 3150 50  0001 C CNN
+F 1 "VCC" V 7165 3428 50  0000 L CNN
+F 2 "" H 7150 3300 50  0001 C CNN
+F 3 "" H 7150 3300 50  0001 C CNN
+	1    7150 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FE6178F
+P 7150 5200
+AR Path="/5FE6178F" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE6178F" Ref="#PWR020"  Part="1" 
+F 0 "#PWR020" H 7150 4950 50  0001 C CNN
+F 1 "GND" V 7155 5072 50  0000 R CNN
+F 2 "" H 7150 5200 50  0001 C CNN
+F 3 "" H 7150 5200 50  0001 C CNN
+	1    7150 5200
+	1    0    0    -1  
+$EndComp
+NoConn ~ 7650 3700
+Text Label 7650 3600 0    50   ~ 0
+mosi
+Text Label 6650 4500 2    50   ~ 0
+count0
+Text Label 6650 4600 2    50   ~ 0
+count1
+Text Label 6650 4700 2    50   ~ 0
+count2
+$Comp
+L power:GND #PWR?
+U 1 1 5FE6179A
+P 6650 4900
+AR Path="/5FE6179A" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE6179A" Ref="#PWR016"  Part="1" 
+F 0 "#PWR016" H 6650 4650 50  0001 C CNN
+F 1 "GND" V 6655 4772 50  0000 R CNN
+F 2 "" H 6650 4900 50  0001 C CNN
+F 3 "" H 6650 4900 50  0001 C CNN
+	1    6650 4900
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS161 U?
+U 1 1 5FE617A0
+P 4450 6600
+AR Path="/5FE617A0" Ref="U?"  Part="1" 
+AR Path="/5FE5ABE2/5FE617A0" Ref="U2"  Part="1" 
+F 0 "U2" H 4900 6050 50  0000 C CNN
+F 1 "74HC161PW" H 4800 5950 50  0000 C CNN
+F 2 "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" H 4450 6600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/308767.pdf" H 4450 6600 50  0001 C CNN
+	1    4450 6600
+	1    0    0    -1  
+$EndComp
+Text Label 4950 6100 0    50   ~ 0
+count0
+Text Label 4950 6200 0    50   ~ 0
+count1
+Text Label 4950 6300 0    50   ~ 0
+count2
+Text Label 4950 6400 0    50   ~ 0
+count3
+$Comp
+L power:GND #PWR?
+U 1 1 5FE617AA
+P 4450 7400
+AR Path="/5FE617AA" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE617AA" Ref="#PWR011"  Part="1" 
+F 0 "#PWR011" H 4450 7150 50  0001 C CNN
+F 1 "GND" V 4455 7272 50  0000 R CNN
+F 2 "" H 4450 7400 50  0001 C CNN
+F 3 "" H 4450 7400 50  0001 C CNN
+	1    4450 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE617B0
+P 4450 5800
+AR Path="/5FE617B0" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE617B0" Ref="#PWR010"  Part="1" 
+F 0 "#PWR010" H 4450 5650 50  0001 C CNN
+F 1 "VCC" V 4465 5928 50  0000 L CNN
+F 2 "" H 4450 5800 50  0001 C CNN
+F 3 "" H 4450 5800 50  0001 C CNN
+	1    4450 5800
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE617B6
+P 3950 6000
+AR Path="/5FE617B6" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE617B6" Ref="#PWR06"  Part="1" 
+F 0 "#PWR06" H 3950 5850 50  0001 C CNN
+F 1 "VCC" V 3965 6128 50  0000 L CNN
+F 2 "" H 3950 6000 50  0001 C CNN
+F 3 "" H 3950 6000 50  0001 C CNN
+	1    3950 6000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3950 6400 3950 6300
+Connection ~ 3950 6100
+Wire Wire Line
+	3950 6100 3950 6000
+Connection ~ 3950 6200
+Wire Wire Line
+	3950 6200 3950 6100
+Connection ~ 3950 6300
+Wire Wire Line
+	3950 6300 3950 6200
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE617C3
+P 3900 6700
+AR Path="/5FE617C3" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE617C3" Ref="#PWR05"  Part="1" 
+F 0 "#PWR05" H 3900 6550 50  0001 C CNN
+F 1 "VCC" V 3915 6828 50  0000 L CNN
+F 2 "" H 3900 6700 50  0001 C CNN
+F 3 "" H 3900 6700 50  0001 C CNN
+	1    3900 6700
+	0    -1   -1   0   
+$EndComp
+Text Label 3950 7100 2    50   ~ 0
+~int_rst
+Wire Wire Line
+	3950 6600 3950 6700
+Connection ~ 3950 6700
+Wire Wire Line
+	3950 6700 3950 6800
+Wire Wire Line
+	3900 6700 3950 6700
+Text Label 3950 6900 2    50   ~ 0
+~clk
+NoConn ~ 4950 6600
+$Comp
+L 74xx:74HC273 U?
+U 1 1 5FE62655
+P 7100 6600
+AR Path="/5FE62655" Ref="U?"  Part="1" 
+AR Path="/5FE5ABE2/5FE62655" Ref="U4"  Part="1" 
+F 0 "U4" H 7500 6050 50  0000 C CNN
+F 1 "74HC273PW" H 7500 5900 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 7100 6600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878567.pdf" H 7100 6600 50  0001 C CNN
+	1    7100 6600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FE66867
+P 7100 7400
+AR Path="/5FE66867" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE66867" Ref="#PWR018"  Part="1" 
+F 0 "#PWR018" H 7100 7150 50  0001 C CNN
+F 1 "GND" V 7105 7272 50  0000 R CNN
+F 2 "" H 7100 7400 50  0001 C CNN
+F 3 "" H 7100 7400 50  0001 C CNN
+	1    7100 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE66E39
+P 7100 5800
+AR Path="/5FE66E39" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE66E39" Ref="#PWR017"  Part="1" 
+F 0 "#PWR017" H 7100 5650 50  0001 C CNN
+F 1 "VCC" V 7115 5928 50  0000 L CNN
+F 2 "" H 7100 5800 50  0001 C CNN
+F 3 "" H 7100 5800 50  0001 C CNN
+	1    7100 5800
+	1    0    0    -1  
+$EndComp
+Text Label 7600 6100 0    50   ~ 0
+reg_recv_q0
+Text Label 7600 6200 0    50   ~ 0
+reg_recv_q1
+Text Label 7600 6300 0    50   ~ 0
+reg_recv_q2
+Text Label 7600 6400 0    50   ~ 0
+reg_recv_q3
+Text Label 7600 6500 0    50   ~ 0
+reg_recv_q4
+Text Label 7600 6600 0    50   ~ 0
+reg_recv_q5
+Text Label 7600 6700 0    50   ~ 0
+reg_recv_q6
+Text Label 7600 6800 0    50   ~ 0
+reg_recv_q7
+Text Label 6600 6100 2    50   ~ 0
+miso
+Text Label 6600 6200 2    50   ~ 0
+reg_recv_q0
+Text Label 6600 6300 2    50   ~ 0
+reg_recv_q1
+Text Label 6600 6400 2    50   ~ 0
+reg_recv_q2
+Text Label 6600 6500 2    50   ~ 0
+reg_recv_q3
+Text Label 6600 6600 2    50   ~ 0
+reg_recv_q4
+Text Label 6600 6700 2    50   ~ 0
+reg_recv_q5
+Text Label 6600 6800 2    50   ~ 0
+reg_recv_q6
+Text Label 6600 7100 2    50   ~ 0
+~rst
+Text Label 6600 7000 2    50   ~ 0
+clk
+$Comp
+L 74xx:74HC244 U6
+U 1 1 5FE6C343
+P 8950 6600
+F 0 "U6" H 9400 5950 50  0000 C CNN
+F 1 "MC74HC244ADT" H 9400 5850 50  0000 C CNN
+F 2 "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" H 8950 6600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1878565.pdf" H 8950 6600 50  0001 C CNN
+	1    8950 6600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7600 6100 8450 6100
+Wire Wire Line
+	8450 6200 7600 6200
+Wire Wire Line
+	7600 6300 8450 6300
+Wire Wire Line
+	8450 6400 7600 6400
+Wire Wire Line
+	7600 6500 8450 6500
+Wire Wire Line
+	8450 6600 7600 6600
+Wire Wire Line
+	7600 6700 8450 6700
+Wire Wire Line
+	8450 6800 7600 6800
+Text Label 9450 6100 0    50   ~ 0
+d0
+Text Label 9450 6200 0    50   ~ 0
+d1
+Text Label 9450 6300 0    50   ~ 0
+d2
+Text Label 9450 6400 0    50   ~ 0
+d3
+Text Label 9450 6500 0    50   ~ 0
+d4
+Text Label 9450 6600 0    50   ~ 0
+d5
+Text Label 9450 6700 0    50   ~ 0
+d6
+Text Label 9450 6800 0    50   ~ 0
+d7
+Text Label 8450 7000 2    50   ~ 0
+~oe_to_d
+Wire Wire Line
+	8450 7000 8450 7100
+$Comp
+L power:GND #PWR?
+U 1 1 5FE7030B
+P 8950 7400
+AR Path="/5FE7030B" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE7030B" Ref="#PWR022"  Part="1" 
+F 0 "#PWR022" H 8950 7150 50  0001 C CNN
+F 1 "GND" V 8955 7272 50  0000 R CNN
+F 2 "" H 8950 7400 50  0001 C CNN
+F 3 "" H 8950 7400 50  0001 C CNN
+	1    8950 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE709A9
+P 8950 5800
+AR Path="/5FE709A9" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE709A9" Ref="#PWR021"  Part="1" 
+F 0 "#PWR021" H 8950 5650 50  0001 C CNN
+F 1 "VCC" V 8965 5928 50  0000 L CNN
+F 2 "" H 8950 5800 50  0001 C CNN
+F 3 "" H 8950 5800 50  0001 C CNN
+	1    8950 5800
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74HC74 U3
+U 1 1 5FE7AD90
+P 4450 8600
+F 0 "U3" H 4800 8400 50  0000 C CNN
+F 1 "74HC74PW" H 4850 8300 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 4450 8600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 4450 8600 50  0001 C CNN
+	1    4450 8600
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74HC74 U3
+U 2 1 5FE7C18A
+P 6450 8600
+F 0 "U3" H 6750 8350 50  0000 C CNN
+F 1 "74HC74PW" H 6750 8250 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 6450 8600 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 6450 8600 50  0001 C CNN
+	2    6450 8600
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74HC74 U3
+U 3 1 5FE7C9F6
+P 3950 20700
+F 0 "U3" H 4180 20746 50  0000 L CNN
+F 1 "74HC74PW" H 4180 20655 50  0000 L CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 3950 20700 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648944.pdf" H 3950 20700 50  0001 C CNN
+	3    3950 20700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FE7D6EE
+P 3950 21100
+AR Path="/5FE7D6EE" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE7D6EE" Ref="#PWR014"  Part="1" 
+F 0 "#PWR014" H 3950 20850 50  0001 C CNN
+F 1 "GND" V 3955 20972 50  0000 R CNN
+F 2 "" H 3950 21100 50  0001 C CNN
+F 3 "" H 3950 21100 50  0001 C CNN
+	1    3950 21100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE7DD29
+P 3950 20300
+AR Path="/5FE7DD29" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE7DD29" Ref="#PWR013"  Part="1" 
+F 0 "#PWR013" H 3950 20150 50  0001 C CNN
+F 1 "VCC" V 3965 20428 50  0000 L CNN
+F 2 "" H 3950 20300 50  0001 C CNN
+F 3 "" H 3950 20300 50  0001 C CNN
+	1    3950 20300
+	1    0    0    -1  
+$EndComp
+Text Label 4750 8500 0    50   ~ 0
+~rdy_int
+Text Label 4750 8700 0    50   ~ 0
+rdy_int
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE7FC4F
+P 4150 8500
+AR Path="/5FE7FC4F" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE7FC4F" Ref="#PWR07"  Part="1" 
+F 0 "#PWR07" H 4150 8350 50  0001 C CNN
+F 1 "VCC" V 4165 8628 50  0000 L CNN
+F 2 "" H 4150 8500 50  0001 C CNN
+F 3 "" H 4150 8500 50  0001 C CNN
+	1    4150 8500
+	0    -1   -1   0   
+$EndComp
+Text Label 3950 4550 2    50   ~ 0
+reg_send_cp
+Text Label 4150 8600 2    50   ~ 0
+reg_send_cp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE80BC0
+P 4450 8300
+AR Path="/5FE80BC0" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE80BC0" Ref="#PWR012"  Part="1" 
+F 0 "#PWR012" H 4450 8150 50  0001 C CNN
+F 1 "VCC" V 4465 8428 50  0000 L CNN
+F 2 "" H 4450 8300 50  0001 C CNN
+F 3 "" H 4450 8300 50  0001 C CNN
+	1    4450 8300
+	1    0    0    -1  
+$EndComp
+Text Label 4450 8900 3    50   ~ 0
+~int_rst
+Text Label 6750 8500 0    50   ~ 0
+clk_ena
+$Comp
+L power:VCC #PWR?
+U 1 1 5FE83B74
+P 6450 8300
+AR Path="/5FE83B74" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FE83B74" Ref="#PWR015"  Part="1" 
+F 0 "#PWR015" H 6450 8150 50  0001 C CNN
+F 1 "VCC" V 6465 8428 50  0000 L CNN
+F 2 "" H 6450 8300 50  0001 C CNN
+F 3 "" H 6450 8300 50  0001 C CNN
+	1    6450 8300
+	1    0    0    -1  
+$EndComp
+Text Label 6450 8900 3    50   ~ 0
+~int_rst
+Wire Wire Line
+	4750 8500 6150 8500
+Text Label 6150 8600 2    50   ~ 0
+~int_clk
+Text HLabel 11300 2500 2    50   Output ~ 0
+clk
+Text HLabel 11300 2600 2    50   Output ~ 0
+mosi
+Text HLabel 11300 3000 2    50   Input ~ 0
+~miso
+Text Label 11300 2600 2    50   ~ 0
+mosi
+Text Label 11300 2500 2    50   ~ 0
+clk
+Text Label 9150 3000 2    50   ~ 0
+miso
+Text HLabel 1250 2050 0    50   BiDi ~ 0
+d[0..7]
+Text Label 1250 2050 0    50   ~ 0
+d[0..7]
+Text Label 1200 2350 0    50   ~ 0
+~rst
+Text Label 1200 2550 0    50   ~ 0
+~oe
+Text Label 1200 2700 0    50   ~ 0
+~we
+Text HLabel 1200 2550 0    50   Input ~ 0
+~oe
+Text HLabel 1200 2700 0    50   Input ~ 0
+~we
+Text HLabel 1200 2850 0    50   Input ~ 0
+~sel
+Text Label 1200 2850 0    50   ~ 0
+~sel
+Text GLabel 1200 2350 0    50   Output ~ 0
+~rst
+Wire Bus Line
+	1250 2050 1700 2050
+Entry Wire Line
+	1800 2450 1700 2350
+Entry Wire Line
+	1800 2550 1700 2450
+Entry Wire Line
+	1800 2650 1700 2550
+Entry Wire Line
+	1800 2750 1700 2650
+Entry Wire Line
+	1800 2850 1700 2750
+Entry Wire Line
+	1800 2950 1700 2850
+Entry Wire Line
+	1800 3050 1700 2950
+Entry Wire Line
+	1800 3150 1700 3050
+Text Label 2000 3150 0    50   ~ 0
+d7
+Text Label 2000 3050 0    50   ~ 0
+d6
+Text Label 2000 2950 0    50   ~ 0
+d5
+Text Label 2000 2850 0    50   ~ 0
+d4
+Text Label 2000 2750 0    50   ~ 0
+d3
+Text Label 2000 2650 0    50   ~ 0
+d2
+Text Label 2000 2550 0    50   ~ 0
+d1
+Text Label 2000 2450 0    50   ~ 0
+d0
+Wire Wire Line
+	1800 2450 2000 2450
+Wire Wire Line
+	2000 2550 1800 2550
+Wire Wire Line
+	1800 2650 2000 2650
+Wire Wire Line
+	2000 2750 1800 2750
+Wire Wire Line
+	1800 2850 2000 2850
+Wire Wire Line
+	2000 2950 1800 2950
+Wire Wire Line
+	1800 3050 2000 3050
+Wire Wire Line
+	2000 3150 1800 3150
+$Comp
+L Device:C C?
+U 1 1 604B88D3
+P 3950 21850
+AR Path="/5FE853A4/604B88D3" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604B88D3" Ref="C29"  Part="1" 
+F 0 "C29" H 4065 21896 50  0000 L CNN
+F 1 "0.1" H 4065 21805 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 3988 21700 50  0001 C CNN
+F 3 "~" H 3950 21850 50  0001 C CNN
+	1    3950 21850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604B88D9
+P 3950 22000
+AR Path="/5FE853A4/604B88D9" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604B88D9" Ref="#PWR0158"  Part="1" 
+F 0 "#PWR0158" H 3950 21750 50  0001 C CNN
+F 1 "GND" H 3955 21827 50  0000 C CNN
+F 2 "" H 3950 22000 50  0001 C CNN
+F 3 "" H 3950 22000 50  0001 C CNN
+	1    3950 22000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604B88DF
+P 3950 21700
+AR Path="/5FE853A4/604B88DF" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604B88DF" Ref="#PWR0157"  Part="1" 
+F 0 "#PWR0157" H 3950 21550 50  0001 C CNN
+F 1 "VCC" H 3965 21873 50  0000 C CNN
+F 2 "" H 3950 21700 50  0001 C CNN
+F 3 "" H 3950 21700 50  0001 C CNN
+	1    3950 21700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 604B9CAB
+P 4750 2950
+AR Path="/5FE853A4/604B9CAB" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604B9CAB" Ref="C27"  Part="1" 
+F 0 "C27" H 4865 2996 50  0000 L CNN
+F 1 "0.1" H 4865 2905 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 4788 2800 50  0001 C CNN
+F 3 "~" H 4750 2950 50  0001 C CNN
+	1    4750 2950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604B9CB1
+P 4750 3100
+AR Path="/5FE853A4/604B9CB1" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604B9CB1" Ref="#PWR0154"  Part="1" 
+F 0 "#PWR0154" H 4750 2850 50  0001 C CNN
+F 1 "GND" H 4755 2927 50  0000 C CNN
+F 2 "" H 4750 3100 50  0001 C CNN
+F 3 "" H 4750 3100 50  0001 C CNN
+	1    4750 3100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604B9CB7
+P 4750 2800
+AR Path="/5FE853A4/604B9CB7" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604B9CB7" Ref="#PWR0153"  Part="1" 
+F 0 "#PWR0153" H 4750 2650 50  0001 C CNN
+F 1 "VCC" H 4765 2973 50  0000 C CNN
+F 2 "" H 4750 2800 50  0001 C CNN
+F 3 "" H 4750 2800 50  0001 C CNN
+	1    4750 2800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 604BA846
+P 7500 2900
+AR Path="/5FE853A4/604BA846" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604BA846" Ref="C31"  Part="1" 
+F 0 "C31" H 7615 2946 50  0000 L CNN
+F 1 "0.1" H 7615 2855 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7538 2750 50  0001 C CNN
+F 3 "~" H 7500 2900 50  0001 C CNN
+	1    7500 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604BA84C
+P 7500 3050
+AR Path="/5FE853A4/604BA84C" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BA84C" Ref="#PWR0162"  Part="1" 
+F 0 "#PWR0162" H 7500 2800 50  0001 C CNN
+F 1 "GND" H 7505 2877 50  0000 C CNN
+F 2 "" H 7500 3050 50  0001 C CNN
+F 3 "" H 7500 3050 50  0001 C CNN
+	1    7500 3050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604BA852
+P 7500 2750
+AR Path="/5FE853A4/604BA852" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BA852" Ref="#PWR0161"  Part="1" 
+F 0 "#PWR0161" H 7500 2600 50  0001 C CNN
+F 1 "VCC" H 7515 2923 50  0000 C CNN
+F 2 "" H 7500 2750 50  0001 C CNN
+F 3 "" H 7500 2750 50  0001 C CNN
+	1    7500 2750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 604BB018
+P 4750 5550
+AR Path="/5FE853A4/604BB018" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604BB018" Ref="C28"  Part="1" 
+F 0 "C28" H 4865 5596 50  0000 L CNN
+F 1 "0.1" H 4865 5505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 4788 5400 50  0001 C CNN
+F 3 "~" H 4750 5550 50  0001 C CNN
+	1    4750 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604BB01E
+P 4750 5700
+AR Path="/5FE853A4/604BB01E" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BB01E" Ref="#PWR0156"  Part="1" 
+F 0 "#PWR0156" H 4750 5450 50  0001 C CNN
+F 1 "GND" H 4755 5527 50  0000 C CNN
+F 2 "" H 4750 5700 50  0001 C CNN
+F 3 "" H 4750 5700 50  0001 C CNN
+	1    4750 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604BB024
+P 4750 5400
+AR Path="/5FE853A4/604BB024" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BB024" Ref="#PWR0155"  Part="1" 
+F 0 "#PWR0155" H 4750 5250 50  0001 C CNN
+F 1 "VCC" H 4765 5573 50  0000 C CNN
+F 2 "" H 4750 5400 50  0001 C CNN
+F 3 "" H 4750 5400 50  0001 C CNN
+	1    4750 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 604BBACF
+P 7350 5550
+AR Path="/5FE853A4/604BBACF" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604BBACF" Ref="C30"  Part="1" 
+F 0 "C30" H 7465 5596 50  0000 L CNN
+F 1 "0.1" H 7465 5505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7388 5400 50  0001 C CNN
+F 3 "~" H 7350 5550 50  0001 C CNN
+	1    7350 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604BBAD5
+P 7350 5700
+AR Path="/5FE853A4/604BBAD5" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BBAD5" Ref="#PWR0160"  Part="1" 
+F 0 "#PWR0160" H 7350 5450 50  0001 C CNN
+F 1 "GND" H 7355 5527 50  0000 C CNN
+F 2 "" H 7350 5700 50  0001 C CNN
+F 3 "" H 7350 5700 50  0001 C CNN
+	1    7350 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604BBADB
+P 7350 5400
+AR Path="/5FE853A4/604BBADB" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BBADB" Ref="#PWR0159"  Part="1" 
+F 0 "#PWR0159" H 7350 5250 50  0001 C CNN
+F 1 "VCC" H 7365 5573 50  0000 C CNN
+F 2 "" H 7350 5400 50  0001 C CNN
+F 3 "" H 7350 5400 50  0001 C CNN
+	1    7350 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 604BC586
+P 9300 5550
+AR Path="/5FE853A4/604BC586" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/604BC586" Ref="C32"  Part="1" 
+F 0 "C32" H 9415 5596 50  0000 L CNN
+F 1 "0.1" H 9415 5505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 9338 5400 50  0001 C CNN
+F 3 "~" H 9300 5550 50  0001 C CNN
+	1    9300 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 604BC58C
+P 9300 5700
+AR Path="/5FE853A4/604BC58C" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BC58C" Ref="#PWR0164"  Part="1" 
+F 0 "#PWR0164" H 9300 5450 50  0001 C CNN
+F 1 "GND" H 9305 5527 50  0000 C CNN
+F 2 "" H 9300 5700 50  0001 C CNN
+F 3 "" H 9300 5700 50  0001 C CNN
+	1    9300 5700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 604BC592
+P 9300 5400
+AR Path="/5FE853A4/604BC592" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/604BC592" Ref="#PWR0163"  Part="1" 
+F 0 "#PWR0163" H 9300 5250 50  0001 C CNN
+F 1 "VCC" H 9315 5573 50  0000 C CNN
+F 2 "" H 9300 5400 50  0001 C CNN
+F 3 "" H 9300 5400 50  0001 C CNN
+	1    9300 5400
+	1    0    0    -1  
+$EndComp
+Text GLabel 11500 3750 1    50   BiDi ~ 0
+rdy
+Text Label 10550 3950 3    50   ~ 0
+rdy_out
+$Comp
+L 74xx:74LS14 U31
+U 1 1 5FEB7884
+P 4900 1600
+F 0 "U31" H 4900 1917 50  0000 C CNN
+F 1 "SN74LV14APW" H 4900 1826 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 4900 1600 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 4900 1600 50  0001 C CNN
+	1    4900 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 2 1 5FEB8D72
+P 5700 1600
+F 0 "U31" H 5700 1917 50  0000 C CNN
+F 1 "SN74LV14APW" H 5700 1826 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5700 1600 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 5700 1600 50  0001 C CNN
+	2    5700 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 3 1 5FEB9C37
+P 5550 6400
+F 0 "U31" H 5550 6717 50  0000 C CNN
+F 1 "SN74LV14APW" H 5550 6626 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5550 6400 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 5550 6400 50  0001 C CNN
+	3    5550 6400
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 4 1 5FEBA289
+P 10050 2500
+F 0 "U31" H 10050 2817 50  0000 C CNN
+F 1 "SN74LV14APW" H 10050 2726 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10050 2500 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 10050 2500 50  0001 C CNN
+	4    10050 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 5 1 5FEBABC1
+P 9450 3000
+F 0 "U31" H 9450 3317 50  0000 C CNN
+F 1 "SN74LV14APW" H 9450 3226 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 9450 3000 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 9450 3000 50  0001 C CNN
+	5    9450 3000
+	-1   0    0    1   
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 6 1 5FEBB2AF
+P 10900 3950
+F 0 "U31" H 10900 4267 50  0000 C CNN
+F 1 "SN74LV14APW" H 10900 4176 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10900 3950 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 10900 3950 50  0001 C CNN
+	6    10900 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS14 U31
+U 7 1 5FEBCBC0
+P 5300 20700
+F 0 "U31" H 5530 20746 50  0000 L CNN
+F 1 "SN74LV14APW" H 5530 20655 50  0000 L CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 5300 20700 50  0001 C CNN
+F 3 "https://www.ti.com/lit/ds/symlink/sn74lv14a.pdf" H 5300 20700 50  0001 C CNN
+	7    5300 20700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C33
+U 1 1 5FEE1A66
+P 4400 1750
+F 0 "C33" H 4515 1796 50  0000 L CNN
+F 1 "C" H 4515 1705 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 4438 1600 50  0001 C CNN
+F 3 "~" H 4400 1750 50  0001 C CNN
+	1    4400 1750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 5FEE2986
+P 4900 1100
+F 0 "R5" V 4693 1100 50  0000 C CNN
+F 1 "R" V 4784 1100 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 4830 1100 50  0001 C CNN
+F 3 "~" H 4900 1100 50  0001 C CNN
+	1    4900 1100
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4400 1600 4600 1600
+Wire Wire Line
+	4400 1600 4400 1100
+Wire Wire Line
+	4400 1100 4750 1100
+Connection ~ 4400 1600
+Wire Wire Line
+	5050 1100 5200 1100
+Wire Wire Line
+	5200 1100 5200 1600
+$Comp
+L power:GND #PWR?
+U 1 1 5FEE6054
+P 4400 1900
+AR Path="/5FEE6054" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FEE6054" Ref="#PWR0166"  Part="1" 
+F 0 "#PWR0166" H 4400 1650 50  0001 C CNN
+F 1 "GND" V 4405 1772 50  0000 R CNN
+F 2 "" H 4400 1900 50  0001 C CNN
+F 3 "" H 4400 1900 50  0001 C CNN
+	1    4400 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5400 1600 5200 1600
+Connection ~ 5200 1600
+Text Label 6000 1850 0    50   ~ 0
+int_clk
+Text Label 6000 1600 0    50   ~ 0
+~int_clk
+Wire Wire Line
+	6000 1850 5200 1850
+Wire Wire Line
+	5200 1850 5200 1600
+Wire Notes Line
+	4050 2450 4050 600 
+Wire Notes Line
+	4050 600  6500 600 
+Wire Notes Line
+	6500 600  6500 2450
+Wire Notes Line
+	6500 2450 4050 2450
+Text Notes 5500 850  0    50   ~ 0
+SPI clock, ~~1 MHz
+$Comp
+L 74xx:74LS32 U32
+U 1 1 5FF10ABD
+P 3100 4550
+F 0 "U32" H 3100 4875 50  0000 C CNN
+F 1 "SN74HC32PWR" H 3100 4784 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 3100 4550 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 3100 4550 50  0001 C CNN
+	1    3100 4550
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS32 U32
+U 2 1 5FF12D5A
+P 9200 2500
+F 0 "U32" H 9200 2825 50  0000 C CNN
+F 1 "SN74HC32PWR" H 9200 2734 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 9200 2500 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 9200 2500 50  0001 C CNN
+	2    9200 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS32 U32
+U 3 1 5FF143A8
+P 10150 3950
+F 0 "U32" H 10150 4275 50  0000 C CNN
+F 1 "SN74HC32PWR" H 10150 4184 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 10150 3950 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 10150 3950 50  0001 C CNN
+	3    10150 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS32 U32
+U 4 1 5FF14DA2
+P 8150 7850
+F 0 "U32" H 8150 8175 50  0000 C CNN
+F 1 "SN74HC32PWR" H 8150 8084 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 8150 7850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 8150 7850 50  0001 C CNN
+	4    8150 7850
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS32 U32
+U 5 1 5FF16A48
+P 6350 20750
+F 0 "U32" H 6580 20796 50  0000 L CNN
+F 1 "SN74HC32PWR" H 6580 20705 50  0000 L CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 6350 20750 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648978.pdf" H 6350 20750 50  0001 C CNN
+	5    6350 20750
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS08 U33
+U 1 1 5FF1D115
+P 3300 7100
+F 0 "U33" H 3300 7425 50  0000 C CNN
+F 1 "74HC08PW" H 3300 7334 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 3300 7100 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648975.pdf" H 3300 7100 50  0001 C CNN
+	1    3300 7100
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS08 U33
+U 5 1 5FF23A21
+P 7350 20800
+F 0 "U33" H 7580 20846 50  0000 L CNN
+F 1 "74HC08PW" H 7580 20755 50  0000 L CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 7350 20800 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648975.pdf" H 7350 20800 50  0001 C CNN
+	5    7350 20800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3400 4550 3950 4550
+Text Label 2800 4450 2    50   ~ 0
+~sel
+Text Label 2800 4650 2    50   ~ 0
+~we
+Wire Wire Line
+	5250 6400 4950 6400
+Text Label 5850 6400 0    50   ~ 0
+~count3
+Wire Wire Line
+	3950 7100 3600 7100
+Text Label 3000 7000 2    50   ~ 0
+~rst
+Wire Wire Line
+	5850 6400 5850 7750
+Wire Wire Line
+	5850 7750 3000 7750
+Wire Wire Line
+	3000 7750 3000 7200
+Wire Wire Line
+	8450 7850 8450 7100
+Connection ~ 8450 7100
+Text Label 7850 7950 2    50   ~ 0
+~sel
+Text Label 7850 7750 2    50   ~ 0
+~oe
+Text Label 8900 2400 2    50   ~ 0
+~int_clk
+Text Label 6750 8700 0    50   ~ 0
+~clk_ena
+Text Label 8900 2600 2    50   ~ 0
+~clk_ena
+Wire Wire Line
+	10350 2500 11300 2500
+Wire Wire Line
+	9750 2500 9500 2500
+Text Label 9550 2500 0    50   ~ 0
+~clk
+Text Label 9850 3850 2    50   ~ 0
+rdy_int
+Text Label 9850 4050 2    50   ~ 0
+~sel
+$Comp
+L power:GND #PWR?
+U 1 1 5FF5D8CC
+P 5300 21200
+AR Path="/5FF5D8CC" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5D8CC" Ref="#PWR0170"  Part="1" 
+F 0 "#PWR0170" H 5300 20950 50  0001 C CNN
+F 1 "GND" V 5305 21072 50  0000 R CNN
+F 2 "" H 5300 21200 50  0001 C CNN
+F 3 "" H 5300 21200 50  0001 C CNN
+	1    5300 21200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FF5DEE3
+P 6350 21250
+AR Path="/5FF5DEE3" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5DEE3" Ref="#PWR0174"  Part="1" 
+F 0 "#PWR0174" H 6350 21000 50  0001 C CNN
+F 1 "GND" V 6355 21122 50  0000 R CNN
+F 2 "" H 6350 21250 50  0001 C CNN
+F 3 "" H 6350 21250 50  0001 C CNN
+	1    6350 21250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FF5E2FB
+P 7350 21300
+AR Path="/5FF5E2FB" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5E2FB" Ref="#PWR0178"  Part="1" 
+F 0 "#PWR0178" H 7350 21050 50  0001 C CNN
+F 1 "GND" V 7355 21172 50  0000 R CNN
+F 2 "" H 7350 21300 50  0001 C CNN
+F 3 "" H 7350 21300 50  0001 C CNN
+	1    7350 21300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF5E77B
+P 5300 20200
+AR Path="/5FF5E77B" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5E77B" Ref="#PWR0169"  Part="1" 
+F 0 "#PWR0169" H 5300 20050 50  0001 C CNN
+F 1 "VCC" V 5315 20328 50  0000 L CNN
+F 2 "" H 5300 20200 50  0001 C CNN
+F 3 "" H 5300 20200 50  0001 C CNN
+	1    5300 20200
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF5ECA2
+P 6350 20250
+AR Path="/5FF5ECA2" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5ECA2" Ref="#PWR0173"  Part="1" 
+F 0 "#PWR0173" H 6350 20100 50  0001 C CNN
+F 1 "VCC" V 6365 20378 50  0000 L CNN
+F 2 "" H 6350 20250 50  0001 C CNN
+F 3 "" H 6350 20250 50  0001 C CNN
+	1    6350 20250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF5F2A3
+P 7350 20300
+AR Path="/5FF5F2A3" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF5F2A3" Ref="#PWR0177"  Part="1" 
+F 0 "#PWR0177" H 7350 20150 50  0001 C CNN
+F 1 "VCC" V 7365 20428 50  0000 L CNN
+F 2 "" H 7350 20300 50  0001 C CNN
+F 3 "" H 7350 20300 50  0001 C CNN
+	1    7350 20300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5FF6024B
+P 5250 21850
+AR Path="/5FE853A4/5FF6024B" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/5FF6024B" Ref="C34"  Part="1" 
+F 0 "C34" H 5365 21896 50  0000 L CNN
+F 1 "0.1" H 5365 21805 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 5288 21700 50  0001 C CNN
+F 3 "~" H 5250 21850 50  0001 C CNN
+	1    5250 21850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FF60251
+P 5250 22000
+AR Path="/5FE853A4/5FF60251" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF60251" Ref="#PWR0168"  Part="1" 
+F 0 "#PWR0168" H 5250 21750 50  0001 C CNN
+F 1 "GND" H 5255 21827 50  0000 C CNN
+F 2 "" H 5250 22000 50  0001 C CNN
+F 3 "" H 5250 22000 50  0001 C CNN
+	1    5250 22000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF60257
+P 5250 21700
+AR Path="/5FE853A4/5FF60257" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF60257" Ref="#PWR0167"  Part="1" 
+F 0 "#PWR0167" H 5250 21550 50  0001 C CNN
+F 1 "VCC" H 5265 21873 50  0000 C CNN
+F 2 "" H 5250 21700 50  0001 C CNN
+F 3 "" H 5250 21700 50  0001 C CNN
+	1    5250 21700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5FF614AA
+P 6300 22000
+AR Path="/5FE853A4/5FF614AA" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/5FF614AA" Ref="C35"  Part="1" 
+F 0 "C35" H 6415 22046 50  0000 L CNN
+F 1 "0.1" H 6415 21955 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 6338 21850 50  0001 C CNN
+F 3 "~" H 6300 22000 50  0001 C CNN
+	1    6300 22000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FF614B0
+P 6300 22150
+AR Path="/5FE853A4/5FF614B0" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF614B0" Ref="#PWR0172"  Part="1" 
+F 0 "#PWR0172" H 6300 21900 50  0001 C CNN
+F 1 "GND" H 6305 21977 50  0000 C CNN
+F 2 "" H 6300 22150 50  0001 C CNN
+F 3 "" H 6300 22150 50  0001 C CNN
+	1    6300 22150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF614B6
+P 6300 21850
+AR Path="/5FE853A4/5FF614B6" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF614B6" Ref="#PWR0171"  Part="1" 
+F 0 "#PWR0171" H 6300 21700 50  0001 C CNN
+F 1 "VCC" H 6315 22023 50  0000 C CNN
+F 2 "" H 6300 21850 50  0001 C CNN
+F 3 "" H 6300 21850 50  0001 C CNN
+	1    6300 21850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5FF62E29
+P 7300 22000
+AR Path="/5FE853A4/5FF62E29" Ref="C?"  Part="1" 
+AR Path="/5FE5ABE2/5FF62E29" Ref="C36"  Part="1" 
+F 0 "C36" H 7415 22046 50  0000 L CNN
+F 1 "0.1" H 7415 21955 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7338 21850 50  0001 C CNN
+F 3 "~" H 7300 22000 50  0001 C CNN
+	1    7300 22000
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5FF62E2F
+P 7300 22150
+AR Path="/5FE853A4/5FF62E2F" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF62E2F" Ref="#PWR0176"  Part="1" 
+F 0 "#PWR0176" H 7300 21900 50  0001 C CNN
+F 1 "GND" H 7305 21977 50  0000 C CNN
+F 2 "" H 7300 22150 50  0001 C CNN
+F 3 "" H 7300 22150 50  0001 C CNN
+	1    7300 22150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF62E35
+P 7300 21850
+AR Path="/5FE853A4/5FF62E35" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF62E35" Ref="#PWR0175"  Part="1" 
+F 0 "#PWR0175" H 7300 21700 50  0001 C CNN
+F 1 "VCC" H 7315 22023 50  0000 C CNN
+F 2 "" H 7300 21850 50  0001 C CNN
+F 3 "" H 7300 21850 50  0001 C CNN
+	1    7300 21850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	11300 3000 9750 3000
+$Comp
+L Device:Q_NMOS_GSD Q2
+U 1 1 60205316
+P 11400 3950
+F 0 "Q2" H 11604 3996 50  0000 L CNN
+F 1 "2N7002" H 11604 3905 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 11600 4050 50  0001 C CNN
+F 3 "~" H 11400 3950 50  0001 C CNN
+	1    11400 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 60206585
+P 11500 4150
+AR Path="/5FE853A4/60206585" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/60206585" Ref="#PWR0225"  Part="1" 
+F 0 "#PWR0225" H 11500 3900 50  0001 C CNN
+F 1 "GND" H 11505 3977 50  0000 C CNN
+F 2 "" H 11500 4150 50  0001 C CNN
+F 3 "" H 11500 4150 50  0001 C CNN
+	1    11500 4150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10600 3950 10450 3950
+Text Label 11200 3950 3    50   ~ 0
+~rdy_out
+NoConn ~ 13750 8850
+Wire Wire Line
+	12550 8850 12550 8950
+$Comp
+L power:VCC #PWR?
+U 1 1 5FF6AA2B
+P 12550 8850
+AR Path="/5FF6AA2B" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/5FF6AA2B" Ref="#PWR0179"  Part="1" 
+F 0 "#PWR0179" H 12550 8700 50  0001 C CNN
+F 1 "VCC" V 12565 8978 50  0000 L CNN
+F 2 "" H 12550 8850 50  0001 C CNN
+F 3 "" H 12550 8850 50  0001 C CNN
+	1    12550 8850
+	0    -1   -1   0   
+$EndComp
+Connection ~ 12550 8850
+Wire Wire Line
+	12550 8750 12550 8850
+Wire Wire Line
+	13150 8850 13150 8950
+Wire Wire Line
+	13150 8750 13150 8850
+Connection ~ 13150 8850
+$Comp
+L 74xx:74LS08 U33
+U 4 1 5FF21E71
+P 12850 8850
+F 0 "U33" H 12850 9175 50  0000 C CNN
+F 1 "74HC08PW" H 12850 9084 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 12850 8850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648975.pdf" H 12850 8850 50  0001 C CNN
+	4    12850 8850
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xx:74LS08 U33
+U 3 1 5FF20AA5
+P 13450 8850
+F 0 "U33" H 13450 9175 50  0000 C CNN
+F 1 "74HC08PW" H 13450 9084 50  0000 C CNN
+F 2 "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" H 13450 8850 50  0001 C CNN
+F 3 "http://www.farnell.com/datasheets/1648975.pdf" H 13450 8850 50  0001 C CNN
+	3    13450 8850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:LED D2
+U 1 1 60392BD3
+P 7400 8500
+F 0 "D2" H 7393 8245 50  0000 C CNN
+F 1 "LED" H 7393 8336 50  0000 C CNN
+F 2 "LED_SMD:LED_0805_2012Metric" H 7400 8500 50  0001 C CNN
+F 3 "~" H 7400 8500 50  0001 C CNN
+	1    7400 8500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	6750 8500 7250 8500
+$Comp
+L Device:R R19
+U 1 1 60397E60
+P 7700 8500
+F 0 "R19" V 7493 8500 50  0000 C CNN
+F 1 "620" V 7584 8500 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 7630 8500 50  0001 C CNN
+F 3 "~" H 7700 8500 50  0001 C CNN
+	1    7700 8500
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 603983EF
+P 7850 8500
+AR Path="/603983EF" Ref="#PWR?"  Part="1" 
+AR Path="/5FE5ABE2/603983EF" Ref="#PWR0224"  Part="1" 
+F 0 "#PWR0224" H 7850 8250 50  0001 C CNN
+F 1 "GND" V 7855 8372 50  0000 R CNN
+F 2 "" H 7850 8500 50  0001 C CNN
+F 3 "" H 7850 8500 50  0001 C CNN
+	1    7850 8500
+	0    -1   -1   0   
+$EndComp
+Wire Bus Line
+	1700 2050 1700 3050
+$EndSCHEMATC
