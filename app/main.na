@@ -13,7 +13,6 @@ import u8 matrix_code_rain();
 u8 life_main() {
     qp_init(COLOR_MAGENTA, COLOR_BROWN);
     life_init();
-    qp_render();
     qp_set_cursor_enabled(1u8);
     u8 running = 0u8;
     while (1u8) {
@@ -31,12 +30,10 @@ u8 life_main() {
                 qp_move_cursor(1s8, 0s8);
             } else if (key == KEY_ENT) {
                 qp_set_and_render(qp_cursor_x, qp_cursor_y, 1u8);
-                life_set(qp_cursor_x, qp_cursor_y, 1u8);
             } else if (key == KEY_ESC) {
                 qp_set_and_render(qp_cursor_x, qp_cursor_y, 0u8);
-                life_set(qp_cursor_x, qp_cursor_y, 0u8);
             } else if (key == KEY_STAR) {
-                qp_render_all();
+                qp_render();
             } else if (key == KEY_F1) {
                 running = 1u8;
                 qp_set_cursor_enabled(0u8);

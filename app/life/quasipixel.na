@@ -2,26 +2,22 @@
 #include <vga.h>
 #include <string.h>
 
-#define QP_INDEX(x, y) ((u16)(x) + (u16)(y) * (u16)QP_WIDTH)
-
 #define CHAR_NONE 0u8
 #define CHAR_TOP 223u8
 #define CHAR_BOTTOM 220u8
 #define CHAR_BOTH 219u8
 
-#define PIXEL_BLANK 0u8
-#define PIXEL_SET 1u8
-
-#define PIXEL_SCHEDULED 2u8
-#define PIXEL_VALUE_MASK 1u8
-
-u8 qp_fb[QP_SIZE];
+import u8 qp_fb[QP_SIZE]; // same memory organization as in video buffer
+import u8 qp_colors[4];
 
 u8 cursor_enabled;
 export u8 qp_cursor_x;
 export u8 qp_cursor_y;
 u8 fg_color;
 u8 bg_color;
+
+import u8 qp_render_fast();
+import u8 qp_vga_clear();
 
 export u8 qp_init(u8 fg, u8 bg) {
     cursor_enabled = 0u8;
@@ -30,21 +26,20 @@ export u8 qp_init(u8 fg, u8 bg) {
     fg_color = fg;
     bg_color = bg;
 
-    memset((u8*)qp_fb, PIXEL_BLANK | PIXEL_SCHEDULED, QP_SIZE);
+    memset((u8*)qp_fb, 0u8, QP_SIZE);
+    qp_colors[0u8] = COLOR(bg_color, bg_color);
+    qp_colors[1u8] = COLOR(bg_color, fg_color);
+    qp_colors[2u8] = COLOR(fg_color, bg_color);
+    qp_colors[3u8] = COLOR(fg_color, fg_color);
+
+    qp_vga_clear();
+    qp_render_fast();
 }
 
-u8 render_one_char(u8 c, u8 r, u16 offset, u8 force) {
+u8 render_one_char(u8 c, u8 r, u16 offset) {
     u8 top_pixel = qp_fb[offset];
-    u8 bot_pixel = qp_fb[offset + (u16)QP_WIDTH];
-
-    if (!force && !((top_pixel | bot_pixel) & PIXEL_SCHEDULED)) {
-        return;
-    }
-
-    top_pixel &= PIXEL_VALUE_MASK;
-    bot_pixel &= PIXEL_VALUE_MASK;
-    qp_fb[offset] = top_pixel;
-    qp_fb[offset + (u16)QP_WIDTH] = bot_pixel;
+    u8 bot_pixel = top_pixel >> 1u8;
+    top_pixel &= 1u8;
 
     u8 cursor_on_col = cursor_enabled && qp_cursor_x == c;
     u8 cursor_on_top = cursor_on_col && qp_cursor_y == (r << 1u8);
@@ -71,61 +66,40 @@ u8 render_one_char(u8 c, u8 r, u16 offset, u8 force) {
     if (cursor_on_bot) {
         bot_color = bot_color ^ 8u8;
     }
-    vga_color_seg[VGA_OFFSET(c, r)] = COLOR(bot_color, top_color);
-    vga_char_seg[VGA_OFFSET(c, r)] = CHAR_BOTTOM;
+    vga_color_seg[offset] = COLOR(bot_color, top_color);
 }
 
 export u8 qp_render() {
-    u8 r = 0u8;
-    u16 offset = 0u16;
-    while (r < VGA_ROWS) {
-        u8 c = 0u8;
-        while (c < VGA_COLS) {
-            render_one_char(c, r, offset, 0u8);
+    qp_render_fast();
 
-            offset += 1u16;
-            c += 1u8;
-        }
-        offset += (u16)VGA_COLS;
-        r += 1u8;
-    }
-}
-
-export u8 qp_render_all() {
-    u8 r = 0u8;
-    u16 offset = 0u16;
-    while (r < VGA_ROWS) {
-        u8 c = 0u8;
-        while (c < VGA_COLS) {
-            render_one_char(c, r, offset, 1u8);
-
-            offset += 1u16;
-            c += 1u8;
-        }
-        offset += (u16)VGA_COLS;
-        r += 1u8;
+    if (cursor_enabled) {
+        qp_render_one(qp_cursor_x, qp_cursor_y);
     }
 }
 
 export u8 qp_set(u8 x, u8 y, u8 v) {
-    if (v) {
-        v = PIXEL_SET;
+    u16 index = VGA_OFFSET(x, y >> 1u8);
+    u8 value = qp_fb[index];
+    u8 mask = 1u8;
+    if (y & 1u8) {
+        mask <<= 1u8;
     }
-    v |= PIXEL_SCHEDULED;
-    qp_fb[QP_INDEX(x, y)] = v;
+    if (v) {
+        value |= mask;
+    } else {
+        value &= ~mask;
+    }
+    qp_fb[index] = value;
 }
 
 u8 qp_render_one(u8 x, u8 y) {
-    u16 offset = QP_INDEX(x, y & 0xfeu8);
-    render_one_char(x, y >> 1u8, offset, 1u8);
+    y >>= 1u8;
+    u16 offset = VGA_OFFSET(x, y);
+    render_one_char(x, y, offset);
 }
 
 export u8 qp_set_and_render(u8 x, u8 y, u8 v) {
-    if (v) {
-        v = PIXEL_SET;
-    }
-    v |= PIXEL_SCHEDULED;
-    qp_fb[QP_INDEX(x, y)] = v;
+    qp_set(x, y, v);
     qp_render_one(x, y);
 }
 

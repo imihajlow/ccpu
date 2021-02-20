@@ -1,101 +1,168 @@
 #include "life.h"
 #include <string.h>
+#include <vga.h>
 #include "quasipixel.h"
 
-#define WIDTH 80u8
-#define HEIGHT 60u8
-#define SIZE (80u16 * 60u16)
-#define OFFSET(x, y) ((u16)(x) + (u16)WIDTH * (u16)(y))
-
-#define CELL_DEAD 0u8
-#define CELL_ALIVE 1u8
-#define CELL_FLIPPED 2u8
-#define CELL_CURRENT_MASK 1u8
-
-u8 life_buf[SIZE];
+#define LAST_ROW_OFFSET VGA_OFFSET(0u8, VGA_ROWS - 1u8)
 
 export u8 life_init() {
-    memset((u8*)life_buf, CELL_DEAD, SIZE);
 }
 
-export u8 life_set(u8 x, u8 y, u8 v) {
-    if (v) {
-        v = CELL_ALIVE;
-    }
-    life_buf[OFFSET(x, y)] = v;
-}
+u8 get_next(
+        u8 ptl, u8 ptc, u8 ptr,
+        u8 pcl, u8 pcc, u8 pcr,
+        u8 pbl, u8 pbc, u8 pbr) {
+    u8 rt, rc, rb;
 
-u8 get_neighbors(u8 x, u8 y, u16 u_offset) {
-    s16 offset = (s16)u_offset;
+    u8 t = pcc & 1u8;
+    u8 b = pcc & 2u8;
 
-    s16 left = -1s16;
-    s16 right = 1s16;
-    s16 up = -(s16)WIDTH;
-    s16 down = (s16)WIDTH;
-    // torus topology
-    if (x == 0u8) {
-        left += (s16)WIDTH;
-    }
-    if (x == WIDTH - 1u8) {
-        right -= (s16)WIDTH;
-    }
-    if (y == 0u8) {
-        up += (s16)SIZE;
-    }
-    if (y == HEIGHT - 1u8) {
-        down -= (s16)SIZE;
-    }
+    ptl >>= 1u8;
+    ptc >>= 1u8;
+    ptr >>= 1u8;
+    pbl &= 1u8;
+    pbc &= 1u8;
+    pbr &= 1u8;
+    rt = ptl + ptc + ptr;
+    rb = pbl + pbc + pbr;
+    rc = pcl + pcc + pcr;
+    pcl >>= 1u8;
+    pcc >>= 1u8;
+    pcr >>= 1u8;
+    rc -= pcl + pcc + pcr;
 
-    u8 result = 0u8;
-    result += life_buf[offset + left + up] & CELL_CURRENT_MASK;
-    result += life_buf[offset + left] & CELL_CURRENT_MASK;
-    result += life_buf[offset + left + down] & CELL_CURRENT_MASK;
+    u8 st = rt + rc;
+    u8 sb = rc + rb;
 
-    result += life_buf[offset + up] & CELL_CURRENT_MASK;
-    result += life_buf[offset + down] & CELL_CURRENT_MASK;
-
-    result += life_buf[offset + right + up] & CELL_CURRENT_MASK;
-    result += life_buf[offset + right] & CELL_CURRENT_MASK;
-    result += life_buf[offset + right + down] & CELL_CURRENT_MASK;
-    return result;
+    if (st == 3u8) {
+        t = 1u8;
+    } else if (st != 4u8) {
+        t = 0u8;
+    }
+    if (sb == 3u8) {
+        b = 2u8;
+    } else if (sb != 4u8) {
+        b = 0u8;
+    }
+    return t | b;
 }
 
 export u8 life_step_and_render() {
-    u8 y = 0u8;
-    u16 offset = 0u16;
-    while (y < HEIGHT) {
-        u8 x = 0u8;
-        while (x < WIDTH) {
-            u8 value = life_buf[offset];
-            u8 neighbors;
-            neighbors = get_neighbors(x, y, offset);
-
-            if (value) {
-                if (neighbors < 2u8 || neighbors > 3u8) {
-                    life_buf[offset] = CELL_FLIPPED | CELL_ALIVE;
-                    qp_set(x, y, 0u8);
-                }
-            } else {
-                if (neighbors == 3u8) {
-                    life_buf[offset] = CELL_FLIPPED | CELL_DEAD;
-                    qp_set(x, y, 1u8);
-                }
-            }
-            offset += 1u16;
-            x += 1u8;
-        }
-        y += 1u8;
-    }
-
-    offset = 0u16;
-    while (offset < SIZE) {
-        value = life_buf[offset];
-        u8 flip = value >> 1u8;
-        value = (value & CELL_CURRENT_MASK) ^ flip;
-        life_buf[offset] = value;
+    u8 top_row[VGA_COLS];
+    u8 first_row[VGA_COLS];
+    memcpy((u8*)top_row, (u8*)qp_fb + VGA_OFFSET(0u8, VGA_ROWS - 1u8), (u16)VGA_COLS);
+    memcpy((u8*)first_row, (u8*)qp_fb, (u16)VGA_COLS);
+    u16 offset = VGA_OFFSET(0u8, 0u8);
+    u16 offset_bot = VGA_OFFSET(0u8, 1u8);
+    u8 leftmost;
+    u8 leftmost_top;
+    u8 result_0;
+    u8 result_1;
+    for (u8 y = 0u8; y < VGA_ROWS - 1u8; y += 1u8) {
+        leftmost = qp_fb[offset];
+        leftmost_top = top_row[0u8];
+        result_0 = get_next(
+            top_row[VGA_COLS - 1u8],
+            leftmost_top,
+            top_row[1u8],
+            qp_fb[offset + (u16)(VGA_COLS - 1u8)],
+            leftmost,
+            qp_fb[offset + 1u16],
+            qp_fb[offset_bot + (u16)(VGA_COLS - 1u8)],
+            qp_fb[offset_bot],
+            qp_fb[offset_bot + 1u16]);
 
         offset += 1u16;
+        offset_bot += 1u16;
+
+        u16 offset_minus_1;
+
+        for (u8 x = 1u8; x < VGA_COLS - 1u8; x += 1u8) {
+            offset_minus_1 = offset - 1u16;
+            result_1 = result_0;
+            result_0 = get_next(
+                top_row[x - 1u8],
+                top_row[x],
+                top_row[x + 1u8],
+                qp_fb[offset_minus_1],
+                qp_fb[offset],
+                qp_fb[offset + 1u16],
+                qp_fb[offset_bot - 1u16],
+                qp_fb[offset_bot],
+                qp_fb[offset_bot + 1u16]);
+
+            top_row[x - 1u8] = qp_fb[offset_minus_1];
+            qp_fb[offset_minus_1] = result_1;
+
+            offset += 1u16;
+            offset_bot += 1u16;
+        }
+
+        offset_minus_1 = offset - 1u16;
+
+        result_1 = get_next(
+            top_row[VGA_COLS - 2u8],
+            top_row[VGA_COLS - 1u8],
+            leftmost_top,
+            qp_fb[offset_minus_1],
+            qp_fb[offset],
+            leftmost,
+            qp_fb[offset_bot - 1u16],
+            qp_fb[offset_bot],
+            qp_fb[offset_bot - (u16)(VGA_COLS - 1u8)]);
+
+        top_row[VGA_COLS - 2u8] = qp_fb[offset_minus_1];
+        top_row[VGA_COLS - 1u8] = qp_fb[offset];
+        qp_fb[offset_minus_1] = result_0;
+        qp_fb[offset] = result_1;
+
+        offset += 128u16 - 80u16 + 1u16;
+        offset_bot += 128u16 - 80u16 + 1u16;
     }
+    // last row
+    leftmost = qp_fb[LAST_ROW_OFFSET];
+    leftmost_top = top_row[0u8];
+    result_0 = get_next(
+        top_row[VGA_COLS - 1u8],
+        top_row[0u8],
+        top_row[1u8],
+        qp_fb[LAST_ROW_OFFSET + (u16)(VGA_COLS - 1u8)],
+        leftmost,
+        qp_fb[LAST_ROW_OFFSET + 1u16],
+        first_row[VGA_COLS - 1u8],
+        first_row[0u8],
+        first_row[1u8]);
+
+    for (x = 1u8; x < VGA_COLS - 1u8; x += 1u8) {
+        result_1 = result_0;
+        result_0 = get_next(
+            top_row[x - 1u8],
+            top_row[x],
+            top_row[x + 1u8],
+            qp_fb[(LAST_ROW_OFFSET - 1u16) + (u16)x],
+            qp_fb[LAST_ROW_OFFSET + (u16)x],
+            qp_fb[(LAST_ROW_OFFSET + 1u16) + (u16)x],
+            first_row[x - 1u8],
+            first_row[x],
+            first_row[x + 1u8]);
+
+        qp_fb[(LAST_ROW_OFFSET - 1u16) + (u16)x] = result_1;
+    }
+
+    result_1 = get_next(
+        top_row[VGA_COLS - 2u8],
+        top_row[VGA_COLS - 1u8],
+        leftmost_top,
+        qp_fb[VGA_OFFSET(VGA_COLS - 2u8, VGA_ROWS - 1u8)],
+        qp_fb[VGA_OFFSET(VGA_COLS - 1u8, VGA_ROWS - 1u8)],
+        leftmost,
+        first_row[VGA_COLS - 2u8],
+        first_row[VGA_COLS - 1u8],
+        first_row[0u8]);
+
+    qp_fb[VGA_OFFSET(VGA_COLS - 2u8, VGA_ROWS - 1u8)] = result_0;
+    qp_fb[VGA_OFFSET(VGA_COLS - 1u8, VGA_ROWS - 1u8)] = result_1;
+
     qp_render();
 }
 
