@@ -37,15 +37,13 @@ row_loop:
     st a
     col_loop:
             ; qp_fb is aligned
-            ldi pl, lo(offset)
+            ldi pl, lo(offset + 1)
             ldi ph, hi(offset)
-            ld b
-            inc pl
             ld a
+            dec pl
+            ld pl
             ldi ph, hi(qp_fb)
             add ph, a
-            mov a, b
-            mov pl, a
 
             ld a ; pair of quasipixels
             ldi ph, hi(qp_colors)
@@ -195,7 +193,7 @@ clear_row_loop:
 
 
     .section bss
-    .align 0x1000
+    .align 0x100
 qp_fb:
     res 30 * 128
 

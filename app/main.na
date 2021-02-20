@@ -11,7 +11,7 @@ import u8 vga_demo();
 import u8 matrix_code_rain();
 
 u8 life_main() {
-    qp_init(COLOR_MAGENTA, COLOR_BROWN);
+    qp_init(COLOR_GREEN, COLOR_MAGENTA);
     life_init();
     qp_set_cursor_enabled(1u8);
     u8 running = 0u8;

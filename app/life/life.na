@@ -8,6 +8,12 @@
 export u8 life_init() {
 }
 
+import u8 life_get_next_fast(
+        u8 ptl, u8 ptc, u8 ptr,
+        u8 pcl, u8 pcc, u8 pcr,
+        u8 pbl, u8 pbc, u8 pbr);
+
+/*
 u8 get_next(
         u8 ptl, u8 ptc, u8 ptr,
         u8 pcl, u8 pcc, u8 pcr,
@@ -46,6 +52,7 @@ u8 get_next(
     }
     return t | b;
 }
+*/
 
 export u8 life_step_and_render() {
     u8 top_row[VGA_COLS];
@@ -61,7 +68,7 @@ export u8 life_step_and_render() {
     for (u8 y = 0u8; y < VGA_ROWS - 1u8; y += 1u8) {
         leftmost = qp_fb[offset];
         leftmost_top = top_row[0u8];
-        result_0 = get_next(
+        result_0 = life_get_next_fast(
             top_row[VGA_COLS - 1u8],
             leftmost_top,
             top_row[1u8],
@@ -80,7 +87,7 @@ export u8 life_step_and_render() {
         for (u8 x = 1u8; x < VGA_COLS - 1u8; x += 1u8) {
             offset_minus_1 = offset - 1u16;
             result_1 = result_0;
-            result_0 = get_next(
+            result_0 = life_get_next_fast(
                 top_row[x - 1u8],
                 top_row[x],
                 top_row[x + 1u8],
@@ -100,7 +107,7 @@ export u8 life_step_and_render() {
 
         offset_minus_1 = offset - 1u16;
 
-        result_1 = get_next(
+        result_1 = life_get_next_fast(
             top_row[VGA_COLS - 2u8],
             top_row[VGA_COLS - 1u8],
             leftmost_top,
@@ -122,7 +129,7 @@ export u8 life_step_and_render() {
     // last row
     leftmost = qp_fb[LAST_ROW_OFFSET];
     leftmost_top = top_row[0u8];
-    result_0 = get_next(
+    result_0 = life_get_next_fast(
         top_row[VGA_COLS - 1u8],
         top_row[0u8],
         top_row[1u8],
@@ -135,7 +142,7 @@ export u8 life_step_and_render() {
 
     for (x = 1u8; x < VGA_COLS - 1u8; x += 1u8) {
         result_1 = result_0;
-        result_0 = get_next(
+        result_0 = life_get_next_fast(
             top_row[x - 1u8],
             top_row[x],
             top_row[x + 1u8],
@@ -149,7 +156,7 @@ export u8 life_step_and_render() {
         qp_fb[(LAST_ROW_OFFSET - 1u16) + (u16)x] = result_1;
     }
 
-    result_1 = get_next(
+    result_1 = life_get_next_fast(
         top_row[VGA_COLS - 2u8],
         top_row[VGA_COLS - 1u8],
         leftmost_top,
