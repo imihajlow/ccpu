@@ -28,7 +28,46 @@ def align(ip, alignment):
     else:
         return ip
 
-def link(objects, layout):
+def fitSectionsSimple(begin, sections):
+    ip = begin
+    for s in sections:
+        s.offset = align(ip, s.align)
+        ip = s.offset + len(s.text)
+        if ip > 0xffff:
+            raise LinkerError("64k overflow", o, s)
+    return ip
+
+def fitSectionsFill(begin, sections):
+    sections = sorted(sections, key=lambda s: s.align, reverse=True)
+    ip = begin
+    holes = [] # start, length
+    for s in sections:
+        l = len(s.text)
+        foundHole = False
+        for i in range(len(holes)):
+            holeStart,holeSize = holes[i]
+            alignment = align(holeStart, s.align) - holeStart
+            if holeSize >= l + alignment:
+                foundHole = True
+                s.offset = holeStart + alignment
+                holes.pop(i)
+                if alignment > 0:
+                    holes.append((holeStart, alignment))
+                holeTail = holeSize - alignment - l
+                if holeTail > 0:
+                    holes.append((holeStart + alignment + l, holeTail))
+                break
+        if not foundHole:
+            alignment = align(ip, s.align) - ip
+            if alignment > 0:
+                holes.append((ip, alignment))
+            s.offset = ip + alignment
+            ip = s.offset + len(s.text)
+            if ip > 0xffff:
+                raise LinkerError("64k overflow", o, s)
+    return ip
+
+def link(objects, layout, fit):
     ip = 0
     globalSymbols = set()
     exportedSymbolValues = {}
@@ -40,16 +79,13 @@ def link(objects, layout):
                 raise LinkerError("segment overflow: IP is beyond segment `{}' begin".format(segment["name"]))
             ip = segment["begin"]
         segBegin = ip
+        sectionList = []
         for o in objects:
             globalSymbols.update(o.globalSymbols)
             for s in o.sections:
                 if s.name == segment["name"]:
-                    s.offset = align(ip, s.align)
-                    ip = s.offset + len(s.text)
-                    if segment["end"] is not None and ip > segment["end"]:
-                        raise LinkerError("Segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
-                    if ip > 0xffff:
-                        raise LinkerError("64k overflow", o, s)
+                    sectionList.append(s)
+        ip = fit(ip, sectionList)
         if segment["end"] is not None:
             end = segment["end"]
             if end < ip:
@@ -168,13 +204,15 @@ if __name__ == '__main__':
     parser.add_argument('--filler', type=int, default=0xff, help="value to fill uninitialized memory (bin output type only)")
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
     parser.add_argument('--layout', choices=["default", "sim"], default="default", help='memory layout')
+    parser.add_argument('--fit-strategy', choices=["fill", "simple"], default="fill", help='fit strategy')
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
     layout = importlib.import_module("." + args.layout, "layouts")
     try:
         objects = [load(filename) for filename in args.file]
-        symbolMap, segments = link(objects, layout)
+        fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
+        symbolMap, segments = link(objects, layout, fitters[args.fit_strategy])
         rom = createRom(objects, segments)
         save(rom, args.o, args.type, args.full, args.filler)
         saveLabels(args.m, symbolMap)
