@@ -7,7 +7,7 @@ from lark.visitors import VisitError
 from const import ConstTransformer, SizeofExprTransformer
 from type import TypeTransformer, CastTransformer
 from value import VarTransformerStageOne, VarTransformerStageTwo
-from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, ForTransformer, DefinitionTransformer
+from sugar import SubscriptTransformer, DeclarationTransformer, CompoundTransformer, DefinitionTransformer
 from literal import LiteralTransformer
 from structure import StructDeclarationTransformer, MemberAccessTransformer
 from function import NameInterpreter
@@ -92,7 +92,6 @@ if __name__ == '__main__':
         t = CompoundTransformer().transform(t)
         t = CastTransformer().transform(t)
         t = SubscriptTransformer().transform(t)
-        t = ForTransformer().transform(t)
         t = MemberAccessTransformer().transform(t)
         t = SizeofExprTransformer().transform(t)
         t = ConstTransformer(True).transform(t)

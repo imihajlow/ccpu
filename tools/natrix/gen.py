@@ -194,6 +194,43 @@ class Generator:
         return self.backend.genLabel(labelBegin) + codeCond + self.backend.genInvCondJump(rvCond, labelEnd)\
             + codeBody + self.backend.genJump(labelBegin) + self.backend.genLabel(labelEnd)
 
+    def generateFor(self, prolog, cond, iteration, body, curFn):
+        if prolog.data != 'for_prolog':
+            codeProlog = self.generateStatement(prolog, curFn)
+        else:
+            codeProlog = ""
+
+        hasIterationCode = iteration.data != "for_iteration"
+
+        labelBegin = self.allocLabel("for_begin")
+        labelEnd = self.allocLabel("for_end")
+        if hasIterationCode:
+            labelContinue = self.allocLabel("for_continue")
+        else:
+            labelContinue = labelBegin
+
+        if isinstance(cond, Value) or cond.data != 'for_condition':
+            self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
+            rvCond, codeCond = self.generateExpression(cond, 0,
+                Value.variable(Location.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
+            codeCond += self.backend.genInvCondJump(rvCond, labelEnd)
+        else:
+            codeCond = ""
+
+        self.breakLabel = [labelEnd] + self.breakLabel
+        self.continueLabel = [labelContinue] + self.continueLabel
+        codeBody = self.generateStatement(body, curFn)
+        self.breakLabel = self.breakLabel[1:]
+        self.continueLabel = self.continueLabel[1:]
+        if hasIterationCode:
+            codeIter = self.backend.genLabel(labelContinue)
+            codeIter += self.generateStatement(iteration, curFn)
+            codeIter += self.backend.genJump(labelBegin)
+        else:
+            codeIter = self.backend.genJump(labelBegin)
+        return codeProlog + self.backend.genLabel(labelBegin) + codeCond\
+            + codeBody + codeIter + self.backend.genLabel(labelEnd)
+
     def generateFunctionCall(self, location, name, args, curFn):
         if name not in self.nameInfo.functions:
             raise SemanticError(location, "Undefined function: {}".format(name))
@@ -232,6 +269,8 @@ class Generator:
             return self.generateConditional(t.children[0], t.children[1], t.children[2] if len(t.children) == 3 else None, curFn)
         elif t.data == 'while_loop':
             return self.generateWhile(t.children[0], t.children[1], curFn)
+        elif t.data == 'for_loop':
+            return self.generateFor(t.children[0], t.children[1], t.children[2], t.children[3], curFn)
         elif t.data == 'break_statement':
             if len(self.breakLabel) == 0:
                 raise SemanticError(t.line, "Not in a loop")

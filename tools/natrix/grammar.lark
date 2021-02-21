@@ -47,11 +47,11 @@ while_loop: "while" "(" expression ")" statement
 
 for_loop: "for" "(" for_prolog ";" for_condition ";" for_iteration ")" statement
 
-for_prolog: _basic_statement?
+?for_prolog: _basic_statement?
 
 ?for_condition: expression?
 
-for_iteration: _basic_statement?
+?for_iteration: _basic_statement?
 
 ?block: "{" statement* "}"
 

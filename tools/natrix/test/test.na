@@ -1085,6 +1085,42 @@ u8 test_copy() {
     }
 }
 
+u8 test_for() {
+    u8 i;
+    for (i = 0u8; i < 10u8; i += 1u8) {
+    }
+    ASSERT_TRUE(i == 10u8);
+
+    for (; i; i -= 1u8) {
+
+    }
+    ASSERT_TRUE(i == 0u8);
+
+    for (i = 5u8; ; i += 1u8) {
+        break;
+    }
+    ASSERT_TRUE(i == 5u8);
+
+    u8 s = 0u8;
+    for (i = 0u8; i < 10u8 && s < 20u8; i += 1u8) {
+        s += 1u8;
+        continue;
+        s += 1u8;
+    }
+    ASSERT_TRUE(i == 10u8);
+    ASSERT_TRUE(s == 10u8);
+
+    s = 0u8;
+    for (i = 0u8; i < 10u8; ) {
+        i += 1u8;
+        s += 1u8;
+        continue;
+        s += 1u8;
+    }
+    ASSERT_TRUE(i == 10u8);
+    ASSERT_TRUE(s == 10u8);
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
@@ -1102,6 +1138,7 @@ export u8 main() {
     test_struct();
     test_sizeof();
     test_copy();
+    test_for();
     display_print("Success!");
     success();
 }
