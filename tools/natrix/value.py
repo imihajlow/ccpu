@@ -4,7 +4,6 @@ from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import labelname
 from location import Location
-from function import Function
 
 '''
 Value class

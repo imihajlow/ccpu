@@ -95,7 +95,7 @@ if __name__ == '__main__':
         t = MemberAccessTransformer().transform(t)
         t = SizeofExprTransformer().transform(t)
         t = ConstTransformer(True).transform(t)
-        lt = LiteralTransformer()
+        lt = LiteralTransformer(ni)
         t = lt.transform(t)
         if args.tree:
             print()

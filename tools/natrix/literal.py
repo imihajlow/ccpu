@@ -3,42 +3,14 @@ from exceptions import LiteralError
 from location import Location
 from type import IntType, PtrType
 from value import Value
-
-def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True, findLastQuote=False):
-    s = s[1:]
-    if not findLastQuote:
-        s = s[:-1]
-    escape = False
-    result = ""
-    for c in s:
-        if not escape:
-            if c == '\\':
-                escape = True
-            else:
-                if findLastQuote and c == quote:
-                    return result
-                if ord(c) > 127:
-                    raise ValueError("only 127 ASCII characters are supported")
-                result += c
-        else:
-            if c == quote:
-                result += c
-            elif c == 'n':
-                result += chr(10)
-            elif c == '\\':
-                result += c
-            else:
-                if acceptUnknownEscapeSeq:
-                    result += ['\\', c]
-                else:
-                    raise ValueError("unknown escape sequence: \\{}".format(c))
-            escape = False
-    return result
+from function import unescapeString
 
 class LiteralTransformer(Transformer):
-    def __init__(self):
+    def __init__(self, nameInfo):
         self._index = 0
         self._literals = []
+        self._new_literals = []
+        self._ni = nameInfo
 
     def getLiterals(self):
         return self._literals
@@ -50,8 +22,18 @@ class LiteralTransformer(Transformer):
 
     def _addLiteral(self, loc, t, v):
         label = self._allocLiteralLabel()
-        self._literals += [(label, t, v)]
+        self._new_literals += [(label, t, v)]
         return Value(loc, PtrType(t), 0, label, True)
+
+    @v_args(tree = True)
+    def function_definition(self, t):
+        decl, body = t.children
+        name = decl.children[2]
+        section = self._ni.functions[name].section
+        for label, type, value in self._new_literals:
+            self._literals += [(label, type, value, section)]
+        self._new_literals = []
+        return t
 
     @v_args(inline = True)
     def string_literal(self, lt):

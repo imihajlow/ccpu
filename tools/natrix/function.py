@@ -3,8 +3,48 @@ from lark.visitors import Interpreter
 from location import Location
 from exceptions import SemanticError
 
+def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True, findLastQuote=False):
+    s = s[1:]
+    if not findLastQuote:
+        s = s[:-1]
+    escape = False
+    result = ""
+    for c in s:
+        if not escape:
+            if c == '\\':
+                escape = True
+            else:
+                if findLastQuote and c == quote:
+                    return result
+                if ord(c) > 127:
+                    raise ValueError("only 127 ASCII characters are supported")
+                result += c
+        else:
+            if c == quote:
+                result += c
+            elif c == 'n':
+                result += chr(10)
+            elif c == '\\':
+                result += c
+            else:
+                if acceptUnknownEscapeSeq:
+                    result += ['\\', c]
+                else:
+                    raise ValueError("unknown escape sequence: \\{}".format(c))
+            escape = False
+    return result
+
 def hasAttr(attrs, a):
     return any(x.data == a for x in attrs)
+
+def getSection(attrs, default):
+    section_attrs = [x for x in attrs if x.data == "attr_section"]
+    if len(section_attrs) == 1:
+        return unescapeString(section_attrs[0].children[0])
+    elif len(section_attrs) == 0:
+        return default
+    else:
+        raise ValueError("Multple sections specified")
 
 class Function:
     def __init__(self, name, retType, attrs, args):
@@ -16,6 +56,7 @@ class Function:
         self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
         self.retType = retType
         self.localVars = {}
+        self.section = getSection(attrs, "text")
         if self.isExported and self.isImported:
             raise ValueError("A function can't be exported and imported at the same time")
 

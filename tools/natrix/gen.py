@@ -300,9 +300,13 @@ class Generator:
 
     def generateFunctionDefinition(self, decl, body):
         name = str(decl.children[2])
-        result = self.backend.genFunctionPrologue(name)
+        section = self.nameInfo.functions[name].section
+        result = f"; ====== function {name} =======\n"
+        result += self.backend.startSection(section)
+        result += self.backend.genFunctionPrologue(name)
         result += "".join(self.generateStatement(child, name) for child in body.children)
         result += self.backend.genReturn(name)
+        result += f"; ====== end function {name} ===\n"
         return result
 
     def generateToplevel(self, t):
@@ -362,4 +366,4 @@ class Generator:
         reserveCode = self.generateReserve()
         literalsCode = self.backend.dumpLiterals(self.literalPool)
 
-        return exportCode + importCode + self.backend.startCodeSection() + execCode + literalsCode + self.backend.startBssSection() + reserveCode
+        return exportCode + importCode + execCode + literalsCode + self.backend.startBssSection() + reserveCode

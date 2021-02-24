@@ -18,6 +18,7 @@ attributes: attribute*
 ?attribute: "import" -> attr_import
     | "export" -> attr_export
     | "traitor" -> attr_always_recursion
+    | "section" ESCAPED_STRING -> attr_section
 
 
 arg_declarations: (arg_declaration ("," arg_declaration)*)?

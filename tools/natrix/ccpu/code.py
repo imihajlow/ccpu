@@ -11,13 +11,21 @@ from .stack import *
 from exceptions import SemanticError
 
 def startCodeSection():
-    return ".section text\n"
+    return startSection("text")
 
 def startBssSection():
-    return '''
-        .section bss
-        .align 2
-    '''
+    return startSection("bss", 2)
+
+def startSection(name, alignment=1):
+    if alignment > 1:
+        return f'''
+            .section {name}
+            .align {alignment}
+        '''
+    else:
+        return f'''
+            .section {name}
+        '''
 
 def dumpExports(exports):
     return "".join(".export {}\n".format(s) for s in exports)
@@ -51,14 +59,16 @@ def _dumpRuntimeImports():
     """
 
 def dumpLiterals(lp):
-    result = '; literals:\n'
-    for label,t,v in lp.getLiterals():
+    result = '; ====== literals: ===========\n'
+    for label,t,v,section in lp.getLiterals():
+        result += f".section {section}\n"
         size = t.getSize()
         if size == 2:
             result += '.align 2\n'
         result += '{}:\n'.format(label)
         # a literal can't be empty
         result += '{} {}\n'.format("db" if size == 1 else "dw", ", ".join(str(x) for x in v))
+    result += '; ====== end literals =======\n'
     return result
 
 def reserve(label, size):
