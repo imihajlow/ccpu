@@ -1,0 +1,45 @@
+#include <vga.h>
+
+#define PS2_DATA *((u8*)0xFE00)
+#define PS2_STATUS *((u8*)0xFE01)
+
+#define PS2_STATUS_HAS_DATA 1u8
+#define PS2_STATUS_RECV_VALID 2u8
+#define PS2_STATUS_SEND_ACK 4u8
+
+u8 print_hex_char(u8 col, u8 row, u8 v) {
+    if (v < 10u8) {
+        v += '0';
+    } else {
+        v += 'A' - 10u8;
+    }
+    vga_char_seg[VGA_OFFSET(col, row)] = v;
+}
+
+export u8 main() {
+    for (;;) {
+        vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+        vga_put_text(0u8, 0u8, "PS/2 test program");
+
+        u8 row = 1u8;
+        u8 col = 0u8;
+        while (row < VGA_ROWS) {
+            u8 status = PS2_STATUS;
+            if (status & PS2_STATUS_HAS_DATA) {
+                if (status & PS2_STATUS_RECV_VALID) {
+                    u8 data = PS2_DATA;
+                    print_hex_char(col, row, data >> 4u8);
+                    print_hex_char(col + 1u8, row, data & 0x0fu8);
+                } else {
+                    vga_put_text(col, row, "XX");
+                }
+                PS2_STATUS = 0u8;
+                col += 3u8;
+                if (col >= VGA_COLS) {
+                    row += 1u8;
+                    col = 0u8;
+                }
+            }
+        }
+    }
+}
