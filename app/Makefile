@@ -5,7 +5,7 @@ FREQUENCY=1350kHz
 
 BCDF_OBJECTS=lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o lib/bcdf_print.o
 
-all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom locheck.rom vgatest.rom ps2test.rom
+all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom lotest.rom vgatest.rom ps2test.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s $(NATRIX_DIR)/runtime/natrix_runtime.o
@@ -41,10 +41,10 @@ alutest.bin: test/alutest.o
 memcheck.bin: memcheck/memcheck.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-locheck.bin: memcheck/locheck.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtime.o
+lotest.bin: memcheck/lotest.o lib/string.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/vga.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
-vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o
+vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o lib/string.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 ps2test.bin: test/ps2test.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o

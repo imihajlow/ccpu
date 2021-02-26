@@ -21,11 +21,23 @@
     .export __cc_r_quotient
     .export __cc_r_remainder
 
-    .global __seg_stack_end ; provided by the linker
+    ; provided by the linker
+    .global __seg_stack_end
+    .global __seg_ramtext_begin
+    .global __seg_ramtext_end
+    .global __seg_ramtext_origin_begin
+    .global __seg_ramtext_origin_end
+
+    .global memcpy
+    .global memcpy_arg0
+    .global memcpy_arg1
+    .global memcpy_arg2
+
     .global main
 
     ; start-up code
     .section init
+    .align 0x10000 ; make sure this is at address 0
     nop
     ; enable all memory segments except for d and e
     ldi ph, 0xff
@@ -40,6 +52,35 @@
     inc pl
     ldi a, hi(__seg_stack_end)
     st a
+
+    ; populate ramtext secion
+    ldi pl, lo(memcpy_arg0)
+    ldi ph, hi(memcpy_arg0)
+    ldi a, lo(__seg_ramtext_begin)
+    ldi b, hi(__seg_ramtext_begin)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(memcpy_arg1)
+    ldi ph, hi(memcpy_arg1)
+    ldi a, lo(__seg_ramtext_origin_begin)
+    ldi b, hi(__seg_ramtext_origin_begin)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(memcpy_arg2)
+    ldi ph, hi(memcpy_arg2)
+    ldi a, lo(__seg_ramtext_end - __seg_ramtext_begin)
+    ldi b, hi(__seg_ramtext_end - __seg_ramtext_begin)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(memcpy)
+    ldi ph, hi(memcpy)
+    jmp
 
     ; call main
     ldi pl, lo(main)

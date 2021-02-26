@@ -1,0 +1,66 @@
+#include <vga.h>
+
+export u8 main() {
+    vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+    vga_put_text(0u8, 0u8, "Program started");
+    rt_main();
+}
+
+section "ramtext"
+u8 rt_main() {
+    vga_put_text(0u8, 1u8, "Hello from ramtext");
+    *((u8*)0xff02) = 0x3fu8; // enable lo RAM
+    put_text("Lo RAM enabled", 2u8);
+    put_text("Writing into Lo RAM...", 3u8);
+    u8 v = 3u8;
+    for (u8 *p = (u8*)0; p != (u8*)0x8000; p += 1u8) {
+        *p = v;
+        v += 7u8;
+    }
+    put_text("Reading from Lo RAM...", 4u8);
+    v = 3u8;
+    for (p = (u8*)0; p != (u8*)0x8000; p += 1u8) {
+        if (*p != v) {
+            fail((u16)p, *p, v);
+        }
+        v += 7u8;
+    }
+    put_text("Success!", 5u8);
+
+    for (;;) {}
+}
+
+section "ramtext"
+u8 put_text(u8 *s, u8 col) {
+    u8 *offset = (u8*)vga_char_seg + VGA_OFFSET(0, col);
+    while (*s) {
+        *offset = *s;
+        s += 1u8;
+        offset += 1u8;
+    }
+}
+
+section "ramtext"
+u8 fail(u16 address, u8 read, u8 expected) {
+    put_text("Fail at ", 5u8);
+    print_hex_byte(9u8, 5u8, (u8)(address >> 8u8));
+    print_hex_byte(11u8, 5u8, (u8)address);
+    print_hex_byte(14u8, 5u8, expected);
+    print_hex_byte(17u8, 5u8, read);
+    for (;;) {}
+}
+
+section "ramtext"
+u8 hex_to_char(u8 v) {
+    if (v < 10u8) {
+        return '0' + v;
+    } else {
+        return 'A' + v - 10u8;
+    }
+}
+
+section "ramtext"
+u8 print_hex_byte(u8 col, u8 row, u8 b) {
+    vga_char_seg[VGA_OFFSET(col + 1u8, row)] = hex_to_char(b & 0xfu8);
+    vga_char_seg[VGA_OFFSET(col, row)] = hex_to_char(b >> 4u8);
+}
