@@ -1,7 +1,8 @@
 #include <vga.h>
+#include <keyboard.h>
 
-#define PS2_DATA *((u8*)0xFE00)
-#define PS2_STATUS *((u8*)0xFE01)
+#define PS2_DATA *((u8*)0xFD00)
+#define PS2_STATUS *((u8*)0xFD01)
 
 #define PS2_STATUS_HAS_DATA 1u8
 #define PS2_STATUS_RECV_VALID 2u8
@@ -17,6 +18,7 @@ u8 print_hex_char(u8 col, u8 row, u8 v) {
 }
 
 export u8 main() {
+    u8 leds = 0u8;
     for (;;) {
         vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
         vga_put_text(0u8, 0u8, "PS/2 test program");
@@ -38,6 +40,29 @@ export u8 main() {
                 if (col >= VGA_COLS) {
                     row += 1u8;
                     col = 0u8;
+                }
+            }
+            u8 k = keyboard_get_if_pressed();
+            if (k != KEY_NO_KEY) {
+                if (k == KEY_F1) {
+                    PS2_DATA = 0xEEu8; // echo
+                } else if (k == KEY_ESC) {
+                    PS2_DATA = 0xFFu8; // reset
+                } else if (k == KEY_F2) {
+                    PS2_DATA = 0xFEu8; // resend
+                } else if (k == KEY_1) {
+                    PS2_DATA = 0xF2u8; // id
+                } else {
+                    leds = leds ^ 7u8;
+                    PS2_DATA = 0xEDu8;
+                    status = PS2_STATUS;
+                    while (!(status & PS2_STATUS_HAS_DATA)) {
+                        status = PS2_STATUS;
+                    }
+                    if (PS2_DATA == 0xfau8) {
+                        PS2_STATUS = 0u8;
+                        PS2_DATA = leds;
+                    }
                 }
             }
         }
