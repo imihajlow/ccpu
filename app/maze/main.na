@@ -2,6 +2,7 @@
 #include <entropy.h>
 #include <random.h>
 #include <vga.h>
+#include <ps2keyboard.h>
 #include "maze.h"
 #include "game.h"
 #include "../frame.h"
@@ -55,7 +56,7 @@ u8 maze_loop() {
         game_print_state();
         trap();
         while (1u8) {
-            k = keyboard_wait_key_released();
+            k = keyboard_get_if_pressed();
             if (k == KEY_ESC) {
                 return;
             } else if (k == KEY_RIGHT) {
@@ -79,9 +80,43 @@ u8 maze_loop() {
             if (r == RESULT_EXIT) {
                 break;
             }
+
+            k = ps2_get_key_event();
+            if (k == PS2_KEY_ESCAPE) {
+                return;
+            } else if (k == PS2_KEY_RIGHT) {
+                r = game_move_right();
+            } else if (k == PS2_KEY_LEFT) {
+                r = game_move_left();
+            } else if (k == PS2_KEY_UP) {
+                r = game_move_up();
+            } else if (k == PS2_KEY_DOWN) {
+                r = game_move_down();
+            } else if (k == PS2_KEY_PAGEDOWN) {
+                break;
+            } else if (k == PS2_KEY_PAGEUP) {
+                n -= 4u8;
+                break;
+            } else if (k == PS2_KEY_F1) {
+                game_show_all();
+            } else {
+                r = 0u8;
+            }
+            if (r == RESULT_EXIT) {
+                break;
+            }
         }
         print_success();
-        keyboard_wait_key_released();
+        while (1u8) {
+            k = keyboard_get_if_pressed();
+            if (k != KEY_NO_KEY) {
+                break;
+            }
+            k = ps2_get_key_event();
+            if (k != PS2_KEY_NONE && !(k & PS2_KEY_RELEASE)) {
+                break;
+            }
+        }
         n += 2u8;
     }
 }
