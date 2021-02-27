@@ -28,16 +28,16 @@ Color encoding is 4 bit IRGB.
 
 ## Vario board
 
-0xFE00 - PS/2 data (RW). RDY is blocked if data reception or transmission is in progress.
+0xFD00 - PS/2 data (RW). RDY is blocked if data reception or transmission is in progress.
 
-0xFE01 - PS/2 status. RDY is blocked if data reception or transmission is in progress. Write any value to reset. Read:
+0xFD01 - PS/2 status. RDY is blocked if data reception or transmission is in progress. Write any value to reset. Read:
 	* bit 0 - has_data;
 	* bit 1 - recv_valid;
 	* bit 2 - send_ack (0 = valid ACK).
 
-0xFE02 - SPI data (RW). Write initiates transmission. RDY is blocked when data transfer is in progress.
+0xFD02 - SPI data (RW). Write initiates transmission. RDY is blocked when data transfer is in progress.
 
-0xFE03 - memory card control:
+0xFD03 - memory card control:
 	* bit 0 - n_card_detect (RO);
 	* bit 1 - write_protect (RO);
 	* bit 2 - n_card_cs (WO);
