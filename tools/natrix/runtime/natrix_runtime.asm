@@ -28,10 +28,11 @@
     .global __seg_ramtext_origin_begin
     .global __seg_ramtext_origin_end
 
-    .global memcpy
-    .global memcpy_arg0
-    .global memcpy_arg1
-    .global memcpy_arg2
+    .export memcpy
+    .export memcpy_arg0
+    .export memcpy_arg1
+    .export memcpy_arg2
+    .export memcpy_ret
 
     .global main
 
@@ -570,6 +571,42 @@ copy_loop:
         ldi pl, lo(copy_loop)
         ldi ph, hi(copy_loop)
         jmp
+
+memcpy:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ldi pl, lo(memcpy_arg2)
+    ldi ph, hi(memcpy_arg2)
+    ld a
+    inc pl
+    ld b
+    ldi pl, lo(memcpy_arg1)
+    ldi ph, hi(memcpy_arg1)
+    ld pl
+    add a, pl
+    ldi pl, lo(memcpy_arg1 + 1)
+    ld ph
+    mov pl, a
+    mov a, b
+    adc a, ph
+    mov b, a
+    mov a, pl
+    ldi pl, lo(src_to)
+    ldi ph, hi(src_to)
+    st a
+    inc pl
+    st b
+
+    ldi pl, lo(copy)
+    ldi ph, hi(copy)
+    jmp
 
 ; multiply A and B, result into R
 __cc_mul_byte:
@@ -1377,8 +1414,10 @@ __cc_r_b: res 2
 __cc_r_r: res 2
 
 int_ret: res 2
+memcpy_arg1:
 src_from: res 2
 src_to: res 2
+memcpy_arg0:
 dst_from: res 2
 tmp: res 2
 __cc_r_quotient:
@@ -1387,3 +1426,5 @@ __cc_r_remainder:
 remainder: res 2
 div_ret: res 2
 qbit: res 2
+memcpy_ret:
+memcpy_arg2: res 2

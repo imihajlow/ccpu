@@ -7,12 +7,3 @@ export u8 memset(u8 *b, u8 c, u16 len) {
         b += 1;
     }
 }
-
-export u8 memcpy(u8 *dst, u8 *src, u16 len) {
-    while (len != (u16)0) {
-        *dst = *src;
-        dst += 1;
-        src += 1;
-        len -= (u16)1;
-    }
-}

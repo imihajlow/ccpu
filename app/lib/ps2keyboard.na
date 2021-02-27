@@ -1,0 +1,681 @@
+#include "ps2keyboard.h"
+#include "ps2.h"
+
+u8 extended;
+u8 release;
+
+export u8 ps2_init() {
+    extended = 0u8;
+    release = 0u8;
+}
+
+export u8 ps2_get_key_event() {
+    u8 code = ps2_read();
+    u8 result = PS2_KEY_NONE;
+    if (code != PS2_READ_EMPTY) {
+        if (code == PS2_CODE_BAT_PASSED || code == PS2_CODE_BUFFER_OVERRUN) {
+            // TODO handle BAT error
+            extended = 0u8;
+            release = 0u8;
+        } else if (code == 0xf0u8) {
+            release = 0x80u8;
+        } else if (code == 0xe0u8 || code == 0xe1u8) {
+            extended = 1u8;
+        } else {
+            if (extended) {
+                result = {
+                    // 0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 10
+                    0u8,
+                    PS2_KEY_RALT,
+                    0u8,
+                    0u8,
+                    PS2_KEY_RCTRL,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 18
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    PS2_KEY_LWIN,
+
+                    // 20
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    PS2_KEY_RWIN,
+
+                    // 28
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    PS2_KEY_MENU,
+
+                    // 30
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 38
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 40
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 48
+                    0u8,
+                    0u8,
+                    PS2_KEY_NUM_DIV,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 50
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 58
+                    0u8,
+                    0u8,
+                    PS2_KEY_NUM_ENTER,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 60
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 68
+                    0u8,
+                    PS2_KEY_END,
+                    0u8,
+                    PS2_KEY_LEFT,
+                    PS2_KEY_HOME,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 70
+                    PS2_KEY_INSERT,
+                    PS2_KEY_DELETE,
+                    PS2_KEY_DOWN,
+                    0u8,
+                    PS2_KEY_RIGHT,
+                    PS2_KEY_UP,
+                    0u8,
+                    0u8,
+
+                    // 78
+                    0u8,
+                    0u8,
+                    PS2_KEY_PAGEDOWN,
+                    0u8,
+                    0u8,
+                    PS2_KEY_PAGEUP,
+                    0u8,
+                    0u8,
+
+                    // 80
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 88
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 90
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 98
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // A0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // A8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // B0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // B8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // C0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // C8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // D0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // D8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // E0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // E8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // F0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // F8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8
+                }[code];
+            } else {
+                result = {
+                    // 0
+                    0u8,
+                    PS2_KEY_F9,
+                    0u8,
+                    PS2_KEY_F5,
+                    PS2_KEY_F3,
+                    PS2_KEY_F1,
+                    PS2_KEY_F2,
+                    PS2_KEY_F12,
+
+                    // 8
+                    0u8,
+                    PS2_KEY_F10,
+                    PS2_KEY_F8,
+                    PS2_KEY_F6,
+                    PS2_KEY_F4,
+                    PS2_KEY_TAB,
+                    PS2_KEY_BACKQUOTE,
+                    0u8,
+
+                    // 10
+                    0u8,
+                    PS2_KEY_LALT,
+                    PS2_KEY_LSHIFT,
+                    0u8,
+                    PS2_KEY_LCTRL,
+                    PS2_KEY_Q,
+                    PS2_KEY_1,
+                    0u8,
+
+                    // 18
+                    0u8,
+                    0u8,
+                    PS2_KEY_Z,
+                    PS2_KEY_S,
+                    PS2_KEY_A,
+                    PS2_KEY_W,
+                    PS2_KEY_2,
+                    0u8,
+
+                    // 20
+                    0u8,
+                    PS2_KEY_C,
+                    PS2_KEY_X,
+                    PS2_KEY_D,
+                    PS2_KEY_E,
+                    PS2_KEY_4,
+                    PS2_KEY_3,
+                    0u8,
+
+                    // 28
+                    0u8,
+                    PS2_KEY_SPACE,
+                    PS2_KEY_V,
+                    PS2_KEY_F,
+                    PS2_KEY_T,
+                    PS2_KEY_R,
+                    PS2_KEY_5,
+                    0u8,
+
+                    // 30
+                    0u8,
+                    PS2_KEY_N,
+                    PS2_KEY_B,
+                    PS2_KEY_H,
+                    PS2_KEY_G,
+                    PS2_KEY_Y,
+                    PS2_KEY_6,
+                    0u8,
+
+                    // 38
+                    0u8,
+                    0u8,
+                    PS2_KEY_M,
+                    PS2_KEY_J,
+                    PS2_KEY_U,
+                    PS2_KEY_7,
+                    PS2_KEY_8,
+                    0u8,
+
+                    // 40
+                    0u8,
+                    PS2_KEY_COMMA,
+                    PS2_KEY_K,
+                    PS2_KEY_I,
+                    PS2_KEY_O,
+                    PS2_KEY_0,
+                    PS2_KEY_9,
+                    0u8,
+
+                    // 48
+                    0u8,
+                    PS2_KEY_DOT,
+                    PS2_KEY_SLASH,
+                    PS2_KEY_L,
+                    PS2_KEY_SEMICOLON,
+                    PS2_KEY_P,
+                    PS2_KEY_DASH,
+                    0u8,
+
+                    // 50
+                    0u8,
+                    0u8,
+                    PS2_KEY_QUOTE,
+                    0u8,
+                    PS2_KEY_LBRACE,
+                    PS2_KEY_EQUALS,
+                    0u8,
+                    0u8,
+
+                    // 58
+                    PS2_KEY_CAPSLOCK,
+                    PS2_KEY_RSHIFT,
+                    PS2_KEY_ENTER,
+                    PS2_KEY_RBRACE,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 60
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    PS2_KEY_BACKSPACE,
+                    0u8,
+
+                    // 68
+                    0u8,
+                    PS2_KEY_NUM_1,
+                    0u8,
+                    PS2_KEY_NUM_4,
+                    PS2_KEY_NUM_7,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 70
+                    PS2_KEY_NUM_0,
+                    PS2_KEY_NUM_DOT,
+                    PS2_KEY_NUM_2,
+                    PS2_KEY_NUM_5,
+                    PS2_KEY_NUM_6,
+                    PS2_KEY_NUM_8,
+                    PS2_KEY_ESCAPE,
+                    PS2_KEY_NUMLOCK,
+
+                    // 78
+                    PS2_KEY_F11,
+                    PS2_KEY_NUM_ADD,
+                    PS2_KEY_NUM_3,
+                    PS2_KEY_NUM_SUB,
+                    PS2_KEY_NUM_MUL,
+                    PS2_KEY_NUM_9,
+                    PS2_KEY_SCROLLLOCK,
+                    0u8,
+
+                    // 80
+                    0u8,
+                    0u8,
+                    0u8,
+                    PS2_KEY_F7,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 88
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 90
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // 98
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // A0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // A8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // B0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // B8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // C0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // C8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // D0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // D8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // E0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // E8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // F0
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+
+                    // F8
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8,
+                    0u8
+                }[code];
+            }
+        }
+    }
+    if (result) {
+        result |= release;
+        release = 0u8;
+        extended = 0u8;
+        return result;
+    } else {
+        return 0u8;
+    }
+}
+

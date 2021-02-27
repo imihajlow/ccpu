@@ -5,7 +5,7 @@ FREQUENCY=1350kHz
 
 BCDF_OBJECTS=lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o lib/bcdf_print.o
 
-all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom lotest.rom vgatest.rom ps2test.rom
+all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom lotest.rom vgatest.rom ps2test.rom ps2hightest.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s $(NATRIX_DIR)/runtime/natrix_runtime.o
@@ -48,6 +48,9 @@ vgatest.bin: test/vgatest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 ps2test.bin: test/ps2test.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o lib/string.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+ps2hightest.bin: test/ps2hightest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o lib/string.o lib/ps2.o lib/ps2keyboard.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
 
 %.o: %.asm

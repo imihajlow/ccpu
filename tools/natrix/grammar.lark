@@ -134,7 +134,7 @@ _arguments: expression ("," expression)*
 ?subscript: number
     | literal
     | var
-    | var "[" expression "]" -> subscript
+    | subscript "[" expression "]" -> subscript
     | "sizeof" "(" type ")" -> sizeof_type
     | "sizeof" "(" expression ")" -> sizeof_expr
 

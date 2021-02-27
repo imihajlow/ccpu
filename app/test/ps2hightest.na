@@ -1,0 +1,48 @@
+#include <vga.h>
+#include <keyboard.h>
+#include <ps2.h>
+#include <ps2keyboard.h>
+
+u8 print_hex_char(u8 col, u8 row, u8 v) {
+    if (v < 10u8) {
+        v += '0';
+    } else {
+        v += 'A' - 10u8;
+    }
+    vga_char_seg[VGA_OFFSET(col, row)] = v;
+}
+
+export u8 main() {
+    u8 leds = 0u8;
+    ps2_init();
+    for (;;) {
+        vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+        vga_put_text(0u8, 0u8, "PS/2 high-level test program");
+
+        u8 row = 1u8;
+        u8 col = 0u8;
+        while (row < VGA_ROWS) {
+            u8 code = ps2_get_key_event();
+            if (code != PS2_KEY_NONE && code) {
+                vga_char_seg[VGA_OFFSET(col, row)] = code & ~PS2_KEY_RELEASE;
+                if (code & PS2_KEY_RELEASE) {
+                    vga_color_seg[VGA_OFFSET(col, row)] = COLOR(COLOR_RED, COLOR_BLACK);
+                }
+                col += 1u8;
+                if (col >= VGA_COLS) {
+                    col = 0u8;
+                    row += 1u8;
+                }
+            }
+            u8 k = keyboard_get_if_pressed();
+            if (k != KEY_NO_KEY) {
+                if (k == KEY_ESC) {
+                    ps2_reset();
+                } else {
+                    leds = leds ^ 7u8;
+                    ps2_set_led_mask(leds);
+                }
+            }
+        }
+    }
+}

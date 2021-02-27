@@ -1,0 +1,65 @@
+#include "ps2.h"
+
+export u8 ps2_read() {
+    u8 status = PS2_STATUS;
+    if (status & PS2_STATUS_HAS_DATA) {
+        if (status & PS2_STATUS_RECV_VALID) {
+            u8 data = PS2_DATA;
+            PS2_STATUS = 0u8;
+            return data;
+        } else {
+            PS2_DATA = PS2_CODE_RESEND;
+            PS2_STATUS = 0u8;
+        }
+    }
+    return PS2_READ_EMPTY;
+}
+
+#define STATE_START 0u8
+#define STATE_END 1u8
+#define STATE_WAIT_RESPONSE 2u8
+
+u8 send_byte(u8 byte) {
+    u8 status = PS2_STATUS;
+    if (status & PS2_STATUS_HAS_DATA) {
+        return 0u8;
+    }
+
+    u8 state = STATE_START;
+    while (state != STATE_END) {
+        if (state == STATE_START) {
+            PS2_DATA = byte;
+            state = STATE_WAIT_RESPONSE;
+        } else if (state == STATE_WAIT_RESPONSE) {
+            status = PS2_STATUS;
+            if (status & PS2_STATUS_HAS_DATA) {
+                if (status & PS2_STATUS_RECV_VALID) {
+                    u8 data = PS2_DATA;
+                    if (data == PS2_CODE_ACK) {
+                        state = STATE_END;
+                    } else {
+                        state = STATE_START;
+                    }
+                } else {
+                    PS2_DATA = PS2_CODE_RESEND;
+                }
+                PS2_STATUS = 0u8;
+            }
+        }
+    }
+    return 1u8;
+}
+
+export u8 ps2_reset() {
+    return send_byte(0xffu8);
+}
+
+export u8 ps2_set_led_mask(u8 mask) {
+    send_byte(0xedu8);
+    send_byte(mask);
+}
+
+export u8 ps2_set_rate(u8 mask) {
+    send_byte(0xf3u8);
+    send_byte(mask);
+}
