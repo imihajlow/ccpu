@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name missing)(type Legacy)(uri ${KIPRJMOD}/../registers/missing.lib)(options "")(descr ""))
+  (lib (name vario-rescue)(type Legacy)(uri ${KIPRJMOD}/vario-rescue.lib)(options "")(descr ""))
 )
