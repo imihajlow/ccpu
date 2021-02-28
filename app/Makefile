@@ -5,7 +5,7 @@ FREQUENCY=1350kHz
 
 BCDF_OBJECTS=lib/bcdf.o lib/bcdf_addsub.o lib/bcdf_mul.o lib/bcdf_div.o lib/bcdf_print.o
 
-all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom lotest.rom vgatest.rom ps2test.rom ps2hightest.rom
+all: io_test.rom natest.bin main.rom alutest.rom memcheck.rom lotest.rom vgatest.rom ps2test.rom ps2hightest.rom cardtest.rom
 
 clean:
 	rm -f *.bin *.rom *.map *.s *.o */*.o */*.s $(NATRIX_DIR)/runtime/natrix_runtime.o
@@ -52,6 +52,13 @@ ps2test.bin: test/ps2test.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.
 
 ps2hightest.bin: test/ps2hightest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o lib/string.o lib/ps2.o lib/ps2keyboard.o
 	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+cardtest.bin: test/cardtest.o $(NATRIX_DIR)/runtime/natrix_runtime.o lib/keyboard.o lib/vga.o lib/string.o lib/ps2.o lib/ps2keyboard.o lib/card.o lib/fat.o
+	../tools/link.py -o $@ -m $(@:.bin=.map) $^
+
+lib/debug_card.o: lib/card.na
+	$(NATRIX) --cpp-arg=-Ilib --cpp-arg="-DIMPORTED_SPI_TRANSFER" -o $(@:.o=.s) $^
+	../tools/asm.py --alu-revision=$(ALU_REVISION) -o $@ $(@:.o=.s)
 
 %.o: %.asm
 	../tools/asm.py --alu-revision=$(ALU_REVISION) -o $@ $^

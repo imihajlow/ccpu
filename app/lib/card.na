@@ -1,0 +1,174 @@
+#include "card.h"
+
+#define SPI_DATA *((u8*)0xFD02)
+#define SPI_CTRL *((u8*)0xFD03)
+
+#define SPI_CTRL_N_CARD_DETECT 1u8
+#define SPI_CTRL_WRITE_PROTECT 2u8
+#define SPI_CTRL_N_CARD_CS 4u8
+#define SPI_CTRL_EN_3V3 8u8
+
+#ifdef IMPORTED_SPI_TRANSFER
+import u8 spi_transfer(u8 x);
+#else
+u8 spi_transfer(u8 x) {
+    SPI_DATA = x;
+    return SPI_DATA;
+}
+#endif
+
+#define R1_IDLE 1u8
+#define R1_READY 0u8
+#define R1_ILLEGAL_COMMAND 4u8
+
+#define DATA_START_BLOCK 0xFEu8
+
+u8 delay_1ms() {
+    for (u16 i = 0u16; i < 1000u16; i += 1u16) {}
+}
+
+export u8 card_init() {
+    u8 r;
+    SPI_CTRL = SPI_CTRL_EN_3V3 | SPI_CTRL_N_CARD_CS;
+    delay_1ms();
+
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+
+    SPI_CTRL = SPI_CTRL_EN_3V3; // CS low
+    // CMD0, soft reset
+    spi_transfer(0x40u8);
+    spi_transfer(0x00u8);
+    spi_transfer(0x00u8);
+    spi_transfer(0x00u8);
+    spi_transfer(0x00u8);
+    spi_transfer(0x95u8);
+    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+        r = spi_transfer(0xFFu8);
+        if (r != 0xffu8) {
+            break;
+        }
+    }
+    if (t == 4u8) {
+        SPI_CTRL = 0u8;
+        return CARD_ERROR_TIMEOUT;
+    }
+    if (r != R1_IDLE) {
+        SPI_CTRL = 0u8;
+        return CARD_ERROR_RESET_FAILED;
+    }
+    spi_transfer(0xFFu8);
+
+    r = 0xffu8;
+    while (r != R1_READY) {
+        // ACMD41
+        spi_transfer(0x40u8 | 55u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0xFFu8); // CRC
+
+        r = spi_transfer(0xFFu8);
+        while (r & 0x80u8) {
+            r = spi_transfer(0xFFu8);
+        }
+
+        if (r & 0xfeu8) {
+            SPI_CTRL = 0u8;
+            return CARD_ERROR_ACMD_FAILED;
+        }
+        spi_transfer(0xFFu8);
+
+        spi_transfer(0x40u8 | 41u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0x00u8);
+        spi_transfer(0xFFu8); // CRC
+
+        r = spi_transfer(0xFFu8);
+        while (r & 0x80u8) {
+            r = spi_transfer(0xFFu8);
+        }
+        if (r & 0xfeu8) {
+            SPI_CTRL = 0u8;
+            return CARD_ERROR_ACMD41_FAILED;
+        }
+        spi_transfer(0xFFu8);
+    }
+    return CARD_SUCCESS;
+}
+
+export u8 card_power_off() {
+    SPI_CTRL = SPI_CTRL_N_CARD_CS;
+}
+
+export u8 card_read_block(u16 offset_hi, u16 offset_lo, u16 offset_in_block, u16 size, u8 *dst) {
+    u8 offset[4];
+    offset[0] = (u8)offset_lo;
+    offset[1] = (u8)(offset_lo >> 8u8);
+    offset[2] = (u8)offset_hi;
+    offset[3] = (u8)(offset_hi >> 8u8);
+    return card_read_block_u32((u8*)offset, offset_in_block, size, dst);
+}
+
+export u8 card_read_block_u32(u8 *offset, u16 offset_in_block, u16 size, u8 *dst) {
+    u8 r;
+    spi_transfer(0x40u8 | 17u8); // CMD17 - read single block
+    spi_transfer(offset[3]);
+    spi_transfer(offset[2]);
+    spi_transfer(offset[1]);
+    spi_transfer(offset[0]);
+    spi_transfer(0xFFu8); // CRC
+
+    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+        r = spi_transfer(0xFFu8);
+        if (r != 0xffu8) {
+            break;
+        }
+    }
+    if (t == 4u8) {
+        SPI_CTRL = 0u8;
+        return CARD_ERROR_TIMEOUT;
+    }
+    if (r) {
+        spi_transfer(0xFFu8);
+        return CARD_ERROR_BLOCK_CMD_FAILED;
+    }
+
+    r = spi_transfer(0xffu8);
+    while (r == 0xffu8) {
+        r = spi_transfer(0xFFu8);
+    }
+    if (r != DATA_START_BLOCK) {
+        return r;
+    }
+    for (u16 i = 0u16; i < offset_in_block; i += 1u16) {
+        spi_transfer(0xFFu8);
+    }
+    for (; i < 512u16 && size > 0u16; i += 1u16) {
+        *dst = spi_transfer(0xFFu8);
+        dst += 1u8;
+        size -= 1u16;
+    }
+    for (; i < 512u16; i += 1u16) {
+        spi_transfer(0xFFu8);
+    }
+    // CRC
+    spi_transfer(0xFFu8);
+    spi_transfer(0xFFu8);
+
+    // Final transfer
+    spi_transfer(0xFFu8);
+    return 0u8;
+}

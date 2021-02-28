@@ -1,0 +1,216 @@
+#include <vga.h>
+#include <ps2keyboard.h>
+#include <card.h>
+#include <fat.h>
+
+#define SPI_DATA *((u8*)0xFD02)
+
+export u8 print_hex_char(u8 col, u8 row, u8 v) {
+    if (v < 10u8) {
+        v += '0';
+    } else {
+        v += 'A' - 10u8;
+    }
+    vga_char_seg[VGA_OFFSET(col, row)] = v;
+}
+
+u8 row;
+u8 col;
+export u8 spi_transfer(u8 in) {
+    print_hex_char(col, row, in >> 4u8);
+    print_hex_char(col + 1u8, row, in & 0xfu8);
+    vga_char_seg[VGA_OFFSET(col + 2u8, row)] = 26u8;
+    SPI_DATA = in;
+    u8 rsp = SPI_DATA;
+    print_hex_char(col + 3u8, row, rsp >> 4u8);
+    print_hex_char(col + 4u8, row, rsp & 0xfu8);
+    col += 6u8;
+    if (col >= (VGA_COLS / 6u8) * 6u8) {
+        row += 1u8;
+        col = 0u8;
+    }
+    if (row == VGA_ROWS) {
+        row = 1u8;
+        col = 0u8;
+        vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+    }
+    return rsp;
+}
+
+u8 buffer[512];
+
+u8 show_buffer() {
+    u8 *ptr = (u8*)buffer;
+    u16 offset = 0u16;
+
+    vga_clear(COLOR(COLOR_WHITE, COLOR_BLUE));
+    for (u8 row = 0u8; row < 22u8; row += 1u8) {
+        for (u8 col = 0u8; col < 72u8 && offset < 512u16; col += 3u8) {
+            u8 x = *ptr;
+            print_hex_char(col, row, x >> 4u8);
+            print_hex_char(col + 1u8, row, x & 0xfu8);
+            ptr += 1u8;
+            offset += 1u16;
+        }
+    }
+
+    u8 k = ps2_get_key_event();
+    while (k == PS2_KEY_NONE || k & PS2_KEY_RELEASE) {
+        k = ps2_get_key_event();
+    }
+}
+
+
+export u8 wait_keypressed() {
+    u8 k = 0u8;
+    while (!k || (k & PS2_KEY_RELEASE)) {
+        k = ps2_get_key_event();
+    }
+    return k;
+}
+
+export u8 print_u32(u8 col, u8 row, u8 *v) {
+    print_hex_char(col + 0u8, row, v[3] >> 4u8);
+    print_hex_char(col + 1u8, row, v[3] & 0xfu8);
+    print_hex_char(col + 2u8, row, v[2] >> 4u8);
+    print_hex_char(col + 3u8, row, v[2] & 0xfu8);
+    print_hex_char(col + 4u8, row, v[1] >> 4u8);
+    print_hex_char(col + 5u8, row, v[1] & 0xfu8);
+    print_hex_char(col + 6u8, row, v[0] >> 4u8);
+    print_hex_char(col + 7u8, row, v[0] & 0xfu8);
+}
+
+u8 print_u16(u8 col, u8 row, u16 v) {
+    print_hex_char(col, row, (u8)(v >> 12u8));
+    print_hex_char(col + 1u8, row, (u8)(v >> 8u8) & 0xfu8);
+    print_hex_char(col + 2u8, row, (u8)(v >> 4u8) & 0xfu8);
+    print_hex_char(col + 3u8, row, (u8)v & 0xfu8);
+}
+
+u8 print_file(struct FatDirEntry *de) {
+    vga_clear(COLOR(COLOR_WHITE, COLOR_GREEN));
+    u8 f = fat_open_file(de);
+    if (f == FAT_BAD_DESC) {
+        vga_put_text(0u8, 0u8, "Error");
+        wait_keypressed();
+        return;
+    }
+    u8 buf[256];
+    u8 row = 0u8;
+    u8 col = 0u8;
+    u8 k = 0u8;
+    while (k != PS2_KEY_ESCAPE) {
+        u16 len = fat_read(f, (u8*)buf, 256u16);
+        if (len == 0u16) {
+            break;
+        }
+        if (len >= 0x8000u16) {
+            vga_put_text(0u8, VGA_ROWS - 1u8, "ERROR");
+            wait_keypressed();
+            break;
+        }
+        for (u16 i = 0u16; i < len; i += 1u16) {
+            if (buf[i] == '\n') {
+                row += 1u8;
+                col = 0u8;
+            } else {
+                vga_char_seg[VGA_OFFSET(col, row)] = buf[i];
+                col += 1u8;
+                if (col == VGA_COLS) {
+                    col = 0u8;
+                    row += 1u8;
+                }
+            }
+            if (row == VGA_ROWS - 1u8) {
+                vga_put_text(0u8, VGA_ROWS - 1u8, "-- MORE --");
+                k = wait_keypressed();
+                if (k == PS2_KEY_ESCAPE) {
+                    break;
+                }
+                vga_clear(COLOR(COLOR_WHITE, COLOR_GREEN));
+                row = 0u8;
+            }
+        }
+    }
+    if (k != PS2_KEY_ESCAPE) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "-- END --");
+        wait_keypressed();
+    }
+    fat_close_file(f);
+}
+
+export u8 main() {
+    ps2_init();
+
+    row = 1u8;
+    col = 0u8;
+    u16 block = 0u16;
+
+
+    while (1u8) {
+        vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+        vga_put_text(0u8, 0u8, "Memory card test program");
+        u8 power = 0u8;
+        u8 n_cs = 0u8;
+        u8 data = 0xa5u8;
+
+
+        u8 r;
+
+        while (row < VGA_ROWS) {
+            u8 k = ps2_get_key_event();
+            if (k == PS2_KEY_ESCAPE) {
+                card_power_off();
+                vga_char_seg[VGA_OFFSET(40u8, 0u8)] = 0u8;
+            } else if (k == PS2_KEY_F1) {
+                r = card_init();
+                print_hex_char(40u8, 0u8, r);
+            } else if (k == PS2_KEY_F2) {
+                r = card_read_block(0u16, block, 0u16, 512u16, (u8*)buffer);
+                block += 512u16;
+                print_hex_char(40u8, 0u8, r >> 4u8);
+                print_hex_char(41u8, 0u8, r & 0xfu8);
+            } else if (k == PS2_KEY_F4) {
+                r = fat_init();
+                if (r) {
+                    print_hex_char(40u8, 0u8, r >> 4u8);
+                    print_hex_char(41u8, 0u8, r & 0xfu8);
+                } else {
+                    vga_put_text(40u8, 0u8, "FAT init OK");
+                }
+            } else if (k == PS2_KEY_F5) {
+                u8 dd = fat_open_dir();
+                if (dd == FAT_BAD_DESC) {
+                    vga_put_text(40u8, 0u8, "fat_open_dir() failed");
+                } else {
+                    struct FatDirEntry de;
+                    while (1u8) {
+                        r = fat_get_next_dir_entry(dd, &de);
+                        if (!r) {
+                            break;
+                        }
+                        de.attrs = 0u8; // hack
+                        vga_put_text(40u8, 0u8, (u8*)de.filename);
+                        while (k != PS2_KEY_SPACE && k != PS2_KEY_ENTER) {
+                            k = ps2_get_key_event();
+                        }
+                        if (k == PS2_KEY_ENTER) {
+                            print_file(&de);
+                            vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+                        }
+                        k = 0u8;
+                    }
+                    fat_close_dir(dd);
+                    break;
+                }
+            } else if (k == PS2_KEY_ENTER) {
+                spi_transfer(0xFFu8);
+            } else if (k == PS2_KEY_DELETE) {
+                break;
+            } else if (k == PS2_KEY_SPACE) {
+                show_buffer();
+                break;
+            }
+        }
+    }
+}
