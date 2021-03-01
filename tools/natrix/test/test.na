@@ -61,6 +61,26 @@ u8 test_type_cast() {
     _s8 = (s8)0xaa;
     _u16 = (u16)_s8;
     ASSERT_TRUE(_u16 == (u16)0xffaa);
+
+    u32 _u32;
+    s32 _s32;
+    _u32 = 0xdeadbeefu32;
+    ASSERT_TRUE(_u32 == 0xdeadbeefu32);
+    ASSERT_FALSE(_u32 != 0xdeadbeefu32);
+
+    ASSERT_TRUE(-1s32 == (s32)0xffs8);
+    ASSERT_TRUE(0xffu32 == (u32)0xffu8);
+
+    _u32 = 0xffu32;
+    ASSERT_TRUE(-1s32 == (s32)(s8)_u32);
+    ASSERT_TRUE(0xffs32 == (s32)(s16)_u32);
+    ASSERT_TRUE(0xffffffffu32 == (u32)(s8)_u32);
+    ASSERT_TRUE(_u32 == 0xffu32);
+
+    _u32 = 0xa0bbu32;
+    _u32 = (u32)(u8)_u32;
+    ASSERT_TRUE(_u32 == 0xbbu32);
+    ASSERT_TRUE(0xffffffbbu32 == (u32)(s8)_u32);
 }
 
 u8 test_indirect() {

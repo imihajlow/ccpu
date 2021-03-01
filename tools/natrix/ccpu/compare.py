@@ -15,73 +15,90 @@ def _genEqNeCmp(src1Loc, src2Loc):
     s2 = src2Loc.getSource()
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
-    isWord = t.getSize() == 2
+    size = t.getSize()
     result = ''
     if l1 == 0 or l2 == 0:
         # var == const
         if l1 == 0:
             s1, s2 = s2, s1
-        result = '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
+            src1Loc, src2Loc = src2Loc, src1Loc
+        result = f'''
+            ldi pl, lo({s1})
+            ldi ph, hi({s1})
             ld b
-        '''.format(s1)
+        '''
         if isinstance(s2, int):
             l = lo(s2)
             if l == 0:
                 result += 'mov a, 0\n'
             else:
-                result += 'ldi a, {}\n'.format(l)
+                result += f'ldi a, {l}\n'
         else:
-            result += 'ldi a, lo({})\n'.format(s2)
+            result += f'ldi a, lo({s2})\n'
         result += 'sub b, a\n'
-        if isWord:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-                ld pl
-            '''.format(s1) # TODO optimize aligned
+        if size > 1:
+            if src1Loc.isAligned():
+                result += '''
+                    inc pl
+                    ld pl
+                '''
+            else:
+                result += f'''
+                    ldi pl, lo({s1} + 1)
+                    ldi ph, hi({s1} + 1)
+                    ld pl
+                '''
             if isinstance(s2, int):
                 h = hi(s2)
                 if h == 0:
                     result += 'mov a, 0\n'
                 else:
-                    result += 'ldi a, {}\n'.format(h)
+                    result += f'ldi a, {h}\n'
             else:
-                result += 'ldi a, hi({})\n'.format(s2)
+                result += f'ldi a, hi({s2})\n'
+            result += '''
+                sub a, pl
+                or b, a
+            '''
+        for offset in range(2, size):
+            result += f'''
+                ldi pl, lo({s1} + {offset})
+                ldi ph, hi({s1} + {offset})
+                ld pl
+            '''
+            if isinstance(s2, int):
+                h = lo(s2 >> (offset * 8))
+                if h == 0:
+                    result += 'mov a, 0\n'
+                else:
+                    result += f'ldi a, {h}\n'
+            else:
+                result += f'ldi a, lo({s2} >> ({offset * 8}))\n'
             result += '''
                 sub a, pl
                 or b, a
             '''
     else:
-        if not isWord:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
+        result += f'''
+            ldi pl, lo({s1})
+            ldi ph, hi({s1})
+            ld a
+            ldi pl, lo({s2})
+            ldi ph, hi({s2})
+            ld b
+            sub b, a
+        '''
+        for offset in range(1, size):
+            result += f'''
+                ldi pl, lo({s1} + {offset})
+                ldi ph, hi({s1} + {offset})
                 ld a
-                ldi pl, lo({1})
-                ldi ph, hi({1})
-                ld b
-                sub b, a
-            '''.format(s1, s2)
-        else:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
-                ldi pl, lo({1})
-                ldi ph, hi({1})
-                ld b
-                sub b, a
-                ldi pl, lo({1} + 1)
-                ldi ph, hi({1} + 1)
-                ld a
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
+                ldi pl, lo({s2} + {offset})
+                ldi ph, hi({s2} + {offset})
                 ld pl
                 sub a, pl
                 or b, a
-            '''.format(s1, s2) # TODO optimize aligned
+            '''
     return result
 
 def genEq(resultLoc, src1Loc, src2Loc):
@@ -90,13 +107,11 @@ def genEq(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
         raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
-    assert(t.getSize() == 1 or t.getSize() == 2)
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
     rs = resultLoc.getSource()
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
-    isWord = t.getSize() == 2
     result = '; {} == {}\n'.format(src1Loc, src2Loc)
     if l1 == 0 and l2 == 0:
         # const == const
@@ -107,15 +122,15 @@ def genEq(resultLoc, src1Loc, src2Loc):
             return Value(loc, BoolType(), 0, "int(({}) == ({}))".format(s1, s2), True), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
-    result += '''
-        dec b
-        mov a, 0
-        adc a, 0
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st a
-    '''.format(rs)
-    return resultLoc, result
+        result += '''
+            dec b
+            mov a, 0
+            adc a, 0
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            st a
+        '''.format(rs)
+        return resultLoc, result
 
 def genNe(resultLoc, src1Loc, src2Loc):
     resultLoc = resultLoc.withType(BoolType())
@@ -123,7 +138,6 @@ def genNe(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
         raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
-    assert(t.getSize() == 1 or t.getSize() == 2)
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
     rs = resultLoc.getSource()
@@ -140,15 +154,15 @@ def genNe(resultLoc, src1Loc, src2Loc):
             return Value(loc, BoolType(), 0, "int(({}) != ({}))".format(s1, s2), True), result
     else:
         result += _genEqNeCmp(src1Loc, src2Loc)
-    result += '''
-        dec b
-        ldi a, 1
-        sbb a, 0
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st a
-    '''.format(rs)
-    return resultLoc, result
+        result += '''
+            dec b
+            ldi a, 1
+            sbb a, 0
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            st a
+        '''.format(rs)
+        return resultLoc, result
 
 def _genCmpSub(src1Loc, src2Loc, op):
     # subtract the values so that flags C, S, and O are set accordingly and (b | pl) is zero if the result is zero
