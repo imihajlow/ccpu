@@ -10,11 +10,13 @@ from .common import *
 from .stack import *
 from exceptions import SemanticError
 
+MAX_INT_SIZE = 4
+
 def startCodeSection():
     return startSection("text")
 
 def startBssSection():
-    return startSection("bss", 2)
+    return startSection("bss")
 
 def startSection(name, alignment=1):
     if alignment > 1:
@@ -71,22 +73,50 @@ def dumpLiterals(lp):
     result += '; ====== end literals =======\n'
     return result
 
+def isPowerOfTwo(n):
+    return not bool(n & (n - 1))
+
 def reserve(label, size):
-    return "{}: res {}\n".format(label, max(2, size))
+    if not isPowerOfTwo(size):
+        raise RuntimeError("var size is not a power of 2")
+    return f"""
+        .align {size}
+        {label}: res {size}
+    """
+
+def reserveBlock(label, vs):
+    """
+    Reserve several integer variables keeping them aligned to the size of the largest one and continous in memory.
+    """
+    maxSize = min(max(size for _,size in vs), MAX_INT_SIZE)
+    if not isPowerOfTwo(maxSize):
+        maxSize = MAX_INT_SIZE
+    result = f'''
+        .align {maxSize}
+        {label}:
+    '''
+    offset = 0
+    for label, size in vs:
+        mod = offset % size
+        if mod != 0:
+            result += f'res {size - mod}\n'
+            offset += size - mod
+        result += f'{label}: res {size}\n'
+        offset = (offset + size) % maxSize
+    return result
 
 def reserveGlobalVars(vs, imports):
     result = '; global vars:\n'
     for v in vs:
         if v not in imports:
-            result += '{}: res {}\n'.format(v, align(vs[v].getReserveSize(), 2))
+            result += reserve(v, vs[v].getReserveSize())
     return result
 
 def reserveTempVars(maxIndex):
-    return "".join(reserve(labelname.getTempName(i), 2) for i in range(maxIndex + 1))
+    return "".join(reserve(labelname.getTempName(i), MAX_INT_SIZE) for i in range(maxIndex + 1))
 
 def reserveVar(label, type):
-    rs = align(type.getReserveSize(), 2)
-    return "{}: res {}\n".format(label, rs)
+    return reserve(label, type.getReserveSize())
 
 def genFunctionPrologue(fn):
     return genLabel(fn) + '''
@@ -124,9 +154,10 @@ def genPushLocals(fn):
 def genPopLocals(fn):
     return "; pop frame of {}\n".format(fn) + genPop(labelname.getReserveBeginLabel(fn), labelname.getReserveEndLabel(fn))
 
-def _loadConst(size, value):
+def _loadConst(size, value, offset=0):
     # load const into a:b
     if isinstance(value, int):
+        value = (value >> (offset * 8)) & 0xffff
         result = 'ldi b, {}\n'.format(lo(value))
         if size > 1:
             h = hi(value)
@@ -135,9 +166,11 @@ def _loadConst(size, value):
             else:
                 result += 'ldi a, {}\n'.format(h)
     else:
-        result = 'ldi b, lo({})\n'.format(value)
+        if offset != 0:
+            RuntimeError("WTF? Labels are 16 bits max.")
+        result = f'ldi b, lo({value})\n'
         if size > 1:
-            result += 'ldi a, hi({})\n'.format(value)
+            result += f'ldi a, hi({value})\n'
     return result
 
 def genMove(resultLoc, srcLoc, avoidCopy):
@@ -194,20 +227,70 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                     storeCode += 'st a\n'
                 return resultLoc, loadCode + storeCode
             else:
+                result = f"; {resultLoc} := {srcLoc} (large)\n"
                 if srcLoc.getIndirLevel() == 0:
-                    raise RuntimeError("struct const")
-                result = ""
-                # TODO loop on large objects
-                for offset in range(size):
-                    result += f'''
-                        ldi pl, lo(({srcLoc.getSource()}) + {offset})
-                        ldi ph, hi(({srcLoc.getSource()}) + {offset})
-                        ld a
-                        ldi pl, lo(({resultLoc.getSource()}) + {offset})
-                        ldi ph, hi(({resultLoc.getSource()}) + {offset})
-                        st a
-                    '''
-                return resultLoc, result
+                    for offset in range(0, size, 2):
+                        chunkSize = min(2, size - offset)
+                        result += _loadConst(chunkSize, srcLoc.getSource(), offset)
+                        result += f"""
+                            ldi pl, lo({resultLoc.getSource()} + {offset})
+                            ldi ph, hi({resultLoc.getSource()} + {offset})
+                            st b
+                        """
+                        if chunkSize > 1:
+                            if resultLoc.isAligned():
+                                result += 'inc pl\n'
+                            else:
+                                result += f'''
+                                    ldi pl, lo({resultLoc.getSource()} + {offset + 1})
+                                    ldi ph, hi({resultLoc.getSource()} + {offset + 1})
+                                '''
+                            result += 'st a\n'
+                    return resultLoc, result
+                else:
+                    # TODO loop on large objects
+                    for offset in range(0, size, 2):
+                        chunkSize = min(2, size - offset)
+                        result += f'''
+                            ldi pl, lo(({srcLoc.getSource()}) + {offset})
+                            ldi ph, hi(({srcLoc.getSource()}) + {offset})
+                            ld a
+                        '''
+                        if chunkSize > 1:
+                            if srcLoc.isAligned():
+                                result += f'''
+                                    inc pl
+                                '''
+                            else:
+                                result += f'''
+                                    ldi pl, lo(({srcLoc.getSource()}) + {offset + 1})
+                                    ldi ph, hi(({srcLoc.getSource()}) + {offset + 1})
+                                '''
+                            result += f'''
+                                ld b
+                                ldi pl, lo(({resultLoc.getSource()}) + {offset + 1})
+                                ldi ph, hi(({resultLoc.getSource()}) + {offset + 1})
+                                st b
+                            '''
+
+                            if resultLoc.isAligned():
+                                result += '''
+                                    dec pl
+                                '''
+                            else:
+                                result += f'''
+                                    ldi pl, lo(({resultLoc.getSource()}) + {offset})
+                                    ldi ph, hi(({resultLoc.getSource()}) + {offset})
+                                '''
+                        else:
+                            result += f'''
+                                ldi pl, lo(({resultLoc.getSource()}) + {offset})
+                                ldi ph, hi(({resultLoc.getSource()}) + {offset})
+                            '''
+                        result += '''
+                            st a
+                        '''
+                    return resultLoc, result
 
 def genCast(resultLoc, t, srcLoc):
     resultLoc = resultLoc.withType(t)

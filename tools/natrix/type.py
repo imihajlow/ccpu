@@ -56,7 +56,7 @@ class IntType(Type):
 
     @staticmethod
     def parse(s):
-        r = re.match(r"(s|u)(8|16)", s)
+        r = re.match(r"(s|u)(8|16|32)", s)
         if r is not None:
             return IntType(r.group(1) == 's', int(r.group(2)) // 8)
         else:

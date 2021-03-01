@@ -119,10 +119,10 @@ class ConstTransformer(Transformer):
     def __init__(self, transformCasts):
         self._transformCast = transformCasts
         self._intRe = dict()
-        self._intRe[10] = re.compile(r"([+-]?[1-9]\d*)([su](?:8|16)?)?", re.I)
-        self._intRe[16] = re.compile(r"0x([0-9a-f]+)([su](?:8|16)?)?", re.I)
-        self._intRe[8] = re.compile(r"0([0-7]*)([su](?:8|16)?)?", re.I)
-        self._intRe[2] = re.compile(r"0b([01]+)([su](?:8|16)?)?", re.I)
+        self._intRe[10] = re.compile(r"([+-]?[1-9]\d*)([su](?:8|16|32)?)?", re.I)
+        self._intRe[16] = re.compile(r"0x([0-9a-f]+)([su](?:8|16|32)?)?", re.I)
+        self._intRe[8] = re.compile(r"0([0-7]*)([su](?:8|16|32)?)?", re.I)
+        self._intRe[2] = re.compile(r"0b([01]+)([su](?:8|16|32)?)?", re.I)
 
     def _constFromLiteral(self, t, base):
         value = str(t.children[0])
