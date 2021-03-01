@@ -298,41 +298,55 @@ def genCast(resultLoc, t, srcLoc):
         return resultLoc, ""
     if resultLoc.getIndirLevel() != 1:
         raise RuntimeError("Compiler error: move destination level of indirection is not 1")
-    assert(resultLoc.getType().getSize() == 1 or resultLoc.getType().getSize() == 2)
-    assert(srcLoc.getType().getSize() == 1 or srcLoc.getType().getSize() == 2)
     result = '; cast {} := {}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 1 and srcLoc.getSource() == resultLoc.getSource():
         # cast into itself
-        if resultLoc.getType().getSize() > srcLoc.getType().getSize():
+        srcSize = srcLoc.getType().getSize()
+        resultSize = resultLoc.getType().getSize()
+        if resultSize > srcSize:
             # widen
             if srcLoc.getType().getSign():
                 # sign expand
-                code = '''
+                code = f'''
                     ; widening cast, sign expand
-                    ldi pl, lo({0})
-                    ldi ph, hi({0})
+                    ldi pl, lo({srcLoc.getSource()} + {srcSize - 1})
+                    ldi ph, hi({srcLoc.getSource()} + {srcSize - 1})
                     ld a
                     shl a
                     exp a
-                '''.format(srcLoc.getSource())
-                if resultLoc.isAligned():
-                    code += 'inc pl\n'
-                else:
-                    code += '''
-                        ldi pl, lo({0} + 1)
-                        ldi ph, hi({0} + 1)
-                    '''.format(srcLoc.getSource())
-                code += 'st a\n'
+                '''
+                for offset in range(srcSize, resultSize):
+                    if resultLoc.isAligned():
+                        code += 'inc pl\n'
+                    else:
+                        code += f'''
+                            ldi pl, lo({srcLoc.getSource()} + {offset})
+                            ldi ph, hi({srcLoc.getSource()} + {offset})
+                        '''
+                    code += 'st a\n'
                 return resultLoc, result + code
             else:
                 # zero expand
-                return resultLoc, result + '''
+                result += f'''
                     ; widening cast, zero expand
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
+                    ldi pl, lo({srcLoc.getSource()} + {srcSize})
+                    ldi ph, hi({srcLoc.getSource()} + {srcSize})
                     mov a, 0
                     st a
-                    '''.format(srcLoc.getSource())
+                '''
+                for offset in range(srcSize + 1, resultSize):
+                    if resultLoc.isAligned():
+                        result += '''
+                            inc pl
+                            st a
+                        '''
+                    else:
+                        result += f'''
+                            ldi pl, lo({resultLoc.getSource()} + {offset})
+                            ldi ph, hi({resultLoc.getSource()} + {offset})
+                            st a
+                        '''
+                return resultLoc, result
         else:
             # make narrower or the same, do nothing
             return resultLoc, ""
@@ -345,45 +359,51 @@ def genCast(resultLoc, t, srcLoc):
                 return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource())), True)
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
-        if resultLoc.getType().getSize() > srcLoc.getType().getSize():
-            # widen a byte
+        srcSize = srcLoc.getType().getSize()
+        resultSize = resultLoc.getType().getSize()
+        if resultSize > srcSize:
+            # widen
+            result += '''
+                ; widening cast
+            '''
+            for offset in range(srcSize):
+                # copy the low part
+                result += f'''
+                    ldi pl, lo({srcLoc.getSource()} + {offset})
+                    ldi ph, hi({srcLoc.getSource()} + {offset})
+                    ld a
+                    ldi pl, lo({resultLoc.getSource()} + {offset})
+                    ldi ph, hi({resultLoc.getSource()} + {offset})
+                    st a
+                '''
             if srcLoc.getType().getSign():
                 # sign expand
+                # a contains MSB of src
                 result += '''
-                    ; widening cast, sign expand
-                    ldi pl, lo({0})
-                    ldi ph, hi({0})
-                    ld a
-                    ldi pl, lo({1})
-                    ldi ph, hi({1})
-                    st a
+                    ; sign expand
                     shl a
                     exp a
-                    '''.format(srcLoc.getSource(), resultLoc.getSource())
-
+                '''
+            else:
+                result += '''
+                    ; zero expand
+                    mov a, 0
+                '''
+            for offset in range(srcSize, resultSize):
                 if resultLoc.isAligned():
                     result += 'inc pl\n'
                 else:
-                    result += '''
-                        ldi pl, lo({0} + 1)
-                        ldi ph, hi({0} + 1)
-                    '''.format(resultLoc.getSource())
-                result += 'st a\n'
-            else:
-                # zero expand
-                result += '''
-                    ; widening cast, zero expand
-                    ldi pl, lo({0})
-                    ldi ph, hi({0})
-                    ld a
-                    ldi pl, lo({1})
-                    ldi ph, hi({1})
-                    st a
-                    mov a, 0
-                    inc pl
-                '''.format(srcLoc.getSource(), resultLoc.getSource())
-                if not resultLoc.isAligned():
-                    result += 'adc ph, a\n'
+                    if srcLoc.getType().getSign():
+                        result += f'''
+                            ldi pl, lo({resultLoc.getSource()} + {offset})
+                            ldi ph, hi({resultLoc.getSource()} + {offset})
+                        '''
+                    else:
+                        # a is 0
+                        result += '''
+                            inc pl
+                            adc ph, a
+                        '''
                 result += 'st a\n'
             return resultLoc, result
         else:
