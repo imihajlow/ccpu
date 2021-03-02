@@ -164,6 +164,47 @@ def genNe(resultLoc, src1Loc, src2Loc):
         '''.format(rs)
         return resultLoc, result
 
+def _loadByte(reg, loc, offset):
+    v = loc.getSource()
+    if loc.getIndirLevel() == 0:
+        if isinstance(v, int):
+            b = lo(v >> (8 * offset))
+            if b == 0 and reg == 'a':
+                return 'mov a, 0\n'
+            else:
+                return f'ldi {reg}, {b}\n'
+        else:
+            if offset == 0:
+                return f'ldi {reg}, lo({b})\n'
+            elif offset == 1:
+                return f'ldi {reg}, hi({b})\n'
+            else:
+                raise RuntimeError("symbols are 2 bytes")
+    else:
+        return f'''
+            ldi pl, lo({v} + {offset})
+            ldi ph, hi({v} + {offset})
+            ld {reg}
+        '''
+
+def _genCmpSubFlags(src1Loc, src2Loc):
+    # subtract the values so that flags C, S, and O are set accordingly
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    t = src1Loc.getType()
+    size = t.getSize()
+    result = ''
+    for offset in range(size):
+        result += _loadByte('a', src1Loc, offset)
+        result += _loadByte('b', src2Loc, offset)
+        if offset == 0:
+            result += 'sub a, b\n'
+        else:
+            result += 'sbb a, b\n'
+    return result
+
 def _genCmpSub(src1Loc, src2Loc, op):
     # subtract the values so that flags C, S, and O are set accordingly and (b | pl) is zero if the result is zero
     s1 = src1Loc.getSource()
@@ -171,6 +212,7 @@ def _genCmpSub(src1Loc, src2Loc, op):
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
+    assert(t.getSize() <= 2)
     isWord = t.getSize() == 2
     result = ''
     if l1 == 0:
@@ -267,14 +309,13 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 result += 'ldi pl, 0\n'
     return result
 
-def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
+def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
     rs = resultLoc.getSource()
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
-    isWord = t.getSize() == 2
     result = '; compare unsigned {} and {} ({})\n'.format(src1Loc, src2Loc, op)
     if l1 == 0 and l2 == 0:
         # const and const
@@ -285,53 +326,98 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op):
         else:
             pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
             return Value(loc, BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2), True), result
+    if t.getSize() <= 2:
+        if op == 'lt' or op == 'ge':
+            result = _genCmpSubFlags(src1Loc, src2Loc)
+        else:
+            result += _genCmpSub(src1Loc, src2Loc, op)
+        # C = carry flag
+        # Z = (b | pl) == 0
+        if op == 'lt':
+            # 1 if C
+            result += '''
+                mov a, 0
+                adc a, 0
+            '''
+        elif op == 'ge':
+            # 1 if !C
+            result += '''
+                ldi a, 1
+                sbb a, 0
+            '''
+        elif op == 'le':
+            # 1 if C or !(b | pl)
+            result += '''
+                exp ph ; ph = C (0xff or 0x00)
+                mov a, pl
+                or a, b
+                dec a ; C = Z
+                exp a ; a = Z (0xff or 0x00)
+                or a, ph ; a = C | Z (0xff or 0x00)
+                ldi b, 1
+                and a, b
+            '''
+        elif op == 'gt':
+            # 1 if !(C or Z)
+            result += '''
+                exp ph ; ph = C (0xff or 0x00)
+                mov a, pl
+                or a, b
+                dec a ; C = Z
+                exp a ; a = Z (0xff or 0x00)
+                or a, ph ; a = C | Z (0xff or 0x00)
+                not a
+                ldi b, 1
+                and a, b
+            '''
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            st a
+        '''.format(rs)
+        return resultLoc, result
     else:
-        result += _genCmpSub(src1Loc, src2Loc, op)
-    # C = carry flag
-    # Z = (b | pl) == 0
-    if op == 'lt':
-        # 1 if C
-        result += '''
-            mov a, 0
-            adc a, 0
-        '''
-    elif op == 'ge':
-        # 1 if !C
-        result += '''
-            ldi a, 1
-            sbb a, 0
-        '''
-    elif op == 'le':
-        # 1 if C or !(b | pl)
-        result += '''
-            exp ph ; ph = C (0xff or 0x00)
-            mov a, pl
-            or a, b
-            dec a ; C = Z
-            exp a ; a = Z (0xff or 0x00)
-            or a, ph ; a = C | Z (0xff or 0x00)
-            ldi b, 1
-            and a, b
-        '''
-    elif op == 'gt':
-        # 1 if !(C or Z)
-        result += '''
-            exp ph ; ph = C (0xff or 0x00)
-            mov a, pl
-            or a, b
-            dec a ; C = Z
-            exp a ; a = Z (0xff or 0x00)
-            or a, ph ; a = C | Z (0xff or 0x00)
-            not a
-            ldi b, 1
-            and a, b
-        '''
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st a
-    '''.format(rs)
-    return resultLoc, result
+        # large size and le or gt
+        if op[0] == 'g':
+            src1Loc, src2Loc = src2Loc, src1Loc
+        result += _genCmpSubFlags(src1Loc, src2Loc)
+        # C if s1 < s2
+        if op[1] == 't':
+            result += f'''
+                mov a, 0
+                adc a, 0
+                ldi pl, lo({rs})
+                ldi ph, hi({rs})
+                st a
+            '''
+        else:
+            labelEnd = labelProvider.allocLabel("cmp_end")
+            result += f'''
+                ldi b, 1
+                ldi pl, lo({labelEnd})
+                ldi ph, hi({labelEnd})
+                jc
+                dec b
+            '''
+            for offset in range(t.getSize()):
+                result += _loadByte('a', src1Loc, offset)
+                result += _loadByte('pl', src2Loc, offset)
+                result += f'''
+                    sub a, pl
+                    ldi pl, lo({labelEnd})
+                    ldi ph, hi({labelEnd})
+                    jnz
+                '''
+                # invert b
+            result += 'inc b\n'
+            result += f'''
+                {labelEnd}:
+                ldi pl, lo({rs})
+                ldi ph, hi({rs})
+                st b
+            '''
+        return resultLoc, result
+
 
 def _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider):
     s1 = src1Loc.getSource()
@@ -548,6 +634,8 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
+    if t.getSize() > 2:
+        raise NotImplementedError("signed over s16 comparison isn't implemented")
     isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const and const
@@ -568,8 +656,7 @@ def genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider):
     if src1Loc.getType() != src2Loc.getType():
         raise SemanticError(src1Loc.getLocation(), "Incompatible types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     t = src1Loc.getType()
-    assert(t.getSize() == 1 or t.getSize() == 2)
     if t.getSign():
         return _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider)
     else:
-        return _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op)
+        return _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op, labelProvider)
