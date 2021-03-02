@@ -164,29 +164,6 @@ def genNe(resultLoc, src1Loc, src2Loc):
         '''.format(rs)
         return resultLoc, result
 
-def _loadByte(reg, loc, offset):
-    v = loc.getSource()
-    if loc.getIndirLevel() == 0:
-        if isinstance(v, int):
-            b = lo(v >> (8 * offset))
-            if b == 0 and reg == 'a':
-                return 'mov a, 0\n'
-            else:
-                return f'ldi {reg}, {b}\n'
-        else:
-            if offset == 0:
-                return f'ldi {reg}, lo({b})\n'
-            elif offset == 1:
-                return f'ldi {reg}, hi({b})\n'
-            else:
-                raise RuntimeError("symbols are 2 bytes")
-    else:
-        return f'''
-            ldi pl, lo({v} + {offset})
-            ldi ph, hi({v} + {offset})
-            ld {reg}
-        '''
-
 def _genCmpSubFlags(src1Loc, src2Loc):
     # subtract the values so that flags C, S, and O are set accordingly
     s1 = src1Loc.getSource()
@@ -197,8 +174,8 @@ def _genCmpSubFlags(src1Loc, src2Loc):
     size = t.getSize()
     result = ''
     for offset in range(size):
-        result += _loadByte('a', src1Loc, offset)
-        result += _loadByte('b', src2Loc, offset)
+        result += loadByte('a', src1Loc, offset)
+        result += loadByte('b', src2Loc, offset)
         if offset == 0:
             result += 'sub a, b\n'
         else:
@@ -400,8 +377,8 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
                 dec b
             '''
             for offset in range(t.getSize()):
-                result += _loadByte('a', src1Loc, offset)
-                result += _loadByte('pl', src2Loc, offset)
+                result += loadByte('a', src1Loc, offset)
+                result += loadByte('pl', src2Loc, offset)
                 result += f'''
                     sub a, pl
                     ldi pl, lo({labelEnd})

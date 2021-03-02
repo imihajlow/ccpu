@@ -120,6 +120,22 @@ u8 test_indirect() {
     ASSERT_TRUE(a16[xu8] == x16);
     p16 += -2; // TODO p16 -= 2
     ASSERT_TRUE(*(p16 + xu8) == x16);
+
+    u32 x32;
+    u32 *p32;
+    u32 a32[10];
+    x32 = 0xbabeb00bu32;
+    p32 = &x32;
+    ASSERT_TRUE(*p32 == x32);
+    *p32 = 0x12345678u32;
+    ASSERT_TRUE(x32 == 0x12345678u32);
+    p32 = (u32*)a32;
+    p32 += 2u8;
+    *p32 = 0xd00d1ed0u32;
+    ASSERT_TRUE(a32[2] == 0xd00d1ed0u32);
+    p32 += 3;
+    *p32 = x32;
+    ASSERT_TRUE(a32[5] == x32);
 }
 
 u8 test_jump() {

@@ -20,14 +20,80 @@ def lo(x):
     return x & 0xff
 
 def isPowerOfTwo(x):
-    ones = 0
-    while x != 0:
-        if bool(x & 1):
-            ones += 1
-            if ones == 2:
-                return False
-        x >>= 1
-    return True
+    return not bool(x & (x - 1))
+
+def loadByte(reg, loc, offset):
+    v = loc.getSource()
+    if loc.getIndirLevel() == 0:
+        if isinstance(v, int):
+            b = lo(v >> (8 * offset))
+            if b == 0 and reg == 'a':
+                return 'mov a, 0\n'
+            else:
+                return f'ldi {reg}, {b}\n'
+        else:
+            if offset == 0:
+                return f'ldi {reg}, lo({b})\n'
+            elif offset == 1:
+                return f'ldi {reg}, hi({b})\n'
+            else:
+                raise RuntimeError("symbols are 2 bytes")
+    else:
+        return f'''
+            ldi pl, lo({v} + {offset})
+            ldi ph, hi({v} + {offset})
+            ld {reg}
+        '''
+
+def loadP(loc, offset=0):
+    """
+    Load P from location with offset considering indirection level.
+    """
+    result = ''
+    if loc.getIndirLevel() == 0:
+        result += '''
+            ldi pl, lo({0} + {1})
+            ldi ph, hi({0} + {1})
+        '''.format(loc.getSource(), offset)
+    else:
+        result += '''
+            ldi pl, lo({0})
+            ldi ph, hi({0})
+            ld a
+        '''.format(loc.getSource())
+        if loc.isAligned():
+            result += 'inc pl\n'
+        else:
+            result += '''
+                ldi pl, lo({0} + 1)
+                ldi ph, hi({0} + 1)
+            '''.format(loc.getSource())
+        result += '''
+            ld ph
+            mov pl, a
+        '''
+        if offset != 0:
+            l = lo(offset)
+            h = hi(offset)
+            if l == 0:
+                pass
+            elif l == 1:
+                result += 'inc pl\n'
+            else:
+                result += '''
+                    ldi a, {}
+                    add pl, a
+                '''.format(l)
+            if h == 0:
+                result += 'mov a, 0\n'
+            else:
+                result += 'ldi a, {}\n'.format(h)
+            if l == 0:
+                # carry was not set
+                result += 'add ph, a\n'
+            else:
+                result += 'adc ph, a\n'
+    return result
 
 def copyW(f, t, fAligned, tAligned):
     result = '''

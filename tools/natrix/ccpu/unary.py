@@ -1,5 +1,6 @@
 from value import Value
 from type import BoolType
+from .common import *
 import operator
 import labelname
 from exceptions import SemanticError
@@ -13,59 +14,41 @@ def genDeref(resultLoc, srcLoc, offset=0):
     assert(srcLoc.getIndirLevel() <= 1)
 
     t = resultLoc.getType()
-    assert(0 < t.getSize() <= 2)
 
     if srcLoc.getIndirLevel() == 0:
         return Value.withOffset(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource(), True, offset), ""
 
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
     result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")
-    if offset == 0:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
-            ld ph
-            mov pl, a
-        '''.format(srcLoc.getSource()) # TODO optimize aligned
-    else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-            ldi b, lo({1})
-            add b, a
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
-            ld a
-            ldi ph, hi({1})
-            adc ph, a
-            mov a, b
-            mov pl, a
-        '''.format(srcLoc.getSource(), offset)
-    # TODO: s8 x; s8 a[10]; x = *a;
-    result += '''
-        ld b
-    '''
-    if t.getSize() > 1:
-        result += '''
-            mov a, 0
-            inc pl
-            adc ph, a
-            ld a
+    rs = resultLoc.getSource()
+    for byteOffset in range(0, t.getSize(), 2):
+        rest = min(2, t.getSize() - byteOffset)
+        result += loadP(srcLoc, byteOffset + offset)
+        result += 'ld b\n'
+        if rest > 1:
+            result += '''
+                mov a, 0
+                inc pl
+                adc ph, a
+                ld a
+            '''
+        result += f'''
+            ldi pl, lo({rs} + {byteOffset})
+            ldi ph, hi({rs} + {byteOffset})
+            st b
         '''
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st b
-    '''.format(resultLoc.getSource())
-    if t.getSize() > 1:
-        result += '''
-            inc pl
-            st a
-        '''
+        if rest > 1:
+            if resultLoc.isAligned():
+                result += '''
+                    inc pl
+                    st a
+                '''
+            else:
+                result += f'''
+                    ldi pl, lo({rs} + {byteOffset + 1})
+                    ldi ph, hi({rs} + {byteOffset + 1})
+                    st a
+                '''
     return resultLoc, result
 
 def genUnary(op, resultLoc, srcLoc):

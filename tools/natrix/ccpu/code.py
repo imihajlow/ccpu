@@ -410,44 +410,6 @@ def genCast(resultLoc, t, srcLoc):
             # same size or narrower
             return srcLoc.withType(resultLoc.getType()), ""
 
-def _loadP(loc, offset=0):
-    result = ''
-    if loc.getIndirLevel() == 0:
-        result += '''
-            ldi pl, lo({0} + {1})
-            ldi ph, hi({0} + {1})
-        '''.format(loc.getSource(), offset)
-    else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-        '''.format(loc.getSource())
-        if loc.isAligned():
-            result += 'inc pl\n'
-        else:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-            '''.format(loc.getSource())
-        result += '''
-            ld ph
-            mov pl, a
-        '''
-        if offset != 0:
-            l = lo(offset)
-            h = hi(offset)
-            result += '''
-                ldi a, {}
-                add pl, a
-            '''.format(l)
-            if h == 0:
-                result += 'mov a, 0\n'
-            else:
-                result += 'ldi a, {}\n'.format(h)
-            result += 'adc ph, a\n'
-    return result
-
 def _loadAB(loc):
     result = ''
     isWord = loc.getType().getSize() == 2
@@ -471,30 +433,6 @@ def _loadAB(loc):
             result += 'ld a\n'
     return result
 
-def _loadBLow(loc):
-    result = ''
-    if loc.getIndirLevel() == 0:
-        result += 'ldi b, lo({})\n'.format(loc.getSource())
-    else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-        '''.format(loc.getSource())
-    return result
-
-def _loadBHi(loc):
-    result = ''
-    if loc.getIndirLevel() == 0:
-        result += 'ldi b, hi({})\n'.format(loc.getSource())
-    else:
-        result += '''
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
-            ld b
-        '''.format(loc.getSource())
-    return result
-
 def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     if srcLoc.getType().isUnknown():
         raise SemanticError(srcLoc.getLocation(), "Unknown source type")
@@ -504,21 +442,27 @@ def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
         raise SemanticError(resultAddrLoc.getLocation() - srcLoc.getLocation(),
             "Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
     t = srcLoc.getType()
-    isWord = t.getSize() == 2
+    result = "; *({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
     s = srcLoc.getSource()
     rs = resultAddrLoc.getSource()
-    result = "; *({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
-    if not isWord:
-        result += _loadAB(srcLoc) # only b is used
-        result += _loadP(resultAddrLoc, offset) # a is overwritten
-        result += 'st b\n'
+    if t.getSize() <= 2:
+        isWord = t.getSize() == 2
+        if not isWord:
+            result += _loadAB(srcLoc) # only b is used
+            result += loadP(resultAddrLoc, offset) # a is overwritten
+            result += 'st b\n'
+        else:
+            result += loadByte('b', srcLoc, 0)
+            result += loadP(resultAddrLoc, offset)
+            result += 'st b\n'
+            result += loadByte('b', srcLoc, 1)
+            result += loadP(resultAddrLoc, offset + 1)
+            result += 'st b\n'
     else:
-        result += _loadBLow(srcLoc)
-        result += _loadP(resultAddrLoc, offset)
-        result += 'st b\n'
-        result += _loadBHi(srcLoc)
-        result += _loadP(resultAddrLoc, offset + 1)
-        result += 'st b\n'
+        for byte_offset in range(t.getSize()):
+            result += loadByte('b', srcLoc, offset + byte_offset)
+            result += loadP(resultAddrLoc, offset + byte_offset)
+            result += 'st b\n'
     return result
 
 def genInvCondJump(condLoc, label):
