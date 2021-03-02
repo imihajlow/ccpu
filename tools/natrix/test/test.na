@@ -186,6 +186,9 @@ u8 test_unary() {
 u8 test_binary() {
     s16 x16 = C1_16;
     s8 x8 = C1_8;
+    u16 xu16 = (u16)C1_16;
+    u8 xu8 = (u8)C1_8;
+    u32 x32 = C1_32;
 
     s16 a[1];
 
@@ -194,24 +197,29 @@ u8 test_binary() {
     ASSERT_TRUE(x16 + C3_16 == C1_16 + C3_16);
     ASSERT_TRUE(x16 + C4_16 == C1_16 + C4_16);
     ASSERT_TRUE(x8 + C2_8 == C1_8 + C2_8);
+    ASSERT_TRUE(x32 - C2_32 == C1_32 - C2_32);
 
-    ASSERT_TRUE(x16 + (s16)a == C1_16 + (s16)a);
-    ASSERT_TRUE(x8 + (s8)a == C1_8 + (s8)a);
+    ASSERT_TRUE(xu16 + (u16)a == (u16)C1_16 + (u16)a);
+    ASSERT_TRUE(xu8 + (u8)a == (u8)C1_8 + (u8)a);
 
     // const + var
     ASSERT_TRUE(C2_16 + x16 == C1_16 + C2_16);
     ASSERT_TRUE(C3_16 + x16 == C1_16 + C3_16);
     ASSERT_TRUE(C4_16 + x16 == C1_16 + C4_16);
     ASSERT_TRUE(C2_8 + x8 == C1_8 + C2_8);
+    ASSERT_TRUE(C2_32 - x32 == C2_32 - C1_32);
 
-    ASSERT_TRUE((s16)a + x16 == C1_16 + (s16)a);
-    ASSERT_TRUE((s8)a + x8 == C1_8 + (s8)a);
+    ASSERT_TRUE((u16)a + xu16 == (u16)C1_16 + (u16)a);
+    ASSERT_TRUE((u8)a + xu8 == (u8)C1_8 + (u8)a);
 
     // var + var
     s16 y16 = C2_16;
     s8 y8 = C2_8;
+    u32 y32 = C2_32;
     ASSERT_TRUE(x16 + y16 == C1_16 + C2_16);
     ASSERT_TRUE(x8 + y8 == C1_8 + C2_8);
+    ASSERT_TRUE(x32 + y32 == C1_32 + C2_32);
+    ASSERT_TRUE(x32 - y32 == C1_32 - C2_32);
 }
 
 u8 test_bool_binary() {

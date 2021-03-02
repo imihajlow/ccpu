@@ -33,9 +33,9 @@ def loadByte(reg, loc, offset):
                 return f'ldi {reg}, {b}\n'
         else:
             if offset == 0:
-                return f'ldi {reg}, lo({b})\n'
+                return f'ldi {reg}, lo({v})\n'
             elif offset == 1:
-                return f'ldi {reg}, hi({b})\n'
+                return f'ldi {reg}, hi({v})\n'
             else:
                 raise RuntimeError("symbols are 2 bytes")
     else:

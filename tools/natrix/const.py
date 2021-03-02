@@ -48,29 +48,43 @@ def binary(tree, op, overrideType=None, typeChecker=sameTypeChecker):
         else:
             raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
 
-def addsub(tree, op):
+def addsub(tree, op, pattern):
     a, b = tree.children
     if isinstance(a, Tree) or isinstance(b, Tree):
         return tree
-    elif not a.isConstNumber() or not b.isConstNumber():
+    if a.getIndirLevel() > 0 or b.getIndirLevel() > 0:
         return tree
-    elif not a.getType().isPointer():
-        if a.getType() == b.getType():
-            newType = a.getType()
-            sa = signExpand(a.getType(), a.getSource())
-            sb = signExpand(b.getType(), b.getSource())
-            return _const(Location.fromAny(tree), newType, op(sa, sb))
-        else:
-            raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
-    else:
-        if b.getType().isInteger():
-            newType = a.getType()
-            memberSize = a.getType().deref().getReserveSize()
-            sa = signExpand(a.getType(), a.getSource())
-            sb = signExpand(b.getType(), b.getSource())
-            return _const(Location.fromAny(tree), newType, op(sa, sb * memberSize))
-        else:
+    if a.getType().isPointer():
+        if not b.getType().isInteger():
             raise exceptions.SemanticError(Location.fromAny(tree), f"Cannot add {str(b.getType())} to a pointer")
+    else:
+        if a.getType() != b.getType():
+            raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
+    if not a.isConstNumber() or not b.isConstNumber():
+        if not a.getType().isPointer():
+            if a.getType().getSign():
+                print(str(a))
+                print(str(b))
+                raise exceptions.SemanticError(Location.fromAny(tree), "Signed label? WTF is that? 1")
+            return Value(Location.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), b.getSource()), True)
+        else:
+            if b.isConstNumber() or not b.getType().getSign():
+                sb = signExpand(b.getType(), b.getSource())
+                memberSize = a.getType().deref().getReserveSize()
+                return Value(Location.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), sb * memberSize), True)
+            else:
+                raise exceptions.SemanticError(Location.fromAny(tree), "Signed label? WTF is that? 2")
+    elif not a.getType().isPointer():
+        newType = a.getType()
+        sa = signExpand(a.getType(), a.getSource())
+        sb = signExpand(b.getType(), b.getSource())
+        return _const(Location.fromAny(tree), newType, op(sa, sb))
+    else:
+        newType = a.getType()
+        memberSize = a.getType().deref().getReserveSize()
+        sa = signExpand(a.getType(), a.getSource())
+        sb = signExpand(b.getType(), b.getSource())
+        return _const(Location.fromAny(tree), newType, op(sa, sb * memberSize))
 
 def unary(tree, op):
     a = tree.children[0]
@@ -152,10 +166,10 @@ class ConstTransformer(Transformer):
             raise exceptions.LiteralError(l, str(e))
 
     def add(self, tree):
-        return addsub(tree, operator.add)
+        return addsub(tree, operator.add, "{} + {}")
 
     def sub(self, tree):
-        return addsub(tree, operator.sub)
+        return addsub(tree, operator.sub, "{} - {}")
 
     def mul(self, tree):
         return binary(tree, operator.mul)

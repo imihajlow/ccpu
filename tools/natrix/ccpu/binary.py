@@ -19,11 +19,11 @@ def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     elif op == 'sub':
         return genSub(resultLoc, src1Loc, src2Loc)
     elif op == 'band':
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "and", "and", "({}) & ({})", operator.and_)
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "and", "and", "({}) & ({})", operator.and_, True)
     elif op == 'bor':
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "or", "or", "({}) | ({})", operator.or_)
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "or", "or", "({}) | ({})", operator.or_, True)
     elif op == 'bxor':
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "xor", "xor", "({}) ^ ({})", operator.xor)
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "xor", "xor", "({}) ^ ({})", operator.xor, True)
     elif op == 'lor':
         return _genBoolBinary(resultLoc, src1Loc, src2Loc, "or", "bool({}) or bool({})", lambda a,b: a or b)
     elif op == 'land':
@@ -45,7 +45,7 @@ def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     else:
         raise RuntimeError("Unhandled binary op: {}".format(op))
 
-def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambda):
+def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambda, carryIrrelevant):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
@@ -59,177 +59,212 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
     l2 = src2Loc.getIndirLevel()
     assert(l1 == 0 or l1 == 1)
     assert(l2 == 0 or l2 == 1)
+    if l1 == 0 and l2 == 0:
+        raise RuntimeError("Case unhandled by ConstTransformer")
     t = resultLoc.getType()
     rs = resultLoc.getSource()
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
     result = "; {} = {} {}, {}\n".format(resultLoc, opLo, src1Loc, src2Loc)
-    isWord = t.getSize() == 2
-    if l1 == 0 and l2 == 0:
-        # const + const
-        c1 = src1Loc.getSource()
-        c2 = src2Loc.getSource()
-        if isinstance(c1, int) and isinstance(c2, int):
-            cr = constLambda(c1, c2)
-            if isWord:
-                cr = cr & 0xffff
-            else:
-                cr = cr & 0xff
-            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, cr, True), result
-        else:
-            return Value(src1Loc.getLocation() - src2Loc.getLocation(), t, 0, pyPattern.format(c1, c2), True), result
-    elif l2 == 0:
-        # var + const
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-        '''.format(src1Loc.getSource())
-        if isWord:
-            if src1Loc.isAligned():
-                result += 'inc pl\n'
-            else:
-                result += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                '''.format(src1Loc.getSource())
-        c = src2Loc.getSource()
-        if isinstance(c, int):
-            l = lo(c)
-            if l == 0:
-                result += 'mov a, 0\n'
-            else:
-                result += 'ldi a, {}\n'.format(l)
-            result += '{} b, a\n'.format(opLo)
-            if isWord:
-                h = hi(c)
-                result += '''
-                    ld a
-                    ldi pl, {}
-                    {} a, pl
-                '''.format(h, opHi)
-        else:
+    if t.getSize() <= 2:
+        isWord = t.getSize() == 2
+        if l2 == 0:
+            # var + const
             result += '''
-                ldi a, lo({})
-                {} b, a
-            '''.format(c, opLo)
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+            '''.format(src1Loc.getSource())
             if isWord:
-                result += '''
-                    ld a
-                    ldi pl, hi({})
-                    {} a, pl
-                '''.format(c, opHi)
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st b
-        '''.format(rs)
-        if isWord:
-            if resultLoc.isAligned():
-                result += '''
-                    inc pl
-                    st a
-                '''
-            else:
-                result += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                    st a
-                '''.format(rs)
-    elif l1 == 0:
-        # const + var
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-        '''.format(src2Loc.getSource())
-        if isWord:
-            if src2Loc.isAligned():
-                result += 'inc pl\n'
-            else:
-                result += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                '''.format(src2Loc.getSource())
-        c = src1Loc.getSource()
-        if isinstance(c, int):
-            l = lo(c)
-            result += 'ldi b, {}\n'.format(l)
-            result += '{} b, a\n'.format(opLo)
-            if isWord:
-                h = hi(c)
-                result += 'ld pl\n'
-                if h == 0:
+                if src1Loc.isAligned():
+                    result += 'inc pl\n'
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                    '''.format(src1Loc.getSource())
+            c = src2Loc.getSource()
+            if isinstance(c, int):
+                l = lo(c)
+                if l == 0:
                     result += 'mov a, 0\n'
                 else:
-                    result += 'ldi a, {}\n'.format(h)
-                result += '{} a, pl'.format(opHi)
-        else:
+                    result += 'ldi a, {}\n'.format(l)
+                result += '{} b, a\n'.format(opLo)
+                if isWord:
+                    h = hi(c)
+                    result += '''
+                        ld a
+                        ldi pl, {}
+                        {} a, pl
+                    '''.format(h, opHi)
+            else:
+                result += '''
+                    ldi a, lo({})
+                    {} b, a
+                '''.format(c, opLo)
+                if isWord:
+                    result += '''
+                        ld a
+                        ldi pl, hi({})
+                        {} a, pl
+                    '''.format(c, opHi)
             result += '''
-                ldi b, lo({})
-                {} b, a
-            '''.format(c, opLo)
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                st b
+            '''.format(rs)
+            if isWord:
+                if resultLoc.isAligned():
+                    result += '''
+                        inc pl
+                        st a
+                    '''
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                        st a
+                    '''.format(rs)
+        elif l1 == 0:
+            # const + var
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld a
+            '''.format(src2Loc.getSource())
+            if isWord:
+                if src2Loc.isAligned():
+                    result += 'inc pl\n'
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                    '''.format(src2Loc.getSource())
+            c = src1Loc.getSource()
+            if isinstance(c, int):
+                l = lo(c)
+                result += 'ldi b, {}\n'.format(l)
+                result += '{} b, a\n'.format(opLo)
+                if isWord:
+                    h = hi(c)
+                    result += 'ld pl\n'
+                    if h == 0:
+                        result += 'mov a, 0\n'
+                    else:
+                        result += 'ldi a, {}\n'.format(h)
+                    result += '{} a, pl'.format(opHi)
+            else:
+                result += '''
+                    ldi b, lo({})
+                    {} b, a
+                '''.format(c, opLo)
+                if isWord:
+                    result += '''
+                        ld pl
+                        ldi a, hi({})
+                        {} a, pl
+                    '''.format(c, opHi)
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                st b
+            '''.format(rs)
+            if isWord:
+                if resultLoc.isAligned():
+                    result += '''
+                        inc pl
+                        st a
+                    '''
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                        st a
+                    '''.format(rs)
+        else:
+            # var + var
+            s1 = src1Loc.getSource()
+            s2 = src2Loc.getSource()
+            result += '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                ld b
+                ldi pl, lo({1})
+                ldi ph, hi({1})
+                ld a
+                {2} b, a
+            '''.format(s1, s2, opLo)
             if isWord:
                 result += '''
+                    ldi pl, lo({0} + 1)
+                    ldi ph, hi({0} + 1)
+                    ld a
+                    ldi pl, lo({1} + 1)
+                    ldi ph, hi({1} + 1)
                     ld pl
-                    ldi a, hi({})
-                    {} a, pl
-                '''.format(c, opHi)
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st b
-        '''.format(rs)
-        if isWord:
-            if resultLoc.isAligned():
-                result += '''
-                    inc pl
-                    st a
-                '''
-            else:
-                result += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                    st a
-                '''.format(rs)
-    else:
-        # var + var
-        s1 = src1Loc.getSource()
-        s2 = src2Loc.getSource()
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-            ldi pl, lo({1})
-            ldi ph, hi({1})
-            ld a
-            {2} b, a
-        '''.format(s1, s2, opLo)
-        if isWord:
+                    {2} a, pl
+                '''.format(s1, s2, opHi)
             result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-                ld a
-                ldi pl, lo({1} + 1)
-                ldi ph, hi({1} + 1)
-                ld pl
-                {2} a, pl
-            '''.format(s1, s2, opHi)
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st b
-        '''.format(rs)
-        if isWord:
-            if resultLoc.isAligned():
-                result += '''
-                    inc pl
-                    st a
-                '''
+                ldi pl, lo({0})
+                ldi ph, hi({0})
+                st b
+            '''.format(rs)
+            if isWord:
+                if resultLoc.isAligned():
+                    result += '''
+                        inc pl
+                        st a
+                    '''
+                else:
+                    result += '''
+                        ldi pl, lo({0} + 1)
+                        ldi ph, hi({0} + 1)
+                        st a
+                    '''.format(rs)
+    else:
+        # size > 2
+        # This produces less size-efficient code than above, that's why it's not a general case.
+        for offset in range(0, t.getSize(), 2):
+            rest = t.getSize() - offset
+            result += loadByte('a', src1Loc, offset)
+            if rest > 1:
+                if l1 == 0:
+                    result += loadByte('b', src1Loc, offset + 1)
+                else:
+                    if (offset == 0 or carryIrrelevant) and src1Loc.isAligned():
+                        # can trash flags if it's the first pair of bytes or if op is like and, or, xor
+                        result += '''
+                            inc pl
+                            ld b
+                        '''
+                    else:
+                        # must preserve flags
+                        if src1Loc.isAligned():
+                            result += f'''
+                                ldi pl, lo({s1} + {offset + 1})
+                                ld b
+                            '''
+                        else:
+                            result += loadByte('b', src1Loc, offset + 1)
+            result += loadByte('pl', src2Loc, offset)
+            if offset == 0:
+                result += f'{opLo} a, pl\n'
             else:
-                result += '''
-                    ldi pl, lo({0} + 1)
-                    ldi ph, hi({0} + 1)
-                    st a
-                '''.format(rs)
+                result += f'{opHi} a, pl\n'
+            result += f'''
+                ldi pl, lo({rs} + {offset})
+                ldi ph, hi({rs} + {offset})
+                st a
+            '''
+            if rest > 1:
+                result += loadByte('a', src2Loc, offset + 1)
+                result += f'''
+                    {opHi} b, a
+                    ldi pl, lo({rs} + {offset + 1})
+                    ldi ph, hi({rs} + {offset + 1})
+                    st b
+                '''
     return resultLoc, result
 
 def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
@@ -321,12 +356,14 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     s2 = src2Loc.getSource()
     rs = resultLoc.getSource()
     t = resultLoc.getType()
+    if src2Loc.getType().getSize() > 2:
+        raise NotImplementedError("Can only add integers up to 16 bit to pointers")
     result = '; {} = {} + {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
     isWord = src2Loc.getType().getSize() == 2
     if isWord:
         if memberSize == 1:
             # no multiplication, just add
-            loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "add", "adc", "({}) + ({})", operator.add)
+            loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
@@ -335,7 +372,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
                 return loc, result + code
             else:
                 result += '''
@@ -418,7 +455,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     offset = s2 * memberSize
                 else:
                     offset = "({}) * {}".format(s2, memberSize)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
                 return loc, result + code
             else:
                 raise NotImplementedError()
@@ -431,7 +468,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         if src2Loc.getType().getSign():
             raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
@@ -492,7 +529,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     add a, pl ; a = i_h + c + p_h = r_h
                 '''.format(src1Loc.getSource())
         else:
-            # src1loc + (u16)b * memberSize
+            # src1Loc + (u16)b * memberSize
             raise NotImplementedError()
         if resultLoc.isAligned():
             result += '''
@@ -527,7 +564,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     if isWord:
         if memberSize == 1:
             # no multiplication, just subtract
-            loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "sub", "sbb", "({}) - ({})", operator.sub)
+            loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
@@ -536,7 +573,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
                 return loc, result + code
             else:
                 result += '''
@@ -609,7 +646,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         if src2Loc.getType().getSign():
             raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
@@ -692,7 +729,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     return resultLoc, result
 
 def genAddPointerOffset(resultLoc, src, offset):
-    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset, True), "add", "adc", "({}) + ({})", operator.add)
+    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
@@ -703,7 +740,7 @@ def genAdd(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType().isPointer():
         return _genAddPtr(resultLoc, src1Loc, src2Loc)
     else:
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "add", "adc", "({}) + ({})", operator.add)
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "add", "adc", "({}) + ({})", operator.add, False)
 
 def genSub(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
@@ -714,4 +751,4 @@ def genSub(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType().isPointer():
         return _genSubPtr(resultLoc, src1Loc, src2Loc)
     else:
-        return _genIntBinary(resultLoc, src1Loc, src2Loc, "sub", "sbb", "({}) - ({})", operator.sub)
+        return _genIntBinary(resultLoc, src1Loc, src2Loc, "sub", "sbb", "({}) - ({})", operator.sub, False)

@@ -167,6 +167,8 @@ def genNeg(resultLoc, srcLoc):
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
     t = srcLoc.getType()
+    if t.getSize() > 2:
+        raise NotImplementedError("Negation of ints wider than s16 is not implemented")
     result = '; {} = -{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant
