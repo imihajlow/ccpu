@@ -22,6 +22,13 @@ def lo(x):
 def isPowerOfTwo(x):
     return not bool(x & (x - 1))
 
+def log(x):
+    result = 0
+    while x > 1:
+        x >>= 1
+        result += 1
+    return result
+
 def loadByte(reg, loc, offset):
     v = loc.getSource()
     if loc.getIndirLevel() == 0:

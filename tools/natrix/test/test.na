@@ -313,6 +313,7 @@ u8 test_pointer_addsub() {
     a8[256] = (s8)25;
 
     u8 x8;
+    s8 xs8;
     s16 x16;
 
     s8 *p8 = (s8*)a8;
@@ -393,6 +394,28 @@ u8 test_pointer_addsub() {
     ASSERT_TRUE(*(p16 - (s8)2) == 10);
     x8 = (u8)128;
     ASSERT_TRUE(a8[x8] == (s8)12);
+
+
+    u32 a32[260];
+    u32 *p32;
+    a32[7] = C1_32;
+    a32[8] = C2_32;
+    x8 = 8u8;
+    ASSERT_TRUE(a32[x8] == C2_32);
+    p32 = (u32*)a32 + 8;
+    ASSERT_TRUE(*p32 == C2_32);
+    xs8 = -1s8;
+    ASSERT_TRUE(p32[xs8] == C1_32);
+
+    x16 = -1s16;
+    ASSERT_TRUE(p32[x16] == C1_32);
+
+    x16 = 8s16;
+    ASSERT_TRUE(a32[x16] == C2_32);
+
+    // p32 += xs8;
+    // ASSERT_TRUE(*p32 == C1_32);
+
 }
 
 u8 test_compare_unsigned() {

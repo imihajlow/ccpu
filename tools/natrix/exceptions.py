@@ -11,3 +11,7 @@ class SemanticError(NatrixError):
 class LiteralError(NatrixError):
     def __init__(self, location, msg):
         super().__init__(location, msg, "Literal parsing error")
+
+class NatrixNotImplementedError(NatrixError):
+    def __init__(self, location, msg):
+        super().__init__(location, f"Not implemented: {msg}", "Not implemented error")

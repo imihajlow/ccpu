@@ -21,7 +21,7 @@ def genDeref(resultLoc, srcLoc, offset=0):
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
     result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")
     rs = resultLoc.getSource()
-    for byteOffset in range(0, t.getSize(), 2):
+    for byteOffset in reversed(range(0, t.getSize(), 2)):
         rest = min(2, t.getSize() - byteOffset)
         result += loadP(srcLoc, byteOffset + offset)
         result += 'ld b\n'

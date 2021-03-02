@@ -22,7 +22,7 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
         c = src2Loc.getSource()
         if isinstance(c, int):
             if op == 'shl':
-                return _genSHLVarByConst(resultLoc, src1Loc, c)
+                return genSHLVarByConst(resultLoc, src1Loc, c)
             elif op == 'shr':
                 if t.getSign():
                     return _genSARVarByConst(resultLoc, src1Loc, c)
@@ -39,35 +39,97 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
             else:
                 return _genSHRByVar(resultLoc, src1Loc, src2Loc, labelProvider)
 
-def _genSHLVarByConst(resultLoc, srcLoc, n):
+def genSHLVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
-    isWord = srcLoc.getType().getSize() == 2
+    size = srcLoc.getType().getSize()
     result = '; shl {}, {}'.format(srcLoc, n)
     if n == 0:
         return srcLoc, result
-    if not isWord:
+    if size == 1:
+        assert(resultLoc.getType().getSize() <= 2)
+        expandToWord = resultLoc.getType().getSize() == 2
+        signed = srcLoc.getType().getSign()
         if n >= 8:
-            result += '''
-                mov a, 0
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-            '''.format(rs)
+            if expandToWord:
+                n -= 8
+                if n >= 8:
+                    result += f'''
+                        mov a, 0
+                        ldi pl, lo({rs})
+                        ldi ph, hi({rs})
+                        st a
+                        inc pl
+                    '''
+                    if not resultLoc.isAligned():
+                        result += 'adc ph, a\n'
+                    result += 'st a\n'
+                else:
+                    result += f'''
+                        ldi pl, lo({s})
+                        ldi ph, hi({s})
+                        ld b
+                    '''
+                    for i in range(n):
+                        result += 'shl b\n'
+                    result += f'''
+                        mov a, 0
+                        ldi pl, lo({rs})
+                        ldi ph, hi({rs})
+                        st a
+                        inc pl
+                    '''
+                    if not resultLoc.isAligned():
+                        result += 'adc ph, a\n'
+                    result += 'st b\n'
+            else:
+                result += f'''
+                    mov a, 0
+                    ldi pl, lo({rs})
+                    ldi ph, hi({rs})
+                    st a
+                '''
         else:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
-            '''.format(s)
+            result += f'''
+                ldi pl, lo({s})
+                ldi ph, hi({s})
+                ld b
+            '''
+            if expandToWord:
+                if not signed:
+                    result += 'mov a, 0\n'
             for i in range(n):
-                result += 'shl a\n'
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-            '''.format(rs)
-    else:
+                if expandToWord:
+                    if i > 0:
+                        result += 'shl a\n'
+                    if i == 0 and signed:
+                        result += '''
+                            shl b
+                            exp a
+                        '''
+                    else:
+                        result += '''
+                            shl b
+                            adc a, 0
+                        '''
+                else:
+                    result += 'shl b\n'
+            result += f'''
+                ldi pl, lo({rs})
+                ldi ph, hi({rs})
+                st b
+            '''
+            if expandToWord:
+                if resultLoc.isAligned():
+                    result += 'inc pl\n'
+                else:
+                    result += f'''
+                        ldi pl, lo({rs} + 1)
+                        ldi ph, hi({rs} + 1)
+                    '''
+                result += 'st a\n'
+    elif size == 2:
+        assert(resultLoc.getType().getSize() == 2)
         if n >= 16:
             result += '''
                 mov a, 0
@@ -116,6 +178,8 @@ def _genSHLVarByConst(resultLoc, srcLoc, n):
                 inc pl
                 st a
             '''.format(rs)
+    else:
+        raise NotImplementedError()
     return resultLoc, result
 
 def _genSHRVarByConst(resultLoc, srcLoc, n):

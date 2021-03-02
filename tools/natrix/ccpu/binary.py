@@ -2,12 +2,12 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
-from .shift import genShift
+from .shift import genShift, genSHLVarByConst
 from .common import *
 from .compare import *
 from .mul import *
 from .div import *
-from exceptions import SemanticError
+from exceptions import SemanticError, NatrixNotImplementedError
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if resultLoc.getIndirLevel() == 0:
@@ -357,10 +357,28 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     rs = resultLoc.getSource()
     t = resultLoc.getType()
     if src2Loc.getType().getSize() > 2:
-        raise NotImplementedError("Can only add integers up to 16 bit to pointers")
+        raise NatrixNotImplementedError(src2Loc.getLocation(), "Can only add integers up to 16 bit to pointers")
     result = '; {} = {} + {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
     isWord = src2Loc.getType().getSize() == 2
-    if isWord:
+    if memberSize > 2:
+        if src2Loc.getIndirLevel() == 0:
+            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            if isinstance(s2, int):
+                offset = s2 * memberSize
+            else:
+                offset = "({}) * {}".format(s2, memberSize)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
+            return loc, result + code
+        elif src1Loc == resultLoc:
+            raise NatrixNotImplementedError(src2Loc.getLocation(), "Incrementing a pointer to a large type")
+        elif not isPowerOfTwo(memberSize):
+            raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+        else:
+            shift = log(memberSize)
+            shiftedLoc, shiftCode = genSHLVarByConst(resultLoc, src2Loc, shift)
+            loc, additionCode = _genIntBinary(resultLoc, shiftedLoc, src1Loc, "add", "adc", "({}) + ({})", operator.add, False)
+            return loc, result + shiftCode + additionCode
+    elif isWord:
         if memberSize == 1:
             # no multiplication, just add
             loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "add", "adc", "({}) + ({})", operator.add, False)
@@ -448,17 +466,6 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                             ldi ph, hi({0} + 1)
                             st a
                         '''.format(rs)
-        else:
-            if src2Loc.getIndirLevel() == 0:
-                loc = src1Loc.getLocation() - src2Loc.getLocation()
-                if isinstance(s2, int):
-                    offset = s2 * memberSize
-                else:
-                    offset = "({}) * {}".format(s2, memberSize)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
-                return loc, result + code
-            else:
-                raise NotImplementedError()
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             loc = src1Loc.getLocation() - src2Loc.getLocation()
@@ -528,9 +535,6 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                     ld pl
                     add a, pl ; a = i_h + c + p_h = r_h
                 '''.format(src1Loc.getSource())
-        else:
-            # src1Loc + (u16)b * memberSize
-            raise NotImplementedError()
         if resultLoc.isAligned():
             result += '''
                 ldi pl, lo({0})
