@@ -169,6 +169,7 @@ u8 test_jump() {
 #define C2_8 (s8)0x9f
 #define C1_32 0xdeadbeefu32
 #define C2_32 0x90817263u32
+#define C3_32 0xBABEB00Bu32
 
 u8 test_unary() {
     s16 x16 = C1_16;
@@ -396,10 +397,11 @@ u8 test_pointer_addsub() {
     ASSERT_TRUE(a8[x8] == (s8)12);
 
 
-    u32 a32[260];
+    u32 a32[256 + 8];
     u32 *p32, p32_2;
     a32[7] = C1_32;
     a32[8] = C2_32;
+    a32[8 + 255] = C3_32;
     x8 = 8u8;
     ASSERT_TRUE(a32[x8] == C2_32);
     p32 = (u32*)a32 + 8;
@@ -413,8 +415,22 @@ u8 test_pointer_addsub() {
     x16 = 8s16;
     ASSERT_TRUE(a32[x16] == C2_32);
 
-    // p32 += xs8;
-    // ASSERT_TRUE(*p32 == C1_32);
+    p32 += xs8;
+    ASSERT_TRUE(*p32 == C1_32);
+    xs8 = 8s8;
+    p32 = (u32*)a32;
+    p32 += xs8;
+    ASSERT_TRUE(*p32 == C2_32);
+    p32 = (u32*)a32;
+    x16 = 7s16;
+    p32 += (u16)x16;
+    ASSERT_TRUE(*p32 == C1_32);
+
+    p32 = (u32*)a32 + 8;
+    x8 = 255u8;
+    p32 += x8;
+    ASSERT_TRUE(*p32 == C3_32);
+
     p32 = (u32*)a32 + 7u8;
     xs8 = -1s8;
     p32_2 = p32 - xs8;

@@ -347,6 +347,85 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     '''.format(rs)
     return resultLoc, result
 
+def _genIncDecPtr(resultLoc, srcLoc, shift, opLo, opHi):
+    """
+    result = result + src << shift
+    """
+    assert(resultLoc.getType().getSize() == 2)
+    assert(srcLoc.getType().getSize() <= 2)
+    assert(srcLoc.getIndirLevel() == 1)
+    assert(shift < 16)
+    result = ""
+    rs = resultLoc.getSource()
+    s = srcLoc.getSource()
+    signed = srcLoc.getType().getSign()
+    isWord = srcLoc.getType().getSize() == 2
+    if shift < 8:
+        # lo byte of the index
+        result += loadByte('b', srcLoc, 0)
+        if isWord:
+            if srcLoc.isAligned():
+                result += 'inc pl\n'
+            else:
+                result += '''
+                    inc pl
+                    mov a, 0
+                    adc ph, 0
+                '''
+            result += 'ld a\n'
+        elif not signed:
+            result += 'mov a, 0\n'
+        for i in range(shift):
+            if i == 0 and not isWord and signed:
+                result += '''
+                    shl b
+                    exp a
+                '''
+            else:
+                if i > 0 or isWord:
+                    result += 'shl a\n'
+                result += '''
+                    shl b
+                    adc a, 0
+                '''
+        # a:b - shifted index
+        if opLo == 'add':
+            result += loadByte('pl', resultLoc, 1)
+            result += f'''
+                add a, pl
+                ldi pl, lo({rs} + 1)
+                st a
+            '''
+            if resultLoc.isAligned():
+                result += '''
+                    dec pl
+                    ld a
+                    inc pl
+                    add b, a
+                    ld a
+                    adc a, 0
+                    st a
+                    dec pl
+                    st b
+                '''
+            else:
+                result += f'''
+                    dec pl
+                    mov a, 0
+                    sbb ph, a
+                    ld a
+                    add b, a
+                    st a
+                    ldi pl, lo({rs})
+                    ldi ph, hi({rs})
+                    ld a
+                    adc a, 0
+                    st a
+                '''
+        else:
+            raise NatrixNotImplementedError(resultLoc.getLocation(), "fuck")
+    return resultLoc, result
+
 def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
         raise SemanticError(src2Loc.getLocation(),
@@ -369,10 +448,12 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                 offset = "({}) * {}".format(s2, memberSize)
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
-        elif src1Loc == resultLoc:
-            raise NatrixNotImplementedError(src2Loc.getLocation(), "Incrementing a pointer to a large type")
         elif not isPowerOfTwo(memberSize):
             raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+        elif src1Loc == resultLoc:
+            shift = log(memberSize)
+            loc, code = _genIncDecPtr(resultLoc, src2Loc, shift, "add", "adc")
+            return loc, result + code
         else:
             shift = log(memberSize)
             shiftedLoc, shiftCode = genSHLVarByConst(resultLoc, src2Loc, shift)
@@ -574,10 +655,12 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                 offset = "({}) * {}".format(s2, memberSize)
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
-        elif src1Loc == resultLoc:
-            raise NatrixNotImplementedError(src2Loc.getLocation(), "Decrementing a pointer to a large type")
         elif not isPowerOfTwo(memberSize):
             raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+        elif src1Loc == resultLoc:
+            shift = log(memberSize)
+            loc, code = _genIncDecPtr(resultLoc, src2Loc, shift, "sub", "sbb")
+            return loc, result + code
         else:
             shift = log(memberSize)
             shiftedLoc, shiftCode = genSHLVarByConst(resultLoc, src2Loc, shift)
