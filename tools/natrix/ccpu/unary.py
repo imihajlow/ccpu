@@ -83,31 +83,41 @@ def genBNot(resultLoc, srcLoc):
         else:
             c = '~({})'.format(c) # Warning
         return Value(srcLoc.getLocation(), t, 0, c, True), result
-    else:
-        # var
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
+    # var
+    s = srcLoc.getSource()
+    rs = resultLoc.getSource()
+    for offset in range(0, t.getSize(), 2):
+        rest = t.getSize() - offset
+        result += f'''
+            ldi pl, lo({s} + {offset})
+            ldi ph, hi({s} + {offset})
             ld b
-            not b
-        '''.format(srcLoc.getSource())
-        if t.getSize() > 1:
-            result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
-                ld a
-                not a
-            '''.format(srcLoc.getSource()) # TODO optimize aligned
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st b
-    '''.format(resultLoc.getSource())
-    if t.getSize() > 1:
-        result += '''
-            inc pl
-            st a
         '''
+        if rest > 1:
+            result += incP(srcLoc.isAligned())
+            result += 'ld a\n'
+        result += f'''
+            ldi pl, lo({rs} + {offset})
+            ldi ph, hi({rs} + {offset})
+            not b
+            st b
+        '''
+        if rest > 1:
+            if resultLoc.isAligned:
+                result += '''
+                    inc pl
+                    not a
+                    st a
+                '''
+            else:
+                result += '''
+                    mov b, a
+                    inc pl
+                    mov a, 0
+                    adc ph, a
+                    not b
+                    st b
+                '''
     return resultLoc, result
 
 def genLNot(resultLoc, srcLoc):

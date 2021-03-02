@@ -167,6 +167,8 @@ u8 test_jump() {
 #define C4_16 0x0015
 #define C1_8 (s8)0x53
 #define C2_8 (s8)0x9f
+#define C1_32 0xdeadbeefu32
+#define C2_32 0x90817263u32
 
 u8 test_unary() {
     s16 x16 = C1_16;
@@ -176,6 +178,9 @@ u8 test_unary() {
 
     ASSERT_TRUE(-x16 == -C1_16);
     ASSERT_TRUE(-x8 == -C1_8);
+
+    u32 x32 = C2_32;
+    ASSERT_TRUE(~x32 == ~C2_32);
 }
 
 u8 test_binary() {

@@ -97,10 +97,11 @@ def reserveBlock(label, vs):
     '''
     offset = 0
     for label, size in vs:
-        mod = offset % size
+        alignSize = min(size, MAX_INT_SIZE)
+        mod = offset % alignSize
         if mod != 0:
-            result += f'res {size - mod}\n'
-            offset += size - mod
+            result += f'res {alignSize - mod}\n'
+            offset += alignSize - mod
         result += f'{label}: res {size}\n'
         offset = (offset + size) % maxSize
     return result

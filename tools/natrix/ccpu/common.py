@@ -169,3 +169,13 @@ def call(f):
         ldi ph, hi({0})
         jmp
     '''.format(f)
+
+def incP(aligned):
+    if aligned:
+        return 'inc pl\n'
+    else:
+        return '''
+            inc pl
+            mov a, 0
+            adc ph, a
+        '''
