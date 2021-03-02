@@ -565,7 +565,25 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     t = resultLoc.getType()
     result = '; {} = {} - {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
     isWord = src2Loc.getType().getSize() == 2
-    if isWord:
+    if memberSize > 2:
+        if src2Loc.getIndirLevel() == 0:
+            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            if isinstance(s2, int):
+                offset = s2 * memberSize
+            else:
+                offset = "({}) * {}".format(s2, memberSize)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
+            return loc, result + code
+        elif src1Loc == resultLoc:
+            raise NatrixNotImplementedError(src2Loc.getLocation(), "Decrementing a pointer to a large type")
+        elif not isPowerOfTwo(memberSize):
+            raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+        else:
+            shift = log(memberSize)
+            shiftedLoc, shiftCode = genSHLVarByConst(resultLoc, src2Loc, shift)
+            loc, subtractionCode = _genIntBinary(resultLoc, src1Loc, shiftedLoc, "sub", "sbb", "({}) - ({})", operator.sub, False)
+            return loc, result + shiftCode + subtractionCode
+    elif isWord:
         if memberSize == 1:
             # no multiplication, just subtract
             loc, code = _genIntBinary(resultLoc, src1Loc, src2Loc.withType(t), "sub", "sbb", "({}) - ({})", operator.sub, False)
@@ -639,8 +657,6 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                         adc ph, a
                     '''
                 result += 'st b\n'
-        else:
-            raise NotImplementedError("Other sizes than 1 and 2 are not supported for pointer indexing")
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             loc = src1Loc.getLocation() - src2Loc.getLocation()
