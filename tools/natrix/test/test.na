@@ -223,6 +223,8 @@ u8 test_binary() {
     ASSERT_TRUE(x32 - y32 == C1_32 - C2_32);
 }
 
+import u8 const_54[1]; // this imported symbol equals to 54
+
 u8 test_bool_binary() {
     u8 a;
     u8 b;
@@ -250,17 +252,16 @@ u8 test_bool_binary() {
     ASSERT_TRUE(TRUE || a);
     ASSERT_FALSE(FALSE || a);
 
-    u8 s[1];
     // var and const, const is a symbol
     a = TRUE;
-    ASSERT_TRUE(a && (u8)s);
+    ASSERT_TRUE(a && (u8)const_54);
     ASSERT_FALSE(a && (u8)__seg_init_begin);
-    ASSERT_TRUE(a || (u8)s);
+    ASSERT_TRUE(a || (u8)const_54);
     ASSERT_TRUE(a || (u8)__seg_init_begin);
     a = FALSE;
-    ASSERT_FALSE(a && (u8)s);
+    ASSERT_FALSE(a && (u8)const_54);
     ASSERT_FALSE(a && (u8)__seg_init_begin);
-    ASSERT_TRUE(a || (u8)s);
+    ASSERT_TRUE(a || (u8)const_54);
     ASSERT_FALSE(a || (u8)__seg_init_begin);
 
     // var and var
@@ -1054,6 +1055,10 @@ u8 test_shl() {
     ASSERT_TRUE(a16 << (u16)9 == 0b1011010000000000);
     ASSERT_TRUE(a16 << (u16)16 == 0);
     ASSERT_TRUE(a16 << (u16)0x101 == 0);
+    a16 <<= 1u8;
+    ASSERT_TRUE(a16 == 0b0100101010110100);
+    a16 <<= 1u8;
+    ASSERT_TRUE(a16 == 0b1001010101101000);
     a32 = C1_32;
     ASSERT_TRUE(a32 << 0u8 == a32);
     ASSERT_TRUE(a32 << 1u8 == C1_32 << 1u8);
@@ -1068,6 +1073,21 @@ u8 test_shl() {
     ASSERT_TRUE(a32 << 25u8 == C1_32 << 25u8);
     ASSERT_TRUE(a32 << 32u8 == 0u32);
     ASSERT_TRUE(a32 << 0x101u16 == 0u32);
+    a32 <<= 1u8;
+    ASSERT_TRUE(a32 == C1_32 << 1u8);
+    a32 <<= 8u8;
+    ASSERT_TRUE(a32 == C1_32 << 9u8);
+    a32 <<= 9u8;
+    ASSERT_TRUE(a32 == C1_32 << 18u8);
+    a32 = C1_32;
+    a32 <<= 16u8;
+    ASSERT_TRUE(a32 == C1_32 << 16u8);
+    a32 = C1_32;
+    a32 <<= 24u8;
+    ASSERT_TRUE(a32 == C1_32 << 24u8);
+    a32 = C1_32;
+    a32 <<= 32u8;
+    ASSERT_TRUE(a32 == 0u32);
 
     // var and var
     a8 = (s8)0xa5;
@@ -1082,7 +1102,7 @@ u8 test_shl() {
     au16 = (u16)0x101;
     ASSERT_TRUE(a8 << au16 == (s8)0);
 
-
+    a16 = 0xa55a;
     au16 = (u16)0;
     ASSERT_TRUE(a16 << au16 == a16);
     au16 = (u16)1;

@@ -4,6 +4,8 @@
 	.export aligned_255_2
 	.export aligned_255_3
 	.export aligned_255_4
+	.export const_54
+	.const const_54 = 54
 .section text
 .align 256
 	db 0xf5

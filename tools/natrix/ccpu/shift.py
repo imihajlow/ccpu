@@ -39,6 +39,142 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
             else:
                 return _genSHRByVar(resultLoc, src1Loc, src2Loc, labelProvider)
 
+def _genSHLVarByConstLarge(resultLoc, srcLoc, n):
+    assert(resultLoc != srcLoc)
+    rs = resultLoc.getSource()
+    s = srcLoc.getSource()
+    size = srcLoc.getType().getSize()
+    n = min(n, size * 8)
+    byteShift = n // 8
+    bitShift = n % 8
+
+    result = ''
+    result += 'mov a, 0\n'
+    if byteShift > 0:
+        result += f'''
+            ldi pl, lo({rs})
+            ldi ph, hi({rs})
+        '''
+        for i in range(byteShift - 1):
+            result += '''
+                st a
+                inc pl
+            '''
+            if not resultLoc.isAligned():
+                result += 'adc ph, a\n'
+        result += 'st a\n'
+    for byteIndex in range(byteShift, size):
+        result += f'''
+            ldi pl, lo({s} + {byteIndex - byteShift})
+            ldi ph, hi({s} + {byteIndex - byteShift})
+            ld b
+        '''
+        for bit in range(bitShift):
+            if bit != 0:
+                result += 'shl a\n'
+            result += '''
+                shl b
+                adc a, 0
+            '''
+        if byteIndex + 1 != size:
+            result += f'''
+                ldi pl, lo({rs} + {byteIndex + 1})
+                ldi ph, hi({rs} + {byteIndex + 1})
+                st a
+            '''
+            if resultLoc.isAligned():
+                result += 'dec pl\n'
+            else:
+                result += '''
+                    mov a, 0
+                    dec pl
+                    sbb ph, a
+                '''
+        else:
+            result += f'''
+                ldi pl, lo({rs} + {byteIndex})
+                ldi ph, hi({rs} + {byteIndex})
+            '''
+        if byteIndex == byteShift:
+            result += 'st b\n'
+        else:
+            result += '''
+                ld a
+                or a, b
+                st a
+            '''
+        if byteIndex + 1 != size:
+            result += 'mov a, 0\n'
+    return result
+
+def _adjustP(resultLoc, offset, oldP):
+    if oldP == offset:
+        return '', offset
+    elif oldP is None or not resultLoc.isAligned():
+        return f'''
+            ldi pl, lo({resultLoc.getSource()} + {offset})
+            ldi ph, hi({resultLoc.getSource()} + {offset})
+        ''', offset
+    elif oldP == offset:
+        return '', offset
+    elif offset - oldP == 1:
+        return 'inc pl\n', offset
+    elif oldP - offset == 1:
+        return 'dec pl\n', offset
+    else:
+        return f'ldi pl, lo({resultLoc.getSource()} + {offset})\n', offset
+
+def _genSHLVarByConstLargeInplace(resultLoc, n):
+    rs = resultLoc.getSource()
+    size = resultLoc.getType().getSize()
+    n = min(n, size * 8)
+    byteShift = n // 8
+    bitShift = n % 8
+
+    result = ''
+    p = None
+    lastByteLoaded = False
+    # high bytes are assembled from two values
+    for offset in reversed(range(byteShift + 1, size)):
+        pCode, p = _adjustP(resultLoc, offset - byteShift - 1, p)
+        result += pCode
+        result += 'ld b\n'
+        # B = source byte
+        pCode, p = _adjustP(resultLoc, offset - byteShift, p)
+        result += pCode
+        # P = destination address
+        result += 'ld a\n'
+        for bit in range(bitShift):
+            result += '''
+                shl a
+                shl b
+                adc a, 0
+            '''
+        pCode, p = _adjustP(resultLoc, offset, p)
+        result += pCode
+        result += 'st a\n'
+        lastByteLoaded = True
+    # last meaningful byte is assembled from one value
+    if byteShift < size:
+        if not lastByteLoaded:
+            pCode, p = _adjustP(resultLoc, 0, p)
+            result += pCode
+            result += 'ld b\n'
+            for bit in range(bitShift):
+                result += 'shl b\n'
+        pCode, p = _adjustP(resultLoc, byteShift, p)
+        result += pCode
+        result += 'st b\n'
+    # the rest are zeroes
+    if byteShift > 0:
+        result += 'mov a, 0\n'
+        for offset in reversed(range(0, byteShift)):
+            pCode, p = _adjustP(resultLoc, offset, p)
+            result += pCode
+            result += 'st a\n'
+    return result
+
+
 def genSHLVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
@@ -179,66 +315,10 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
                 st a
             '''.format(rs)
     else:
-        n = min(n, size * 8)
-        byteShift = n // 8
-        bitShift = n % 8
-
-        result += 'mov a, 0\n'
-        if byteShift > 0:
-            result += f'''
-                ldi pl, lo({rs})
-                ldi ph, hi({rs})
-            '''
-            for i in range(byteShift - 1):
-                result += '''
-                    st a
-                    inc pl
-                '''
-                if not resultLoc.isAligned():
-                    result += 'adc ph, a\n'
-            result += 'st a\n'
-        for byteIndex in range(byteShift, size):
-            result += f'''
-                ldi pl, lo({s} + {byteIndex - byteShift})
-                ldi ph, hi({s} + {byteIndex - byteShift})
-                ld b
-            '''
-            for bit in range(bitShift):
-                if bit != 0:
-                    result += 'shl a\n'
-                result += '''
-                    shl b
-                    adc a, 0
-                '''
-            if byteIndex + 1 != size:
-                result += f'''
-                    ldi pl, lo({rs} + {byteIndex + 1})
-                    ldi ph, hi({rs} + {byteIndex + 1})
-                    st a
-                '''
-                if resultLoc.isAligned():
-                    result += 'dec pl\n'
-                else:
-                    result += '''
-                        mov a, 0
-                        dec pl
-                        sbb ph, a
-                    '''
-            else:
-                result += f'''
-                    ldi pl, lo({rs} + {byteIndex})
-                    ldi ph, hi({rs} + {byteIndex})
-                '''
-            if byteIndex == byteShift:
-                result += 'st b\n'
-            else:
-                result += '''
-                    ld a
-                    or a, b
-                    st a
-                '''
-            if byteIndex + 1 != size:
-                result += 'mov a, 0\n'
+        if resultLoc != srcLoc:
+            result += _genSHLVarByConstLarge(resultLoc, srcLoc, n)
+        else:
+            result += _genSHLVarByConstLargeInplace(resultLoc, n)
 
     return resultLoc, result
 
