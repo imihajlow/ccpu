@@ -11,6 +11,5 @@
 
 import u8 card_init();
 import u8 card_power_off();
-import u8 card_read_block(u16 offset_hi, u16 offset_lo, u16 offset_in_block, u16 size, u8 *dst);
-import u8 card_read_block_u32(u8 *offset, u16 offset_in_block, u16 size, u8 *dst);
+import u8 card_read_block(u32 offset, u16 offset_in_block, u16 size, u8 *dst);
 

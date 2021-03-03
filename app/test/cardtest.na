@@ -69,15 +69,15 @@ export u8 wait_keypressed() {
     return k;
 }
 
-export u8 print_u32(u8 col, u8 row, u8 *v) {
-    print_hex_char(col + 0u8, row, v[3] >> 4u8);
-    print_hex_char(col + 1u8, row, v[3] & 0xfu8);
-    print_hex_char(col + 2u8, row, v[2] >> 4u8);
-    print_hex_char(col + 3u8, row, v[2] & 0xfu8);
-    print_hex_char(col + 4u8, row, v[1] >> 4u8);
-    print_hex_char(col + 5u8, row, v[1] & 0xfu8);
-    print_hex_char(col + 6u8, row, v[0] >> 4u8);
-    print_hex_char(col + 7u8, row, v[0] & 0xfu8);
+export u8 print_u32(u8 col, u8 row, u32 v) {
+    print_hex_char(col + 0u8, row, ((u8*)&v)[3] >> 4u8);
+    print_hex_char(col + 1u8, row, ((u8*)&v)[3] & 0xfu8);
+    print_hex_char(col + 2u8, row, ((u8*)&v)[2] >> 4u8);
+    print_hex_char(col + 3u8, row, ((u8*)&v)[2] & 0xfu8);
+    print_hex_char(col + 4u8, row, ((u8*)&v)[1] >> 4u8);
+    print_hex_char(col + 5u8, row, ((u8*)&v)[1] & 0xfu8);
+    print_hex_char(col + 6u8, row, ((u8*)&v)[0] >> 4u8);
+    print_hex_char(col + 7u8, row, ((u8*)&v)[0] & 0xfu8);
 }
 
 u8 print_u16(u8 col, u8 row, u16 v) {
@@ -144,7 +144,7 @@ export u8 main() {
 
     row = 1u8;
     col = 0u8;
-    u16 block = 0u16;
+    u32 block = 0u32;
 
 
     while (1u8) {
@@ -166,8 +166,8 @@ export u8 main() {
                 r = card_init();
                 print_hex_char(40u8, 0u8, r);
             } else if (k == PS2_KEY_F2) {
-                r = card_read_block(0u16, block, 0u16, 512u16, (u8*)buffer);
-                block += 512u16;
+                r = card_read_block(block, 0u16, 512u16, (u8*)buffer);
+                block += 512u32;
                 print_hex_char(40u8, 0u8, r >> 4u8);
                 print_hex_char(41u8, 0u8, r & 0xfu8);
             } else if (k == PS2_KEY_F4) {

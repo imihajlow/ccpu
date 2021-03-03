@@ -135,6 +135,7 @@ _arguments: expression ("," expression)*
     | literal
     | var
     | subscript "[" expression "]" -> subscript
+    | "(" expression ")" "[" expression "]" -> subscript
     | "sizeof" "(" type ")" -> sizeof_type
     | "sizeof" "(" expression ")" -> sizeof_expr
 

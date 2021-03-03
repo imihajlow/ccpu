@@ -12,8 +12,8 @@ struct Partition {
     u8 end_h;  // 0x07
     u8 end_s; // 0x60
     u8 end_c; // 0xe4
-    u8 rel_sector[4]; // 0x00000027
-    u8 n_sectors[4]; // 0x0001e4d9
+    u32 rel_sector; // 0x00000027
+    u32 n_sectors; // 0x0001e4d9
 };
 
 struct BPB {
@@ -29,84 +29,35 @@ struct BPB {
     u16 sectors_per_fat; // 0x0079
         u16 sectors_per_track; // 0x0020
         u16 n_heads; // 0x0010
-    u8 n_hidden_sectors[4]; // 0x00000027
-    u8 large_sectors[4]; // 0x0001e4d9
+    u32 n_hidden_sectors; // 0x00000027
+    u32 large_sectors; // 0x0001e4d9
 };
 
 struct FatInfo {
-    u8 fat0_offset[4];
-    u8 fat1_offset[4];
+    u32 fat0_offset;
+    u32 fat1_offset;
     u16 sectors_per_fat;
-    u8 root_dir_offset[4];
+    u32 root_dir_offset;
     u8 log_sectors_per_cluster;
     u16 n_dir_entries;
-    u8 data_offset[4];
+    u32 data_offset;
 };
 
 
 struct DirDescriptor {
     u8 is_free;
-    u8 block_addr[4];
+    u32 block_addr;
     u16 block_offset;
 };
 
 struct FileDescriptor {
     u8 is_free;
     u16 last_cluster_len; // number of bytes in the last cluster in the chain
-    u8 block_addr[4]; // current block
+    u32 block_addr; // current block
     u8 block_in_cluster; // block index in current cluster
     u16 index_in_block; // read pointer in current block
     u16 next_cluster; // value from the FAT
 };
-
-
-u8 u32_shl_9(u8 *p) {
-    p[3] = (p[2] << 1u8) | (p[1] >> 7u8);
-    p[2] = (p[1] << 1u8) | (p[0] >> 7u8);
-    p[1] = p[0] << 1u8;
-    p[0] = 0u8;
-}
-
-u8 u32_add(u8 *dst, u8 *src) {
-    u16 carry = 0u16;
-    for (u8 i = 0u8; i < 4u8; i += 1u8) {
-        u16 r = (u16)dst[i] + (u16)src[i] + carry;
-        dst[i] = (u8)r;
-        carry = r >> 8u8;
-    }
-}
-
-u8 u32_add_u16(u8 *dst, u16 src) {
-    u16 r;
-    r = (u16)dst[0] + (u16)(u8)src;
-    dst[0] = (u8)r;
-    r = (u16)dst[1] + (src >> 8u8) + (r >> 8u8);
-    dst[1] = (u8)r;
-    dst[2] = dst[2] + (u8)(r >> 8u8);
-}
-
-u8 u32_add_sectors(u8 *dst, u16 src) {
-    if (src >= 0x8000u16) {
-        dst[3] += 1u8;
-        src &= 0x7FFFu16;
-    }
-    src <<= 1u8;
-    u16 r;
-    r = (u16)dst[1] + (u16)(u8)src;
-    dst[1] = (u8)r;
-    r >>= 8u8;
-    src >>= 8u8;
-    r = (u16)dst[2] + src + r;
-    dst[2] = (u8)r;
-    dst[3] += (u8)(r >> 8u8);
-}
-
-u8 u32_copy(u8 *dst, u8 *src) {
-    dst[0] = src[0];
-    dst[1] = src[1];
-    dst[2] = src[2];
-    dst[3] = src[3];
-}
 
 struct FatInfo fat_info;
 struct DirDescriptor dir_desc; // TODO array
@@ -118,15 +69,13 @@ export u8 fat_init() {
 
     struct Partition partition;
     struct BPB bpb;
-    u8 r = card_read_block(0u16, 0u16, 446u16, sizeof(struct Partition), (u8*)&partition);
+    u8 r = card_read_block(0u32, 446u16, sizeof(struct Partition), (u8*)&partition);
     if (r) {
         return FAT_ERROR_CARD;
     }
 
-    u8 offset[4];
-    u32_copy((u8*)offset, (u8*)partition.rel_sector);
-    u32_shl_9((u8*)offset);
-    r = card_read_block_u32((u8*)offset, 0u16, sizeof(struct BPB), (u8*)&bpb);
+    u32 offset = partition.rel_sector << 9u8;
+    r = card_read_block(partition.rel_sector << 9u8, 0u16, sizeof(struct BPB), (u8*)&bpb);
     if (r) {
         return FAT_ERROR_CARD;
     }
@@ -134,18 +83,17 @@ export u8 fat_init() {
     if (bpb.bytes_per_sector != 512u16) {
         return FAT_ERROR_UNSUPPORTED_SECTOR_SIZE;
     }
-    u32_copy((u8*)offset, (u8*)bpb.n_hidden_sectors);
-    u32_shl_9((u8*)offset);
-    u32_add_sectors((u8*)offset, (u16)bpb.n_reserved_sectors);
-    u32_copy((u8*)fat_info.fat0_offset, (u8*)offset); // 5000
-    u32_add_sectors((u8*)offset, bpb.sectors_per_fat);
+    offset = bpb.n_hidden_sectors << 9u8;
+    offset += (u32)bpb.n_reserved_sectors << 9u8;
+    fat_info.fat0_offset = offset; // 5000
+    offset += (u32)bpb.sectors_per_fat << 9u8;
     if (bpb.n_fats == 2u8) {
-        u32_copy((u8*)fat_info.fat1_offset, (u8*)offset);
-        u32_add_sectors((u8*)offset, bpb.sectors_per_fat);
+        fat_info.fat1_offset = offset;
+        offset += (u32)bpb.sectors_per_fat << 9u8;
     } else if (bpb.n_fats > 2u8) {
         return FAT_ERROR_TOO_MANY_FATS;
     }
-    u32_copy((u8*)fat_info.root_dir_offset, (u8*)offset); // 23400
+    fat_info.root_dir_offset = offset; // 23400
     fat_info.sectors_per_fat = bpb.sectors_per_fat;
     fat_info.log_sectors_per_cluster = 0u8;
     while (bpb.sectors_per_cluster > 1u8) {
@@ -153,8 +101,8 @@ export u8 fat_init() {
         bpb.sectors_per_cluster >>= 1u8;
     }
     fat_info.n_dir_entries = bpb.n_dir_entries;
-    u32_add_sectors((u8*)offset, (fat_info.n_dir_entries + 15u16) >> 4u8); // 27400
-    u32_copy((u8*)fat_info.data_offset, (u8*)offset);
+    offset += (u32)((fat_info.n_dir_entries + 15u16) >> 4u8) << 9u8; // 27400
+    fat_info.data_offset = offset;
 
     return 0u8;
 }
@@ -165,21 +113,21 @@ export u8 fat_open_dir() {
     }
 
     dir_desc.is_free = 0u8;
-    u32_copy((u8*)dir_desc.block_addr, (u8*)fat_info.root_dir_offset);
+    dir_desc.block_addr = fat_info.root_dir_offset;
     dir_desc.block_offset = 0u16;
     return 0u8;
 }
 
 export u8 fat_get_next_dir_entry(u8 desc, struct FatDirEntry *dst) {
     while (1u8) {
-        u8 r = card_read_block_u32((u8*)dir_desc.block_addr, dir_desc.block_offset, sizeof(struct FatDirEntry), (u8*)dst);
+        u8 r = card_read_block(dir_desc.block_addr, dir_desc.block_offset, sizeof(struct FatDirEntry), (u8*)dst);
         if (r) {
             return 0u8;
         }
         dir_desc.block_offset += sizeof(struct FatDirEntry);
         if (dir_desc.block_offset == CARD_BLOCK_SIZE) {
             dir_desc.block_offset = 0u16;
-            u32_add_sectors((u8*)dir_desc.block_addr, 1u16);
+            dir_desc.block_addr += (u32)CARD_BLOCK_SIZE;
         }
 
         if (dst->filename[0] == 0u8) {
@@ -205,12 +153,12 @@ u16 read_fat_entry(u16 index) {
     u16 result;
     u8 r;
     if (sector_index > 0u16) {
-        u8 disk_offset[4];
-        u32_copy((u8*)disk_offset, (u8*)fat_info.fat0_offset);
-        u32_add_sectors((u8*)disk_offset, sector_index);
-        r = card_read_block_u32((u8*)disk_offset, sector_offset, sizeof(u16), (u8*)&result);
+        u32 disk_offset;
+        disk_offset = fat_info.fat0_offset;
+        disk_offset += (u32)sector_index << 9u8;
+        r = card_read_block(disk_offset, sector_offset, sizeof(u16), (u8*)&result);
     } else {
-        r = card_read_block_u32((u8*)fat_info.fat0_offset, sector_offset, sizeof(u16), (u8*)&result);
+        r = card_read_block(fat_info.fat0_offset, sector_offset, sizeof(u16), (u8*)&result);
     }
     if (r) {
         return 0u16;
@@ -229,8 +177,8 @@ export u8 fat_open_file(struct FatDirEntry *dsc) {
     file_desc.last_cluster_len = (u16)dsc->size[0] | ((u16)dsc->size[1] << 8u8);
     file_desc.last_cluster_len &= cluster_mask;
 
-    u32_copy((u8*)file_desc.block_addr, (u8*)fat_info.data_offset);
-    u32_add_sectors((u8*)file_desc.block_addr, (dsc->cluster_lo - 2u16) << fat_info.log_sectors_per_cluster);
+    file_desc.block_addr = fat_info.data_offset;
+    file_desc.block_addr += (u32)(dsc->cluster_lo - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
     file_desc.block_in_cluster = 0u8;
     file_desc.index_in_block = 0u16;
     file_desc.next_cluster = read_fat_entry(dsc->cluster_lo);
@@ -263,7 +211,7 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
         if (to_read == 0u16) {
             return result;
         }
-        r = card_read_block_u32((u8*)file_desc.block_addr, file_desc.index_in_block, to_read, dst);
+        r = card_read_block(file_desc.block_addr, file_desc.index_in_block, to_read, dst);
         if (r) {
             return result | 0x8000u16;
         }
@@ -276,13 +224,13 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
             file_desc.index_in_block = 0u16;
             if (file_desc.block_in_cluster >> fat_info.log_sectors_per_cluster) {
                 // next cluster
-                u32_copy((u8*)file_desc.block_addr, (u8*)fat_info.data_offset);
-                u32_add_sectors((u8*)file_desc.block_addr, (file_desc.next_cluster - 2u16) << fat_info.log_sectors_per_cluster);
+                file_desc.block_addr = fat_info.data_offset;
+                file_desc.block_addr += (u32)(file_desc.next_cluster - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
                 file_desc.next_cluster = read_fat_entry(file_desc.next_cluster);
                 file_desc.block_in_cluster = 0u8;
             } else {
                 // next block in cluster
-                u32_add_sectors((u8*)file_desc.block_addr, 1u16);
+                file_desc.block_addr += (u32)CARD_BLOCK_SIZE;
             }
         }
     }

@@ -349,7 +349,7 @@ class Generator:
             return ""
         result = self.backend.reserveBlock(labelname.getReserveBeginLabel(fn.name),
             [(labelname.getReturnAddressLabel(fn.name), 2)] +
-            [(labelname.getArgumentName(fn.name, i), 2) for i in range(len(fn.args))] +
+            [(labelname.getArgumentName(fn.name, i), fn.args[i].getReserveSize()) for i in range(len(fn.args))] +
             [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars])
         result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
         result += self.backend.reserve(labelname.getReturnName(fn.name), fn.retType.getReserveSize())

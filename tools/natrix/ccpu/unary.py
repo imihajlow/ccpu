@@ -3,7 +3,7 @@ from type import BoolType
 from .common import *
 import operator
 import labelname
-from exceptions import SemanticError
+from exceptions import SemanticError, NatrixNotImplementedError
 
 def genDeref(resultLoc, srcLoc, offset=0):
     if resultLoc.getType().isUnknown():
@@ -168,7 +168,7 @@ def genNeg(resultLoc, srcLoc):
 
     t = srcLoc.getType()
     if t.getSize() > 2:
-        raise NotImplementedError("Negation of ints wider than s16 is not implemented")
+        raise NatrixNotImplementedError(srcLoc.getLocation(), "Negation of ints wider than s16 is not implemented")
     result = '; {} = -{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant

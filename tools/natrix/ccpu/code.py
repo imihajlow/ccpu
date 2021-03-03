@@ -75,14 +75,12 @@ def dumpLiterals(lp):
     result += '; ====== end literals =======\n'
     return result
 
-def isPowerOfTwo(n):
-    return not bool(n & (n - 1))
-
 def reserve(label, size):
-    if not isPowerOfTwo(size):
-        raise RuntimeError("var size is not a power of 2")
+    alignment = min(size, MAX_INT_SIZE)
+    while not isPowerOfTwo(alignment):
+        alignment += 1
     return f"""
-        .align {size}
+        .align {alignment}
         {label}: res {size}
     """
 

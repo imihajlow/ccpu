@@ -8,6 +8,8 @@
 #define SPI_CTRL_N_CARD_CS 4u8
 #define SPI_CTRL_EN_3V3 8u8
 
+// #define IMPORTED_SPI_TRANSFER
+
 #ifdef IMPORTED_SPI_TRANSFER
 import u8 spi_transfer(u8 x);
 #else
@@ -113,22 +115,13 @@ export u8 card_power_off() {
     SPI_CTRL = SPI_CTRL_N_CARD_CS;
 }
 
-export u8 card_read_block(u16 offset_hi, u16 offset_lo, u16 offset_in_block, u16 size, u8 *dst) {
-    u8 offset[4];
-    offset[0] = (u8)offset_lo;
-    offset[1] = (u8)(offset_lo >> 8u8);
-    offset[2] = (u8)offset_hi;
-    offset[3] = (u8)(offset_hi >> 8u8);
-    return card_read_block_u32((u8*)offset, offset_in_block, size, dst);
-}
-
-export u8 card_read_block_u32(u8 *offset, u16 offset_in_block, u16 size, u8 *dst) {
+export u8 card_read_block(u32 offset, u16 offset_in_block, u16 size, u8 *dst) {
     u8 r;
     spi_transfer(0x40u8 | 17u8); // CMD17 - read single block
-    spi_transfer(offset[3]);
-    spi_transfer(offset[2]);
-    spi_transfer(offset[1]);
-    spi_transfer(offset[0]);
+    spi_transfer(((u8*)(&offset))[3]);
+    spi_transfer(((u8*)(&offset))[2]);
+    spi_transfer(((u8*)(&offset))[1]);
+    spi_transfer(((u8*)(&offset))[0]);
     spi_transfer(0xFFu8); // CRC
 
     for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
