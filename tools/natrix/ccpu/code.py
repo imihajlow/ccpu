@@ -41,7 +41,7 @@ def _dumpRuntimeImports():
     .global __cc_asl
     .global __cc_asl_dword
     .global __cc_asr
-    ;.global __cc_asr_dword
+    .global __cc_lsr_dword
     .global __cc_lsr
     .global __cc_sh_val
     .global __cc_sh_count

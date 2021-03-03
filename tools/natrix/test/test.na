@@ -1034,6 +1034,44 @@ u8 test_shr_word() {
     ASSERT_TRUE(as16 >> bu16 == 0);
 }
 
+u8 test_shr_dword() {
+    u32 a32;
+    u8 a8;
+
+    // // var and const
+    // a32 = C2_32;
+    // ASSERT_TRUE(a32 >> 0u8 == C2_32);
+    // ASSERT_TRUE(a32 >> 8u8 == C2_32 >> 8u8);
+    // ASSERT_TRUE(a32 >> 16u8 == C2_32 >> 16u8);
+    // ASSERT_TRUE(a32 >> 24u8 == C2_32 >> 24u8);
+    // ASSERT_TRUE(a32 >> 32u8 == 0u32);
+    // ASSERT_TRUE(a32 >> 1u8 == C2_32 >> 1u8);
+    // ASSERT_TRUE(a32 >> 5u8 == C2_32 >> 5u8);
+    // ASSERT_TRUE(a32 >> 9u8 == C2_32 >> 9u8);
+    // ASSERT_TRUE(a32 >> 22u8 == C2_32 >> 22u8);
+
+    // var and var
+    a32 = C1_32;
+    a8 = 0u8;
+    ASSERT_TRUE(a32 >> a8 == a32);
+    a8 = 8u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 8);
+    a8 = 16u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 16);
+    a8 = 24u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 24);
+    a8 = 32u8;
+    ASSERT_TRUE(a32 >> a8 == 0u32);
+    a8 = 1u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 1);
+    a8 = 5u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 5);
+    a8 = 17u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 17);
+    a8 = 22u8;
+    ASSERT_TRUE(a32 >> a8 == C1_32 >> 22);
+}
+
 u8 test_shl() {
     u16 au16;
     s16 a16;
@@ -1392,6 +1430,7 @@ export u8 main() {
     test_compare_signed();
     test_shr_byte();
     test_shr_word();
+    test_shr_dword();
     test_shl();
     test_struct();
     test_sizeof();

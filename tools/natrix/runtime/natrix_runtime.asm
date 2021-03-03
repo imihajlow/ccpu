@@ -1,6 +1,6 @@
     .export __cc_r_sp
     .export __cc_asr
-    ; .export __cc_lsr_dword
+    .export __cc_lsr_dword
     .export __cc_asl
     .export __cc_asl_dword
     .export __cc_lsr
@@ -86,14 +86,23 @@
     jmp
 
     ; initialize zeroes
-    ldi pl, lo(sh_val_zeroes)
-    ldi ph, hi(sh_val_zeroes)
+    ldi pl, lo(sh_val_zeroes_before)
+    ldi ph, hi(sh_val_zeroes_before)
     mov a, 0
     st a
     inc pl
     st a
     inc pl
     st a
+
+    ldi pl, lo(sh_val_zeroes_after)
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
+    inc pl
+
 
     ; call main
     ldi pl, lo(main)
@@ -496,6 +505,127 @@ asl_dword_loop:
         ldi pl, lo(asl_dword_loop)
         ldi ph, hi(asl_dword_loop)
         jmp
+
+; __cc_sh_val = __cc_sh_val >> __cc_sh_count
+__cc_lsr_dword:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ldi pl, lo(__cc_sh_count)
+    ld a
+    ldi pl, lo(return_0_dword)
+    ldi ph, hi(return_0_dword)
+    ldi b, 31
+    sub b, a ; 31 - count
+    jc ; 31 < count
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    add a, 0
+    jz
+
+    mov b, a
+    ldi pl, 0x7
+    and a, pl
+    shr b
+    shr b
+    shr b
+    ; a = bit shift, b = byte shift
+    ldi pl, lo(bit_shift)
+    ldi ph, hi(bit_shift)
+    st a
+
+    ; there are three zero bytes in memory after __cc_sh_val
+    mov a, b
+
+    ldi pl, lo(__cc_sh_val)
+    add pl, a
+    ld b
+    sub pl, a
+    st b
+
+    inc pl
+    add pl, a
+    ld b
+    sub pl, a
+    st b
+
+    inc pl
+    add pl, a
+    ld b
+    sub pl, a
+    st b
+
+    inc pl
+    add pl, a
+    ld b
+    sub pl, a
+    st b
+
+lsr_dword_loop:
+        ldi pl, lo(bit_shift)
+        ldi ph, hi(bit_shift)
+        ld a
+        dec a
+        st a
+        ldi pl, lo(exit)
+        ldi ph, hi(exit)
+        jc
+
+        ldi ph, hi(__cc_sh_val)
+        ldi pl, lo(__cc_sh_val)
+        ld b
+        shr b
+        inc pl
+        ld a
+        shr a
+        exp a
+        ldi pl, 0x80
+        and a, pl
+        or b, a
+        ldi pl, lo(__cc_sh_val)
+        st b
+
+        inc pl
+        ld b
+        inc pl
+        ld a
+        shr b
+        shr a
+        exp a
+        ldi pl, 0x80
+        and a, pl
+        or b, a
+        ldi pl, lo(__cc_sh_val + 1)
+        st b
+
+        inc pl
+        ld b
+        inc pl
+        ld a
+        shr b
+        shr a
+        exp a
+        ldi pl, 0x80
+        and a, pl
+        or b, a
+        ldi pl, lo(__cc_sh_val + 2)
+        st b
+
+        inc pl
+        ld b
+        shr b
+        st b
+
+        ldi pl, lo(lsr_dword_loop)
+        ldi ph, hi(lsr_dword_loop)
+        jmp
+
 
     ; push onto stack values in range [__cc_from, __cc_to)
 __cc_push:
@@ -1531,8 +1661,9 @@ __cc_div_zero_trap:
     .section bss
     .align 64 ; all internal data have the same hi byte
 __cc_r_sp: res 2
-sh_val_zeroes: res 3
+sh_val_zeroes_before: res 3
 __cc_sh_val: res 4
+sh_val_zeroes_after: res 3
 __cc_sh_count: res 2
 __cc_from: res 2
 __cc_to: res 2
