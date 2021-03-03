@@ -423,7 +423,41 @@ def _genIncDecPtr(resultLoc, srcLoc, shift, opLo, opHi):
                     st a
                 '''
         else:
-            raise NatrixNotImplementedError(resultLoc.getLocation(), "fuck")
+            result += loadByte('pl', resultLoc, 1)
+            result += f'''
+                sub pl, a
+                mov a, pl
+                ldi pl, lo({rs} + 1)
+                st a
+            '''
+            if resultLoc.isAligned():
+                result += '''
+                    dec pl
+                    ld a
+                    sub a, b
+                    st a
+                    mov a, 0
+                    adc a, 0
+                    inc pl
+                    ld b
+                    sub b, a
+                    st b
+                '''
+            else:
+                result += f'''
+                    ldi ph, hi({rs})
+                    ldi pl, lo({rs})
+                    ld a
+                    sub a, b
+                    st a
+                    mov a, 0
+                    adc a, 0
+                    ldi ph, hi({rs} + 1)
+                    ldi pl, lo({rs} + 1)
+                    ld b
+                    sub b, a
+                    st b
+                '''
     return resultLoc, result
 
 def _genAddPtr(resultLoc, src1Loc, src2Loc):

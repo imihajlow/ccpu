@@ -439,6 +439,23 @@ u8 test_pointer_addsub() {
     x16 = 7s16;
     p32_2 = p32 + x16;
     ASSERT_TRUE(*p32_2 == C1_32);
+
+    p32 = (u32*)a32 + 8u8;
+    x8 = 1u8;
+    p32 -= x8;
+    ASSERT_TRUE(*p32 == C1_32);
+    xs8 = -1s8;
+    p32 -= xs8;
+    ASSERT_TRUE(*p32 == C2_32);
+    p32 = (u32*)a32 + (8 + 255);
+    ASSERT_TRUE(*p32 == C3_32);
+    x8 = 255u8;
+    p32 -= x8;
+    ASSERT_TRUE(*p32 == C2_32);
+    p32 = (u32*)a32;
+    x16 = 7;
+    p32 += x16;
+    ASSERT_TRUE(*p32 == C1_32);
 }
 
 u8 test_compare_unsigned() {
