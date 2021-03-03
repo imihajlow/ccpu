@@ -1,3 +1,4 @@
 export u8 main() {
-
+    u32 x, y;
+    y = x >> 8u8;
 }

@@ -109,21 +109,24 @@ def _genSHLVarByConstLarge(resultLoc, srcLoc, n):
     return result
 
 def _adjustP(resultLoc, offset, oldP):
-    if oldP == offset:
-        return '', offset
-    elif oldP is None or not resultLoc.isAligned():
-        return f'''
+    oldLoc, oldOffset = oldP if oldP is not None else (None, None)
+    code = ''
+    if oldP == (resultLoc, offset):
+        code = ''
+    elif oldP is None or oldLoc != resultLoc or not resultLoc.isAligned():
+        code = f'''
             ldi pl, lo({resultLoc.getSource()} + {offset})
             ldi ph, hi({resultLoc.getSource()} + {offset})
-        ''', offset
-    elif oldP == offset:
-        return '', offset
-    elif offset - oldP == 1:
-        return 'inc pl\n', offset
-    elif oldP - offset == 1:
-        return 'dec pl\n', offset
+        '''
+    elif oldOffset == offset:
+        code = ''
+    elif offset - oldOffset == 1:
+        code = 'inc pl\n'
+    elif oldOffset - offset == 1:
+        code = 'dec pl\n'
     else:
-        return f'ldi pl, lo({resultLoc.getSource()} + {offset})\n', offset
+        code = f'ldi pl, lo({resultLoc.getSource()} + {offset})\n'
+    return code, (resultLoc, offset)
 
 def _genSHLVarByConstLargeInplace(resultLoc, n):
     rs = resultLoc.getSource()
@@ -323,6 +326,76 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
 
     return resultLoc, result
 
+def _genSHRVarByConstLarge(resultLoc, srcLoc, n):
+    s = srcLoc.getSource()
+    rs = resultLoc.getSource()
+    size = srcLoc.getType().getSize()
+    result = f'; {resultLoc} = shr {srcLoc}, {n}'
+    bitShift = n % 8
+    byteShift = n // 8
+    p = None
+    for offset in range(size - byteShift):
+        pCode, p = _adjustP(srcLoc, offset + byteShift, p)
+        result += pCode
+        result += 'ld b\n'
+        lastByte = offset + 1 + byteShift >= size
+        if bitShift != 0:
+            if not lastByte:
+                pCode, p = _adjustP(srcLoc, offset + 1 + byteShift, p)
+                result += pCode
+                result += 'ld a\n'
+            for bit in range(8):
+                if bit < bitShift:
+                    result += 'shr b\n'
+                elif not lastByte:
+                    result += 'shl a\n'
+            if not lastByte:
+                result += 'or b, a\n'
+        pCode, p = _adjustP(resultLoc, offset, p)
+        result += pCode
+        result += 'st b\n'
+    if byteShift > 0:
+        result += 'mov a, 0\n'
+        for offset in range(size - byteShift, size):
+            pCode, p = _adjustP(resultLoc, offset, p)
+            result += pCode
+            result += 'st a\n'
+    return resultLoc, result
+
+def _genSHRVarByConstLargeInplace(srcLoc, n):
+    s = srcLoc.getSource()
+    size = srcLoc.getType().getSize()
+    result = '; shr {}, {}'.format(srcLoc, n)
+    bitShift = n % 8
+    byteShift = n // 8
+    p = None
+    for offset in range(size - byteShift):
+        pCode, p = _adjustP(srcLoc, offset + byteShift, p)
+        result += pCode
+        result += 'ld b\n'
+        lastByte = offset + 1 + byteShift >= size
+        if not lastByte:
+            pCode, p = _adjustP(srcLoc, offset + 1 + byteShift, p)
+            result += pCode
+            result += 'ld a\n'
+        for bit in range(8):
+            if bit < bitShift:
+                result += 'shr b\n'
+            elif not lastByte:
+                result += 'shl a\n'
+        if not lastByte:
+            result += 'or b, a\n'
+        pCode, p = _adjustP(srcLoc, offset, p)
+        result += pCode
+        result += 'st b\n'
+    if byteShift > 0:
+        result += 'mov a, 0\n'
+        for offset in range(size - byteShift, size):
+            pCode, p = _adjustP(srcLoc, offset, p)
+            result += pCode
+            result += 'st a\n'
+    return srcLoc, result
+
 def _genSHRVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
@@ -407,7 +480,13 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
                 st a
             '''.format(rs)
     else:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHR large numbers")
+        if n >= 8 * size:
+            return Value(srcLoc.getLocation(), resultLoc.getType(), 0, 0, True), ''
+        elif resultLoc == srcLoc:
+            return _genSHRVarByConstLargeInplace(resultLoc, n)
+        else:
+            return _genSHRVarByConstLarge(resultLoc, srcLoc, n)
+
     return resultLoc, result
 
 def _genSARVarByConst(resultLoc, srcLoc, n):

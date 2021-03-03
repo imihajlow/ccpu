@@ -1038,17 +1038,39 @@ u8 test_shr_dword() {
     u32 a32;
     u8 a8;
 
-    // // var and const
-    // a32 = C2_32;
-    // ASSERT_TRUE(a32 >> 0u8 == C2_32);
-    // ASSERT_TRUE(a32 >> 8u8 == C2_32 >> 8u8);
-    // ASSERT_TRUE(a32 >> 16u8 == C2_32 >> 16u8);
-    // ASSERT_TRUE(a32 >> 24u8 == C2_32 >> 24u8);
-    // ASSERT_TRUE(a32 >> 32u8 == 0u32);
-    // ASSERT_TRUE(a32 >> 1u8 == C2_32 >> 1u8);
-    // ASSERT_TRUE(a32 >> 5u8 == C2_32 >> 5u8);
-    // ASSERT_TRUE(a32 >> 9u8 == C2_32 >> 9u8);
-    // ASSERT_TRUE(a32 >> 22u8 == C2_32 >> 22u8);
+    // var and const
+    a32 = C2_32;
+    ASSERT_TRUE(a32 >> 0u8 == C2_32);
+    ASSERT_TRUE(a32 >> 8u8 == C2_32 >> 8u8);
+    ASSERT_TRUE(a32 >> 16u8 == C2_32 >> 16u8);
+    ASSERT_TRUE(a32 >> 24u8 == C2_32 >> 24u8);
+    ASSERT_TRUE(a32 >> 32u8 == 0u32);
+    ASSERT_TRUE(a32 >> 1u8 == C2_32 >> 1u8);
+    ASSERT_TRUE(a32 >> 5u8 == C2_32 >> 5u8);
+    ASSERT_TRUE(a32 >> 9u8 == C2_32 >> 9u8);
+    ASSERT_TRUE(a32 >> 22u8 == C2_32 >> 22u8);
+
+    a32 = C1_32;
+    a32 >>= 0u8;
+    ASSERT_TRUE(a32 == C1_32);
+    a32 = C1_32;
+    a32 >>= 8u8;
+    ASSERT_TRUE(a32 == C1_32 >> 8u8);
+    a32 = C1_32;
+    a32 >>= 16u8;
+    ASSERT_TRUE(a32 == C1_32 >> 16u8);
+    a32 = C1_32;
+    a32 >>= 24u8;
+    ASSERT_TRUE(a32 == C1_32 >> 24u8);
+    a32 = C1_32;
+    a32 >>= 1u8;
+    ASSERT_TRUE(a32 == C1_32 >> 1u8);
+    a32 = C1_32;
+    a32 >>= 19u8;
+    ASSERT_TRUE(a32 == C1_32 >> 19u8);
+    a32 = C1_32;
+    a32 >>= 27u8;
+    ASSERT_TRUE(a32 == C1_32 >> 27u8);
 
     // var and var
     a32 = C1_32;
