@@ -362,40 +362,6 @@ def _genSHRVarByConstLarge(resultLoc, srcLoc, n):
             result += 'st a\n'
     return resultLoc, result
 
-def _genSHRVarByConstLargeInplace(srcLoc, n):
-    s = srcLoc.getSource()
-    size = srcLoc.getType().getSize()
-    result = '; shr {}, {}'.format(srcLoc, n)
-    bitShift = n % 8
-    byteShift = n // 8
-    p = None
-    for offset in range(size - byteShift):
-        pCode, p = _adjustP(srcLoc, offset + byteShift, p)
-        result += pCode
-        result += 'ld b\n'
-        lastByte = offset + 1 + byteShift >= size
-        if not lastByte:
-            pCode, p = _adjustP(srcLoc, offset + 1 + byteShift, p)
-            result += pCode
-            result += 'ld a\n'
-        for bit in range(8):
-            if bit < bitShift:
-                result += 'shr b\n'
-            elif not lastByte:
-                result += 'shl a\n'
-        if not lastByte:
-            result += 'or b, a\n'
-        pCode, p = _adjustP(srcLoc, offset, p)
-        result += pCode
-        result += 'st b\n'
-    if byteShift > 0:
-        result += 'mov a, 0\n'
-        for offset in range(size - byteShift, size):
-            pCode, p = _adjustP(srcLoc, offset, p)
-            result += pCode
-            result += 'st a\n'
-    return srcLoc, result
-
 def _genSHRVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
@@ -483,7 +449,7 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
         if n >= 8 * size:
             return Value(srcLoc.getLocation(), resultLoc.getType(), 0, 0, True), ''
         elif resultLoc == srcLoc:
-            return _genSHRVarByConstLargeInplace(resultLoc, n)
+            return _genSHRVarByConstLarge(resultLoc, srcLoc, n)
         else:
             return _genSHRVarByConstLarge(resultLoc, srcLoc, n)
 
