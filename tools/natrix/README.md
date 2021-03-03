@@ -1,7 +1,7 @@
 A C-like language compiler targeting CCPU.
 
 Most important differences with C:
-* Different integer types. Currently u8, u16, s8, s16 are supported.
+* Different integer types. Currently u8, u16, u32, s8, s16 are supported.
 * No implicit casts.
 * No void.
 * Assignments are not expressions.
@@ -9,5 +9,4 @@ Most important differences with C:
 * Everything is static by default. To mark stuff global, use `export`. To import stuff, use `import`.
 * Recursion is detected. For non-recursive calls stack is not used. The attribute `traitor` should be used to forced indicate a function that may cause recursion.
 * There is no initialization of static variables. String and array literals (`{1,2,3}`) are allocated in a read-only section and can be assigned to pointer variables.
-* No semicolon after struct declaration.
 * Also, some features like `union`, `typedef`, and others are just not implemented.
