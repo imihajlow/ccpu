@@ -4,13 +4,13 @@ import os.path
 asmBuilder = Builder(action = 'asm.py -o $TARGET $SOURCE', suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
 natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
 def linkGenerator(source, target, env, for_signature):
-	return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+    return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
 def linkEmitter(target, source, env):
-	t = target[0]
-	base,ext = os.path.splitext(str(t))
-	target.append(f"{base}.map")
-	return target, source
+    t = target[0]
+    base,ext = os.path.splitext(str(t))
+    target.append(f"{base}.map")
+    return target, source
 
 linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 env = Environment(BUILDERS = {'Asm' : asmBuilder, 'Natrix': natrixBuilder, 'Bin': linkBuilder})
@@ -22,8 +22,8 @@ env["CPPPATH"] = "lib" # needed for scanner
 
 # Libraries
 bcdf = Split('''
-	lib/bcdf.asm lib/bcdf_addsub.asm lib/bcdf_mul.asm lib/bcdf_div.asm lib/bcdf_print.asm
-	''')
+    lib/bcdf.asm lib/bcdf_addsub.asm lib/bcdf_mul.asm lib/bcdf_div.asm lib/bcdf_print.asm
+    ''')
 natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
 
 ps2 = Split('lib/ps2.na lib/ps2keyboard.na')
@@ -36,16 +36,16 @@ life = Split('life/quasipixel.na life/life.na life/life_next.asm life/qp_render.
 
 # Targets
 env.Bin('main', Split('''
-	main.na
-	calc/calc.asm
-	test/trap.asm
-	lib/string.na
-	lib/keyboard.asm
-	lib/vga_console.na
-	lib/random.na
-	lib/entropy.na
-	vga_demo.asm
-	matrix.na''') + bcdf + natrix + maze + life + ps2 + vga)
+    main.na
+    calc/calc.asm
+    test/trap.asm
+    lib/string.na
+    lib/keyboard.asm
+    lib/vga_console.na
+    lib/random.na
+    lib/entropy.na
+    vga_demo.asm
+    matrix.na''') + bcdf + natrix + maze + life + ps2 + vga)
 
 env.Bin('alutest', 'test/alutest.asm')
 
