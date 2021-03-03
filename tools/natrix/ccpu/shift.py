@@ -2,7 +2,8 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
-from exceptions import SemanticError
+from location import Location
+from exceptions import SemanticError, NatrixNotImplementedError
 
 def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(resultLoc.getIndirLevel() == 1)
@@ -17,7 +18,7 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(l1 == 0 or l1 == 1)
     assert(l2 == 0 or l2 == 1)
     if l1 == 0 and l2 == 0:
-        raise NotImplementedError("Stop doing shit with pointers!")
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "Stop doing shit with pointers!")
     if l2 == 0:
         c = src2Loc.getSource()
         if isinstance(c, int):
@@ -29,7 +30,7 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
                 else:
                     return _genSHRVarByConst(resultLoc, src1Loc, c)
         else:
-            raise NotImplementedError("Stop doing shit with pointers!")
+            raise NatrixNotImplementedError(Location.fromAny(resultLoc), "Stop doing shit with pointers!")
     else:
         if op == 'shl':
             return _genSHLByVar(resultLoc, src1Loc, src2Loc, labelProvider)
@@ -325,11 +326,11 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
 def _genSHRVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
-    isWord = srcLoc.getType().getSize() == 2
+    size = srcLoc.getType().getSize()
     result = '; shr {}, {}'.format(srcLoc, n)
     if n == 0:
         return srcLoc, result
-    if not isWord:
+    if size == 1:
         if n >= 8:
             result += '''
                 mov a, 0
@@ -350,7 +351,7 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
                 ldi ph, hi({0})
                 st a
             '''.format(rs)
-    else:
+    elif size == 2:
         if n >= 16:
             result += '''
                 mov a, 0
@@ -405,16 +406,18 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
                 inc pl
                 st a
             '''.format(rs)
+    else:
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHR large numbers")
     return resultLoc, result
 
 def _genSARVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
-    isWord = srcLoc.getType().getSize() == 2
+    size = srcLoc.getType().getSize()
     result = '; sar {}, {}'.format(srcLoc, n)
     if n == 0:
         return srcLoc, result
-    if not isWord:
+    if size == 1:
         if n >= 8:
             result += '''
                 ldi pl, lo({0})
@@ -440,7 +443,7 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 ldi ph, hi({0})
                 st a
             '''.format(rs)
-    else:
+    elif size == 2:
         if n >= 16:
             result += '''
                 ldi pl, lo({0} + 1)
@@ -503,6 +506,8 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 inc pl
                 st a
             '''.format(rs)
+    else:
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SAR large numbers")
     return resultLoc, result
 
 def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
@@ -638,24 +643,98 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
     return resultLoc, result
 
 # src2Loc is a var, 1 or 2 bytes
+# src1Loc var or const, N bytes
+def _genShiftLargeCall(resultLoc, src1Loc, src2Loc, label):
+    result = f'; {resultLoc} = shift {src1Loc}, {src2Loc}\n'
+    s2 = src2Loc.getSource()
+    s1 = src1Loc.getSource()
+    rs = resultLoc.getSource()
+    if src2Loc.getType().getSize() == 2:
+        raise NatrixNotImplementedError(Location.fromAny(src2Loc), "Shift large by word")
+    result += f'''
+        ldi pl, lo({s2})
+        ldi ph, hi({s2})
+        ld b
+        ldi pl, lo(__cc_sh_count)
+        ldi ph, hi(__cc_sh_count)
+        st b
+    '''
+    size = src1Loc.getType().getSize()
+    for offset in range(0, size, 2):
+        rest = size - offset
+        pCode, p = _adjustP(src1Loc, offset, None)
+        result += pCode
+        result += 'ld a\n'
+        if rest > 1:
+            pCode, p = _adjustP(src1Loc, offset + 1, p)
+            result += pCode
+            result += 'ld b\n'
+        result += f'''
+            ldi pl, lo(__cc_sh_val + {offset})
+            ldi ph, hi(__cc_sh_val + {offset})
+            st a
+        '''
+        if rest > 1:
+            result += '''
+                inc pl
+                st b
+            '''
+    result += f'''
+        ldi pl, lo({label})
+        ldi ph, hi({label})
+        jmp
+    '''
+    for offset in range(0, size, 2):
+        result += f'''
+            ldi pl, lo(__cc_sh_val + {offset})
+            ldi ph, hi(__cc_sh_val + {offset})
+            ld a
+        '''
+        if rest > 1:
+            result += '''
+                inc pl
+                ld b
+            '''
+        p = None
+        rest = size - offset
+        pCode, p = _adjustP(resultLoc, offset, p)
+        result += pCode
+        result += 'st a\n'
+        if rest > 1:
+            pCode, p = _adjustP(resultLoc, offset + 1, p)
+            result += pCode
+            result += 'st b\n'
+    return resultLoc, result
+
+# src2Loc is a var, 1 or 2 bytes
 # src1Loc var or const
 def _genSHLByVar(resultLoc, src1Loc, src2Loc, labelProvider):
-    isWord = src1Loc.getType().getSize() == 2
-    if not isWord:
+    size = src1Loc.getType().getSize()
+    if size == 1:
         return _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, "shl")
-    else:
+    elif size == 2:
         return _genShiftWordCall(resultLoc, src1Loc, src2Loc, "__cc_asl")
+    elif size == 4:
+        return _genShiftLargeCall(resultLoc, src1Loc, src2Loc, "__cc_asl_dword")
+    else:
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHL large by var")
 
 def _genSHRByVar(resultLoc, src1Loc, src2Loc, labelProvider):
-    isWord = src1Loc.getType().getSize() == 2
-    if not isWord:
+    size = src1Loc.getType().getSize()
+    if size == 1:
         return _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, "shr")
-    else:
+    elif size == 2:
         return _genShiftWordCall(resultLoc, src1Loc, src2Loc, "__cc_lsr")
+    elif size == 4:
+        return _genShiftLargeCall(resultLoc, src1Loc, src2Loc, "__cc_lsr_dword")
+    else:
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHR large by var")
 
 def _genSARByVar(resultLoc, src1Loc, src2Loc, labelProvider):
-    isWord = src1Loc.getType().getSize() == 2
-    if not isWord:
+    size = src1Loc.getType().getSize()
+    if size == 1:
         return _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, "sar")
-    else:
+    elif size == 2:
         return _genShiftWordCall(resultLoc, src1Loc, src2Loc, "__cc_asr")
+    else:
+        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SAR large by var")

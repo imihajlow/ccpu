@@ -1,6 +1,8 @@
     .export __cc_r_sp
     .export __cc_asr
+    ; .export __cc_lsr_dword
     .export __cc_asl
+    .export __cc_asl_dword
     .export __cc_lsr
     .export __cc_sh_val
     .export __cc_sh_count
@@ -82,6 +84,16 @@
     ldi pl, lo(memcpy)
     ldi ph, hi(memcpy)
     jmp
+
+    ; initialize zeroes
+    ldi pl, lo(sh_val_zeroes)
+    ldi ph, hi(sh_val_zeroes)
+    mov a, 0
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
 
     ; call main
     ldi pl, lo(main)
@@ -368,6 +380,122 @@ exit:
     ld ph
     mov pl, a
     jmp
+
+return_0_dword:
+    ldi pl, lo(__cc_sh_val)
+    ldi ph, hi(__cc_sh_val)
+    mov a, 0
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jmp
+
+; __cc_sh_val = __cc_sh_val << __cc_sh_count
+__cc_asl_dword:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ldi pl, lo(__cc_sh_count)
+    ld a
+    ldi pl, lo(return_0_dword)
+    ldi ph, hi(return_0_dword)
+    ldi b, 31
+    sub b, a ; 31 - count
+    jc ; 31 < count
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    add a, 0
+    jz
+
+    mov b, a
+    ldi pl, 0x7
+    and a, pl
+    shr b
+    shr b
+    shr b
+    ; a = bit shift, b = byte shift
+    ldi pl, lo(bit_shift)
+    ldi ph, hi(bit_shift)
+    st a
+
+    ; there are three zero bytes in memory before __cc_sh_val
+    mov a, b
+
+    ldi pl, lo(__cc_sh_val + 3)
+    sub pl, a
+    ld b
+    add pl, a
+    st b
+
+    dec pl
+    sub pl, a
+    ld b
+    add pl, a
+    st b
+
+    dec pl
+    sub pl, a
+    ld b
+    add pl, a
+    st b
+
+    dec pl
+    sub pl, a
+    ld b
+    add pl, a
+    st b
+
+asl_dword_loop:
+        ldi pl, lo(bit_shift)
+        ldi ph, hi(bit_shift)
+        ld a
+        dec a
+        st a
+        ldi pl, lo(exit)
+        ldi ph, hi(exit)
+        jc
+
+        ldi ph, hi(__cc_sh_val)
+        ldi pl, lo(__cc_sh_val + 3)
+        ld a
+        dec pl
+        ld b
+        shl a
+        shl b
+        adc a, 0
+        inc pl
+        st a
+        mov a, b
+        ldi pl, lo(__cc_sh_val + 1)
+        ld b
+        shl b
+        adc a, 0
+        inc pl
+        st a
+        mov a, b
+        ldi pl, lo(__cc_sh_val)
+        ld b
+        shl b
+        adc a, 0
+        st b
+        inc pl
+        st a
+
+        ldi pl, lo(asl_dword_loop)
+        ldi ph, hi(asl_dword_loop)
+        jmp
 
     ; push onto stack values in range [__cc_from, __cc_to)
 __cc_push:
@@ -1403,7 +1531,8 @@ __cc_div_zero_trap:
     .section bss
     .align 64 ; all internal data have the same hi byte
 __cc_r_sp: res 2
-__cc_sh_val: res 2
+sh_val_zeroes: res 3
+__cc_sh_val: res 4
 __cc_sh_count: res 2
 __cc_from: res 2
 __cc_to: res 2
@@ -1420,6 +1549,8 @@ src_to: res 2
 memcpy_arg0:
 dst_from: res 2
 tmp: res 2
+bit_shift: res 1
+byte_shift: res 1
 __cc_r_quotient:
 quotient: res 2
 __cc_r_remainder:
