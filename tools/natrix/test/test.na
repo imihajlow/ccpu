@@ -1037,6 +1037,7 @@ u8 test_shl() {
     u16 au16;
     s16 a16;
     s8 a8;
+    u32 a32;
 
     // var and const
     a8 = (s8)0xa5;
@@ -1053,6 +1054,20 @@ u8 test_shl() {
     ASSERT_TRUE(a16 << (u16)9 == 0b1011010000000000);
     ASSERT_TRUE(a16 << (u16)16 == 0);
     ASSERT_TRUE(a16 << (u16)0x101 == 0);
+    a32 = C1_32;
+    ASSERT_TRUE(a32 << 0u8 == a32);
+    ASSERT_TRUE(a32 << 1u8 == C1_32 << 1u8);
+    ASSERT_TRUE(a32 << 4u8 == C1_32 << 4u8);
+    ASSERT_TRUE(a32 << 7u8 == C1_32 << 7u8);
+    ASSERT_TRUE(a32 << 9u8 == C1_32 << 9u8);
+    ASSERT_TRUE(a32 << 11u8 == C1_32 << 11u8);
+    ASSERT_TRUE(a32 << 16u8 == C1_32 << 16u8);
+    ASSERT_TRUE(a32 << 16u8 == C1_32 << 16u8);
+    ASSERT_TRUE(a32 << 19u8 == C1_32 << 19u8);
+    ASSERT_TRUE(a32 << 24u8 == C1_32 << 24u8);
+    ASSERT_TRUE(a32 << 25u8 == C1_32 << 25u8);
+    ASSERT_TRUE(a32 << 32u8 == 0u32);
+    ASSERT_TRUE(a32 << 0x101u16 == 0u32);
 
     // var and var
     a8 = (s8)0xa5;
