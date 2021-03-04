@@ -2,7 +2,7 @@
 .export delay_100ms
 .export delay_60us
 
-    .section text
+    .section text.lcd_delay
 
 
 ; one nop - 2 clock cycles, 6.6 uS
@@ -88,6 +88,6 @@ delay_60us: ; should not modify registers!!!
     nop
     jmp
 
-    .section bss
+    .section bss.lcd_delay
     .align 2
 delay_return: res 2

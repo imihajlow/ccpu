@@ -56,7 +56,7 @@
     .global bcdf_mul
     .global bcdf_div
 
-    .section text
+    .section text.calc
 calc_main:
 
     ldi a, 0x02 ; green over black
@@ -647,7 +647,7 @@ op_prompt:
     ascii "OP? "
     db 0
 
-    .section bss
+    .section bss.calc
     .align 16
 calc_main_ret:
 number_string: res 17

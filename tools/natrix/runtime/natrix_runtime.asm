@@ -1671,7 +1671,7 @@ __cc_div_zero_trap:
     ldi ph, hi(__cc_div_zero_trap)
     jmp
 
-    .section bss
+    .section bss.natrix_runtime
     .align 64 ; all internal data have the same hi byte
 __cc_r_sp: res 2
 sh_val_zeroes_before: res 3

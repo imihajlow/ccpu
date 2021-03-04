@@ -29,14 +29,14 @@
     .export divmod10_div
     .export divmod10_mod
 
-    .section data
+    .section bss.bcdf_sum
     .align 16
 bcdf_sum_a: res 16
 bcdf_sum_b: res 16
 bcdf_sum_r: res 16
 bcdf_sum_ret: res 2
 
-    .section text
+    .section text.bcdf_sum
 bcdf_sum:
     mov a, ph
     mov b, a
@@ -61,13 +61,13 @@ bcdf_sum:
     mov pl, a
     jmp
 
-    .section data
+    .section bss.bcdf_normalize
     .align 16
 bcdf_normalize_arg: res 16
 bcdf_normalize_ret: res 2
 delta: res 1
 
-    .section text
+    .section text.bcdf_normalize
 bcdf_normalize:
     mov a, ph
     mov b, a
@@ -208,14 +208,14 @@ bcdf_normalize_finish:
     mov pl, a
     jmp
 
-    .section data
+    .section bss.bcdf_divmod10
 divmod10_arg: res 1
 divmod10_div: res 1
 divmod10_mod: res 1
 
 divmod10_ret: res 2
 
-    .section text
+    .section text.bcdf_divmod10
 divmod10:
     mov a, ph
     mov b, a

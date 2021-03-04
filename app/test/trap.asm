@@ -2,12 +2,12 @@
     .export trap_ret
     .export fail
     .export fail_ret
-    .section text
+    .section text.trap
 trap:
     jmp
 
 fail:
     jmp
-    .section bss
+    .section bss.trap
 fail_ret:
 trap_ret: res 2

@@ -8,14 +8,14 @@
 
     .global bcdf_sub
 
-    .section data
+    .section bss.bcdf_div
     .align 16
 divisor: res 16
 result: res 16
 ret_addr: res 2
 index: res 1
 
-    .section text
+    .section text.bcdf_div
 bcdf_div:
     mov a, pl
     mov b, a
@@ -322,7 +322,7 @@ return_inf:
     ldi ph, hi(finish)
     jmp
 
-    .section text
+    .section text.bcdf_compare
     ; compare bcdf_op_a and divisor (absolute values), return flags accordingly
 compare:
     mov a, pl
@@ -399,6 +399,6 @@ compare_finish:
     mov pl, a
     jmp
 
-    .section data
+    .section bss.bcdf_div
     .align 2
 compare_ret: res 2

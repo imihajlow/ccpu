@@ -13,7 +13,7 @@
     .global divmod10_div
     .global divmod10_mod
 
-    .section bss
+    .section bss.bcdf_print
     .align 16
 vga_console_print_bcdf_arg: res 16
 vga_console_print_bcdf_width: res 1
@@ -23,7 +23,7 @@ tmp: res 1
 tmp2: res 1
 is_three_digits: res 1
 
-    .section text
+    .section text.bcdf_print
 vga_console_print_bcdf:
     mov a, ph
     mov b, a

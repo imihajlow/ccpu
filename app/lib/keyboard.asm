@@ -63,12 +63,12 @@
 
     .const keyboard = 0xff00
 
-    .section bss
+    .section bss.keyboard
     .align 2
 keyboard_wait_key_released_ret:
 keyboard_get_if_pressed_ret:
 keyboard_wait_key_released_result: res 1
-    .section text
+    .section text.keyboard
 keyboard_wait_key_released:
     mov a, ph
     mov b, a
@@ -290,7 +290,7 @@ keyboard_key_digit_map:
     db 0xff
     db 0xff
 
-    .section data
+    .section bss.keyboard
     .align 2
 keyboard_ret: res 2
 tmp: res 1

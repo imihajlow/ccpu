@@ -8,7 +8,7 @@
 
     .global bcdf_add
 
-    .section data
+    .section bss.bcdf_mul
     .align 16
 bcdf_mul_a: res 16
 bcdf_mul_b: res 16
@@ -17,7 +17,7 @@ ret_addr: res 2
 i: res 1
 j: res 1    ; j should follow i
 
-    .section text
+    .section text.bcdf_mul
 bcdf_mul:
     mov a, pl
     mov b, a

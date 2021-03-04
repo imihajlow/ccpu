@@ -10,7 +10,7 @@
 
     .const CHAR_BOTTOM = 220
 
-    .section text
+    .section text.qp_render_fast
 qp_render_fast:
     mov a, pl
     mov b, a
@@ -192,7 +192,7 @@ clear_row_loop:
     jmp
 
 
-    .section bss
+    .section bss.qp_fb
     .align 0x100
 qp_fb:
     res 30 * 128

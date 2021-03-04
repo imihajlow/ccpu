@@ -21,7 +21,7 @@
     .global bcdf_normalize
     .global bcdf_normalize_arg
 
-    .section data
+    .section bss.bcdf
     .align 16
 bcdf_op_a: res 16
 bcdf_op_b: res 16
@@ -34,7 +34,7 @@ carry:
 exp_diff: res 1
 index: res 1
 
-    .section text
+    .section text.bcdf_add
 bcdf_add:
     mov a, pl
     mov b, a
@@ -329,6 +329,7 @@ a_inf:
     jmp
 
 ; =============================================================================
+    .section text.bcdf_sub
 bcdf_sub:
     mov a, pl
     mov b, a
@@ -652,12 +653,12 @@ s_return_b_loop:
     ldi ph, hi(finish)
     jmp
 
-    .section data
+    .section bss.bcdf_swap
     .align 2
 swap_a_b_ret: res 2
 swap_a_b_tmp: res 1
 
-    .section text
+    .section text.bcdf_swap
 swap_a_b:
     mov a, pl
     mov b, a

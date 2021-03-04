@@ -10,7 +10,7 @@
     .export life_get_next_fast_arg8
     .export life_get_next_fast_ret
 
-    .section text
+    .section text.life_get_next
 life_get_next_fast:
     mov a, pl
     mov b, a
@@ -157,7 +157,7 @@ bottom_default:
     mov pl, a
     jmp
 
-    .section bss
+    .section bss.life_next
     .align 16
 life_get_next_fast_arg0:
     res 1
