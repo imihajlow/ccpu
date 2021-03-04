@@ -69,13 +69,17 @@ def fitSectionsFill(begin, sections):
 
 
 class SectionsFilter:
-    def __init__(self, objects, gcSections):
+    def __init__(self, objects, layout, gcSections):
         self.gcSections = gcSections
         if not gcSections:
             return
         globalSymbols = dict() # symbol name -> section name
         refs = dict() # section name -> set(section name)
         rootSections = set()
+        for segment in layout:
+            name = segment["name"]
+            globalSymbols[f"__seg_{name}_begin"] = name
+            globalSymbols[f"__seg_{name}_end"] = name
         for o in objects:
             for s in o.sections:
                 if s.name == s.segment:
@@ -87,11 +91,19 @@ class SectionsFilter:
                             raise LinkerError(f"global symbol `{l}` redifinition", o)
                         else:
                             globalSymbols[l] = s.name
+            for l in o.consts:
+                if l in o.exportSymbols:
+                    if l in globalSymbols:
+                        raise LinkerError(f"global symbol `{l}` redifinition", o)
+                    else:
+                        globalSymbols[l] = None
         for o in objects:
             localSymbols = dict()
             for s in o.sections:
                 for l in s.labels:
                     localSymbols[l] = s.name
+            for l in o.consts:
+                localSymbols[l] = None
             for s in o.sections:
                 for _, l in s.refs:
                     names = extractVarNames(l)
@@ -110,8 +122,10 @@ class SectionsFilter:
             s = toVisit.pop(0)
             if s not in self.reachable:
                 self.reachable.add(s)
-                for name in refs[s]:
-                    toVisit.append(name)
+                if s in refs:
+                    for name in refs[s]:
+                        if name is not None:
+                            toVisit.append(name)
 
     def filter(self, sections):
         if not self.gcSections:
@@ -263,7 +277,7 @@ if __name__ == '__main__':
     try:
         objects = [load(filename) for filename in args.file]
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
-        sectionsFilter = SectionsFilter(objects, not args.no_gc_sections)
+        sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections)
         symbolMap, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter)
         rom = createRom(objects, segments, sectionsFilter)
         save(rom, args.o, args.type, args.full, args.filler)

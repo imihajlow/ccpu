@@ -7,9 +7,13 @@ from location import Location
 import structure
 import labelname
 import sys
+import random
+
+def randomString(n):
+    return "".join(chr(x) for x in random.choices(range(ord('A'), ord('Z') + 1), k=n))
 
 class Generator:
-    def __init__(self, callgraph, literalPool, nameInfo, backend):
+    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections):
         self.maxTempVarIndex = -1
         self.labelIndex = 0
         self.breakLabel = [] # stack
@@ -18,6 +22,8 @@ class Generator:
         self.backend = backend
         self.literalPool = literalPool
         self.nameInfo = nameInfo
+        self.createSubsections = createSubsections
+        self.uniqueId = randomString(10)
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -302,7 +308,10 @@ class Generator:
         name = str(decl.children[2])
         section = self.nameInfo.functions[name].section
         result = f"; ====== function {name} =======\n"
-        result += self.backend.startSection(section)
+        if self.createSubsections:
+            result += self.backend.startSection(f"{section}.{self.uniqueId}_{name}")
+        else:
+            result += self.backend.startSection(section)
         result += self.backend.genFunctionPrologue(name)
         result += "".join(self.generateStatement(child, name) for child in body.children)
         result += self.backend.genReturn(name)
