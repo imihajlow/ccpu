@@ -373,6 +373,6 @@ class Generator:
         importCode = self.backend.dumpImports(self.getImports())
         exportCode = self.backend.dumpExports(self.getExports())
         reserveCode = self.generateReserve()
-        literalsCode = self.backend.dumpLiterals(self.literalPool)
+        literalsCode = self.backend.dumpLiterals(self.literalPool, self.uniqueId, self.createSubsections)
 
         return exportCode + importCode + execCode + literalsCode + self.backend.startBssSection() + reserveCode

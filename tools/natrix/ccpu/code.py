@@ -62,10 +62,13 @@ def _dumpRuntimeImports():
     .global __cc_r_remainder
     """
 
-def dumpLiterals(lp):
+def dumpLiterals(lp, fileId, separateSections):
     result = '; ====== literals: ===========\n'
     for label,t,v,section in lp.getLiterals():
-        result += f".section {section}\n"
+        if separateSections:
+            result += f".section {section}.{fileId}_{label}\n"
+        else:
+            result += f".section {section}\n"
         size = t.getSize()
         if size == 2:
             result += '.align 2\n'
