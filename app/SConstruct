@@ -28,35 +28,41 @@ natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
 
 ps2 = Split('lib/ps2.na lib/ps2keyboard.na')
 
-vga = ['lib/vga.asm']
+vga = Split('''
+    lib/vga.asm
+    lib/vga_console.na
+    ''')
+
+keyboard = ['lib/keyboard.asm']
+
+lib = bcdf + vga + ps2 + keyboard + Split('''
+    lib/string.na
+    lib/entropy.na
+    lib/random.na
+    ''')
 
 # Apps
 maze = Split('maze/main.na maze/game.na maze/maze.na')
 life = Split('life/quasipixel.na life/life.na life/life_next.asm life/qp_render.asm')
+calc = Split('calc/calc.asm')
 
 # Targets
 env.Bin('main', Split('''
     main.na
-    calc/calc.asm
     test/trap.asm
-    lib/string.na
-    lib/keyboard.asm
-    lib/vga_console.na
-    lib/random.na
-    lib/entropy.na
     vga_demo.asm
-    matrix.na''') + bcdf + natrix + maze + life + ps2 + vga)
+    matrix.na''') + lib + natrix + maze + life + calc)
 
 env.Bin('alutest', 'test/alutest.asm')
 
 env.Bin('memcheck', 'memcheck/memcheck.asm')
 
-env.Bin('lotest', Split('memcheck/lotest.na lib/string.na') + natrix + vga)
+env.Bin('lotest', Split('memcheck/lotest.na') + natrix + lib)
 
-env.Bin('vgatest', Split('test/vgatest.na lib/keyboard.asm lib/string.na') + natrix + vga)
+env.Bin('vgatest', Split('test/vgatest.na') + natrix + lib)
 
-env.Bin('ps2test', Split('test/ps2test.na lib/keyboard.asm lib/string.na') + natrix + vga)
+env.Bin('ps2test', Split('test/ps2test.na') + natrix + lib)
 
-env.Bin('ps2hightest', Split('test/ps2hightest.na lib/keyboard.asm lib/string.na') + natrix + ps2 + vga)
+env.Bin('ps2hightest', Split('test/ps2hightest.na') + natrix + lib)
 
-env.Bin('cardtest', Split('test/cardtest.na lib/string.na lib/card.na lib/fat.na') + natrix + ps2 + vga)
+env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na') + natrix + lib)
