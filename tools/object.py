@@ -1,6 +1,7 @@
 
 class Section:
     def __init__(self, name, align):
+        self.segment = name.split('.', 1)[0]
         self.name = name
         self.text = []
         self.labels = {}
@@ -10,7 +11,7 @@ class Section:
         self.__ip = 0
 
     def toDict(self):
-        return {"name": self.name, "align": self.align, "text": self.text, "labels": self.labels, "refs": self.refs}
+        return {"segment": self.segment, "name": self.name, "align": self.align, "text": self.text, "labels": self.labels, "refs": self.refs}
 
     @staticmethod
     def fromDict(d):

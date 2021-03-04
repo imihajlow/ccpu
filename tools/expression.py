@@ -12,3 +12,21 @@ def evaluate(e, gl=None, loc=None):
     if gl is not None:
         gls.update(gl)
     return eval(e, gls, loc)
+
+class NameExtractor:
+    def __init__(self, builtins):
+        self._builtins = builtins
+        self.syms = set()
+
+    def __getitem__(self, name):
+        if name in self._builtins:
+            raise KeyError()
+        else:
+            self.syms.add(name)
+            return 0
+
+def extractVarNames(e):
+    gls = {"__builtins__": __allowedBuiltins}
+    ne = NameExtractor(__allowedBuiltins)
+    eval(e, gls, ne)
+    return list(ne.syms)

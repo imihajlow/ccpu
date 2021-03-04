@@ -5,7 +5,7 @@ import json
 import re
 import sys
 from object import Object
-from expression import evaluate
+from expression import evaluate, extractVarNames
 
 class LinkerError(Exception):
     def __init__(self, message, obj=None, section=None):
@@ -67,12 +67,63 @@ def fitSectionsFill(begin, sections):
                 raise LinkerError("64k overflow", o, s)
     return ip
 
-def link(objects, layout, fit):
+
+class SectionsFilter:
+    def __init__(self, objects, gcSections):
+        self.gcSections = gcSections
+        if not gcSections:
+            return
+        globalSymbols = dict() # symbol name -> section name
+        refs = dict() # section name -> set(section name)
+        rootSections = set()
+        for o in objects:
+            for s in o.sections:
+                if s.name == s.segment:
+                    rootSections.add(s.name)
+                refs[s.name] = set()
+                for l in s.labels:
+                    if l in o.exportSymbols:
+                        if l in globalSymbols:
+                            raise LinkerError(f"global symbol `{l}` redifinition", o)
+                        else:
+                            globalSymbols[l] = s.name
+        for o in objects:
+            localSymbols = dict()
+            for s in o.sections:
+                for l in s.labels:
+                    localSymbols[l] = s.name
+            for s in o.sections:
+                for _, l in s.refs:
+                    names = extractVarNames(l)
+                    for n in names:
+                        if n in o.globalSymbols:
+                            if n not in globalSymbols:
+                                raise LinkerError(f"unresolved external symbol `{n}`", o)
+                            refs[s.name].add(globalSymbols[n])
+                        elif n in localSymbols:
+                            refs[s.name].add(localSymbols[n])
+                        else:
+                            raise LinkerError(f"unresolved symbol `{n}`", o)
+        self.reachable = set()
+        toVisit = list(rootSections)
+        while len(toVisit) > 0:
+            s = toVisit.pop(0)
+            if s not in self.reachable:
+                self.reachable.add(s)
+                for name in refs[s]:
+                    toVisit.append(name)
+
+    def filter(self, sections):
+        if not self.gcSections:
+            return sections
+        else:
+            return (s for s in sections if s.name in self.reachable)
+
+def link(objects, layout, fit, sectionsFilter):
     ip = 0
-    globalSymbols = set()
     exportedSymbolValues = {}
     segments = {}
-    # place sections into segments and keep track of globals
+    # place sections into segments
     for segment in layout.layout:
         if segment["begin"] is not None:
             if ip > segment["begin"]:
@@ -81,9 +132,8 @@ def link(objects, layout, fit):
         segBegin = ip
         sectionList = []
         for o in objects:
-            globalSymbols.update(o.globalSymbols)
-            for s in o.sections:
-                if s.name == segment["name"]:
+            for s in sectionsFilter.filter(o.sections):
+                if s.segment == segment["name"]:
                     sectionList.append(s)
         ip = fit(ip, sectionList)
         if segment["end"] is not None:
@@ -118,7 +168,7 @@ def link(objects, layout, fit):
     for o in objects:
         for label in o.exportSymbols:
             found = False
-            for s in o.sections:
+            for s in sectionsFilter.filter(o.sections):
                 if label in s.labels:
                     if label in exportedSymbolValues:
                         raise LinkerError("global symbol `{}' redifinition".format(label), o, s)
@@ -138,14 +188,14 @@ def link(objects, layout, fit):
             if sym not in exportedSymbolValues:
                 raise LinkerError("unresolved external symbol `{}'".format(sym), o)
         localSymbolValues = {}
-        for s in o.sections:
+        for s in sectionsFilter.filter(o.sections):
             for label in s.labels:
                 value = s.offset + s.labels[label]
                 localSymbolValues[label] = value
                 if label not in o.exportSymbols:
                     symbolMap["{}_{}".format(o.name, label)] = value
         localSymbolValues.update(o.consts)
-        for s in o.sections:
+        for s in sectionsFilter.filter(o.sections):
             for offs,expr in s.refs:
                 try:
                     value = evaluate(expr, exportedSymbolValues, localSymbolValues)
@@ -154,14 +204,14 @@ def link(objects, layout, fit):
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
     return symbolMap, segments
 
-def createRom(objects, segments):
+def createRom(objects, segments, sectionsFilter):
     rom = [None] * 65536
     for o in objects:
-        for s in o.sections:
+        for s in sectionsFilter.filter(o.sections):
             if s.offset is None:
                 raise LinkerError("section wasn't laid out", o, s)
-            seg = layout.findSegment(s.name)
-            segBegin = segments[s.name][0]
+            seg = layout.findSegment(s.segment)
+            segBegin = segments[s.segment][0]
             for i,v in enumerate(s.text):
                 rom[s.offset + i] = v
                 if seg["shadow"] is not None:
@@ -205,6 +255,7 @@ if __name__ == '__main__':
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
     parser.add_argument('--layout', choices=["default", "sim"], default="default", help='memory layout')
     parser.add_argument('--fit-strategy', choices=["fill", "simple"], default="fill", help='fit strategy')
+    parser.add_argument('--no-gc-sections', action='store_true', default=False, help='drop unreachable sections')
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
@@ -212,8 +263,9 @@ if __name__ == '__main__':
     try:
         objects = [load(filename) for filename in args.file]
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
-        symbolMap, segments = link(objects, layout, fitters[args.fit_strategy])
-        rom = createRom(objects, segments)
+        sectionsFilter = SectionsFilter(objects, not args.no_gc_sections)
+        symbolMap, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter)
+        rom = createRom(objects, segments, sectionsFilter)
         save(rom, args.o, args.type, args.full, args.filler)
         saveLabels(args.m, symbolMap)
     except LinkerError as e:
