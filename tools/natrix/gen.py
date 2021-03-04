@@ -359,14 +359,17 @@ class Generator:
         result = self.backend.reserveBlock(labelname.getReserveBeginLabel(fn.name),
             [(labelname.getReturnAddressLabel(fn.name), 2)] +
             [(labelname.getArgumentName(fn.name, i), fn.args[i].getReserveSize()) for i in range(len(fn.args))] +
-            [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars])
+            [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars],
+            self.uniqueId, f"{fn.name}_frame", self.createSubsections)
         result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
-        result += self.backend.reserve(labelname.getReturnName(fn.name), fn.retType.getReserveSize())
+        result += self.backend.reserve(labelname.getReturnName(fn.name), fn.retType.getReserveSize(),
+            "bss", self.uniqueId, self.createSubsections)
         return result
 
     def generateReserve(self):
-        return self.backend.reserveTempVars(self.maxTempVarIndex) + "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
-            + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports)
+        return self.backend.reserveTempVars(self.maxTempVarIndex, self.uniqueId, self.createSubsections) +\
+            "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
+            + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports, self.uniqueId, self.createSubsections)
 
     def generate(self, t):
         execCode = self.generateStart(t)
@@ -375,4 +378,4 @@ class Generator:
         reserveCode = self.generateReserve()
         literalsCode = self.backend.dumpLiterals(self.literalPool, self.uniqueId, self.createSubsections)
 
-        return exportCode + importCode + execCode + literalsCode + self.backend.startBssSection() + reserveCode
+        return exportCode + importCode + execCode + literalsCode + reserveCode

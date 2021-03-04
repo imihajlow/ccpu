@@ -78,23 +78,32 @@ def dumpLiterals(lp, fileId, separateSections):
     result += '; ====== end literals =======\n'
     return result
 
-def reserve(label, size):
+def reserve(label, size, baseSecion, uniqueId, subsections):
+    if subsections:
+        section = f"{baseSecion}.{uniqueId}_{label}"
+    else:
+        section = baseSecion
     alignment = min(size, MAX_INT_SIZE)
     while not isPowerOfTwo(alignment):
         alignment += 1
     return f"""
+        .section {section}
         .align {alignment}
         {label}: res {size}
     """
 
-def reserveBlock(label, vs):
+def reserveBlock(label, vs, uniqueId, ssName, subsections):
     """
     Reserve several integer variables keeping them aligned to the size of the largest one and continous in memory.
     """
     maxSize = min(max(size for _,size in vs), MAX_INT_SIZE)
     if not isPowerOfTwo(maxSize):
         maxSize = MAX_INT_SIZE
+    section = "bss"
+    if subsections:
+        section = f"bss.{uniqueId}_{ssName}"
     result = f'''
+        .section {section}
         .align {maxSize}
         {label}:
     '''
@@ -109,15 +118,15 @@ def reserveBlock(label, vs):
         offset = (offset + size) % maxSize
     return result
 
-def reserveGlobalVars(vs, imports):
+def reserveGlobalVars(vs, imports, uniqueId, subsections):
     result = '; global vars:\n'
     for v in vs:
         if v not in imports:
-            result += reserve(v, vs[v].getReserveSize())
+            result += reserve(v, vs[v].getReserveSize(), "bss", uniqueId, subsections)
     return result
 
-def reserveTempVars(maxIndex):
-    return "".join(reserve(labelname.getTempName(i), MAX_INT_SIZE) for i in range(maxIndex + 1))
+def reserveTempVars(maxIndex, uniqueId, subsections):
+    return "".join(reserve(labelname.getTempName(i), MAX_INT_SIZE, "bss", uniqueId, subsections) for i in range(maxIndex + 1))
 
 def reserveVar(label, type):
     return reserve(label, type.getReserveSize())
