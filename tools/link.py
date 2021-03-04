@@ -71,8 +71,7 @@ def fitSectionsFill(begin, sections):
 class SectionsFilter:
     def __init__(self, objects, layout, gcSections):
         self.gcSections = gcSections
-        if not gcSections:
-            return
+        # Build refs anyway, because this way the external refs are checked
         globalSymbols = dict() # symbol name -> section name
         refs = dict() # section name -> set(section name)
         rootSections = set()
@@ -133,6 +132,12 @@ class SectionsFilter:
         else:
             return (s for s in sections if s.name in self.reachable)
 
+    def isReachable(self, section):
+        if not self.gcSections:
+            return True
+        else:
+            return section.name in self.reachable
+
 def link(objects, layout, fit, sectionsFilter):
     ip = 0
     exportedSymbolValues = {}
@@ -182,11 +187,12 @@ def link(objects, layout, fit, sectionsFilter):
     for o in objects:
         for label in o.exportSymbols:
             found = False
-            for s in sectionsFilter.filter(o.sections):
+            for s in o.sections:
                 if label in s.labels:
                     if label in exportedSymbolValues:
                         raise LinkerError("global symbol `{}' redifinition".format(label), o, s)
-                    exportedSymbolValues[label] = s.offset + s.labels[label]
+                    if sectionsFilter.isReachable(s):
+                        exportedSymbolValues[label] = s.offset + s.labels[label]
                     found = True
             if label in o.consts:
                 if label in exportedSymbolValues:
@@ -198,9 +204,6 @@ def link(objects, layout, fit, sectionsFilter):
     # assign local symbol values and evaluate references
     symbolMap = exportedSymbolValues.copy()
     for o in objects:
-        for sym in o.globalSymbols:
-            if sym not in exportedSymbolValues:
-                raise LinkerError("unresolved external symbol `{}'".format(sym), o)
         localSymbolValues = {}
         for s in sectionsFilter.filter(o.sections):
             for label in s.labels:
