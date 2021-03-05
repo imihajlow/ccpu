@@ -1,0 +1,92 @@
+#include "line_edit.h"
+#include <string.h>
+#include <vga.h>
+#include <ps2keyboard.h>
+
+u8 cursor;
+u8 color;
+u8 cursor_color;
+u8 screen_row;
+u8 min_screen_col;
+
+u8 move_cursor(s8 d) {
+    u8 *offset = (u8*)vga_color_seg + VGA_OFFSET(min_screen_col + cursor, screen_row);
+    *offset = color;
+    cursor += (u8)d;
+    offset += (u16)d;
+    *offset = cursor_color;
+}
+
+export u8 line_edit(u8 *buf, u8 max_len, u8 min_screen_col_, u8 screen_row_, u8 color_) {
+    u8 len = strlen_8(buf);
+    color = color_;
+    min_screen_col = min_screen_col_;
+    screen_row = screen_row_;
+    cursor_color = color ^ 0x80u8;
+    cursor = len;
+    u8 i, c;
+
+    vga_put_text(min_screen_col, screen_row, buf);
+    vga_color_seg[VGA_OFFSET(min_screen_col + cursor, screen_row)] = cursor_color;
+    u8 *offset;
+    while (1u8) {
+        u16 key = ps2_get_ascii();
+        if (key == 0u16) {
+            continue;
+        }
+        if (PS2_IS_ASCII(key)) {
+            if (len != max_len) {
+                offset = (u8*)vga_char_seg + VGA_OFFSET(min_screen_col + len, screen_row);
+                for (i = len; i != cursor; i -= 1u8) {
+                    c = buf[i - 1u8];
+                    buf[i] = c;
+                    *offset = c;
+                    offset -= 1u8;
+                }
+                buf[cursor] = (u8)key;
+                *offset = (u8)key;
+                len += 1u8;
+                buf[len] = 0u8;
+                move_cursor(1s8);
+            }
+        } else if ((u8)key == PS2_KEY_ENTER) {
+            vga_color_seg[VGA_OFFSET(min_screen_col + cursor, screen_row)] = color;
+            return;
+        } else if ((u8)key == PS2_KEY_LEFT) {
+            if (cursor != 0u8) {
+                move_cursor(-1s8);
+            }
+        } else if ((u8)key == PS2_KEY_RIGHT) {
+            if (cursor != len) {
+                move_cursor(1s8);
+            }
+        } else if ((u8)key == PS2_KEY_BACKSPACE) {
+            if (cursor != 0u8) {
+                move_cursor(-1s8);
+                offset = (u8*)vga_char_seg + VGA_OFFSET(min_screen_col + cursor, screen_row);
+                for (i = cursor; i != len - 1u8; i += 1u8) {
+                    c = buf[i + 1u8];
+                    *offset = c;
+                    buf[i] = c;
+                    offset += 1u8;
+                }
+                len -= 1u8;
+                *offset = 0u8;
+                buf[len] = 0u8;
+            }
+        } else if ((u8)key == PS2_KEY_DELETE) {
+            if (cursor != len) {
+                offset = (u8*)vga_char_seg + VGA_OFFSET(min_screen_col + cursor, screen_row);
+                for (i = cursor; i != len - 1u8; i += 1u8) {
+                    c = buf[i + 1u8];
+                    *offset = c;
+                    buf[i] = c;
+                    offset += 1u8;
+                }
+                len -= 1u8;
+                *offset = 0u8;
+                buf[len] = 0u8;
+            }
+        }
+    }
+}

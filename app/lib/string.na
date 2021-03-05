@@ -7,3 +7,10 @@ export u8 memset(u8 *b, u8 c, u16 len) {
         b += 1;
     }
 }
+
+export u8 strlen_8(u8 *s) {
+    for (u8 result = 0u8; result != 255u8 && *s; result += 1u8) {
+        s += 1u8;
+    }
+    return result;
+}
