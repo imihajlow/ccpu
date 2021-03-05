@@ -2,6 +2,7 @@
 #include <ps2keyboard.h>
 #include <card.h>
 #include <fat.h>
+#include <more.h>
 
 #define SPI_DATA *((u8*)0xFD02)
 
@@ -61,14 +62,6 @@ u8 show_buffer() {
 }
 
 
-export u8 wait_keypressed() {
-    u8 k = 0u8;
-    while (!k || (k & PS2_KEY_RELEASE)) {
-        k = ps2_get_key_event();
-    }
-    return k;
-}
-
 export u8 print_u32(u8 col, u8 row, u32 v) {
     print_hex_char(col + 0u8, row, ((u8*)&v)[3] >> 4u8);
     print_hex_char(col + 1u8, row, ((u8*)&v)[3] & 0xfu8);
@@ -88,53 +81,30 @@ u8 print_u16(u8 col, u8 row, u16 v) {
 }
 
 u8 print_file(struct FatDirEntry *de) {
-    vga_clear(COLOR(COLOR_WHITE, COLOR_GREEN));
+    more_init(COLOR(COLOR_WHITE, COLOR_GREEN));
     u8 f = fat_open_file(de);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, 0u8, "Error");
-        wait_keypressed();
+        ps2_wait_key_pressed();
         return;
     }
     u8 buf[256];
-    u8 row = 0u8;
-    u8 col = 0u8;
-    u8 k = 0u8;
-    while (k != PS2_KEY_ESCAPE) {
+    u8 k = 1u8;
+    while (k) {
         u16 len = fat_read(f, (u8*)buf, 256u16);
         if (len == 0u16) {
             break;
         }
         if (len >= 0x8000u16) {
             vga_put_text(0u8, VGA_ROWS - 1u8, "ERROR");
-            wait_keypressed();
+            ps2_wait_key_pressed();
             break;
         }
-        for (u16 i = 0u16; i < len; i += 1u16) {
-            if (buf[i] == '\n') {
-                row += 1u8;
-                col = 0u8;
-            } else {
-                vga_char_seg[VGA_OFFSET(col, row)] = buf[i];
-                col += 1u8;
-                if (col == VGA_COLS) {
-                    col = 0u8;
-                    row += 1u8;
-                }
-            }
-            if (row == VGA_ROWS - 1u8) {
-                vga_put_text(0u8, VGA_ROWS - 1u8, "-- MORE --");
-                k = wait_keypressed();
-                if (k == PS2_KEY_ESCAPE) {
-                    break;
-                }
-                vga_clear(COLOR(COLOR_WHITE, COLOR_GREEN));
-                row = 0u8;
-            }
-        }
+        k = more_print((u8*)buf, len);
     }
-    if (k != PS2_KEY_ESCAPE) {
+    if (k) {
         vga_put_text(0u8, VGA_ROWS - 1u8, "-- END --");
-        wait_keypressed();
+        ps2_wait_key_pressed();
     }
     fat_close_file(f);
 }

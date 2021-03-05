@@ -111,3 +111,4 @@
 
 import u8 ps2_init();
 import u8 ps2_get_key_event();
+import u8 ps2_wait_key_pressed();

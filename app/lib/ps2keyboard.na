@@ -9,6 +9,14 @@ export u8 ps2_init() {
     release = 0u8;
 }
 
+export u8 ps2_wait_key_pressed() {
+     u8 result = PS2_KEY_NONE;
+     while (!result || (result & PS2_KEY_RELEASE)) {
+          result = ps2_get_key_event();
+     }
+     return result;
+}
+
 export u8 ps2_get_key_event() {
     u8 code = ps2_read();
     u8 result = PS2_KEY_NONE;

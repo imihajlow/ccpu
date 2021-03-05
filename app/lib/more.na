@@ -1,0 +1,59 @@
+#include "more.h"
+#include <vga.h>
+#include <ps2keyboard.h>
+
+u8 row;
+u8 col;
+u8 color;
+
+export u8 more_init(u8 _color) {
+    vga_clear(_color);
+    color = _color;
+    row = 0u8;
+    col = 0u8;
+}
+
+export u8 more_print(u8 *s, u16 max_len) {
+    for (; max_len != 0u16; max_len -= 1u16) {
+        u8 c = *s;
+        u8 key = more_putchar(c);
+        if (key == PS2_KEY_ESCAPE) {
+            return 0u8;
+        }
+        s += 1u8;
+    }
+    return 1u8;
+}
+
+export u8 more_putchar(u8 c) {
+    if (c == '\n') {
+        return new_line();
+    } else {
+        vga_char_seg[VGA_OFFSET(col, row)] = c;
+        col += 1u8;
+        if (col == VGA_COLS) {
+            return new_line();
+        }
+        return 0u8;
+    }
+}
+
+u8 new_line() {
+    col = 0u8;
+    row += 1u8;
+    if (row == VGA_ROWS - 1u8) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "-- MORE --");
+        u8 highlight_color = color ^ 0x08u8;
+        u8 *offset = (u8*)vga_color_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8);
+        for (u8 i = 0u8; i != 10u8; i += 1u8) {
+            *offset = highlight_color;
+            offset += 1u8;
+        }
+        row = 0u8;
+        u8 result = ps2_wait_key_pressed();
+        vga_clear(color);
+        return result;
+    } else {
+        return 0u8;
+    }
+}

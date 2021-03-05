@@ -39,6 +39,7 @@ lib = bcdf + vga + ps2 + keyboard + Split('''
     lib/string.na
     lib/entropy.na
     lib/random.na
+    lib/more.na
     ''')
 
 # Apps
