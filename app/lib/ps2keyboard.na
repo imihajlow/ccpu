@@ -4,9 +4,12 @@
 u8 extended;
 u8 release;
 
+export u8 ps2_modifiers_mask;
+
 export u8 ps2_init() {
     extended = 0u8;
     release = 0u8;
+    ps2_modifiers_mask = 0u8;
 }
 
 export u8 ps2_wait_key_pressed() {
@@ -678,6 +681,21 @@ export u8 ps2_get_key_event() {
         }
     }
     if (result) {
+        u8 mask = 0u8;
+        if (result == PS2_KEY_RSHIFT || result == PS2_KEY_LSHIFT) {
+            mask = PS2_MASK_SHIFT;
+        } else if (result == PS2_KEY_LCTRL || result == PS2_KEY_RCTRL) {
+            mask = PS2_MASK_CTRL;
+        } else if (result == PS2_KEY_LALT || result == PS2_KEY_RALT) {
+            mask = PS2_MASK_ALT;
+        } else if (result == PS2_KEY_LWIN || result == PS2_KEY_RWIN) {
+            mask = PS2_MASK_WIN;
+        }
+        if (release) {
+            ps2_modifiers_mask &= ~mask;
+        } else {
+            ps2_modifiers_mask |= mask;
+        }
         result |= release;
         release = 0u8;
         extended = 0u8;
@@ -686,4 +704,29 @@ export u8 ps2_get_key_event() {
         return 0u8;
     }
 }
+
+import u8 ps2_keymap[256];
+
+export u16 ps2_get_ascii() {
+    u8 event = ps2_get_key_event();
+    if (!event || (event & PS2_KEY_RELEASE)) {
+        return 0u16;
+    }
+    if (ps2_modifiers_mask & (PS2_MASK_WIN | PS2_MASK_ALT | PS2_MASK_CTRL)) {
+        return PS2_ASCII_SCANCODE_MASK | (u16)event;
+    } else {
+        u8 key;
+        if (ps2_modifiers_mask & PS2_MASK_SHIFT) {
+            key = ps2_keymap[event + 0x80u8];
+        } else {
+            key = ps2_keymap[event];
+        }
+        if (key != 0xffu8) {
+            return (u16)key;
+        } else {
+            return PS2_ASCII_SCANCODE_MASK | (u16)event;
+        }
+    }
+}
+
 

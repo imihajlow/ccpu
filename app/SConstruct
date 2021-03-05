@@ -19,6 +19,7 @@ env.PrependENVPath("PATH", "../tools/natrix")
 env["NATRIX_DIR"] = "../tools/natrix"
 env["CPPPATH"] = "lib" # needed for scanner
 
+env.Command('lib/keymap.s', ['lib/keymap.py', 'lib/ps2keyboard.h'], './lib/keymap.py lib/ps2keyboard.h lib/keymap.s')
 
 # Libraries
 bcdf = Split('''
@@ -26,7 +27,7 @@ bcdf = Split('''
     ''')
 natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
 
-ps2 = Split('lib/ps2.na lib/ps2keyboard.na')
+ps2 = Split('lib/ps2.na lib/ps2keyboard.na lib/keymap.s')
 
 vga = Split('''
     lib/vga.asm

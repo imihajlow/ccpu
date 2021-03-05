@@ -109,6 +109,18 @@
 #define PS2_KEY_PAUSE 119u8
 #define PS2_KEY_PRINT 120u8
 
+#define PS2_MASK_CTRL 0x01u8
+#define PS2_MASK_ALT 0x02u8
+#define PS2_MASK_WIN 0x04u8
+#define PS2_MASK_SHIFT 0x08u8
+
+import u8 ps2_modifiers_mask;
+
 import u8 ps2_init();
 import u8 ps2_get_key_event();
 import u8 ps2_wait_key_pressed();
+
+#define PS2_ASCII_SCANCODE_MASK 0x8000u16
+#define PS2_IS_ASCII(x) ((x & 0x8000u16) == 0u16)
+#define PS2_IS_SCANCODE(x) ((x & 0x8000u16) != 0u16)
+import u16 ps2_get_ascii();
