@@ -106,7 +106,8 @@ u8 print_file(struct FatDirEntry *de) {
         vga_put_text(0u8, VGA_ROWS - 1u8, "-- END --");
         ps2_wait_key_pressed();
     }
-    fat_close_file(f);
+    fat_close(f);
+}
 }
 
 export u8 main() {
@@ -149,28 +150,38 @@ export u8 main() {
                     vga_put_text(40u8, 0u8, "FAT init OK");
                 }
             } else if (k == PS2_KEY_F5) {
-                u8 dd = fat_open_dir();
+                u8 dd = fat_open_dir((struct FatDirEntry *)0u8);
                 if (dd == FAT_BAD_DESC) {
                     vga_put_text(40u8, 0u8, "fat_open_dir() failed");
                 } else {
                     struct FatDirEntry de;
+                    u8 readable_name[13]; // 8 + dot + 3 + null
                     while (1u8) {
-                        r = fat_get_next_dir_entry(dd, &de);
+                        r = fat_get_next_dir_entry(dd, &de, FAT_FILE_ATTR_HIDDEN | FAT_FILE_ATTR_SYSTEM | FAT_FILE_ATTR_VOLUME_ID);
                         if (!r) {
                             break;
                         }
-                        de.attrs = 0u8; // hack
-                        vga_put_text(40u8, 0u8, (u8*)de.filename);
+                        from_fat_name((u8*)readable_name, (u8*)de.filename);
+                        vga_put_text(40u8, 0u8, "                    ");
+                        vga_put_text(40u8, 0u8, (u8*)readable_name);
                         while (k != PS2_KEY_SPACE && k != PS2_KEY_ENTER) {
                             k = ps2_get_key_event();
                         }
                         if (k == PS2_KEY_ENTER) {
-                            print_file(&de);
-                            vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+                            if (de.attrs & FAT_FILE_ATTR_DIRECTORY) {
+                                fat_close(dd);
+                                dd = fat_open_dir(&de);
+                                if (dd == FAT_BAD_DESC) {
+                                    vga_put_text(40u8, 0u8, "fat_open_dir() failed");
+                                }
+                            } else {
+                                print_file(&de);
+                                vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+                            }
                         }
                         k = 0u8;
                     }
-                    fat_close_dir(dd);
+                    fat_close(dd);
                     break;
                 }
             } else if (k == PS2_KEY_ENTER) {
