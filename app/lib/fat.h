@@ -26,7 +26,7 @@ struct FatDirEntry {
     u16 modify_time;
     u16 modify_date;
     u16 cluster_lo; // 0x0004
-    u8 size[4];
+    u32 size;
 };
 
 import u8 fat_init();

@@ -49,6 +49,8 @@ class MemberAccessTransformer(Transformer):
                 offset, type = getField(obj.getType(), fields)
             except ValueError as e:
                 raise SemanticError(Location.fromAny(t), str(e))
+            except LookupError as e:
+                raise SemanticError(Location.fromAny(t), str(e))
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
             return Value.withOffset(Location.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)

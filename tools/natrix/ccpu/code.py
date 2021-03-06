@@ -473,7 +473,7 @@ def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
             result += 'st b\n'
     else:
         for byte_offset in reversed(range(t.getSize())):
-            result += loadByte('b', srcLoc, offset + byte_offset)
+            result += loadByte('b', srcLoc, byte_offset)
             result += loadP(resultAddrLoc, offset + byte_offset)
             result += 'st b\n'
     return result

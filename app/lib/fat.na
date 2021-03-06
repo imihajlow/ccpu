@@ -2,6 +2,7 @@
 #include <card.h>
 
 #define MAX_DIR_DESC 1u8
+#define MAX_FILE_DESC 4u8
 
 struct Partition {
     u8 boot; // 0x00
@@ -57,15 +58,21 @@ struct FileDescriptor {
     u8 block_in_cluster; // block index in current cluster
     u16 index_in_block; // read pointer in current block
     u16 next_cluster; // value from the FAT
+    u16 cur_cluster; // index in the FAT
+    struct FatDirEntry dir_entry;
+    u32 dir_entry_offset;
+    u8 filler[14];
 };
 
 struct FatInfo fat_info;
 struct DirDescriptor dir_desc; // TODO array
-struct FileDescriptor file_desc; // TODO array
+struct FileDescriptor file_desc[MAX_FILE_DESC];
 
 export u8 fat_init() {
     dir_desc.is_free = 1u8;
-    file_desc.is_free = 1u8;
+    for (u8 i = 0u8; i != MAX_FILE_DESC; i += 1u8) {
+        file_desc[i].is_free = 1u8;
+    }
 
     struct Partition partition;
     struct BPB bpb;
@@ -168,42 +175,50 @@ u16 read_fat_entry(u16 index) {
 }
 
 export u8 fat_open_file(struct FatDirEntry *dsc) {
-    if (!file_desc.is_free) {
+    for (u8 fd = 0u8; fd != MAX_FILE_DESC; fd += 1u8) {
+        if (file_desc[fd].is_free) {
+            break;
+        }
+    }
+    if (fd == MAX_FILE_DESC) {
         return FAT_BAD_DESC;
     }
-    file_desc.is_free = 0u8;
+
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    pfd->is_free = 0u8;
     u8 cluster_bits = 9u8 + fat_info.log_sectors_per_cluster;
     u16 cluster_mask = ~(0xffffu16 << cluster_bits);
-    file_desc.last_cluster_len = (u16)dsc->size[0] | ((u16)dsc->size[1] << 8u8);
-    file_desc.last_cluster_len &= cluster_mask;
+    pfd->last_cluster_len = (u16)dsc->size & cluster_mask;
 
-    file_desc.block_addr = fat_info.data_offset;
-    file_desc.block_addr += (u32)(dsc->cluster_lo - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
-    file_desc.block_in_cluster = 0u8;
-    file_desc.index_in_block = 0u16;
-    file_desc.next_cluster = read_fat_entry(dsc->cluster_lo);
-    return 0u8;
+    pfd->block_addr = fat_info.data_offset;
+    pfd->block_addr += (u32)(dsc->cluster_lo - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
+    pfd->block_in_cluster = 0u8;
+    pfd->index_in_block = 0u16;
+    pfd->next_cluster = read_fat_entry(dsc->cluster_lo);
+    pfd->cur_cluster = dsc->cluster_lo;
+    return fd;
 }
 
 export u16 fat_read(u8 fd, u8 *dst, u16 len) {
-    if (file_desc.is_free) {
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    if (pfd->is_free) {
         return 0u16;
     }
     u16 result = 0u16;
     u8 r;
     while (len != 0u16) {
         u16 to_read;
-        if (file_desc.next_cluster >= 0xFFF8u16) {
+        if (pfd->next_cluster >= 0xFFF8u16) {
             // last cluster
-            u16 remainder = file_desc.last_cluster_len - ((u16)file_desc.block_in_cluster << 9u8);
+            u16 remainder = pfd->last_cluster_len - ((u16)pfd->block_in_cluster << 9u8);
             if (remainder <= CARD_BLOCK_SIZE) {
                 // last block
-                to_read = remainder - file_desc.index_in_block;
+                to_read = remainder - pfd->index_in_block;
             } else {
-                to_read = CARD_BLOCK_SIZE - file_desc.index_in_block;
+                to_read = CARD_BLOCK_SIZE - pfd->index_in_block;
             }
         } else {
-            to_read = CARD_BLOCK_SIZE - file_desc.index_in_block;
+            to_read = CARD_BLOCK_SIZE - pfd->index_in_block;
         }
         if (to_read > len) {
             to_read = len;
@@ -211,26 +226,27 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
         if (to_read == 0u16) {
             return result;
         }
-        r = card_read_block(file_desc.block_addr, file_desc.index_in_block, to_read, dst);
+        r = card_read_block(pfd->block_addr, pfd->index_in_block, to_read, dst);
         if (r) {
             return result | 0x8000u16;
         }
         len -= to_read;
         dst += to_read;
         result += to_read;
-        file_desc.index_in_block += to_read;
-        if (file_desc.index_in_block == CARD_BLOCK_SIZE) {
-            file_desc.block_in_cluster += 1u8;
-            file_desc.index_in_block = 0u16;
-            if (file_desc.block_in_cluster >> fat_info.log_sectors_per_cluster) {
+        pfd->index_in_block += to_read;
+        if (pfd->index_in_block == CARD_BLOCK_SIZE) {
+            pfd->block_in_cluster += 1u8;
+            pfd->index_in_block = 0u16;
+            if (pfd->block_in_cluster >> fat_info.log_sectors_per_cluster) {
                 // next cluster
-                file_desc.block_addr = fat_info.data_offset;
-                file_desc.block_addr += (u32)(file_desc.next_cluster - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
-                file_desc.next_cluster = read_fat_entry(file_desc.next_cluster);
-                file_desc.block_in_cluster = 0u8;
+                pfd->block_addr = fat_info.data_offset;
+                pfd->block_addr += (u32)(pfd->next_cluster - 2u16) << (fat_info.log_sectors_per_cluster + 9u8);
+                pfd->cur_cluster = pfd->next_cluster;
+                pfd->next_cluster = read_fat_entry(pfd->cur_cluster);
+                pfd->block_in_cluster = 0u8;
             } else {
                 // next block in cluster
-                file_desc.block_addr += (u32)CARD_BLOCK_SIZE;
+                pfd->block_addr += (u32)CARD_BLOCK_SIZE;
             }
         }
     }
@@ -238,5 +254,5 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
 }
 
 export u8 fat_close_file(u8 fd) {
-    file_desc.is_free = 1u8;
+    file_desc[fd].is_free = 1u8;
 }
