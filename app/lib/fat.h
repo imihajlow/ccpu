@@ -34,10 +34,12 @@ import u8 fat_init();
 #define FAT_BAD_DESC 0xFFu8
 
 /*
- @param dsc - dir entry for a usual dir or 0 for root dir.
+ Open a directory
+ @param dsc - parent dir entry or 0 for root dir.
+ @param name - dir name inside parent or 0 for root dir.
  Returns dir descriptor or FAT_BAD_DESC on error.
  */
-import u8 fat_open_dir(struct FatDirEntry *dsc);
+import u8 fat_open_dir(struct FatDirEntry *dsc, u8 *name);
 
 /*
  Returns 1 on success, 0 on fail (or when no entries are left)
@@ -45,7 +47,7 @@ import u8 fat_open_dir(struct FatDirEntry *dsc);
 import u8 fat_get_next_dir_entry(u8 dir_desc, struct FatDirEntry *dst, u8 attr_skip_mask);
 
 
-import u8 fat_open_file(struct FatDirEntry *dsc);
+import u8 fat_open_file(struct FatDirEntry *dir, u8 *name);
 
 import u16 fat_read(u8 fd, u8 *dst, u16 len);
 

@@ -14,3 +14,15 @@ export u8 strlen_8(u8 *s) {
     }
     return result;
 }
+
+export u8 memcmp(u8 *s1, u8 *s2, u16 len) {
+    for (; len != 0u16; len -= 1u16) {
+        u8 diff = *s1 - *s2;
+        if (diff) {
+            return diff;
+        }
+        s1 += 1u8;
+        s2 += 1u8;
+    }
+    return 0u8;
+}

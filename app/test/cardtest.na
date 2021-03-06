@@ -1,3 +1,4 @@
+#include <string.h>
 #include <vga.h>
 #include <ps2keyboard.h>
 #include <card.h>
@@ -80,9 +81,9 @@ u8 print_u16(u8 col, u8 row, u16 v) {
     print_hex_char(col + 3u8, row, (u8)v & 0xfu8);
 }
 
-u8 print_file(struct FatDirEntry *de) {
+u8 print_file(struct FatDirEntry *parent, u8 *name) {
     more_init(COLOR(COLOR_WHITE, COLOR_GREEN));
-    u8 f = fat_open_file(de);
+    u8 f = fat_open_file(parent, name);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, 0u8, "Error");
         ps2_wait_key_pressed();
@@ -150,7 +151,10 @@ export u8 main() {
                     vga_put_text(40u8, 0u8, "FAT init OK");
                 }
             } else if (k == PS2_KEY_F5) {
-                u8 dd = fat_open_dir((struct FatDirEntry *)0u8);
+                struct FatDirEntry parent;
+                struct FatDirEntry *p_parent = (struct FatDirEntry *)0;
+
+                u8 dd = fat_open_dir((struct FatDirEntry *)0, (u8*)0);
                 if (dd == FAT_BAD_DESC) {
                     vga_put_text(40u8, 0u8, "fat_open_dir() failed");
                 } else {
@@ -170,12 +174,15 @@ export u8 main() {
                         if (k == PS2_KEY_ENTER) {
                             if (de.attrs & FAT_FILE_ATTR_DIRECTORY) {
                                 fat_close(dd);
-                                dd = fat_open_dir(&de);
+                                dd = fat_open_dir(p_parent, (u8*)readable_name);
                                 if (dd == FAT_BAD_DESC) {
                                     vga_put_text(40u8, 0u8, "fat_open_dir() failed");
+                                } else {
+                                    memcpy((u8*)&parent, (u8*)&de, sizeof(struct FatDirEntry));
+                                    p_parent = &parent;
                                 }
                             } else {
-                                print_file(&de);
+                                print_file(p_parent, (u8*)readable_name);
                                 vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
                             }
                         }
