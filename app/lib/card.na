@@ -24,6 +24,10 @@ u8 spi_transfer(u8 x) {
 #define R1_ILLEGAL_COMMAND 4u8
 
 #define DATA_START_BLOCK 0xFEu8
+#define DATA_RSP_MASK 0x1Fu8
+#define DATA_RSP_ACCEPTED    0b00101u8
+#define DATA_RSP_CRC_ERROR   0b01011u8
+#define DATA_RSP_WRITE_ERROR 0b01101u8
 
 u8 delay_1ms() {
     for (u16 i = 0u16; i < 1000u16; i += 1u16) {}
@@ -165,3 +169,62 @@ export u8 card_read_block(u32 offset, u16 offset_in_block, u16 size, u8 *dst) {
     spi_transfer(0xFFu8);
     return 0u8;
 }
+
+export u8 card_write_block(u32 offset, u8 *src) {
+    u8 r;
+    spi_transfer(0x40u8 | 24u8); // CMD24 - write single block
+    spi_transfer(((u8*)(&offset))[3]);
+    spi_transfer(((u8*)(&offset))[2]);
+    spi_transfer(((u8*)(&offset))[1]);
+    spi_transfer(((u8*)(&offset))[0]);
+    spi_transfer(0xFFu8); // CRC
+
+    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+        r = spi_transfer(0xFFu8);
+        if (r != 0xffu8) {
+            break;
+        }
+    }
+    if (t == 4u8) {
+        SPI_CTRL = 0u8;
+        return CARD_ERROR_TIMEOUT;
+    }
+    if (r) {
+        spi_transfer(0xFFu8);
+        return CARD_ERROR_BLOCK_CMD_FAILED;
+    }
+
+    spi_transfer(0xffu8);
+    spi_transfer(0xffu8);
+
+    spi_transfer(DATA_START_BLOCK);
+    for (u16 i = 0u16; i < 512u16; i += 1u16) {
+        spi_transfer(*src);
+        src += 1u8;
+    }
+    // CRC
+    spi_transfer(0xFFu8);
+    spi_transfer(0xFFu8);
+
+    // Data response
+    u8 data_rsp = spi_transfer(0xFFu8);
+
+    // Wait for ready
+    r = spi_transfer(0xFFu8);
+    while (r != 0xFFu8) {
+        r = spi_transfer(0xFFu8);
+    }
+    spi_transfer(0xFFu8); // just in case
+
+    data_rsp &= DATA_RSP_MASK;
+    if (data_rsp == DATA_RSP_ACCEPTED) {
+        return 0u8;
+    } else if (data_rsp == DATA_RSP_WRITE_ERROR) {
+        return CARD_ERROR_WRITE_ERROR;
+    } else if (data_rsp == DATA_RSP_CRC_ERROR) {
+        return CARD_ERROR_CRC_ERROR;
+    } else {
+        return CARD_ERROR_BAD_DATA_RESPONSE;
+    }
+}
+

@@ -51,7 +51,7 @@ import u8 fat_open_file(struct FatDirEntry *dir, u8 *name);
 
 import u16 fat_read(u8 fd, u8 *dst, u16 len);
 
-import u16 fat_write(u8 fd, u8 *scr, u16 len);
+import u16 fat_write(u8 fd, u8 *src, u16 len);
 
 import u8 fat_close(u8 fd);
 

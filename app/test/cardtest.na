@@ -4,6 +4,7 @@
 #include <card.h>
 #include <fat.h>
 #include <more.h>
+#include <line_edit.h>
 
 #define SPI_DATA *((u8*)0xFD02)
 
@@ -109,6 +110,41 @@ u8 print_file(struct FatDirEntry *parent, u8 *name) {
     }
     fat_close(f);
 }
+
+u8 type_file(struct FatDirEntry *parent, u8 *name) {
+    u8 color = COLOR(COLOR_GREEN, COLOR_BLACK);
+    u8 f = fat_open_file(parent, name);
+    if (f == FAT_BAD_DESC) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
+        ps2_wait_key_pressed();
+        return;
+    }
+    u8 buf[64];
+    while (1u8) {
+        u8 row = 1u8;
+        vga_clear(color);
+        vga_put_text(0u8, 0u8, "Typing");
+        vga_put_text(7u8, 0u8, name);
+        while (row != VGA_ROWS) {
+            buf[0u8] = 0u8;
+            u8 r = line_edit((u8*)buf, 64u8, 0u8, row, color);
+            if (!r) {
+                fat_close(f);
+                return;
+            }
+            r = strlen_8((u8*)buf);
+            buf[r] = '\n';
+            buf[r + 1u8] = 0u8;
+            for (u8 i = 0u8; i != 100u8; i += 1u8) {
+                u16 l = fat_write(f, (u8*)buf, (u16)(r + 1u8));
+                if (l != (u16)(r + 1u8)) {
+                    vga_put_text(0u8, VGA_ROWS - 1u8, "Error writing");
+                    ps2_wait_key_pressed();
+                }
+            }
+            row += 1u8;
+        }
+    }
 }
 
 export u8 main() {
@@ -168,9 +204,7 @@ export u8 main() {
                         from_fat_name((u8*)readable_name, (u8*)de.filename);
                         vga_put_text(40u8, 0u8, "                    ");
                         vga_put_text(40u8, 0u8, (u8*)readable_name);
-                        while (k != PS2_KEY_SPACE && k != PS2_KEY_ENTER) {
-                            k = ps2_get_key_event();
-                        }
+                        k = ps2_wait_key_pressed();
                         if (k == PS2_KEY_ENTER) {
                             if (de.attrs & FAT_FILE_ATTR_DIRECTORY) {
                                 fat_close(dd);
@@ -185,6 +219,9 @@ export u8 main() {
                                 print_file(p_parent, (u8*)readable_name);
                                 vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
                             }
+                        } else if (k == PS2_KEY_TAB) {
+                            type_file(p_parent, (u8*)readable_name);
+                            vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
                         }
                         k = 0u8;
                     }

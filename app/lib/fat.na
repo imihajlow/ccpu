@@ -56,7 +56,8 @@ struct FileDescriptor {
     u32 dir_entry_block_addr; // absolute offset on disc
     u16 dir_entry_index_in_block; // offset inside the block
     u8 is_root; // for directory descriptors: if this is a root directory (a special case)
-    u8 filler[11];
+    u8 dir_entry_modified; // need to write out the dir entry on file close
+    u8 filler[10];
 };
 
 #define INVALID_BLOCK_ADDR 0xffffffffu32
@@ -160,6 +161,14 @@ u8 cache(u32 block_addr) {
         cache_block_addr = INVALID_BLOCK_ADDR;
     }
     return r;
+}
+
+u8 flush_cache() {
+    if (cache_block_addr != INVALID_BLOCK_ADDR) {
+        return card_write_block(cache_block_addr, (u8*)cache_block);
+    } else {
+        return 0u8;
+    }
 }
 
 export u8 to_fat_name(u8 *dst, u8 *src) {
@@ -313,7 +322,67 @@ u16 read_fat_entry(u16 index) {
     }
 }
 
-export u8 fat_open_file(struct FatDirEntry *dsc) {
+u16 alloc_cluster(u16 last) {
+    u8 r;
+    u16 result = 0u16;
+    u32 block_addr = fat_info.fat0_offset;
+    for (u16 fat_sector = 0u16; fat_sector != fat_info.sectors_per_fat; fat_sector += 1u16) {
+        r = cache(block_addr);
+        if (r) {
+            return 0xffffu16;
+        }
+        for (u16 i = 0u16; i < (CARD_BLOCK_SIZE >> 1u16); i += 1u16) {
+            u16 entry = ((u16*)cache_block)[i];
+            if (entry == 0u16) {
+                result += i;
+                // write fat0
+                ((u16*)cache_block)[i] = 0xffffu16;
+                r = flush_cache();
+                if (r) {
+                    return 0xffffu16;
+                }
+                // write fat1
+                r = cache(block_addr + fat_info.fat1_offset - fat_info.fat0_offset);
+                if (r) {
+                    return 0xffffu16;
+                }
+                ((u16*)cache_block)[i] = 0xffffu16;
+                r = flush_cache();
+                if (r) {
+                    return 0xffffu16;
+                }
+
+                // now write its parent, start with fat1
+                block_addr = fat_info.fat1_offset + ((u32)(last & 0xff00u16) << 1u8);
+                r = cache(block_addr);
+                if (r) {
+                    return 0xffffu16;
+                }
+                ((u16*)cache_block)[(u8)last] = result;
+                r = flush_cache();
+                if (r) {
+                    return 0xffffu16;
+                }
+                r = cache(block_addr + fat_info.fat0_offset - fat_info.fat1_offset);
+                if (r) {
+                    return 0xffffu16;
+                }
+                ((u16*)cache_block)[(u8)last] = result;
+                r = flush_cache();
+                if (r) {
+                    return 0xffffu16;
+                }
+                return result;
+            }
+        }
+        block_addr += (u32)CARD_BLOCK_SIZE;
+        result += CARD_BLOCK_SIZE >> 1u16;
+    }
+    return 0xffffu16;
+}
+
+import u8 print_u32(u8 col, u8 row, u32 v);
+
 export u8 fat_open_file(struct FatDirEntry *dir, u8 *name) {
     for (u8 fd = 0u8; fd != MAX_FILE_DESC; fd += 1u8) {
         if (file_desc[fd].is_free) {
@@ -348,6 +417,7 @@ u8 init_fd(struct FileDescriptor *pfd) {
     pfd->index_in_block = 0u16;
     pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
     pfd->cur_cluster = pfd->dir_entry.cluster_lo;
+    pfd->dir_entry_modified = 0u8;
 }
 
 u8 init_root_dir(struct FileDescriptor *pfd) {
@@ -355,46 +425,11 @@ u8 init_root_dir(struct FileDescriptor *pfd) {
     pfd->block_addr = fat_info.root_dir_offset;
     pfd->block_in_cluster = 0u8;
     pfd->index_in_block = 0u16;
+    pfd->dir_entry_modified = 0u8;
 }
 
 export u16 fat_read(u8 fd, u8 *dst, u16 len) {
-    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
-    if (pfd->is_free) {
-        return 0u16;
-    }
-    u16 result = 0u16;
-    u8 r;
-    while (len != 0u16) {
-        u16 to_read;
-        if (pfd->next_cluster >= 0xFFF8u16) {
-            // last cluster
-            u16 remainder = pfd->last_cluster_len - ((u16)pfd->block_in_cluster << 9u8);
-            if (remainder <= CARD_BLOCK_SIZE) {
-                // last block
-                to_read = remainder - pfd->index_in_block;
-            } else {
-                to_read = CARD_BLOCK_SIZE - pfd->index_in_block;
-            }
-        } else {
-            to_read = CARD_BLOCK_SIZE - pfd->index_in_block;
-        }
-        if (to_read > len) {
-            to_read = len;
-        }
-        if (to_read == 0u16) {
-            return result;
-        }
-        r = cache(pfd->block_addr);
-        if (r) {
-            return result | 0x8000u16;
-        }
-        memcpy(dst, (u8*)cache_block + pfd->index_in_block, to_read);
-        len -= to_read;
-        dst += to_read;
-        result += to_read;
-        seek_advance(pfd, to_read);
-    }
-    return result;
+    return fat_action(fd, dst, len, 0u8);
 }
 
 u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
@@ -429,6 +464,84 @@ u8 seek_begin(struct FileDescriptor *pfd) {
     pfd->cur_cluster = pfd->dir_entry.cluster_lo;
 }
 
+export u16 fat_write(u8 fd, u8 *src, u16 len) {
+    return fat_action(fd, src, len, 1u8);
+}
+
+u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    if (pfd->is_free) {
+        return 0u16;
+    }
+    u16 result = 0u16;
+    u8 r;
+    while (len != 0u16) {
+        u16 chunk_len = CARD_BLOCK_SIZE - pfd->index_in_block;
+        if (pfd->next_cluster >= 0xFFF8u16) {
+            // last cluster
+            u16 remainder = pfd->last_cluster_len - ((u16)pfd->block_in_cluster << 9u8);
+            if (remainder <= CARD_BLOCK_SIZE) {
+                // last block
+                chunk_len = remainder - pfd->index_in_block;
+                if (is_write) {
+                    if (len > chunk_len) {
+                        // expanding the file past the current size
+                        chunk_len = len;
+                        if (chunk_len + pfd->index_in_block > CARD_BLOCK_SIZE) {
+                            // need to expand over current block
+                            chunk_len = CARD_BLOCK_SIZE - pfd->index_in_block;
+                        }
+                        u16 delta_size = pfd->index_in_block + chunk_len - remainder;
+                        pfd->last_cluster_len += delta_size;
+                        pfd->dir_entry.size += (u32)delta_size;
+                        pfd->dir_entry_modified = 1u8;
+                        if (pfd->last_cluster_len == (CARD_BLOCK_SIZE << fat_info.log_sectors_per_cluster)) {
+                            // need next block
+                            u16 new_cluster = alloc_cluster(pfd->cur_cluster);
+                            if (new_cluster == 0xffffu16) {
+                                return result | 0x8000u16;
+                            }
+                            pfd->next_cluster = new_cluster;
+                            pfd->last_cluster_len = 0u16;
+                        }
+                    }
+                }
+            }
+        }
+        if (chunk_len > len) {
+            chunk_len = len;
+        }
+        if (chunk_len == 0u16) {
+            return result;
+        }
+        r = cache(pfd->block_addr);
+        if (r) {
+            return result | 0x8000u16;
+        }
+        if (is_write) {
+            memcpy((u8*)cache_block + pfd->index_in_block, data, chunk_len);
+            r = flush_cache();
+            if (r) {
+                return result | 0x8000u16;
+            }
+        } else {
+            memcpy(data, (u8*)cache_block + pfd->index_in_block, chunk_len);
+        }
+        len -= chunk_len;
+        data += chunk_len;
+        result += chunk_len;
+        seek_advance(pfd, chunk_len);
+    }
+    return result;
+}
+
+
 export u8 fat_close(u8 fd) {
-    file_desc[fd].is_free = 1u8;
+    struct FileDescriptor *pfd = (struct FileDescriptor*)file_desc + fd;
+    if (pfd->dir_entry_modified) {
+        cache(pfd->dir_entry_block_addr);
+        memcpy((u8*)cache_block + pfd->dir_entry_index_in_block, (u8*)&pfd->dir_entry, sizeof(struct FatDirEntry));
+        flush_cache();
+    }
+    pfd->is_free = 1u8;
 }

@@ -51,7 +51,7 @@ export u8 line_edit(u8 *buf, u8 max_len, u8 min_screen_col_, u8 screen_row_, u8 
             }
         } else if ((u8)key == PS2_KEY_ENTER) {
             vga_color_seg[VGA_OFFSET(min_screen_col + cursor, screen_row)] = color;
-            return;
+            return 1u8;
         } else if ((u8)key == PS2_KEY_LEFT) {
             if (cursor != 0u8) {
                 move_cursor(-1s8);
@@ -87,6 +87,9 @@ export u8 line_edit(u8 *buf, u8 max_len, u8 min_screen_col_, u8 screen_row_, u8 
                 *offset = 0u8;
                 buf[len] = 0u8;
             }
+        } else if ((u8)key == PS2_KEY_ESCAPE) {
+            vga_color_seg[VGA_OFFSET(min_screen_col + cursor, screen_row)] = color;
+            return 0u8;
         }
     }
 }
