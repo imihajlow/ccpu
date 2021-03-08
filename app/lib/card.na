@@ -119,7 +119,7 @@ export u8 card_power_off() {
     SPI_CTRL = SPI_CTRL_N_CARD_CS;
 }
 
-export u8 card_read_block(u32 offset, u16 offset_in_block, u16 size, u8 *dst) {
+export u8 card_read_block(u32 offset, u8 *dst) {
     u8 r;
     spi_transfer(0x40u8 | 17u8); // CMD17 - read single block
     spi_transfer(((u8*)(&offset))[3]);
@@ -150,16 +150,9 @@ export u8 card_read_block(u32 offset, u16 offset_in_block, u16 size, u8 *dst) {
     if (r != DATA_START_BLOCK) {
         return r;
     }
-    for (u16 i = 0u16; i < offset_in_block; i += 1u16) {
-        spi_transfer(0xFFu8);
-    }
-    for (; i < 512u16 && size > 0u16; i += 1u16) {
+    for (u16 i = 0u16; i < 512u16; i += 1u16) {
         *dst = spi_transfer(0xFFu8);
         dst += 1u8;
-        size -= 1u16;
-    }
-    for (; i < 512u16; i += 1u16) {
-        spi_transfer(0xFFu8);
     }
     // CRC
     spi_transfer(0xFFu8);

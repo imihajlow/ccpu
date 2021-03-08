@@ -174,7 +174,7 @@ export u8 main() {
                 r = card_init();
                 print_hex_char(40u8, 0u8, r);
             } else if (k == PS2_KEY_F2) {
-                r = card_read_block(block, 0u16, 512u16, (u8*)buffer);
+                r = card_read_block(block, (u8*)buffer);
                 block += 512u32;
                 print_hex_char(40u8, 0u8, r >> 4u8);
                 print_hex_char(41u8, 0u8, r & 0xfu8);

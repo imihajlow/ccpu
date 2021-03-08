@@ -75,16 +75,18 @@ export u8 fat_init() {
 
     struct Partition partition;
     struct BPB bpb;
-    u8 r = card_read_block(0u32, 446u16, sizeof(struct Partition), (u8*)&partition);
+    u8 r = cache(0u32);
     if (r) {
         return FAT_ERROR_CARD;
     }
+    memcpy((u8*)&partition, (u8*)cache_block + 446, sizeof(struct Partition));
 
     u32 offset = partition.rel_sector << 9u8;
-    r = card_read_block(partition.rel_sector << 9u8, 0u16, sizeof(struct BPB), (u8*)&bpb);
+    r = cache(offset);
     if (r) {
         return FAT_ERROR_CARD;
     }
+    memcpy((u8*)&bpb, (u8*)cache_block, sizeof(struct BPB));
 
     if (bpb.bytes_per_sector != 512u16) {
         return FAT_ERROR_UNSUPPORTED_SECTOR_SIZE;
@@ -156,7 +158,7 @@ u8 cache(u32 block_addr) {
         return 0u8;
     }
     cache_block_addr = block_addr;
-    u8 r = card_read_block(block_addr, 0u16, CARD_BLOCK_SIZE, (u8*)cache_block);
+    u8 r = card_read_block(block_addr, (u8*)cache_block);
     if (r) {
         cache_block_addr = INVALID_BLOCK_ADDR;
     }
@@ -303,22 +305,17 @@ export u8 fat_get_next_dir_entry(u8 desc, struct FatDirEntry *dst, u8 attr_skip_
 }
 
 u16 read_fat_entry(u16 index) {
-    u16 sector_offset = (u16)(u8)(index) << 1u8;
+    u16 entry_offset = (u16)(u8)(index);
     u16 sector_index = index >> 8u8;
-    u16 result;
     u8 r;
-    if (sector_index != 0u16) {
-        u32 disk_offset;
-        disk_offset = fat_info.fat0_offset;
-        disk_offset += (u32)sector_index << 9u8;
-        r = card_read_block(disk_offset, sector_offset, sizeof(u16), (u8*)&result);
-    } else {
-        r = card_read_block(fat_info.fat0_offset, sector_offset, sizeof(u16), (u8*)&result);
-    }
+    u32 disk_offset;
+    disk_offset = fat_info.fat0_offset;
+    disk_offset += (u32)sector_index << 9u8;
+    r = cache(disk_offset);
     if (r) {
         return 0u16;
     } else {
-        return result;
+        return ((u16*)cache_block)[entry_offset];
     }
 }
 
