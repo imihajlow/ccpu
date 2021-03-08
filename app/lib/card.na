@@ -119,13 +119,14 @@ export u8 card_power_off() {
     SPI_CTRL = SPI_CTRL_N_CARD_CS;
 }
 
-export u8 card_read_block(u32 offset, u8 *dst) {
+export u8 card_read_block(u32 block_index, u8 *dst) {
     u8 r;
+    block_index <<= 1u8;
     spi_transfer(0x40u8 | 17u8); // CMD17 - read single block
-    spi_transfer(((u8*)(&offset))[3]);
-    spi_transfer(((u8*)(&offset))[2]);
-    spi_transfer(((u8*)(&offset))[1]);
-    spi_transfer(((u8*)(&offset))[0]);
+    spi_transfer(((u8*)(&block_index))[2]);
+    spi_transfer(((u8*)(&block_index))[1]);
+    spi_transfer(((u8*)(&block_index))[0]);
+    spi_transfer(0u8);
     spi_transfer(0xFFu8); // CRC
 
     for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
@@ -163,13 +164,14 @@ export u8 card_read_block(u32 offset, u8 *dst) {
     return 0u8;
 }
 
-export u8 card_write_block(u32 offset, u8 *src) {
+export u8 card_write_block(u32 block_index, u8 *src) {
     u8 r;
+    block_index <<= 1u8;
     spi_transfer(0x40u8 | 24u8); // CMD24 - write single block
-    spi_transfer(((u8*)(&offset))[3]);
-    spi_transfer(((u8*)(&offset))[2]);
-    spi_transfer(((u8*)(&offset))[1]);
-    spi_transfer(((u8*)(&offset))[0]);
+    spi_transfer(((u8*)(&block_index))[2]);
+    spi_transfer(((u8*)(&block_index))[1]);
+    spi_transfer(((u8*)(&block_index))[0]);
+    spi_transfer(0u8);
     spi_transfer(0xFFu8); // CRC
 
     for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
