@@ -1,10 +1,30 @@
 import os.path
+import sys
+sys.path.append("../tools")
+sys.path.append("../tools")
+
+from asm import assembleFile
+from link import linkFiles
+from natrix import compileNatrix
 
 # Build tools
-asmBuilder = Builder(action = 'asm.py -o $TARGET $SOURCE', suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
-natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
+
+def asmBuildFunction(target, source, env):
+    return assembleFile(str(source[0]), str(target[0]))
+
+# asmBuilder = Builder(action = 'asm.py -o $TARGET $SOURCE', suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
+asmBuilder = Builder(action=asmBuildFunction, suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
+
+def natrixBuildFunction(target, source, env):
+    return compileNatrix(str(target[0]), str(source[0]), cppArgs=['-Ilib'])
+
+natrixBuilder = Builder(action=natrixBuildFunction, suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
+#natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
 def linkGenerator(source, target, env, for_signature):
     return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def linkBuildFunction(target, source, env):
+    return linkFiles(str(target[0]), [str(s) for s in source], mapfile=str(target[1]))
 
 def linkEmitter(target, source, env):
     t = target[0]
@@ -12,10 +32,10 @@ def linkEmitter(target, source, env):
     target.append(f"{base}.map")
     return target, source
 
-linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+linkBuilder = Builder(action=linkBuildFunction, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+# linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 env = Environment(BUILDERS = {'Asm' : asmBuilder, 'Natrix': natrixBuilder, 'Bin': linkBuilder})
 env.PrependENVPath("PATH", "../tools")
-env.PrependENVPath("PATH", "../tools/natrix")
 env["NATRIX_DIR"] = "../tools/natrix"
 env["CPPPATH"] = "lib" # needed for scanner
 

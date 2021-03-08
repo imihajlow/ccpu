@@ -1,7 +1,7 @@
 from lark import Visitor, v_args, Tree
 from lark.visitors import Interpreter
-from location import Location
-from exceptions import SemanticError
+from .location import Location
+from .exceptions import SemanticError
 
 def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True, findLastQuote=False):
     s = s[1:]

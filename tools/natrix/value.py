@@ -1,9 +1,9 @@
 from lark import Transformer, v_args, Tree
 from lark.visitors import Interpreter
-from type import UnknownType, PtrType, ArrayType
-from exceptions import SemanticError
-import labelname
-from location import Location
+from .type import UnknownType, PtrType, ArrayType
+from .exceptions import SemanticError
+from . import labelname
+from .location import Location
 
 '''
 Value class

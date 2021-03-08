@@ -1,1 +1,1 @@
-import code
+from .code import *

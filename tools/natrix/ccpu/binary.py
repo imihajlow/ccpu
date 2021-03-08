@@ -1,13 +1,13 @@
-from value import Value
-from type import BoolType
+from ..value import Value
+from ..type import BoolType
 import operator
-import labelname
+from .. import labelname
 from .shift import genShift, genSHLVarByConst
 from .common import *
 from .compare import *
 from .mul import *
 from .div import *
-from exceptions import SemanticError, NatrixNotImplementedError
+from ..exceptions import SemanticError, NatrixNotImplementedError
 
 def genBinary(op, resultLoc, src1Loc, src2Loc, labelProvider):
     if resultLoc.getIndirLevel() == 0:

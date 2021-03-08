@@ -1,8 +1,8 @@
 import re
 from abc import ABC, abstractmethod
 from lark import Transformer, v_args, Tree
-from exceptions import SemanticError
-from location import Location
+from .exceptions import SemanticError
+from .location import Location
 
 class Type(ABC):
     @abstractmethod
@@ -277,7 +277,7 @@ class TypeTransformer(Transformer):
     def decl_array(self, t):
         type = t.children[0]
         size = t.children[2]
-        from value import Value
+        from .value import Value
         if isinstance(size, Value):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
@@ -287,7 +287,7 @@ class TypeTransformer(Transformer):
     @v_args(tree = True)
     def gl_decl_array(self, t):
         attrs, type, name, size = t.children
-        from value import Value
+        from .value import Value
         if isinstance(size, Value):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
@@ -297,7 +297,7 @@ class TypeTransformer(Transformer):
     @v_args(tree = True)
     def array_field_declaration(self, t):
         type, name, size = t.children
-        from value import Value
+        from .value import Value
         if isinstance(size, Value):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
@@ -308,7 +308,7 @@ class CastTransformer(Transformer):
     @v_args(tree = True)
     def type_cast(self, t):
         type, v = t.children
-        from value import Value
+        from .value import Value
         if isinstance(v, Value) and v.getIndirLevel() == 0:
             s = v.getSource()
             if type.getSize() > 2:

@@ -1,6 +1,6 @@
 from lark import Transformer, v_args, Discard
-from literal import unescapeString
-from location import Location
+from .literal import unescapeString
+from .location import Location
 
 class LineInfo():
 	def __init__(self, filename, code):

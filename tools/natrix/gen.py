@@ -1,11 +1,11 @@
 from lark import Lark, Transformer, v_args, Tree
-from exceptions import SemanticError
-from value import Value
-from type import Type, BoolType, UnknownType, PtrType
-from function import Function
-from location import Location
-import structure
-import labelname
+from .exceptions import SemanticError
+from .value import Value
+from .type import Type, BoolType, UnknownType, PtrType
+from .function import Function
+from .location import Location
+from . import structure
+from . import labelname
 import sys
 import random
 

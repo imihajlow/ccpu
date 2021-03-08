@@ -1,7 +1,7 @@
 from lark import Transformer, v_args, Tree
-from value import Value
-from type import IntType
-from location import Location
+from .value import Value
+from .type import IntType
+from .location import Location
 
 class SubscriptTransformer(Transformer):
     # Transform a[x] -> *(a + x)

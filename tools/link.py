@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import importlib
+import importlib.util
 import argparse
 import json
 import re
 import sys
+import os.path
 from object import Object
 from expression import evaluate, extractVarNames
 
@@ -221,7 +223,7 @@ def link(objects, layout, fit, sectionsFilter):
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
     return symbolMap, segments
 
-def createRom(objects, segments, sectionsFilter):
+def createRom(objects, segments, sectionsFilter, layout):
     rom = [None] * 65536
     for o in objects:
         for s in sectionsFilter.filter(o.sections):
@@ -259,10 +261,33 @@ def save(data, filename, type, full, filler):
             ba = bytearray(filler if x is None else x for x in data[0:65536 if full else 32768])
             file.write(ba)
 
-def saveLabels(file, labels):
-    if file is not None:
-        for label in labels:
-            file.write("{} = 0x{:04x}\n".format(label, labels[label]))
+def saveLabels(filename, labels):
+    if filename is not None:
+        with open(filename, "w") as file:
+            for label in labels:
+                file.write("{} = 0x{:04x}\n".format(label, labels[label]))
+
+def loadLayoutModule(name):
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "layouts")
+    spec = importlib.util.spec_from_file_location(name, os.path.join(path, f"{name}.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+def linkFiles(target, sources, mapfile=None, type="bin", filler=0xff, full=False, layout="default", fitStrategy="fill", gcSections=True):
+    layoutModule = loadLayoutModule(layout)
+    try:
+        objects = [load(filename) for filename in sources]
+        fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
+        sectionsFilter = SectionsFilter(objects, layoutModule.layout, gcSections)
+        symbolMap, segments = link(objects, layoutModule, fitters[fitStrategy], sectionsFilter)
+        rom = createRom(objects, segments, sectionsFilter, layoutModule)
+        save(rom, target, type, full, filler)
+        saveLabels(mapfile, symbolMap)
+    except LinkerError as e:
+        sys.stderr.write(str(e) + "\n")
+        return 1
+    return 0
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Linker')
@@ -273,18 +298,8 @@ if __name__ == '__main__':
     parser.add_argument('--layout', choices=["default", "sim"], default="default", help='memory layout')
     parser.add_argument('--fit-strategy', choices=["fill", "simple"], default="fill", help='fit strategy')
     parser.add_argument('--no-gc-sections', action='store_true', default=False, help='drop unreachable sections')
-    parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
+    parser.add_argument('-m', metavar="MAPFILE", required=False, help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
-    layout = importlib.import_module("." + args.layout, "layouts")
-    try:
-        objects = [load(filename) for filename in args.file]
-        fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
-        sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections)
-        symbolMap, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter)
-        rom = createRom(objects, segments, sectionsFilter)
-        save(rom, args.o, args.type, args.full, args.filler)
-        saveLabels(args.m, symbolMap)
-    except LinkerError as e:
-        sys.stderr.write(str(e) + "\n")
-        sys.exit(1)
+    r = linkFiles(args.o, args.file, args.m, args.type, args.filler, args.full, args.layout, args.fit_strategy, not args.no_gc_sections)
+    sys.exit(r)

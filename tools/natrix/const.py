@@ -2,12 +2,12 @@ import re
 import operator
 from lark import Lark, Transformer, v_args, Tree
 from lark.visitors import VisitError
-from value import Value
-from type import IntType
-from location import Location
-from literal import unescapeString
-from typeof import TypeofTransformer
-import exceptions
+from .value import Value
+from .type import IntType
+from .location import Location
+from .literal import unescapeString
+from .typeof import TypeofTransformer
+from . import exceptions
 
 def signExpand(t, value):
     if t.getSign():

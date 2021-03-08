@@ -1,9 +1,9 @@
-from value import Value
-from type import BoolType
+from ..value import Value
+from ..type import BoolType
 from .common import *
 import operator
-import labelname
-from exceptions import SemanticError, NatrixNotImplementedError
+from .. import labelname
+from ..exceptions import SemanticError, NatrixNotImplementedError
 
 def genDeref(resultLoc, srcLoc, offset=0):
     if resultLoc.getType().isUnknown():

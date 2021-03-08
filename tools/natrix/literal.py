@@ -1,9 +1,9 @@
 from lark import Transformer, v_args, Tree
-from exceptions import LiteralError
-from location import Location
-from type import IntType, PtrType
-from value import Value
-from function import unescapeString
+from .exceptions import LiteralError
+from .location import Location
+from .type import IntType, PtrType
+from .value import Value
+from .function import unescapeString
 
 class LiteralTransformer(Transformer):
     def __init__(self, nameInfo):

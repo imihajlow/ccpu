@@ -236,7 +236,7 @@ def encode(op, args, obj, aluRevision):
     else:
         raise ValueError("Invalid opcode: {}".format(op))
 
-def assemble(lines, aluRevision):
+def assembleLines(lines, aluRevision):
     result = Object()
     r = re.compile(r"^\s*(?:(?P<label>[_a-z]\w*)\s*:)?(?:\s*(?P<op>[.a-z]\w*)(?:\s+(?P<args>[a-z()0-9_+\-=*/><, \t\"'.?|^&]*[a-z()0-9_+\-=*/><,\"']))?)?(?:\s*;.*)?$", re.I)
     for i,l in enumerate(lines):
@@ -300,17 +300,23 @@ def save(filename, o):
     with open(filename, "w") as file:
         file.write(json.dumps(o.toDict()))
 
+def assembleFile(fnameIn, fnameOut, aluRevision=2):
+    try:
+        with open(fnameIn, "r") as f:
+            lines = f.readlines()
+        o = assembleLines(lines, aluRevision)
+        save(fnameOut, o)
+    except AssemblyError as e:
+        print(e)
+        return 1
+    return 0
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Assembler')
     parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
-    parser.add_argument('file', type=argparse.FileType("r"), help='input file name')
+    parser.add_argument('file', help='input file name')
     parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision (default = 2)')
     args = parser.parse_args()
 
-    try:
-        lines = args.file.readlines()
-        o = assemble(lines, args.alu_revision)
-        save(args.o, o)
-    except AssemblyError as e:
-        print(e)
-        sys.exit(1)
+    r = assembleFile(args.file, args.o, args.alu_revision)
+    sys.exit(r)

@@ -1,14 +1,14 @@
-from value import Value
-from type import BoolType
+from ..value import Value
+from ..type import BoolType
 import operator
-import labelname
+from .. import labelname
 from .compare import *
 from .binary import *
 from .unary import *
 from .shift import *
 from .common import *
 from .stack import *
-from exceptions import SemanticError
+from ..exceptions import SemanticError
 
 MAX_INT_SIZE = 4
 

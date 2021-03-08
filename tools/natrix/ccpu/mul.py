@@ -1,5 +1,5 @@
-from value import Value
-from exceptions import SemanticError
+from ..value import Value
+from ..exceptions import SemanticError
 from .common import *
 
 def _genMulVCByte(rs, v, c):

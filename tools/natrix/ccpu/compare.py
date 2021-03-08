@@ -1,9 +1,9 @@
-from value import Value
-from type import BoolType
+from ..value import Value
+from ..type import BoolType
 import operator
-import labelname
+from .. import labelname
 from .common import *
-from exceptions import SemanticError
+from ..exceptions import SemanticError
 
 def _genEqNeCmp(src1Loc, src2Loc):
     '''

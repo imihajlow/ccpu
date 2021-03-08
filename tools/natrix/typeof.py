@@ -1,11 +1,11 @@
 import re
 import operator
 from lark import Lark, Transformer, v_args, Tree
-from value import Value
-from type import IntType, Type, BoolType, PtrType
-from location import Location
-from literal import unescapeString
-import exceptions
+from .value import Value
+from .type import IntType, Type, BoolType, PtrType
+from .location import Location
+from .literal import unescapeString
+from . import exceptions
 
 def _typeof(v):
     if isinstance(v, Value):

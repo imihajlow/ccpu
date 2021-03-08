@@ -1,7 +1,7 @@
 from lark.visitors import Interpreter
 from lark import v_args
-from exceptions import SemanticError
-from location import Location
+from .exceptions import SemanticError
+from .location import Location
 
 class CallGraph(Interpreter):
     def __init__(self):

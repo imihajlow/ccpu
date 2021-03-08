@@ -1,8 +1,8 @@
 from lark import Transformer, v_args, Tree, Discard
-from value import Value
-from type import StructType, PtrType
-from location import Location
-from exceptions import SemanticError
+from .value import Value
+from .type import StructType, PtrType
+from .location import Location
+from .exceptions import SemanticError
 
 def getField(t, fields):
     offset = 0
