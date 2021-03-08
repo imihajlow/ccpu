@@ -164,6 +164,7 @@ export u8 main() {
 
 
         u8 r;
+        struct FatDirEntry dir;
 
         while (row < VGA_ROWS) {
             u8 k = ps2_get_key_event();
@@ -185,12 +186,11 @@ export u8 main() {
                     print_hex_char(41u8, 0u8, r & 0xfu8);
                 } else {
                     vga_put_text(40u8, 0u8, "FAT init OK");
+                    fat_change_dir((struct FatDirEntry*)0, (u8*)0, &dir);
                 }
             } else if (k == PS2_KEY_F5) {
-                struct FatDirEntry parent;
-                struct FatDirEntry *p_parent = (struct FatDirEntry *)0;
 
-                u8 dd = fat_open_dir((struct FatDirEntry *)0, (u8*)0);
+                u8 dd = fat_open_dir(&dir);
                 if (dd == FAT_BAD_DESC) {
                     vga_put_text(40u8, 0u8, "fat_open_dir() failed");
                 } else {
@@ -208,19 +208,21 @@ export u8 main() {
                         if (k == PS2_KEY_ENTER) {
                             if (de.attrs & FAT_FILE_ATTR_DIRECTORY) {
                                 fat_close(dd);
-                                dd = fat_open_dir(p_parent, (u8*)readable_name);
-                                if (dd == FAT_BAD_DESC) {
-                                    vga_put_text(40u8, 0u8, "fat_open_dir() failed");
+                                r = fat_change_dir(&dir, (u8*)readable_name, &dir);
+                                if (!r) {
+                                    vga_put_text(40u8, 0u8, "fat_change_dir() failed");
                                 } else {
-                                    memcpy((u8*)&parent, (u8*)&de, sizeof(struct FatDirEntry));
-                                    p_parent = &parent;
+                                    dd = fat_open_dir(&dir);
+                                    if (dd == FAT_BAD_DESC) {
+                                        vga_put_text(40u8, 0u8, "fat_open_dir() failed");
+                                    }
                                 }
                             } else {
-                                print_file(p_parent, (u8*)readable_name);
+                                print_file(&dir, (u8*)readable_name);
                                 vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
                             }
                         } else if (k == PS2_KEY_TAB) {
-                            type_file(p_parent, (u8*)readable_name);
+                            type_file(&dir, (u8*)readable_name);
                             vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
                         }
                         k = 0u8;

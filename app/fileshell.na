@@ -1,0 +1,170 @@
+#include <string.h>
+#include <vga.h>
+#include <ps2keyboard.h>
+#include <card.h>
+#include <fat.h>
+#include <more.h>
+#include <line_edit.h>
+
+#define FILE_COLOR COLOR(COLOR_WHITE, COLOR_BLUE)
+#define CURSOR_COLOR COLOR(COLOR_WHITE, COLOR_CYAN)
+#define STATUS_COLOR COLOR(COLOR_LIGHT_CYAN, COLOR_GREEN)
+
+#define MAX_FILES 145u16
+
+struct Filename {
+    u8 name[13];
+    u8 attrs;
+    u8 filler[2];
+};
+
+struct Filename filenames[MAX_FILES];
+
+struct FatDirEntry current_dir;
+
+u8 load_files() {
+    u8 fd = fat_open_dir(&current_dir);
+    if (fd == FAT_BAD_DESC) {
+        return 0u8;
+    }
+    struct FatDirEntry ent;
+    struct Filename *name = (struct Filename*)filenames;
+    for (u16 i = 0u16; i != MAX_FILES; i += 1u16) {
+        name->name[0] = 0u8;
+        u8 r = fat_get_next_dir_entry(fd, &ent, FAT_FILE_ATTR_HIDDEN | FAT_FILE_ATTR_SYSTEM | FAT_FILE_ATTR_VOLUME_ID);
+        if (!r) {
+            break;
+        }
+        from_fat_name((u8*)name->name, (u8*)ent.filename);
+        name->attrs = ent.attrs;
+    }
+    fat_close(fd);
+    return 1u8;
+}
+
+u16 display_table(u16 offset) {
+    struct Filename *f = (struct Filename*)filenames + offset;
+    u8 row = 0u8;
+    u8 col = 1u8;
+    while (offset != MAX_FILES) {
+        if (f->name[0] == 0u8) {
+            break;
+        }
+        vga_put_text(col, row, (u8*)f->name);
+        if (f->attrs & FAT_FILE_ATTR_DIRECTORY) {
+            vga_char_seg[VGA_OFFSET(col + 14u8, row)] = '/';
+        }
+        f += 1u8;
+        offset += 1u16;
+        row += 1u8;
+        if (row == VGA_ROWS - 1u8) {
+            col += 16u8;
+            row = 0u8;
+            if (col >= VGA_COLS) {
+                break;
+            }
+        }
+    }
+    return offset;
+}
+
+u8 set_cursor(u8 col, u8 row, u8 color) {
+    memset((u8*)vga_color_seg + VGA_OFFSET(col, row), color, 16u16);
+}
+
+u16 cursor_file_index;
+
+u8 table_cursor_loop(u8 max_index, u8 reset_cursor) {
+    // max 5 x 29 = 145 entries on the screen
+    u8 row;
+    u8 col;
+    u8 index;
+    u8 new_index;
+    if (reset_cursor) {
+        row = 0u8;
+        col = 0u8;
+        index = 0u8;
+        new_index = 0u8;
+        cursor_file_index = 0u16;
+    }
+    set_cursor(0u8, 0u8, CURSOR_COLOR);
+    while (1u8) {
+        u8 k = ps2_wait_key_pressed();
+        if (k == PS2_KEY_DOWN) {
+            new_index = index + 1u8;
+        } else if (k == PS2_KEY_UP) {
+            new_index = index - 1u8;
+        } else if (k == PS2_KEY_RIGHT) {
+            new_index = index + (VGA_ROWS - 1u8);
+        } else if (k == PS2_KEY_LEFT) {
+            new_index = index - (VGA_ROWS - 1u8);
+        } else {
+            set_cursor(col, row, FILE_COLOR);
+            return k;
+        }
+        if (new_index != index) {
+            if (new_index < max_index) {
+                index = new_index;
+                set_cursor(col, row, FILE_COLOR);
+                row = index % (VGA_ROWS - 1u8);
+                col = index / (VGA_ROWS - 1u8);
+                set_cursor(col, row, CURSOR_COLOR);
+                cursor_file_index = (u16)index;
+            } else {
+                new_index = index;
+            }
+        }
+    }
+}
+
+export u8 main() {
+    ps2_init();
+
+    u8 card_present = 0u8;
+    u8 fat_success = 0u8;
+    u8 r;
+
+    while (1u8) {
+        vga_clear(FILE_COLOR);
+        memset((u8*)vga_color_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), STATUS_COLOR, 16u16);
+        if (!card_present) {
+            vga_put_text(0u8, VGA_ROWS - 1u8, "Waiting for card");
+            while (!card_present) {
+                card_present = card_is_present();
+            }
+            r = fat_init();
+            fat_success = r == 0u8;
+            if (fat_success) {
+                fat_change_dir((struct FatDirEntry*)0, (u8*)0, &current_dir);
+            }
+        } else if (!fat_success) {
+            vga_put_text(0u8, VGA_ROWS - 1u8, "FAT error, remove card");
+            while (card_present) {
+                card_present = card_is_present();
+            }
+        } else {
+            u8 init = 1u8;
+            vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, F4 - type");
+            load_files();
+            u16 max_index = display_table(0u16);
+            while (1u8) {
+                u8 k = table_cursor_loop((u8)max_index, init);
+                init = 0u8;
+                card_present = card_is_present();
+                if (!card_present) {
+                    break;
+                }
+                if (k == PS2_KEY_F3) {
+
+                } else if (k == PS2_KEY_ENTER) {
+                    r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
+                    if (r) {
+                        break;
+                    }
+                }
+            }
+            card_power_off();
+            card_present = 0u8;
+        }
+    }
+}

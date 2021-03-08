@@ -115,42 +115,39 @@ export u8 fat_init() {
     return 0u8;
 }
 
-// TODO BUG: can't go up ("..")
-export u8 fat_open_dir(struct FatDirEntry *parent, u8 *name) {
+export u8 fat_open_dir(struct FatDirEntry *dir) {
     u8 fd, r;
-    if ((u16)parent != 0u16) {
-        fd = fat_open_file(parent, name);
-        if (fd == FAT_BAD_DESC) {
-            return FAT_BAD_DESC;
-        }
-
-        file_desc[fd].is_root = 0u8;
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc;
+    for (fd = 0u8; fd != MAX_FILE_DESC && !pfd->is_free; fd += 1u8) {
+        pfd += 1u8;
+    }
+    if (fd == MAX_FILE_DESC) {
+        return FAT_BAD_DESC;
+    }
+    if ((u16)dir == 0u16 || dir->cluster_lo == 0u16) {
+        // root dir
+        init_root_dir(pfd);
     } else {
-        struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc;
-        for (fd = 0u8; fd != MAX_FILE_DESC && !pfd->is_free; fd += 1u8) {
-            pfd += 1u8;
-        }
-        if (fd == MAX_FILE_DESC) {
-            return FAT_BAD_DESC;
-        }
-        pfd->is_free = 0u8;
-
-        if (name == (u8*)0u8) {
-            init_root_dir(pfd);
-        } else {
-            r = find_file(parent, name, pfd);
-            if (!r) {
-                pfd->is_free = 1u8;
-                return FAT_BAD_DESC;
-            }
-            if (pfd->dir_entry.cluster_lo == 0u16) {
-                init_root_dir(pfd);
-            } else {
-                init_fd(pfd);
-            }
-        }
+        memcpy((u8*)&pfd->dir_entry, (u8*)dir, sizeof(struct FatDirEntry));
+        init_fd(pfd);
     }
     return fd;
+}
+
+export u8 fat_change_dir(struct FatDirEntry *parent, u8 *name, struct FatDirEntry *dst) {
+    if (name == (u8*)0) {
+        dst->cluster_lo = 0u16;
+        dst->attrs = FAT_FILE_ATTR_DIRECTORY;
+        return 1u8;
+    }
+    struct FileDescriptor fd;
+    u8 r = find_file(parent, name, &fd);
+
+    if (r && (fd.dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY)) {
+        memcpy((u8*)dst, (u8*)&fd.dir_entry, sizeof(struct FatDirEntry));
+        return 1u8;
+    }
+    return 0u8;
 }
 
 u8 cache(u32 block_addr) {
@@ -243,7 +240,7 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
     u8 r;
 
     struct FileDescriptor fd;
-    if (dir == (struct FatDirEntry *)0u8) {
+    if (dir == (struct FatDirEntry *)0u8 || dir->cluster_lo == 0u16) {
         init_root_dir(&fd);
     } else {
         memcpy((u8*)&fd.dir_entry, (u8*)dir, sizeof(struct FatDirEntry));

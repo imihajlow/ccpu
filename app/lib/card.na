@@ -33,6 +33,10 @@ u8 delay_1ms() {
     for (u16 i = 0u16; i < 1000u16; i += 1u16) {}
 }
 
+export u8 card_is_present() {
+    return !(SPI_CTRL & SPI_CTRL_N_CARD_DETECT);
+}
+
 export u8 card_init() {
     u8 r;
     SPI_CTRL = SPI_CTRL_EN_3V3 | SPI_CTRL_N_CARD_CS;

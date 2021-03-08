@@ -12,6 +12,8 @@
 
 #define CARD_BLOCK_SIZE 512u16
 
+import u8 card_is_present();
+
 import u8 card_init();
 import u8 card_power_off();
 import u8 card_read_block(u32 block_index, u8 *dst);
