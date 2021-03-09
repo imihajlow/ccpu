@@ -40,7 +40,7 @@ import u8 fat_init();
  */
 import u8 fat_open_dir(struct FatDirEntry *dir);
 
-/*
+/**
  Returns 1 on success, 0 on fail (or when no entries are left)
  */
 import u8 fat_get_next_dir_entry(u8 dir_desc, struct FatDirEntry *dst, u8 attr_skip_mask);
@@ -51,6 +51,13 @@ import u8 fat_open_file(struct FatDirEntry *dir, u8 *name);
 import u16 fat_read(u8 fd, u8 *dst, u16 len);
 
 import u16 fat_write(u8 fd, u8 *src, u16 len);
+
+/**
+ Set file size to the current read/write pointer.
+ */
+import u8 fat_truncate(u8 fd);
+
+import u8 fat_seek_end(u8 fd);
 
 import u8 fat_close(u8 fd);
 

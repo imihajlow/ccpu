@@ -2,6 +2,7 @@
 #include <card.h>
 #include <string.h>
 
+#define FAT_MIN_LAST_CLUSTER 0xFFF8u16
 #define MAX_FILE_DESC 4u8
 
 struct Partition {
@@ -57,7 +58,8 @@ struct FileDescriptor {
     u16 dir_entry_index_in_block; // offset inside the block
     u8 is_root; // for directory descriptors: if this is a root directory (a special case)
     u8 dir_entry_modified; // need to write out the dir entry on file close
-    u8 filler[10];
+    u32 abs_offset; // absolute read/write pointer
+    u8 filler[6];
 };
 
 #define INVALID_BLOCK_ADDR 0xffffffffu32
@@ -195,6 +197,7 @@ export u8 to_fat_name(u8 *dst, u8 *src) {
         dst[i] = c;
         src += 1u8;
     }
+    c = *src;
     if (c == '.') {
         src += 1u8;
         c = *src;
@@ -317,6 +320,22 @@ u16 read_fat_entry(u16 index) {
     }
 }
 
+u8 write_fat_entry(u16 index, u16 value) {
+    u16 entry_offset = (u16)(u8)(index);
+    u16 sector_index = index >> 8u8;
+    u8 r;
+    u32 disk_offset;
+    disk_offset = fat_info.fat0_offset;
+    disk_offset += (u32)sector_index;
+    r = cache(disk_offset);
+    if (r) {
+        return 0u8;
+    }
+    ((u16*)cache_block)[entry_offset] = value;
+    r = flush_cache();
+    return !r;
+}
+
 u16 alloc_cluster(u16 last) {
     u8 r;
     u16 result = 0u16;
@@ -405,12 +424,7 @@ u8 init_fd(struct FileDescriptor *pfd) {
     u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
     pfd->last_cluster_len = (u16)pfd->dir_entry.size & cluster_mask;
 
-    pfd->block_addr = fat_info.data_offset;
-    pfd->block_addr += (u32)(pfd->dir_entry.cluster_lo - 2u16) << fat_info.log_sectors_per_cluster;
-    pfd->block_in_cluster = 0u8;
-    pfd->index_in_block = 0u16;
-    pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
-    pfd->cur_cluster = pfd->dir_entry.cluster_lo;
+    seek_begin(pfd);
     pfd->dir_entry_modified = 0u8;
 }
 
@@ -419,6 +433,7 @@ u8 init_root_dir(struct FileDescriptor *pfd) {
     pfd->block_addr = fat_info.root_dir_offset;
     pfd->block_in_cluster = 0u8;
     pfd->index_in_block = 0u16;
+    pfd->abs_offset = 0u32;
     pfd->dir_entry_modified = 0u8;
 }
 
@@ -428,6 +443,7 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
 
 u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
     pfd->index_in_block += advance;
+    pfd->abs_offset += (u32)advance;
     if (pfd->index_in_block == CARD_BLOCK_SIZE) {
         pfd->block_in_cluster += 1u8;
         pfd->index_in_block = 0u16;
@@ -456,6 +472,7 @@ u8 seek_begin(struct FileDescriptor *pfd) {
     pfd->index_in_block = 0u16;
     pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
     pfd->cur_cluster = pfd->dir_entry.cluster_lo;
+    pfd->abs_offset = 0u32;
 }
 
 export u16 fat_write(u8 fd, u8 *src, u16 len) {
@@ -471,7 +488,7 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
     u8 r;
     while (len != 0u16) {
         u16 chunk_len = CARD_BLOCK_SIZE - pfd->index_in_block;
-        if (pfd->next_cluster >= 0xFFF8u16) {
+        if (pfd->next_cluster >= FAT_MIN_LAST_CLUSTER) {
             // last cluster
             u16 remainder = pfd->last_cluster_len - ((u16)pfd->block_in_cluster << 9u8);
             if (remainder <= CARD_BLOCK_SIZE) {
@@ -538,4 +555,41 @@ export u8 fat_close(u8 fd) {
         flush_cache();
     }
     pfd->is_free = 1u8;
+}
+
+export u8 fat_truncate(u8 fd) {
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    if (pfd->is_free) {
+        return 0u8;
+    }
+    if (pfd->abs_offset == pfd->dir_entry.size) {
+        return 1u8;
+    }
+    pfd->dir_entry.size = pfd->abs_offset;
+    pfd->dir_entry_modified = 1u8;
+    if (pfd->next_cluster < FAT_MIN_LAST_CLUSTER) {
+        // there is a chain of clusters to free
+        u16 cur_cluster = pfd->cur_cluster;
+        u16 next_cluster = pfd->next_cluster;
+        write_fat_entry(cur_cluster, 0xffffu16);
+        while (next_cluster < FAT_MIN_LAST_CLUSTER) {
+            cur_cluster = next_cluster;
+            next_cluster = read_fat_entry(cur_cluster);
+            write_fat_entry(cur_cluster, 0u16);
+        }
+        pfd->next_cluster = 0xffffu16;
+    }
+    u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
+    pfd->last_cluster_len = (u16)pfd->abs_offset & cluster_mask;
+    return 1u8;
+}
+
+export u8 fat_seek_end(u8 fd) {
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    if (pfd->is_free) {
+        return 0u8;
+    }
+
+
+    return 1u8;
 }

@@ -6,9 +6,10 @@
 #include <more.h>
 #include <line_edit.h>
 
-#define FILE_COLOR COLOR(COLOR_WHITE, COLOR_BLUE)
-#define CURSOR_COLOR COLOR(COLOR_WHITE, COLOR_CYAN)
-#define STATUS_COLOR COLOR(COLOR_BLACK, COLOR_LIGHT_BLUE)
+#define FILE_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
+#define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_CYAN)
+#define STATUS_COLOR COLOR(COLOR_BLACK, COLOR_CYAN)
+#define TYPING_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
 
 #define MAX_FILES 145u16
 
@@ -90,7 +91,7 @@ u8 table_cursor_loop(u8 max_index, u8 reset_cursor) {
         new_index = 0u8;
         cursor_file_index = 0u16;
     }
-    set_cursor(0u8, 0u8, CURSOR_COLOR);
+    set_cursor(col, row, CURSOR_COLOR);
     while (1u8) {
         u8 k = ps2_wait_key_pressed();
         if (k == PS2_KEY_DOWN) {
@@ -149,6 +150,43 @@ u8 print_file(u8 *name) {
     fat_close(f);
 }
 
+u8 type_file(u8 *name) {
+    u8 f = fat_open_file(&current_dir, name);
+    if (f == FAT_BAD_DESC) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
+        ps2_wait_key_pressed();
+        return;
+    }
+    u8 buf[64];
+    while (1u8) {
+        u8 row = 1u8;
+        vga_clear(TYPING_COLOR);
+        memset((u8*)vga_color_seg, STATUS_COLOR, (u16)VGA_COLS);
+        vga_put_text(0u8, 0u8, "Typing");
+        vga_put_text(7u8, 0u8, name);
+        while (row != VGA_ROWS) {
+            buf[0u8] = 0u8;
+            u8 r = line_edit((u8*)buf, 64u8, 0u8, row, TYPING_COLOR);
+            if (!r) {
+                fat_truncate(f);
+                fat_close(f);
+                return;
+            }
+            r = strlen_8((u8*)buf);
+            buf[r] = '\n';
+            buf[r + 1u8] = 0u8;
+            // for (u8 i = 0u8; i != 100u8; i += 1u8) {
+                u16 l = fat_write(f, (u8*)buf, (u16)(r + 1u8));
+                if (l != (u16)(r + 1u8)) {
+                    vga_put_text(0u8, VGA_ROWS - 1u8, "Error writing");
+                    ps2_wait_key_pressed();
+                }
+            // }
+            row += 1u8;
+        }
+    }
+}
+
 
 export u8 main() {
     ps2_init();
@@ -198,6 +236,11 @@ export u8 main() {
                 if (k == PS2_KEY_F3) {
                     if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
                         print_file((u8*)filenames[cursor_file_index].name);
+                        break;
+                    }
+                } else if (k == PS2_KEY_F4) {
+                    if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
+                        type_file((u8*)filenames[cursor_file_index].name);
                         break;
                     }
                 } else if (k == PS2_KEY_ENTER) {
