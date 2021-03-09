@@ -124,6 +124,7 @@ export u8 fat_open_dir(struct FatDirEntry *dir) {
     if (fd == MAX_FILE_DESC) {
         return FAT_BAD_DESC;
     }
+    pfd->is_free = 0u8;
     if ((u16)dir == 0u16 || dir->cluster_lo == 0u16) {
         // root dir
         init_root_dir(pfd);
