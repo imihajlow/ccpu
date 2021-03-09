@@ -590,6 +590,13 @@ export u8 fat_seek_end(u8 fd) {
         return 0u8;
     }
 
-
+    while (pfd->next_cluster < FAT_MIN_LAST_CLUSTER) {
+        pfd->cur_cluster = pfd->next_cluster;
+        pfd->next_cluster = read_fat_entry(pfd->next_cluster);
+    }
+    pfd->abs_offset = pfd->dir_entry.size;
+    pfd->block_in_cluster = (u8)(pfd->last_cluster_len >> 9u8);
+    pfd->index_in_block = pfd->last_cluster_len & (CARD_BLOCK_SIZE - 1u16);
+    pfd->block_addr = fat_info.data_offset + ((u32)(pfd->cur_cluster - 2u16) << fat_info.log_sectors_per_cluster) + (u32)pfd->block_in_cluster;
     return 1u8;
 }

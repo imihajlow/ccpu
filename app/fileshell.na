@@ -150,20 +150,28 @@ u8 print_file(u8 *name) {
     fat_close(f);
 }
 
-u8 type_file(u8 *name) {
+u8 type_file(u8 *name, u8 append) {
     u8 f = fat_open_file(&current_dir, name);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
         ps2_wait_key_pressed();
         return;
     }
+    if (append) {
+        fat_seek_end(f);
+    }
     u8 buf[64];
     while (1u8) {
         u8 row = 1u8;
         vga_clear(TYPING_COLOR);
         memset((u8*)vga_color_seg, STATUS_COLOR, (u16)VGA_COLS);
-        vga_put_text(0u8, 0u8, "Typing");
-        vga_put_text(7u8, 0u8, name);
+        if (append) {
+            vga_put_text(0u8, 0u8, "Appending");
+            vga_put_text(10u8, 0u8, name);
+        } else {
+            vga_put_text(0u8, 0u8, "Typing");
+            vga_put_text(7u8, 0u8, name);
+        }
         while (row != VGA_ROWS) {
             buf[0u8] = 0u8;
             u8 r = line_edit((u8*)buf, 64u8, 0u8, row, TYPING_COLOR);
@@ -222,7 +230,7 @@ export u8 main() {
             }
         } else {
             u8 init = 1u8;
-            vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, F4 - type");
+            vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, F4 - type, F5 - append");
             load_files();
             u16 max_index = display_table(0u16);
             while (1u8) {
@@ -238,9 +246,9 @@ export u8 main() {
                         print_file((u8*)filenames[cursor_file_index].name);
                         break;
                     }
-                } else if (k == PS2_KEY_F4) {
+                } else if (k == PS2_KEY_F4 || k == PS2_KEY_F5) {
                     if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                        type_file((u8*)filenames[cursor_file_index].name);
+                        type_file((u8*)filenames[cursor_file_index].name, k == PS2_KEY_F5);
                         break;
                     }
                 } else if (k == PS2_KEY_ENTER) {
