@@ -45,6 +45,7 @@ struct FatInfo {
     u8 sectors_per_cluster;
     u16 n_dir_entries;
     u32 data_offset;
+    u16 n_clusters;
 };
 
 struct FileDescriptor {
@@ -119,6 +120,25 @@ export u8 fat_init() {
     fat_info.n_dir_entries = bpb.n_dir_entries;
     offset += (u32)((fat_info.n_dir_entries + 15u16) >> 4u8); // 27400
     fat_info.data_offset = offset;
+
+    u32 data_sectors;
+    if (bpb.total_sectors == 0u16) {
+        data_sectors = bpb.large_sectors;
+    } else {
+        data_sectors = (u32)bpb.total_sectors;
+    }
+    data_sectors -= offset;
+    u32 n_clusters = data_sectors >> fat_info.log_sectors_per_cluster;
+    if (n_clusters < 4085u32) {
+        // FAT12
+        return FAT_ERROR_UNSUPPORTED_FAT_TYPE;
+    } else if (n_clusters < 65525u32) {
+        // FAT16
+        fat_info.n_clusters = (u16)n_clusters;
+    } else {
+        // FAT32 or ExFAT
+        return FAT_ERROR_UNSUPPORTED_FAT_TYPE;
+    }
 
     return 1u8;
 }
