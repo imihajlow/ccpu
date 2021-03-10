@@ -37,6 +37,7 @@ function_body: "{" statement* "}"
     | "return" ";" -> empty_return_statement
     | "return" expression ";" -> return_statement
     | "return" function_call ";" -> return_fc_statement
+    | ";" -> block
 
 _basic_statement: assignment
     | declaration
