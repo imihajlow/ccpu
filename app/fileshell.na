@@ -56,7 +56,7 @@ u16 display_table(u16 offset) {
         }
         vga_put_text(col, row, (u8*)f->name);
         if (f->attrs & FAT_FILE_ATTR_DIRECTORY) {
-            vga_char_seg[VGA_OFFSET(col + 14u8, row)] = '/';
+            vga_char_seg[VGA_OFFSET(col + 13u8, row)] = '/';
         }
         f += 1u8;
         offset += 1u16;

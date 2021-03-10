@@ -1,0 +1,47 @@
+#include <vga.h>
+#include <ps2keyboard.h>
+#include <string.h>
+
+#define LOG_ROW 29u8
+
+u8 print_hex_char(u8 col, u8 row, u8 v) {
+    if (v < 10u8) {
+        v += '0';
+    } else {
+        v += 'A' - 10u8;
+    }
+    vga_char_seg[VGA_OFFSET(col, row)] = v;
+}
+
+export u8 log_string(u8 *s) {
+    vga_put_text(0u8, LOG_ROW, s);
+    ps2_wait_key_pressed();
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, LOG_ROW), 0u8, (u16)VGA_COLS);
+}
+
+export u8 log_u8(u8 v) {
+    print_hex_char(50u8 + 0u8, LOG_ROW, v >> 4u8);
+    print_hex_char(50u8 + 1u8, LOG_ROW, v & 0xfu8);
+    ps2_wait_key_pressed();
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, LOG_ROW), 0u8, (u16)VGA_COLS);
+}
+export u8 log_u16(u16 v) {
+    print_hex_char(60u8 + 0u8, LOG_ROW, ((u8*)&v)[1] >> 4u8);
+    print_hex_char(60u8 + 1u8, LOG_ROW, ((u8*)&v)[1] & 0xfu8);
+    print_hex_char(60u8 + 2u8, LOG_ROW, ((u8*)&v)[0] >> 4u8);
+    print_hex_char(60u8 + 3u8, LOG_ROW, ((u8*)&v)[0] & 0xfu8);
+    ps2_wait_key_pressed();
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, LOG_ROW), 0u8, (u16)VGA_COLS);
+}
+export u8 log_u32(u32 v) {
+    print_hex_char(72u8 + 0u8, LOG_ROW, ((u8*)&v)[3] >> 4u8);
+    print_hex_char(72u8 + 1u8, LOG_ROW, ((u8*)&v)[3] & 0xfu8);
+    print_hex_char(72u8 + 2u8, LOG_ROW, ((u8*)&v)[2] >> 4u8);
+    print_hex_char(72u8 + 3u8, LOG_ROW, ((u8*)&v)[2] & 0xfu8);
+    print_hex_char(72u8 + 4u8, LOG_ROW, ((u8*)&v)[1] >> 4u8);
+    print_hex_char(72u8 + 5u8, LOG_ROW, ((u8*)&v)[1] & 0xfu8);
+    print_hex_char(72u8 + 6u8, LOG_ROW, ((u8*)&v)[0] >> 4u8);
+    print_hex_char(72u8 + 7u8, LOG_ROW, ((u8*)&v)[0] & 0xfu8);
+    ps2_wait_key_pressed();
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, LOG_ROW), 0u8, (u16)VGA_COLS);
+}

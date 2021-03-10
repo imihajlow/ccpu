@@ -68,6 +68,6 @@ env.Bin('ps2test', Split('test/ps2test.na') + natrix + lib)
 
 env.Bin('ps2hightest', Split('test/ps2hightest.na') + natrix + lib)
 
-env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na') + natrix + lib)
+env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + natrix + lib)
 
-env.Bin('fileshell', Split('fileshell.na lib/card.na lib/fat.na') + natrix + lib)
+env.Bin('fileshell', Split('fileshell.na lib/card.na lib/fat.na lib/log.na') + natrix + lib)
