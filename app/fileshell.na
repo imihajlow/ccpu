@@ -5,6 +5,7 @@
 #include <fat.h>
 #include <more.h>
 #include <line_edit.h>
+#include <log.h>
 
 #define FILE_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_CYAN)
@@ -42,8 +43,9 @@ u8 load_files() {
         name->attrs = ent.attrs;
         name += 1u8;
     }
+    r = fat_last_error == FAT_OK;
     fat_close(fd);
-    return 1u8;
+    return r;
 }
 
 u16 display_table(u16 offset) {
@@ -133,12 +135,11 @@ u8 print_file(u8 *name) {
     u8 k = 1u8;
     while (k) {
         u16 len = fat_read(f, (u8*)buf, 256u16);
-        if (len == 0u16) {
-            break;
-        }
-        if (len >= 0x8000u16) {
-            vga_put_text(0u8, VGA_ROWS - 1u8, "ERROR");
-            ps2_wait_key_pressed();
+        if (len < 256u16) {
+            if (fat_last_error != FAT_EOF) {
+                vga_put_text(0u8, VGA_ROWS - 1u8, "ERROR");
+                ps2_wait_key_pressed();
+            }
             break;
         }
         k = more_print((u8*)buf, len);
@@ -157,8 +158,14 @@ u8 type_file(u8 *name, u8 append) {
         ps2_wait_key_pressed();
         return;
     }
+    u8 r;
     if (append) {
-        fat_seek_end(f);
+        r = fat_seek_end(f);
+        if (!r) {
+            vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot seek to the end");
+            ps2_wait_key_pressed();
+            return;
+        }
     }
     u8 buf[64];
     while (1u8) {
@@ -174,7 +181,7 @@ u8 type_file(u8 *name, u8 append) {
         }
         while (row != VGA_ROWS) {
             buf[0u8] = 0u8;
-            u8 r = line_edit((u8*)buf, 64u8, 0u8, row, TYPING_COLOR);
+            r = line_edit((u8*)buf, 64u8, 0u8, row, TYPING_COLOR);
             if (!r) {
                 fat_truncate(f);
                 fat_close(f);
@@ -213,8 +220,7 @@ export u8 main() {
             }
             r = card_init();
             if (!r) {
-                r = fat_init();
-                fat_success = r == 0u8;
+                fat_success = fat_init();
                 if (fat_success) {
                     r = fat_change_dir((struct FatDirEntry*)0, (u8*)0, &current_dir);
                     if (!r) {
@@ -231,32 +237,39 @@ export u8 main() {
         } else {
             u8 init = 1u8;
             vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, F4 - type, F5 - append");
-            load_files();
-            u16 max_index = display_table(0u16);
-            while (1u8) {
-                u8 k = table_cursor_loop((u8)max_index, init);
-                init = 0u8;
-                card_present = card_is_present();
-                if (!card_present) {
-                    card_power_off();
-                    break;
+            r = load_files();
+            if (r) {
+                u16 max_index = display_table(0u16);
+                while (1u8) {
+                    u8 k = table_cursor_loop((u8)max_index, init);
+                    init = 0u8;
+                    card_present = card_is_present();
+                    if (!card_present) {
+                        card_power_off();
+                        break;
+                    }
+                    if (k == PS2_KEY_F3) {
+                        if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
+                            print_file((u8*)filenames[cursor_file_index].name);
+                            break;
+                        }
+                    } else if (k == PS2_KEY_F4 || k == PS2_KEY_F5) {
+                        if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
+                            type_file((u8*)filenames[cursor_file_index].name, k == PS2_KEY_F5);
+                            break;
+                        }
+                    } else if (k == PS2_KEY_ENTER) {
+                        r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
+                        if (r) {
+                            break;
+                        }
+                    }
                 }
-                if (k == PS2_KEY_F3) {
-                    if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                        print_file((u8*)filenames[cursor_file_index].name);
-                        break;
-                    }
-                } else if (k == PS2_KEY_F4 || k == PS2_KEY_F5) {
-                    if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                        type_file((u8*)filenames[cursor_file_index].name, k == PS2_KEY_F5);
-                        break;
-                    }
-                } else if (k == PS2_KEY_ENTER) {
-                    r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
-                    if (r) {
-                        break;
-                    }
-                }
+            }
+            else
+            {
+                card_present = 0u8;
+                card_power_off();
             }
         }
     }

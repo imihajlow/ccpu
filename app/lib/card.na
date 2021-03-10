@@ -19,9 +19,19 @@ u8 spi_transfer(u8 x) {
 }
 #endif
 
+// 300 kHz SPI = ~25 uS byte transfer
+#define TIMEOUT_CMD 4u8
+#define TIMEOUT_BLOCK 20u8
+
 #define R1_IDLE 1u8
 #define R1_READY 0u8
 #define R1_ILLEGAL_COMMAND 4u8
+
+#define ET_ERROR 1u8
+#define ET_CC_ERROR 2u8
+#define ET_ECC_ERROR 4u8
+#define ET_OUT_OF_RANGE 8u8
+#define ET_LOCKED 16u8
 
 #define DATA_START_BLOCK 0xFEu8
 #define DATA_RSP_MASK 0x1Fu8
@@ -39,6 +49,9 @@ export u8 card_is_present() {
 
 export u8 card_init() {
     u8 r;
+    if (SPI_CTRL & SPI_CTRL_N_CARD_DETECT) {
+        return CARD_ERROR_NO_CARD;
+    }
     SPI_CTRL = SPI_CTRL_EN_3V3 | SPI_CTRL_N_CARD_CS;
     delay_1ms();
 
@@ -62,13 +75,13 @@ export u8 card_init() {
     spi_transfer(0x00u8);
     spi_transfer(0x00u8);
     spi_transfer(0x95u8);
-    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+    for (u8 t = 0u8; t < TIMEOUT_CMD; t += 1u8) { // wait for response
         r = spi_transfer(0xFFu8);
         if (r != 0xffu8) {
             break;
         }
     }
-    if (t == 4u8) {
+    if (t == TIMEOUT_CMD) {
         SPI_CTRL = 0u8;
         return CARD_ERROR_TIMEOUT;
     }
@@ -123,7 +136,20 @@ export u8 card_power_off() {
     SPI_CTRL = SPI_CTRL_N_CARD_CS;
 }
 
+u8 return_block_error(u8 error) {
+    if (error & ET_OUT_OF_RANGE) {
+        return CARD_ERROR_OUT_OF_RANGE;
+    } else if (error & ET_LOCKED) {
+        return CARD_ERROR_LOCKED;
+    } else {
+        return CARD_ERROR_BLOCK_CMD_FAILED;
+    }
+}
+
 export u8 card_read_block(u32 block_index, u8 *dst) {
+    if (SPI_CTRL & SPI_CTRL_N_CARD_DETECT) {
+        return CARD_ERROR_NO_CARD;
+    }
     u8 r;
     block_index <<= 1u8;
     spi_transfer(0x40u8 | 17u8); // CMD17 - read single block
@@ -133,27 +159,36 @@ export u8 card_read_block(u32 block_index, u8 *dst) {
     spi_transfer(0u8);
     spi_transfer(0xFFu8); // CRC
 
-    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+    for (u8 t = 0u8; t != TIMEOUT_CMD; t += 1u8) { // wait for response
         r = spi_transfer(0xFFu8);
         if (r != 0xffu8) {
             break;
         }
     }
-    if (t == 4u8) {
+    if (t == TIMEOUT_CMD) {
         SPI_CTRL = 0u8;
         return CARD_ERROR_TIMEOUT;
     }
     if (r) {
         spi_transfer(0xFFu8);
-        return CARD_ERROR_BLOCK_CMD_FAILED;
+        if (r | R1_IDLE) {
+            return CARD_ERROR_NOT_INITIALIZED;
+        } else {
+            return CARD_ERROR_BLOCK_CMD_FAILED;
+        }
     }
 
     r = spi_transfer(0xffu8);
-    while (r == 0xffu8) {
+    for (t = 0u8; t != TIMEOUT_BLOCK && r == 0xFFu8; t += 1u8) {
         r = spi_transfer(0xFFu8);
     }
+    if (t == TIMEOUT_BLOCK) {
+        SPI_CTRL = 0u8;
+        return CARD_ERROR_TIMEOUT;
+    }
     if (r != DATA_START_BLOCK) {
-        return r;
+        // error token
+        return return_block_error(r);
     }
     for (u16 i = 0u16; i < 512u16; i += 1u16) {
         *dst = spi_transfer(0xFFu8);
@@ -165,7 +200,7 @@ export u8 card_read_block(u32 block_index, u8 *dst) {
 
     // Final transfer
     spi_transfer(0xFFu8);
-    return 0u8;
+    return CARD_SUCCESS;
 }
 
 export u8 card_write_block(u32 block_index, u8 *src) {
@@ -178,19 +213,23 @@ export u8 card_write_block(u32 block_index, u8 *src) {
     spi_transfer(0u8);
     spi_transfer(0xFFu8); // CRC
 
-    for (u8 t = 0u8; t < 4u8; t += 1u8) { // wait for response
+    for (u8 t = 0u8; t < TIMEOUT_CMD; t += 1u8) { // wait for response
         r = spi_transfer(0xFFu8);
         if (r != 0xffu8) {
             break;
         }
     }
-    if (t == 4u8) {
+    if (t == TIMEOUT_CMD) {
         SPI_CTRL = 0u8;
         return CARD_ERROR_TIMEOUT;
     }
     if (r) {
         spi_transfer(0xFFu8);
-        return CARD_ERROR_BLOCK_CMD_FAILED;
+        if (r | R1_IDLE) {
+            return CARD_ERROR_NOT_INITIALIZED;
+        } else {
+            return CARD_ERROR_BLOCK_CMD_FAILED;
+        }
     }
 
     spi_transfer(0xffu8);

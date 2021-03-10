@@ -67,6 +67,7 @@ struct FileDescriptor {
 #define INVALID_BLOCK_ADDR 0xffffffffu32
 u8 cache_block[CARD_BLOCK_SIZE];
 u32 cache_block_addr;
+export u8 fat_last_error;
 
 struct FatInfo fat_info;
 struct FileDescriptor file_desc[MAX_FILE_DESC];
@@ -80,20 +81,21 @@ export u8 fat_init() {
     struct Partition partition;
     struct BPB bpb;
     u8 r = cache(0u32);
-    if (r) {
-        return FAT_ERROR_CARD;
+    if (!r) {
+        return 0u8;
     }
     memcpy((u8*)&partition, (u8*)cache_block + 446, sizeof(struct Partition));
 
     u32 offset = partition.rel_sector;
     r = cache(offset);
-    if (r) {
-        return FAT_ERROR_CARD;
+    if (!r) {
+        return 0u8;
     }
     memcpy((u8*)&bpb, (u8*)cache_block, sizeof(struct BPB));
 
     if (bpb.bytes_per_sector != 512u16) {
-        return FAT_ERROR_UNSUPPORTED_SECTOR_SIZE;
+        fat_last_error = FAT_ERROR_UNSUPPORTED_SECTOR_SIZE;
+        return 0u8;
     }
     offset = bpb.n_hidden_sectors;
     offset += (u32)bpb.n_reserved_sectors;
@@ -103,7 +105,8 @@ export u8 fat_init() {
         fat_info.fat1_offset = offset;
         offset += (u32)bpb.sectors_per_fat;
     } else if (bpb.n_fats > 2u8) {
-        return FAT_ERROR_TOO_MANY_FATS;
+        fat_last_error = FAT_ERROR_TOO_MANY_FATS;
+        return 0u8;
     }
     fat_info.root_dir_block = offset; // 23400
     fat_info.sectors_per_fat = bpb.sectors_per_fat;
@@ -117,7 +120,7 @@ export u8 fat_init() {
     offset += (u32)((fat_info.n_dir_entries + 15u16) >> 4u8); // 27400
     fat_info.data_offset = offset;
 
-    return 0u8;
+    return 1u8;
 }
 
 export u8 fat_open_dir(struct FatDirEntry *dir) {
@@ -127,6 +130,7 @@ export u8 fat_open_dir(struct FatDirEntry *dir) {
         pfd += 1u8;
     }
     if (fd == MAX_FILE_DESC) {
+        fat_last_error = FAT_ERROR_TOO_MANY_OPEN_FILES;
         return FAT_BAD_DESC;
     }
     pfd->is_free = 0u8;
@@ -135,7 +139,11 @@ export u8 fat_open_dir(struct FatDirEntry *dir) {
         init_root_dir(pfd);
     } else {
         memcpy((u8*)&pfd->dir_entry, (u8*)dir, sizeof(struct FatDirEntry));
-        init_fd(pfd);
+        r = init_fd(pfd);
+        if (!r) {
+            pfd->is_free = 1u8;
+            return FAT_BAD_DESC;
+        }
     }
     return fd;
 }
@@ -149,34 +157,54 @@ export u8 fat_change_dir(struct FatDirEntry *parent, u8 *name, struct FatDirEntr
     struct FileDescriptor fd;
     u8 r = find_file(parent, name, &fd);
 
-    if (r && (fd.dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY)) {
-        memcpy((u8*)dst, (u8*)&fd.dir_entry, sizeof(struct FatDirEntry));
-        return 1u8;
+    if (r) {
+        if (fd.dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY) {
+            memcpy((u8*)dst, (u8*)&fd.dir_entry, sizeof(struct FatDirEntry));
+            return 1u8;
+        } else {
+            fat_last_error = FAT_ERROR_NOT_A_DIR;
+        }
     }
     return 0u8;
 }
 
+u8 set_fat_error(u8 card_error) {
+    if (card_error == CARD_ERROR_NO_CARD) {
+        fat_last_error = FAT_ERROR_NO_CARD;
+    } else if (card_error == CARD_ERROR_NOT_INITIALIZED) {
+        fat_last_error = FAT_ERROR_CARD_REINSERTED;
+    } else if (card_error == CARD_ERROR_OUT_OF_RANGE) {
+        fat_last_error = FAT_ERROR_FS_BROKEN;
+    } else {
+        fat_last_error = FAT_ERROR_CARD;
+    }
+}
+
+// returns bool
 u8 cache(u32 block_addr) {
     if (cache_block_addr == block_addr) {
-        return 0u8;
+        return 1u8;
     }
     cache_block_addr = block_addr;
     u8 r = card_read_block(block_addr, (u8*)cache_block);
     if (r) {
         cache_block_addr = INVALID_BLOCK_ADDR;
-        log_string("can't cache");
-        log_u32(block_addr);
-        log_u8(r);
-    }
-    return r;
-}
-
-u8 flush_cache() {
-    if (cache_block_addr != INVALID_BLOCK_ADDR) {
-        return card_write_block(cache_block_addr, (u8*)cache_block);
-    } else {
+        set_fat_error(r);
         return 0u8;
     }
+    return 1u8;
+}
+
+// returns bool
+u8 flush_cache() {
+    if (cache_block_addr != INVALID_BLOCK_ADDR) {
+        u8 r = card_write_block(cache_block_addr, (u8*)cache_block);
+        if (r) {
+            set_fat_error(r);
+            return 0u8;
+        }
+    }
+    return 1u8;
 }
 
 export u8 to_fat_name(u8 *dst, u8 *src) {
@@ -246,6 +274,7 @@ export u8 from_fat_name(u8 *dst, u8 *src) {
 }
 
 // Find file in dir by name and fill out dir_entry-related fields in file descriptor
+// returns bool
 u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
     u8 r;
 
@@ -258,12 +287,8 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
     u16 cluster;
     if (is_root) {
         block_addr = fat_info.root_dir_block;
-        log_string("find file from root");
-        log_u32(block_addr);
     } else {
         cluster = dir->cluster_lo;
-        log_string("find file from subfolder");
-        log_u16(cluster);
     }
     u8 sector_in_block = 0u8;
     while (is_root || cluster < FAT_MIN_LAST_CLUSTER) {
@@ -271,21 +296,20 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
             block_addr = fat_info.data_offset + ((u32)(cluster - 2u16) << fat_info.log_sectors_per_cluster);
             cluster = read_fat_entry(cluster);
             if (cluster == 0u16) {
-                log_string("can't read next cluster");
                 return 0u8;
             }
         }
         for (u8 block_in_cluster = 0u8; block_in_cluster != fat_info.sectors_per_cluster; block_in_cluster += 1u8) {
             log_u32(block_addr);
             r = cache(block_addr);
-            if (r) {
+            if (!r) {
                 return 0u8;
             }
             struct FatDirEntry *pentry = (struct FatDirEntry *)cache_block;
             for (u8 i = 0u8; i != (u8)(CARD_BLOCK_SIZE / sizeof(struct FatDirEntry)); i += 1u8) {
                 if (pentry->filename[0] == 0u8) {
-                    log_string("last entry");
                     // last entry
+                    fat_last_error = FAT_ERROR_NOT_FOUND;
                     return 0u8;
                 }
                 if (pentry->filename[0] != 0xe5u8) {
@@ -294,9 +318,6 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
                         memcpy((u8*)&pfd->dir_entry, (u8*)pentry, sizeof(struct FatDirEntry));
                         pfd->dir_entry_index_in_block = (u16)i << 5u8; // log sizeof(struct FatDirEntry)
                         pfd->dir_entry_block_addr = block_addr;
-                        log_string("found");
-                        log_u32(pfd->dir_entry_block_addr);
-                        log_u16(pfd->dir_entry_index_in_block);
                         return 1u8;
                     }
                 }
@@ -305,25 +326,31 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
             block_addr += 1u32;
         }
     }
-    log_string("loop exit");
+    fat_last_error = FAT_ERROR_NOT_FOUND;
     return 0u8;
 }
 
 export u8 fat_get_next_dir_entry(u8 desc, struct FatDirEntry *dst, u8 attr_skip_mask) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + desc;
     if (pfd->is_free) {
+        fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
         return 0u8;
     }
 
     u8 r;
+    fat_last_error = FAT_OK;
     while (1u8) {
         r = cache(pfd->block_addr);
-        if (r) {
+        if (!r) {
             return 0u8;
         }
         memcpy((u8*)dst, (u8*)cache_block + pfd->index_in_block, sizeof(struct FatDirEntry));
 
-        seek_advance(pfd, sizeof(struct FatDirEntry));
+        r = seek_advance(pfd, sizeof(struct FatDirEntry));
+
+        if (!r) {
+            return 0u8;
+        }
 
         if (dst->filename[0] == 0u8) { // last entry
             return 0u8;
@@ -341,6 +368,7 @@ export u8 fat_get_next_dir_entry(u8 desc, struct FatDirEntry *dst, u8 attr_skip_
     }
 }
 
+// returns 0 on error
 u16 read_fat_entry(u16 index) {
     u16 entry_offset = (u16)(u8)(index);
     u16 sector_index = index >> 8u8;
@@ -349,13 +377,14 @@ u16 read_fat_entry(u16 index) {
     disk_offset = fat_info.fat0_offset;
     disk_offset += (u32)sector_index;
     r = cache(disk_offset);
-    if (r) {
+    if (!r) {
         return 0u16;
     } else {
         return ((u16*)cache_block)[entry_offset];
     }
 }
 
+// returns bool
 u8 write_fat_entry(u16 index, u16 value) {
     u16 entry_offset = (u16)(u8)(index);
     u16 sector_index = index >> 8u8;
@@ -364,15 +393,18 @@ u8 write_fat_entry(u16 index, u16 value) {
     disk_offset = fat_info.fat0_offset;
     disk_offset += (u32)sector_index;
     r = cache(disk_offset);
-    if (r) {
+    if (!r) {
         return 0u8;
     }
     ((u16*)cache_block)[entry_offset] = value;
     r = flush_cache();
+    if (!r) {
+        return 0u8;
+    }
     disk_offset = fat_info.fat1_offset;
     disk_offset += (u32)sector_index;
     r = cache(disk_offset);
-    if (r) {
+    if (!r) {
         return 0u8;
     }
     ((u16*)cache_block)[entry_offset] = value;
@@ -380,13 +412,14 @@ u8 write_fat_entry(u16 index, u16 value) {
     return !r;
 }
 
+// returns 0xffff on error
 u16 alloc_cluster(u16 last) {
     u8 r;
     u16 result = 0u16;
     u32 block_addr = fat_info.fat0_offset;
     for (u16 fat_sector = 0u16; fat_sector != fat_info.sectors_per_fat; fat_sector += 1u16) {
         r = cache(block_addr);
-        if (r) {
+        if (!r) {
             return 0xffffu16;
         }
         for (u16 i = 0u16; i < (CARD_BLOCK_SIZE >> 1u16); i += 1u16) {
@@ -396,38 +429,38 @@ u16 alloc_cluster(u16 last) {
                 // write fat0
                 ((u16*)cache_block)[i] = 0xffffu16;
                 r = flush_cache();
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 // write fat1
                 r = cache(block_addr + fat_info.fat1_offset - fat_info.fat0_offset);
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 ((u16*)cache_block)[i] = 0xffffu16;
                 r = flush_cache();
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
 
                 // now write its parent, start with fat1
                 block_addr = fat_info.fat1_offset + (u32)(last >> 8u8);
                 r = cache(block_addr);
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 ((u16*)cache_block)[(u8)last] = result;
                 r = flush_cache();
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 r = cache(block_addr + fat_info.fat0_offset - fat_info.fat1_offset);
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 ((u16*)cache_block)[(u8)last] = result;
                 r = flush_cache();
-                if (r) {
+                if (!r) {
                     return 0xffffu16;
                 }
                 return result;
@@ -448,6 +481,7 @@ export u8 fat_open_file(struct FatDirEntry *dir, u8 *name) {
         }
     }
     if (fd == MAX_FILE_DESC) {
+        fat_last_error = FAT_ERROR_TOO_MANY_OPEN_FILES;
         return FAT_BAD_DESC;
     }
 
@@ -459,17 +493,22 @@ export u8 fat_open_file(struct FatDirEntry *dir, u8 *name) {
         return FAT_BAD_DESC;
     }
 
-    init_fd(pfd);
+    r = init_fd(pfd);
+    if (!r) {
+        pfd->is_free = 1u8;
+        return FAT_BAD_DESC;
+    }
     return fd;
 }
 
+// returns bool
 u8 init_fd(struct FileDescriptor *pfd) {
     pfd->is_root = 0u8;
     u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
     pfd->last_cluster_len = (u16)pfd->dir_entry.size & cluster_mask;
 
-    seek_begin(pfd);
     pfd->dir_entry_modified = 0u8;
+    return seek_begin(pfd);
 }
 
 u8 init_root_dir(struct FileDescriptor *pfd) {
@@ -485,6 +524,7 @@ export u16 fat_read(u8 fd, u8 *dst, u16 len) {
     return fat_action(fd, dst, len, 0u8);
 }
 
+// returns bool
 u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
     pfd->index_in_block += advance;
     pfd->abs_offset += (u32)advance;
@@ -500,6 +540,9 @@ u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
                 pfd->block_addr += (u32)(pfd->next_cluster - 2u16) << fat_info.log_sectors_per_cluster;
                 pfd->cur_cluster = pfd->next_cluster;
                 pfd->next_cluster = read_fat_entry(pfd->cur_cluster);
+                if (pfd->next_cluster == 0u16) {
+                    return 0u8;
+                }
                 pfd->block_in_cluster = 0u8;
             }
         } else {
@@ -507,8 +550,10 @@ u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
             pfd->block_addr += 1u32;
         }
     }
+    return 1u8;
 }
 
+// returns bool
 u8 seek_begin(struct FileDescriptor *pfd) {
     pfd->block_addr = fat_info.data_offset;
     pfd->block_addr += (u32)(pfd->dir_entry.cluster_lo - 2u16) << fat_info.log_sectors_per_cluster;
@@ -517,15 +562,18 @@ u8 seek_begin(struct FileDescriptor *pfd) {
     pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
     pfd->cur_cluster = pfd->dir_entry.cluster_lo;
     pfd->abs_offset = 0u32;
+    return pfd->next_cluster != 0u16;
 }
 
 export u16 fat_write(u8 fd, u8 *src, u16 len) {
     return fat_action(fd, src, len, 1u8);
 }
 
+// return number of bytes processed
 u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
     if (pfd->is_free) {
+        fat_last_error = FAT_BAD_DESC;
         return 0u16;
     }
     u16 result = 0u16;
@@ -554,7 +602,7 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
                             // need next block
                             u16 new_cluster = alloc_cluster(pfd->cur_cluster);
                             if (new_cluster == 0xffffu16) {
-                                return result | 0x8000u16;
+                                return result;
                             }
                             pfd->next_cluster = new_cluster;
                             pfd->last_cluster_len = 0u16;
@@ -567,25 +615,31 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
             chunk_len = len;
         }
         if (chunk_len == 0u16) {
+            if (pfd->abs_offset == pfd->dir_entry.size) {
+                fat_last_error = FAT_EOF;
+            }
             return result;
         }
         r = cache(pfd->block_addr);
-        if (r) {
-            return result | 0x8000u16;
+        if (!r) {
+            return result;
         }
         if (is_write) {
             memcpy((u8*)cache_block + pfd->index_in_block, data, chunk_len);
             r = flush_cache();
-            if (r) {
-                return result | 0x8000u16;
+            if (!r) {
+                return result;
             }
         } else {
             memcpy(data, (u8*)cache_block + pfd->index_in_block, chunk_len);
         }
+        r = seek_advance(pfd, chunk_len);
+        if (!r) {
+            return result;
+        }
         len -= chunk_len;
         data += chunk_len;
         result += chunk_len;
-        seek_advance(pfd, chunk_len);
     }
     return result;
 }
@@ -602,8 +656,10 @@ export u8 fat_close(u8 fd) {
 }
 
 export u8 fat_truncate(u8 fd) {
+    u8 r;
     struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
     if (pfd->is_free) {
+        fat_last_error = FAT_BAD_DESC;
         return 0u8;
     }
     if (pfd->abs_offset == pfd->dir_entry.size) {
@@ -619,7 +675,13 @@ export u8 fat_truncate(u8 fd) {
         while (next_cluster < FAT_MIN_LAST_CLUSTER) {
             cur_cluster = next_cluster;
             next_cluster = read_fat_entry(cur_cluster);
-            write_fat_entry(cur_cluster, 0u16);
+            if (next_cluster == 0u16) {
+                return 0u8;
+            }
+            r = write_fat_entry(cur_cluster, 0u16);
+            if (!r) {
+                return 0u8;
+            }
         }
         pfd->next_cluster = 0xffffu16;
     }
@@ -631,12 +693,16 @@ export u8 fat_truncate(u8 fd) {
 export u8 fat_seek_end(u8 fd) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
     if (pfd->is_free) {
+        fat_last_error = FAT_BAD_DESC;
         return 0u8;
     }
 
     while (pfd->next_cluster < FAT_MIN_LAST_CLUSTER) {
         pfd->cur_cluster = pfd->next_cluster;
         pfd->next_cluster = read_fat_entry(pfd->next_cluster);
+        if (pfd->next_cluster == 0u16) {
+            return 0u8;
+        }
     }
     pfd->abs_offset = pfd->dir_entry.size;
     pfd->block_in_cluster = (u8)(pfd->last_cluster_len >> 9u8);
