@@ -1,0 +1,7 @@
+#include <random.h>
+import u8 matrix_code_rain();
+
+export u8 ext_main() {
+    srand(5u16);
+    matrix_code_rain();
+}

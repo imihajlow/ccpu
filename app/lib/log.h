@@ -1,6 +1,6 @@
 #pragma once
 
-#define DISABLE_LOG
+// #define DISABLE_LOG
 
 #ifndef DISABLE_LOG
 import u8 log_string(u8 *s);

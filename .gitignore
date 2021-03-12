@@ -22,7 +22,9 @@ _autosave*
 fp-info-cache
 *.bin
 *.rom
+*.ext
 *.map
+*.api
 __pycache__
 *.pyc
 *.o

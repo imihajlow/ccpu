@@ -6,14 +6,31 @@ natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE',
 def linkGenerator(source, target, env, for_signature):
     return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
+def loaderLinkGenerator(source, target, env, for_signature):
+    return f"link.py --layout=loader --api-out={target[2]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def extensionLinkGenerator(source, target, env, for_signature):
+    return f"link.py --slim --layout=extension --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
+
 def linkEmitter(target, source, env):
     t = target[0]
     base,ext = os.path.splitext(str(t))
     target.append(f"{base}.map")
     return target, source
 
+def loaderLinkEmitter(target, source, env):
+    t = target[0]
+    base,ext = os.path.splitext(str(t))
+    target.append(f"{base}.map")
+    target.append(f"{base}.api")
+    return target, source
+
 linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
-env = Environment(BUILDERS = {'Asm' : asmBuilder, 'Natrix': natrixBuilder, 'Bin': linkBuilder})
+loaderLinkBuilder = Builder(generator=loaderLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=loaderLinkEmitter)
+extensionLinkBuilder = Builder(generator=extensionLinkGenerator, suffix=".ext", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+
+
+env = Environment(BUILDERS = {'Asm' : asmBuilder, 'Natrix': natrixBuilder, 'Bin': linkBuilder, 'Loader': loaderLinkBuilder, 'Extension': extensionLinkBuilder})
 env.PrependENVPath("PATH", "../tools")
 env.PrependENVPath("PATH", "../tools/natrix")
 env["NATRIX_DIR"] = "../tools/natrix"
@@ -26,6 +43,7 @@ bcdf = Split('''
     lib/bcdf.asm lib/bcdf_addsub.asm lib/bcdf_mul.asm lib/bcdf_div.asm lib/bcdf_print.asm
     ''')
 natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
+startup = ['$NATRIX_DIR/runtime/startup.asm']
 
 ps2 = Split('lib/ps2.na lib/ps2keyboard.na lib/keymap.s')
 
@@ -70,4 +88,8 @@ env.Bin('ps2hightest', Split('test/ps2hightest.na') + natrix + lib)
 
 env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + natrix + lib)
 
-env.Bin('fileshell', Split('fileshell.na lib/card.na lib/fat.na lib/log.na') + natrix + lib)
+env.Loader('fileshell', Split('fileshell.na lib/card.na lib/fat.na lib/log.na extension.asm') + natrix + lib)
+
+env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
+
+env.Extension('test_ext', Split('fileshell.api extension_base.asm test/ext.asm') + lib)

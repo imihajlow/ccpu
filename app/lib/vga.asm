@@ -13,7 +13,7 @@
 .const vga_char_seg = 0xe000
 .const vga_color_seg = 0xd000
 
-.section text
+.section text.vga_clear
 
 vga_clear:
     mov a, pl
@@ -105,6 +105,7 @@ fill_row_loop:
     mov pl, a
     jmp
 
+.section text.vga_put_text
 vga_put_text:
     mov a, pl
     mov b, a
@@ -194,7 +195,7 @@ vga_put_text_end:
     jmp
 
 
-.section bss
+.section bss.vga
 .align 8
 vga_clear_arg0: ; color
 vga_clear_ret:

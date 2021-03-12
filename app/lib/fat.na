@@ -320,7 +320,6 @@ u8 find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd) {
             }
         }
         for (u8 block_in_cluster = 0u8; block_in_cluster != fat_info.sectors_per_cluster; block_in_cluster += 1u8) {
-            log_u32(block_addr);
             r = cache(block_addr);
             if (!r) {
                 return 0u8;
@@ -729,4 +728,13 @@ export u8 fat_seek_end(u8 fd) {
     pfd->index_in_block = pfd->last_cluster_len & (CARD_BLOCK_SIZE - 1u16);
     pfd->block_addr = fat_info.data_offset + ((u32)(pfd->cur_cluster - 2u16) << fat_info.log_sectors_per_cluster) + (u32)pfd->block_in_cluster;
     return 1u8;
+}
+
+export u32 fat_get_size(u8 fd) {
+    struct FileDescriptor *pfd = (struct FileDescriptor *)file_desc + fd;
+    if (pfd->is_free) {
+        fat_last_error = FAT_BAD_DESC;
+        return 0xFFFFFFFFu32;
+    }
+    return pfd->dir_entry.size;
 }

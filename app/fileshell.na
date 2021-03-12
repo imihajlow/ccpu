@@ -6,6 +6,7 @@
 #include <more.h>
 #include <line_edit.h>
 #include <log.h>
+#include <keyboard.h>
 
 #define FILE_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_CYAN)
@@ -202,6 +203,35 @@ u8 type_file(u8 *name, u8 append) {
     }
 }
 
+import u8 __seg_extension_begin[1];
+import u8 __seg_stack_end[1];
+import u8 extension_start();
+
+u8 run_extension(u8 *name) {
+    u8 f = fat_open_file(&current_dir, name);
+    if (f == FAT_BAD_DESC) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
+        ps2_wait_key_pressed();
+        return;
+    }
+    // u32 size32 = fat_get_size(f);
+    // if (size32 > 0xffffu32) {
+    //     vga_put_text(0u8, VGA_ROWS - 1u8, "File is too large");
+    //     ps2_wait_key_pressed();
+    //     return;
+    // }
+    // u16 size = (u16)size32;
+    u16 size = (u16)__seg_stack_end - (u16)__seg_extension_begin;
+    u16 r = fat_read(f, (u8*)__seg_extension_begin, size);
+    // if (r != size) {
+    //     vga_put_text(0u8, VGA_ROWS - 1u8, "Read error");
+    //     ps2_wait_key_pressed();
+    //     return;
+    // }
+    keyboard_wait_key_released();
+    extension_start();
+}
+
 
 export u8 main() {
     ps2_init();
@@ -255,12 +285,17 @@ export u8 main() {
                         }
                     } else if (k == PS2_KEY_F4 || k == PS2_KEY_F5) {
                         if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                            type_file((u8*)filenames[cursor_file_index].name, k == PS2_KEY_F5);
+                            // type_file((u8*)filenames[cursor_file_index].name, k == PS2_KEY_F5);
                             break;
                         }
                     } else if (k == PS2_KEY_ENTER) {
-                        r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
-                        if (r) {
+                        if (filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY) {
+                            r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
+                            if (r) {
+                                break;
+                            }
+                        } else {
+                            run_extension((u8*)filenames[cursor_file_index].name);
                             break;
                         }
                     }

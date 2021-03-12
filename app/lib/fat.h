@@ -87,6 +87,11 @@ import u8 fat_seek_end(u8 fd);
 
 import u8 fat_close(u8 fd);
 
+/**
+ Returns 0xffffffff and sets fat_last_error on error.
+ */
+import u32 fat_get_size(u8 fd);
+
 import u8 to_fat_name(u8 *dst, u8 *src);
 
 import u8 from_fat_name(u8 *dst, u8 *src);

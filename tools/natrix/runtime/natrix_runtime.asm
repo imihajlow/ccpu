@@ -113,10 +113,10 @@ main_exit:
     ldi ph, hi(main_exit)
     jmp
 
-
+    .section text
 ; bit shifts of word values
 ; __cc_sh_val = __cc_sh_val >> __cc_sh_count
-    .section text.__cc_asr
+    ; .section text.__cc_asr
 __cc_asr:
     mov a, pl
     mov b, a
@@ -212,7 +212,7 @@ return_val_sign:
     jmp
 
     ; __cc_sh_val = __cc_sh_val >> __cc_sh_count
-    .section text.__cc_lsr
+    ; .section text.__cc_lsr
 __cc_lsr:
     mov a, pl
     mov b, a
@@ -295,7 +295,7 @@ __cc_lsr_loop_end:
 
 
     ; __cc_sh_val = __cc_sh_val << __cc_sh_count
-    .section text.__cc_asl
+    ; .section text.__cc_asl
 __cc_asl:
     mov a, pl
     mov b, a
@@ -409,7 +409,7 @@ return_0_dword:
     jmp
 
 ; __cc_sh_val = __cc_sh_val << __cc_sh_count
-    .section text.__cc_asl_dword
+    ; .section text.__cc_asl_dword
 __cc_asl_dword:
     mov a, pl
     mov b, a
@@ -511,7 +511,7 @@ asl_dword_loop:
         jmp
 
 ; __cc_sh_val = __cc_sh_val >> __cc_sh_count
-    .section text.__cc_lsr_dword
+    ; .section text.__cc_lsr_dword
 __cc_lsr_dword:
     mov a, pl
     mov b, a
@@ -633,7 +633,7 @@ lsr_dword_loop:
 
 
     ; push onto stack values in range [__cc_from, __cc_to)
-    .section text.__cc_push
+    ; .section text.__cc_push
 __cc_push:
     mov a, pl
     mov b, a
@@ -705,7 +705,7 @@ __cc_push:
     jmp
 
     ; pop from stack values into range [__cc_from, __cc_to)
-    .section text.__cc_pop
+    ; .section text.__cc_pop
 __cc_pop:
     mov a, pl
     mov b, a
@@ -874,7 +874,7 @@ memcpy:
     jmp
 
 ; multiply A and B, result into R
-    .section text.__cc_mul_byte
+    ; .section text.__cc_mul_byte
 __cc_mul_byte:
     mov a, pl
     mov b, a
@@ -931,7 +931,7 @@ __cc_mul_byte_added:
     jmp
 
 ; multiply A and B, result into R
-    .section text.__cc_mul_word
+    ; .section text.__cc_mul_word
 __cc_mul_word:
     mov a, pl
     mov b, a
@@ -1024,7 +1024,7 @@ __cc_mul_word_added:
 
 ; A / B
 ; __cc_r_a / __cc_r_b -> __cc_r_quotient, __cc_r_remainder
-    .section text.__cc_div_word
+    ; .section text.__cc_div_word
 __cc_div_word:
     mov a, pl
     mov b, a
@@ -1215,7 +1215,7 @@ __cc_div_word_neg_nom:
 
     ; A (=N) / B (=D)
     ; preserve B
-    .section text.__cc_udiv_word
+    ; .section text.__cc_udiv_word
 __cc_udiv_word:
 divide_word:
     mov a, pl
@@ -1420,7 +1420,7 @@ divide_word_loop_2_r_lt_d:
 
     ; A / B
     ; __cc_r_a / __cc_r_b -> __cc_r_quotient, __cc_r_remainder
-    .section text.__cc_div_byte
+    ; .section text.__cc_div_byte
 __cc_div_byte:
     mov a, pl
     mov b, a
@@ -1575,7 +1575,7 @@ __cc_div_byte_neg_nom:
 
     ; A (=N) / B (=D)
     ; preserve B
-    .section text.__cc_udiv_byte
+    ; .section text.__cc_udiv_byte
 __cc_udiv_byte:
 divide_byte:
     mov a, pl

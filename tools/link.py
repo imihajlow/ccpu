@@ -69,7 +69,7 @@ def fitSectionsFill(begin, sections):
 
 
 class SectionsFilter:
-    def __init__(self, objects, layout, gcSections):
+    def __init__(self, objects, layout, gcSections, api):
         self.gcSections = gcSections
         # Build refs anyway, because this way the external refs are checked
         globalSymbols = dict() # symbol name -> section name
@@ -108,9 +108,12 @@ class SectionsFilter:
                     names = extractVarNames(l)
                     for n in names:
                         if n in o.globalSymbols:
-                            if n not in globalSymbols:
+                            if n in api:
+                                pass
+                            elif n in globalSymbols:
+                                refs[s.name].add(globalSymbols[n])
+                            else:
                                 raise LinkerError(f"unresolved external symbol `{n}`", o)
-                            refs[s.name].add(globalSymbols[n])
                         elif n in localSymbols:
                             refs[s.name].add(localSymbols[n])
                         else:
@@ -138,9 +141,9 @@ class SectionsFilter:
         else:
             return section.name in self.reachable
 
-def link(objects, layout, fit, sectionsFilter):
+def link(objects, layout, fit, sectionsFilter, api):
     ip = 0
-    exportedSymbolValues = {}
+    exportedSymbolValues = dict()
     segments = {}
     # place sections into segments
     for segment in layout.layout:
@@ -163,19 +166,22 @@ def link(objects, layout, fit, sectionsFilter):
         segments[segment["name"]] = segBegin, ip
     # update origin segments sizes
     ip = 0
-    for i, segment in enumerate(layout.layout):
+    for segment in layout.layout:
         segName = segment["name"]
         target = segment["target"]
         begin, end = segments[segName]
-        if begin < ip:
-            raise LinkerError("Segment `{}' is overlapped".format(segName))
         if target is not None:
             if begin != end:
                 raise LinkerError("Non-empty origin segment `{}'".format(segment["name"]))
+            begin = ip
+        if begin < ip:
+            raise LinkerError("Segment `{}' is overlapped".format(segName))
+        if target is not None:
             targetBegin, targetEnd = segments[target]
             targetSize = targetEnd - targetBegin
             end = begin + targetSize
             segments[segName] = begin, end
+            ip = end
     # report segment sizes
     for name in segments:
         begin, end = segments[name]
@@ -189,20 +195,28 @@ def link(objects, layout, fit, sectionsFilter):
             found = False
             for s in o.sections:
                 if label in s.labels:
-                    if label in exportedSymbolValues:
+                    if label in api:
+                        if sectionsFilter.isReachable(s):
+                            raise LinkerError(f"conflicting definitions of global symbol `{label}' in api and in object", o, s)
+                        exportedSymbolValues[label] = api[label]
+                    elif label in exportedSymbolValues:
                         raise LinkerError("global symbol `{}' redifinition".format(label), o, s)
-                    if sectionsFilter.isReachable(s):
+                    elif sectionsFilter.isReachable(s):
                         exportedSymbolValues[label] = s.offset + s.labels[label]
                     found = True
             if label in o.consts:
-                if label in exportedSymbolValues:
+                if label in api:
+                        exportedSymbolValues[label] = api[label]
+                elif label in exportedSymbolValues:
                     raise LinkerError("global symbol `{}' redifinition".format(label), o)
-                exportedSymbolValues[label] = o.consts[label]
+                else:
+                    exportedSymbolValues[label] = o.consts[label]
                 found = True
             if not found:
                 raise LinkerError("symbol `{}' is exported, but not defined".format(label), o)
     # assign local symbol values and evaluate references
     symbolMap = exportedSymbolValues.copy()
+    apiOut = dict()
     for o in objects:
         localSymbolValues = {}
         for s in sectionsFilter.filter(o.sections):
@@ -211,7 +225,13 @@ def link(objects, layout, fit, sectionsFilter):
                 localSymbolValues[label] = value
                 if label not in o.exportSymbols:
                     symbolMap["{}_{}".format(o.name, label)] = value
+                else:
+                    apiOut[label] = value
         localSymbolValues.update(o.consts)
+        for label in o.consts:
+            if label in o.exportSymbols:
+                apiOut[label] = value
+        exportedSymbolValues.update(api)
         for s in sectionsFilter.filter(o.sections):
             for offs,expr in s.refs:
                 try:
@@ -219,7 +239,7 @@ def link(objects, layout, fit, sectionsFilter):
                     s.text[offs] = value & 255
                 except BaseException as e:
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
-    return symbolMap, segments
+    return symbolMap, apiOut, segments
 
 def createRom(objects, segments, sectionsFilter):
     rom = [None] * 65536
@@ -230,7 +250,8 @@ def createRom(objects, segments, sectionsFilter):
             seg = layout.findSegment(s.segment)
             segBegin = segments[s.segment][0]
             for i,v in enumerate(s.text):
-                rom[s.offset + i] = v
+                if seg["init"]:
+                    rom[s.offset + i] = v
                 if seg["shadow"] is not None:
                     offsetInsideSegment = s.offset + i - segBegin
                     shadowBegin = segments[seg["shadow"]][0]
@@ -242,7 +263,7 @@ def load(filename):
         objectName = "_" + re.sub(r"\W", "_", filename)
         return Object.fromDict(objectName, json.load(f))
 
-def save(data, filename, type, full, filler):
+def save(data, filename, type, full, filler, slim):
     mode = "wb" if type == "bin" else "w"
     with open(filename, mode) as file:
         if type == "hex":
@@ -256,7 +277,14 @@ def save(data, filename, type, full, filler):
                 else:
                     file.write(" ")
         elif type == "bin":
-            ba = bytearray(filler if x is None else x for x in data[0:65536 if full else 32768])
+            if slim:
+                n = 0
+                for i,x in enumerate(data):
+                    if x is not None:
+                        n = i + 1
+                ba = bytearray(filler if x is None else x for x in data[0:n])
+            else:
+                ba = bytearray(filler if x is None else x for x in data[0:65536 if full else 32768])
             file.write(ba)
 
 def saveLabels(file, labels):
@@ -264,27 +292,45 @@ def saveLabels(file, labels):
         for label in labels:
             file.write("{} = 0x{:04x}\n".format(label, labels[label]))
 
+def loadApi(file):
+    if file is None:
+        return dict()
+    g = dict()
+    r = re.compile(r"^(\w+)\s*=\s*(0x[0-9a-f]+)$", re.I)
+    for line in file.readlines():
+        m = re.match(r, line.strip())
+        if m is not None:
+            g[m.group(1)] = int(m.group(2), 0)
+        else:
+            print(f"Unmatched: {line.strip()}")
+    return g
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Linker')
     parser.add_argument('-o', metavar="RESULT", required=True, help='output file name')
     parser.add_argument('--type', choices=["hex", "bin"], default="bin", help='output file type (default: bin)')
     parser.add_argument('--filler', type=int, default=0xff, help="value to fill uninitialized memory (bin output type only)")
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
-    parser.add_argument('--layout', choices=["default", "sim"], default="default", help='memory layout')
+    parser.add_argument('--slim', required=False, default=False, action='store_true', help='do not fill the file up to 32k/64k')
+    parser.add_argument('--layout', choices=["default", "sim", "extension", "loader"], default="default", help='memory layout')
     parser.add_argument('--fit-strategy', choices=["fill", "simple"], default="fill", help='fit strategy')
     parser.add_argument('--no-gc-sections', action='store_true', default=False, help='drop unreachable sections')
+    parser.add_argument('--api-in', metavar="MAPFILE", required=False, type=argparse.FileType("r"), help='external global symbols list')
+    parser.add_argument('--api-out', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='generate external global symbols list')
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
     layout = importlib.import_module("." + args.layout, "layouts")
     try:
+        apiIn = loadApi(args.api_in)
         objects = [load(filename) for filename in args.file]
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
-        sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections)
-        symbolMap, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter)
+        sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections, apiIn)
+        symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)
         rom = createRom(objects, segments, sectionsFilter)
-        save(rom, args.o, args.type, args.full, args.filler)
+        save(rom, args.o, args.type, args.full, args.filler, args.slim)
         saveLabels(args.m, symbolMap)
+        saveLabels(args.api_out, apiOut)
     except LinkerError as e:
         sys.stderr.write(str(e) + "\n")
         sys.exit(1)
