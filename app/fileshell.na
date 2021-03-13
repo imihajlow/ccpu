@@ -214,21 +214,23 @@ u8 run_extension(u8 *name) {
         ps2_wait_key_pressed();
         return;
     }
-    // u32 size32 = fat_get_size(f);
-    // if (size32 > 0xffffu32) {
-    //     vga_put_text(0u8, VGA_ROWS - 1u8, "File is too large");
-    //     ps2_wait_key_pressed();
-    //     return;
-    // }
-    // u16 size = (u16)size32;
-    u16 size = (u16)__seg_stack_end - (u16)__seg_extension_begin;
+    u32 size32 = fat_get_size(f);
+    u16 max_size = (u16)__seg_stack_end - (u16)__seg_extension_begin;
+    if (size32 > (u32)max_size) {
+        fat_close(f);
+        vga_put_text(0u8, VGA_ROWS - 1u8, "File is too large");
+        ps2_wait_key_pressed();
+        return;
+    }
+    u16 size = (u16)size32;
     u16 r = fat_read(f, (u8*)__seg_extension_begin, size);
-    // if (r != size) {
-    //     vga_put_text(0u8, VGA_ROWS - 1u8, "Read error");
-    //     ps2_wait_key_pressed();
-    //     return;
-    // }
-    keyboard_wait_key_released();
+    if (r != size) {
+        fat_close(f);
+        vga_put_text(0u8, VGA_ROWS - 1u8, "Read error");
+        ps2_wait_key_pressed();
+        return;
+    }
+    fat_close(f);
     extension_start();
 }
 
