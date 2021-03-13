@@ -182,7 +182,7 @@ def link(objects, layout, fit, sectionsFilter, api):
             targetSize = targetEnd - targetBegin
             end = begin + targetSize
             segments[segName] = begin, end
-            ip = end
+        ip = end
     # report segment sizes
     for name in segments:
         begin, end = segments[name]
