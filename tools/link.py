@@ -231,7 +231,7 @@ def link(objects, layout, fit, sectionsFilter, api):
         localSymbolValues.update(o.consts)
         for label in o.consts:
             if label in o.exportSymbols:
-                apiOut[label] = value
+                apiOut[label] = o.consts[label]
         exportedSymbolValues.update(api)
         for s in sectionsFilter.filter(o.sections):
             for offs,expr in s.refs:
