@@ -12,6 +12,9 @@ def loaderLinkGenerator(source, target, env, for_signature):
 def extensionLinkGenerator(source, target, env, for_signature):
     return f"link.py --slim --layout=extension --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
 
+def appLinkGenerator(source, target, env, for_signature):
+    return f"link.py --slim --layout=app -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
 def linkEmitter(target, source, env):
     t = target[0]
     base,ext = os.path.splitext(str(t))
@@ -28,9 +31,17 @@ def loaderLinkEmitter(target, source, env):
 linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 loaderLinkBuilder = Builder(generator=loaderLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=loaderLinkEmitter)
 extensionLinkBuilder = Builder(generator=extensionLinkGenerator, suffix=".ext", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+appLinkBuilder = Builder(generator=appLinkGenerator, suffix=".app", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 
 
-env = Environment(BUILDERS = {'Asm' : asmBuilder, 'Natrix': natrixBuilder, 'Bin': linkBuilder, 'Loader': loaderLinkBuilder, 'Extension': extensionLinkBuilder})
+env = Environment(BUILDERS = {
+    'Asm' : asmBuilder,
+    'Natrix': natrixBuilder,
+    'Bin': linkBuilder,
+    'Loader': loaderLinkBuilder,
+    'Extension': extensionLinkBuilder,
+    'App': appLinkBuilder})
+
 env.PrependENVPath("PATH", "../tools")
 env.PrependENVPath("PATH", "../tools/natrix")
 env["NATRIX_DIR"] = "../tools/natrix"
@@ -43,7 +54,8 @@ bcdf = Split('''
     lib/bcdf.asm lib/bcdf_addsub.asm lib/bcdf_mul.asm lib/bcdf_div.asm lib/bcdf_print.asm
     ''')
 natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
-startup = ['$NATRIX_DIR/runtime/startup.asm']
+rom_startup = ['$NATRIX_DIR/runtime/rom_startup.asm']
+app_startup = ['$NATRIX_DIR/runtime/app_startup.asm']
 
 ps2 = Split('lib/ps2.na lib/ps2keyboard.na lib/keymap.s')
 
@@ -68,28 +80,35 @@ life = Split('life/quasipixel.na life/life.na life/life_next.asm life/qp_render.
 calc = Split('calc/calc.asm')
 
 # Targets
-env.Bin('main', Split('''
+env.Bin('main_rom', Split('''
     main.na
     test/trap.asm
     vga_demo.asm
-    matrix.na''') + lib + natrix + maze + life + calc)
+    matrix.na''') + lib + natrix + maze + life + calc + rom_startup)
 
 env.Bin('alutest', 'test/alutest.asm')
 
 env.Bin('memcheck', 'memcheck/memcheck.asm')
 
-env.Bin('lotest', Split('memcheck/lotest.na') + natrix + lib)
+env.Bin('lotest', Split('memcheck/lotest.na') + rom_startup + natrix + lib)
 
-env.Bin('vgatest', Split('test/vgatest.na') + natrix + lib)
+env.Bin('vgatest', Split('test/vgatest.na') + rom_startup + natrix + lib)
 
-env.Bin('ps2test', Split('test/ps2test.na') + natrix + lib)
+env.Bin('ps2test', Split('test/ps2test.na') + rom_startup + natrix + lib)
 
-env.Bin('ps2hightest', Split('test/ps2hightest.na') + natrix + lib)
+env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib)
 
-env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + natrix + lib)
+env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + rom_startup + natrix + lib)
 
-env.Loader('fileshell', Split('fileshell.na lib/card.na lib/fat.na lib/log.na extension.asm') + natrix + lib)
+env.Loader('fileshell', Split('fileshell/fileshell.na lib/card.na lib/fat.na lib/log.na fileshell/extension.asm fileshell/loload.asm fileshell/lorun.asm') + rom_startup + natrix + lib)
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
 
 env.Extension('lo', Split('fileshell.api extension_base.asm test/lotest_ext.na lib/vga.asm'))
+
+env.App('main', Split('''
+    main.na
+    test/trap.asm
+    vga_demo.asm
+    matrix.na''') + lib + natrix + maze + life + calc + app_startup)
+

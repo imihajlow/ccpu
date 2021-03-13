@@ -23,6 +23,7 @@ fp-info-cache
 *.bin
 *.rom
 *.ext
+*.app
 *.map
 *.api
 __pycache__

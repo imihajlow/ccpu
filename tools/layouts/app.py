@@ -1,4 +1,4 @@
-# Memory layout for loader. Has a gap in RAM for loading programs.
+# Default memory layout to use on hardware
 
 layout = [
     {
@@ -11,33 +11,16 @@ layout = [
         "init": True
     },
     {
-        "name": "ramtext_origin",
-        "init": True,
-        "target": "ramtext"
-    },
-    {
-        "name": "extension",
-        "init": False,
-        "begin": 0x8000,
-        "end": 0xB800
-    },
-    {
         "name": "data",
-        "begin": 0xB800,
-        "init": False
+        "init": True
     },
     {
         "name": "bss",
         "init": False
     },
     {
-        "name": "ramtext",
-        "init": False,
-        "shadow": "ramtext_origin"
-    },
-    {
         "name": "stack",
-        "end": 0xd000,
+        "end": 0xB800,
         "init": False
     }
 ]

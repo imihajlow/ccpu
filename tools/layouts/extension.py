@@ -14,7 +14,7 @@ layout = [
     },
     {
         "name": "init",
-        "begin": 0x9800,
+        "begin": 0x8000,
         "init": False,
         "shadow": "init_origin"
     },
@@ -26,7 +26,7 @@ layout = [
     {
         "name": "bss",
         "init": False,
-        "end": 0xd000
+        "end": 0xB800
     },
 ]
 
