@@ -92,4 +92,4 @@ env.Loader('fileshell', Split('fileshell.na lib/card.na lib/fat.na lib/log.na ex
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
 
-env.Extension('test_ext', Split('fileshell.api extension_base.asm test/ext.asm') + lib)
+env.Extension('lo', Split('fileshell.api extension_base.asm test/lotest_ext.na lib/vga.asm'))
