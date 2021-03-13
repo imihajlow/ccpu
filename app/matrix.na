@@ -1,6 +1,6 @@
 #include <vga.h>
 #include <random.h>
-#include <keyboard.h>
+#include <ps2keyboard.h>
 
 #define N_TRACERS 32u8
 #define CHAR_STEP 57u8
@@ -35,8 +35,8 @@ export u8 matrix_code_rain() {
     }
 
     while (1u8) {
-        u8 key = keyboard_get_if_pressed();
-        if (key != KEY_NO_KEY) {
+        u8 key = ps2_get_key_event();
+        if (key == PS2_KEY_ESCAPE) {
             break;
         }
 
