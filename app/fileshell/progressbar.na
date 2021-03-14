@@ -1,0 +1,30 @@
+#include "progressbar.h"
+#include <vga.h>
+#include <string.h>
+
+#define CHAR_EMPTY 177u8
+#define CHAR_FULL 219u8
+
+u16 last_x;
+u16 last_y;
+u8 *offset;
+u8 max_value;
+
+export u8 progressbar_init(u8 max_value_) {
+    offset = (u8*)vga_char_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8);
+    memset(offset, CHAR_EMPTY, (u16)VGA_COLS);
+    max_value = max_value_;
+    last_x = 0u16;
+    last_y = 0u16;
+}
+
+export u8 progressbar_progress(u8 n) {
+    for (u8 i = 0u8; i != n; i += 1u8) {
+        last_x += (u16)VGA_COLS;
+        while (last_y < last_x) {
+            *offset = CHAR_FULL;
+            offset += 1u8;
+            last_y += (u16)max_value;
+        }
+    }
+}

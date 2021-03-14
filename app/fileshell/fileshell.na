@@ -9,6 +9,7 @@
 #include <keyboard.h>
 #include "loload.h"
 #include "lorun.h"
+#include "progressbar.h"
 
 #define FILE_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_CYAN)
@@ -252,6 +253,7 @@ u8 run_app(u8 *name) {
         return;
     }
     u16 size = (u16)size32;
+    progressbar_init((u8)(size >> 8u8));
     u8 dst_hi = 0u8;
     // load lo RAM part
     while (size != 0u16 && dst_hi != 0x80u8) {
@@ -267,6 +269,7 @@ u8 run_app(u8 *name) {
         copy_to_loram(dst_hi);
         size -= r;
         dst_hi += 1u8;
+        progressbar_progress(1u8);
     }
     // load hi RAM part
     if (size != 0u16) {
@@ -277,6 +280,7 @@ u8 run_app(u8 *name) {
             ps2_wait_key_pressed();
             return;
         }
+        progressbar_progress((u8)(r >> 8u8));
     }
     fat_close(f);
     lorun();

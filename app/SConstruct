@@ -94,7 +94,16 @@ env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib
 
 env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + rom_startup + natrix + lib)
 
-env.Loader('fileshell', Split('fileshell/fileshell.na lib/card.na lib/fat.na lib/log.na fileshell/extension.asm fileshell/loload.asm fileshell/lorun.asm') + rom_startup + natrix + lib)
+env.Loader('fileshell', Split('''
+    fileshell/fileshell.na
+    lib/card.na
+    lib/fat.na
+    lib/log.na
+    fileshell/extension.asm
+    fileshell/loload.asm
+    fileshell/lorun.asm
+    fileshell/progressbar.na
+    ''') + rom_startup + natrix + lib)
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
 
