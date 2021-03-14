@@ -127,4 +127,7 @@ env.App('life', Split('''
     life/app.na
     ''') + life + lib + natrix + app_startup)
 
+env.App('pong', Split('''
+    pong/pong.na
+    ''') + lib + natrix + app_startup)
 

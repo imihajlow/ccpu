@@ -1,0 +1,280 @@
+#include <vga.h>
+#include <ps2keyboard.h>
+#include <ps2.h>
+
+#define BOARD_CYCLES 10u8
+#define BOARD_ACCELERATION 1
+
+#define CHAR_TOP 223u8
+#define CHAR_BOT 220u8
+#define CHAR_BOARD 219u8
+
+#define TOP 0
+#define BOTTOM ((s16)VGA_ROWS << 9)
+#define LEFT (1 << 8)
+#define RIGHT (((s16)VGA_COLS - 1) << 8)
+
+#define BOARD_SIZE 3u8
+
+u8 score_left;
+u8 score_right;
+
+u8 board_left_col;
+u8 board_right_col;
+
+s16 ball_x; // screen_x * 256
+s16 ball_y; // screen_y * 512
+
+s16 ball_speed_x;
+s16 ball_speed_y;
+
+// quasipixel coordinates
+u8 last_ball_row;
+u8 last_ball_col;
+
+
+u8 ball_step() {
+    ball_x += ball_speed_x;
+    ball_y += ball_speed_y;
+
+    if (ball_y < TOP) {
+        ball_speed_y = -ball_speed_y;
+        ball_y = 2 * TOP - ball_y;
+    } else if (ball_y >= BOTTOM) {
+        ball_speed_y = -ball_speed_y;
+        ball_y = 2 * BOTTOM - ball_y;
+    }
+    u8 ball_row = (u8)((ball_y) >> 8u8);
+    u8 ball_screen_row = ball_row >> 1u8;
+    if (ball_x < LEFT) {
+        if (ball_screen_row >= board_left_col - BOARD_SIZE && ball_screen_row <= board_left_col + BOARD_SIZE) {
+            ball_speed_x = -ball_speed_x + 1;
+            ball_x = 2 * LEFT - ball_x;
+            ball_speed_y = (s16)((s8)ball_screen_row - (s8)board_left_col);
+        } else {
+            return 2u8;
+        }
+    } else if (ball_x >= RIGHT) {
+        if (ball_screen_row >= board_right_col - BOARD_SIZE && ball_screen_row <= board_right_col + BOARD_SIZE) {
+            ball_speed_x = -ball_speed_x - 1;
+            ball_x = 2 * RIGHT - ball_x;
+            ball_speed_y = (s16)((s8)ball_screen_row - (s8)board_right_col);
+        } else {
+            return 1u8;
+        }
+    }
+
+    u8 ball_col = (u8)((ball_x) >> 8u8);
+
+    if (last_ball_col != ball_col || last_ball_row != ball_row) {
+        u16 last_offset = VGA_OFFSET(last_ball_col, last_ball_row >> 1u8);
+        u16 new_offset = VGA_OFFSET(ball_col, ball_screen_row);
+        if (last_offset != new_offset) {
+            vga_char_seg[last_offset] = 0u8;
+        }
+
+        u8 c = ball_row & 1u8;
+        if (c) {
+            c = CHAR_BOT;
+        } else {
+            c = CHAR_TOP;
+        }
+        vga_char_seg[new_offset] = c;
+        last_ball_row = ball_row;
+        last_ball_col = ball_col;
+    }
+    return 0u8;
+}
+
+u8 show_board(u8 col, u8 pos) {
+    u8 *p = (u8*)vga_char_seg + VGA_OFFSET(col, 0u8);
+    for (u8 r = 0u8; r != VGA_ROWS; r += 1u8) {
+        if (r >= pos - BOARD_SIZE && r <= pos + BOARD_SIZE) {
+            *p = CHAR_BOARD;
+        } else {
+            *p = 0u8;
+        }
+        p += 128u8;
+    }
+}
+
+u8 print_score(u8 col, u8 ra, u8 score) {
+    u8 *p = (u8*)vga_char_seg + VGA_OFFSET(col, 0u8);
+    if (!ra) {
+        if (score >= 10u8) {
+            p += 1u8;
+        }
+        if (score >= 100u8) {
+            p += 1u8;
+        }
+    }
+    u8 m = score % 10u8;
+    *p = '0' + m;
+    score /= 10u8;
+    if (score) {
+        p -= 1u8;
+        m = score % 10u8;
+        *p = '0' + m;
+        score /= 10u8;
+        if (score) {
+            p -= 1u8;
+            *p = '0' + score;
+        }
+    }
+}
+
+u8 show_score() {
+    print_score(38u8, 1u8, score_left);
+    print_score(41u8, 0u8, score_right);
+    while (1u8) {
+        u8 k = ps2_wait_key_pressed();
+        if (k == PS2_KEY_ENTER) {
+            return 1u8;
+        } else if (k == PS2_KEY_ESCAPE) {
+            return 0u8;
+        }
+    }
+}
+
+export u8 main() {
+    ps2_init();
+    vga_clear(COLOR(COLOR_WHITE, COLOR_BLACK));
+    last_ball_col = 0u8;
+    last_ball_row = 0u8;
+    ball_x = (s16)VGA_COLS << 7u8;
+    ball_y = (s16)VGA_ROWS << 8u8;
+    ball_speed_x = 1;
+    ball_speed_y = 2;
+    score_left = 0u8;
+    score_right = 0u8;
+
+    board_left_col = VGA_ROWS >> 1u8;
+    board_right_col = VGA_ROWS >> 1u8;
+
+    u8 new_board_left_col = board_left_col;
+    u8 new_board_right_col = board_right_col;
+
+    s16 board_left_y = (s16)board_left_col << 8u8;
+    s16 board_right_y = (s16)board_right_col << 8u8;
+
+    s16 board_left_speed = 0;
+    s16 board_right_speed = 0;
+
+    show_board(0u8, board_left_col);
+    show_board(VGA_COLS - 1u8, board_right_col);
+
+    u8 l_up_pressed = 0u8;
+    u8 r_up_pressed = 0u8;
+    u8 l_down_pressed = 0u8;
+    u8 r_down_pressed = 0u8;
+
+    u8 board_cycle = 0u8;
+    while (1u8) {
+        if (new_board_left_col != board_left_col) {
+            board_left_col = new_board_left_col;
+            show_board(0u8, board_left_col);
+        }
+        if (new_board_right_col != board_right_col) {
+            board_right_col = new_board_right_col;
+            show_board(VGA_COLS - 1u8, board_right_col);
+        }
+        u8 k = ps2_get_key_event();
+        if (k == PS2_KEY_ESCAPE) {
+           return;
+        } else if (k == PS2_KEY_W) {
+            if (!l_up_pressed) {
+                board_left_y -= 256s16;
+            }
+            l_up_pressed = 1u8;
+        } else if (k == (PS2_KEY_W | PS2_KEY_RELEASE)) {
+            l_up_pressed = 0u8;
+            board_left_speed = 0;
+        } else if (k == PS2_KEY_S) {
+            if (!l_down_pressed) {
+                board_left_y += 256s16;
+            }
+            l_down_pressed = 1u8;
+        } else if (k == (PS2_KEY_S | PS2_KEY_RELEASE)) {
+            l_down_pressed = 0u8;
+            board_left_speed = 0;
+        } else if (k == PS2_KEY_UP) {
+            if (!r_up_pressed) {
+                board_right_y -= 256s16;
+            }
+            r_up_pressed = 1u8;
+        } else if (k == (PS2_KEY_UP | PS2_KEY_RELEASE)) {
+            r_up_pressed = 0u8;
+            board_right_speed = 0;
+        } else if (k == PS2_KEY_DOWN) {
+            if (!r_down_pressed) {
+                board_right_y += 256s16;
+            }
+            r_down_pressed = 1u8;
+        } else if (k == (PS2_KEY_DOWN | PS2_KEY_RELEASE)) {
+            r_down_pressed = 0u8;
+            board_right_speed = 0;
+        }
+
+        board_cycle += 1u8;
+        if (board_cycle == BOARD_CYCLES) {
+            board_cycle = 0u8;
+            if (l_up_pressed) {
+                board_left_speed -= BOARD_ACCELERATION;
+            }
+            if (l_down_pressed) {
+                board_left_speed += BOARD_ACCELERATION;
+            }
+            if (r_up_pressed) {
+                board_right_speed -= BOARD_ACCELERATION;
+            }
+            if (r_down_pressed) {
+                board_right_speed += BOARD_ACCELERATION;
+            }
+
+            board_left_y += board_left_speed;
+            board_right_y += board_right_speed;
+
+            if (board_left_y <= (s16)BOARD_SIZE << 8u8) {
+                board_left_y = (s16)BOARD_SIZE << 8u8;
+            } else if (board_left_y >= (s16)(VGA_ROWS - BOARD_SIZE - 1u8) << 8u8) {
+                board_left_y = (s16)(VGA_ROWS - BOARD_SIZE - 1u8) << 8u8;
+            }
+
+            if (board_right_y <= (s16)BOARD_SIZE << 8u8) {
+                board_right_y = (s16)BOARD_SIZE << 8u8;
+            } else if (board_right_y >= (s16)(VGA_ROWS - BOARD_SIZE - 1u8) << 8u8) {
+                board_right_y = (s16)(VGA_ROWS - BOARD_SIZE - 1u8) << 8u8;
+            }
+
+            new_board_left_col = (u8)(board_left_y >> 8u8);
+            new_board_right_col = (u8)(board_right_y >> 8u8);
+        }
+
+
+        u8 r = ball_step();
+        if (r != 0u8) {
+            if (r == 1u8) {
+                score_left += 1u8;
+            } else {
+                score_right += 1u8;
+            }
+            r = show_score();
+            if (!r) {
+                return;
+            }
+            if (ball_speed_x > 0) {
+                ball_speed_x = 1;
+            } else {
+                ball_speed_x = -1;
+            }
+            ball_x = (s16)VGA_COLS << 7u8;
+            ball_y = (s16)VGA_ROWS << 8u8;
+            l_down_pressed = 0u8;
+            l_up_pressed = 0u8;
+            r_down_pressed = 0u8;
+            r_up_pressed = 0u8;
+            board_right_speed = 0;
+            board_left_speed = 0;
+        }
+    }
+}
