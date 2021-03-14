@@ -3,6 +3,7 @@
 #include <string.h>
 #include <entropy.h>
 #include <ps2keyboard.h>
+#include <frame.h>
 #include "life/quasipixel.h"
 #include "life/life.h"
 #include "calc/main.h"
@@ -84,28 +85,6 @@ u8 life_main() {
                 qp_set_cursor_enabled(1u8);
             }
         }
-    }
-}
-
-export u8 display_frame(u8 x0, u8 y0, u8 x1, u8 y1) {
-    // corners
-    vga_char_seg[VGA_OFFSET(x0, y0)] = 0xc9u8;
-    vga_char_seg[VGA_OFFSET(x0, y1)] = 0xc8u8;
-    vga_char_seg[VGA_OFFSET(x1, y0)] = 0xbbu8;
-    vga_char_seg[VGA_OFFSET(x1, y1)] = 0xbcu8;
-
-    // edges
-    u8 i = x0 + 1u8;
-    while (i < x1) {
-        vga_char_seg[VGA_OFFSET(i, y0)] = 0xcdu8;
-        vga_char_seg[VGA_OFFSET(i, y1)] = 0xcdu8;
-        i += 1u8;
-    }
-    i = y0 + 1u8;
-    while (i < y1) {
-        vga_char_seg[VGA_OFFSET(x0, i)] = 0xbau8;
-        vga_char_seg[VGA_OFFSET(x1, i)] = 0xbau8;
-        i += 1u8;
     }
 }
 

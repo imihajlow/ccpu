@@ -9,8 +9,6 @@ u8 player_y;
 u8 has_key;
 u8 on_exit;
 
-import u8 trap();
-
 export u8 game_init(u8 side) {
     u8 width = side;
     u8 height = side;
@@ -35,7 +33,6 @@ export u8 game_init(u8 side) {
         exit_x = (u8)r << 1u;
         r = random(rand_range_h);
         exit_y = (u8)r << 1u;
-        trap();
     }
 
     u8 key_y = 0u8;

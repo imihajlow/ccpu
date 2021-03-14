@@ -2,12 +2,12 @@
 #include <entropy.h>
 #include <random.h>
 #include <vga.h>
+#include <string.h>
 #include <ps2keyboard.h>
 #include "maze.h"
 #include "game.h"
-#include "../frame.h"
-
-import u8 trap();
+#include <frame.h>
+#include <line_edit.h>
 
 u8 print_decimal(u8 col, u8 row, u8 x) {
     u8* vga_offset = (u8*)vga_char_seg + VGA_OFFSET(col, row);
@@ -41,9 +41,44 @@ u8 print_success() {
 u8 maze_loop();
 
 export u8 maze_main() {
+    vga_clear(COLOR(COLOR_WHITE, COLOR_BLUE));
+    vga_put_text(28u8, 15u8, "Welcome to the Maze");
+    display_frame(26u8, 13u8, 28u8 + 19u8 + 1u8, 17u8);
+
+    ps2_wait_key_pressed_entropy();
     srand(entropy);
 
     maze_loop();
+}
+
+u8 enter_level() {
+    u8 buf[3];
+    buf[0] = 0u8;
+    vga_put_text(0u8, VGA_ROWS - 1u8, "Jump to: ");
+    u8 r = line_edit((u8*)buf, 2u8, 9u8, VGA_ROWS - 1u8, COLOR(COLOR_GRAY, COLOR_BLACK));
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), 0u8, 11u16);
+    if (r) {
+        u8 lvl = 0u8;
+        if (buf[0] == 0u8) {
+            return 0u8;
+        } else if (buf[0] >= '0' && buf[0] <= '9') {
+            lvl = buf[0] - '0';
+        } else {
+            return 0u8;
+        }
+        if (buf[1] != 0u8) {
+            if (buf[1] >= '0' && buf[1] <= '9') {
+                lvl = lvl * 10u8 + (buf[1] - '0');
+            } else {
+                return 0u8;
+            }
+        }
+        lvl |= 1u8;
+        if (lvl <= 79u8 && lvl >= 3u8) {
+            return lvl;
+        }
+    }
+    return 0u8;
 }
 
 u8 maze_loop() {
@@ -54,7 +89,6 @@ u8 maze_loop() {
         print_level_greeting(n);
         game_init(n);
         game_print_state();
-        trap();
         while (1u8) {
             k = keyboard_get_if_pressed();
             if (k == KEY_ESC) {
@@ -99,6 +133,12 @@ u8 maze_loop() {
                 break;
             } else if (k == PS2_KEY_F1) {
                 game_show_all();
+            } else if (k == PS2_KEY_F2) {
+                u8 lvl = enter_level();
+                if (lvl) {
+                    n = lvl - 2u8;
+                    break;
+                }
             } else {
                 r = 0u8;
             }

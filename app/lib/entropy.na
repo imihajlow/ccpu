@@ -1,5 +1,5 @@
 #include "entropy.h"
-
+#include <ps2keyboard.h>
 #define KEYBOARD_ADDR 0xff00u
 #define KEYBOARD_PORT *((u8*)KEYBOARD_ADDR)
 
@@ -30,4 +30,13 @@ export u8 keyboard_wait_key_released_entropy() {
     }
     KEYBOARD_PORT = 0xffu8;
     return bit_mask_to_index[0xfu8 & ~col] + (bit_mask_to_index[~row] << 2u);
+}
+
+export u8 ps2_wait_key_pressed_entropy() {
+    u8 result = PS2_KEY_NONE;
+     while (!result || (result & PS2_KEY_RELEASE)) {
+          result = ps2_get_key_event();
+          entropy += 1u;
+     }
+     return result;
 }

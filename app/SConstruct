@@ -72,19 +72,13 @@ lib = bcdf + vga + ps2 + keyboard + Split('''
     lib/random.na
     lib/more.na
     lib/line_edit.na
+    lib/frame.na
     ''')
 
 # Apps
 maze = Split('maze/main.na maze/game.na maze/maze.na')
 life = Split('life/quasipixel.na life/life.na life/life_next.asm life/qp_render.asm')
 calc = Split('calc/calc.asm')
-
-# Targets
-env.Bin('main_rom', Split('''
-    main.na
-    test/trap.asm
-    vga_demo.asm
-    matrix.na''') + lib + natrix + maze + life + calc + rom_startup)
 
 env.Bin('alutest', 'test/alutest.asm')
 
@@ -116,3 +110,6 @@ env.App('calc', Split('''
     calc/app.na
     ''') + lib + natrix + app_startup)
 
+env.App('maze', Split('''
+    maze/app.na
+    ''') + maze + lib + natrix + app_startup)
