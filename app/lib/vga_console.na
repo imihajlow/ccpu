@@ -1,5 +1,5 @@
 #include "vga_console.h"
-
+#include "line_edit.h"
 
 u16 offset;
 
@@ -35,4 +35,11 @@ export u8 vga_console_putchar(u8 c) {
 
 export u8 vga_console_return() {
     offset &= 0xff80u16; // clear the column counter
+}
+
+export u8 vga_console_line_edit(u8 *buf, u8 max_len) {
+    u8 row = (u8)(offset >> 7u8);
+    u8 col = (u8)offset & 0x7fu8;
+    vga_console_newline();
+    return line_edit(buf, max_len, col, row, color);
 }

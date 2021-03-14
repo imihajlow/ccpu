@@ -4,6 +4,9 @@
     .export vga_console_print_bcdf
     .export vga_console_print_bcdf_arg
     .export vga_console_print_bcdf_width
+    .export vga_console_print_bcdf_arg0
+    .export vga_console_print_bcdf_arg1
+    .export vga_console_print_bcdf_ret
 
     .global vga_console_putchar
     .global vga_console_putchar_arg0
@@ -15,7 +18,10 @@
 
     .section bss.bcdf_print
     .align 16
+vga_console_print_bcdf_arg0:
 vga_console_print_bcdf_arg: res 16
+vga_console_print_bcdf_arg1:
+vga_console_print_bcdf_ret:
 vga_console_print_bcdf_width: res 1
     .align 2
 ret: res 2

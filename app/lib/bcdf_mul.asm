@@ -2,6 +2,7 @@
     ; arguments: bcdf_op_a and bcdf_op_b
     ; result: bcdf_op_r
     .export bcdf_mul
+    .export bcdf_mul_ret
     .global bcdf_op_a
     .global bcdf_op_b
     .global bcdf_op_r
@@ -10,6 +11,7 @@
 
     .section bss.bcdf_mul
     .align 16
+bcdf_mul_ret:
 bcdf_mul_a: res 16
 bcdf_mul_b: res 16
 

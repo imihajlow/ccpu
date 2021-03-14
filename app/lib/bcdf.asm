@@ -1,7 +1,7 @@
     ; Binary-coded decimal float
     ; Coding:
-    ; Byte 0: exponent (signed)
-    ; Byte 1: sign (0x00 - positive, 0xff - negative)
+    ; Byte 0: sign (0x00 - positive, 0xff - negative)
+    ; Byte 1: exponent (signed)
     ; Bytes 2-15: mantissa decimal digits
 
 .const sign = 0
@@ -11,12 +11,14 @@
     ; bcdf_normalize - normalize a number: adjust the exponent in a way that man[0] is not 0
     ; argument: bcdf_normalize_arg (bcdf)
     .export bcdf_normalize
+    .export bcdf_normalize_ret
     .export bcdf_normalize_arg
 
     ; bcdf_sum - sum two bcdf numbers
     ; arguments: bcdf_sum_a, bcdf_sum_b
     ; result: bcdf_sum_r
     .export bcdf_sum
+    .export bcdf_sum_ret
     .export bcdf_sum_a
     .export bcdf_sum_b
     .export bcdf_sum_r

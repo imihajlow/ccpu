@@ -2,6 +2,7 @@
     ; arguments: bcdf_op_a, bcdf_op_b
     ; result: bcdf_op_r
     .export bcdf_div
+    .export bcdf_div_ret
     .global bcdf_op_a
     .global bcdf_op_b
     .global bcdf_op_r
@@ -10,6 +11,7 @@
 
     .section bss.bcdf_div
     .align 16
+bcdf_div_ret:
 divisor: res 16
 result: res 16
 ret_addr: res 2

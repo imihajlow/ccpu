@@ -112,3 +112,7 @@ env.App('main', Split('''
     vga_demo.asm
     matrix.na''') + lib + natrix + maze + life + calc + app_startup)
 
+env.App('calc', Split('''
+    calc/app.na
+    ''') + lib + natrix + app_startup)
+

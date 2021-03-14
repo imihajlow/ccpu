@@ -1,0 +1,158 @@
+#include <bcdf.h>
+#include <string.h>
+#include <vga_console.h>
+#include <ps2keyboard.h>
+
+#define CALC_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
+
+#define STATE_SIGN 0u8
+#define STATE_LEADING_ZEROES 1u8
+#define STATE_BEFORE_DOT 2u8
+#define STATE_AFTER_DOT 3u8
+#define STATE_AFTER_DOT_ZERO 4u8
+
+u8 line_buf[64];
+
+// returns updated index or 0 on failure
+u8 parse_bcdf(u8 i) {
+    u8 state = STATE_SIGN;
+    bcdf_normalize_arg.sign = 0u8;
+    bcdf_normalize_arg.exp = -1s8;
+    memset((u8*)bcdf_normalize_arg.man, 0u8, sizeof(bcdf_normalize_arg.man));
+    u8 man_index = 0u8;
+    for (; i != (u8)sizeof(line_buf); i += 1u8) {
+        u8 c = line_buf[i];
+        if (!c) {
+            break;
+        }
+
+        if (state == STATE_SIGN) {
+            if (c == ' ') {
+            } else if (c == '+') {
+                state = STATE_LEADING_ZEROES;
+            } else if (c == '-') {
+                bcdf_normalize_arg.sign = 0xffu8;
+                state = STATE_LEADING_ZEROES;
+            } else if (c == '0') {
+                state = STATE_LEADING_ZEROES;
+            } else if (c >= '1' && c <= '9') {
+                i -= 1u8;
+                state = STATE_BEFORE_DOT;
+            } else {
+                return 0u8;
+            }
+        } else if (state == STATE_LEADING_ZEROES) {
+            if (c >= '1' && c <= '9') {
+                i -= 1u8;
+                state = STATE_BEFORE_DOT;
+            } else if (c == '.') {
+                state = STATE_AFTER_DOT_ZERO;
+            } else if (c != '0') {
+                return 0u8;
+            }
+        } else if (state == STATE_BEFORE_DOT) {
+            if (c >= '0' && c <= '9') {
+                if (man_index != (u8)sizeof(bcdf_normalize_arg.man)) {
+                    bcdf_normalize_arg.man[man_index] = c - '0';
+                    man_index += 1u8;
+                }
+                bcdf_normalize_arg.exp += 1s8;
+            } else if (c == '.') {
+                state = STATE_AFTER_DOT;
+            } else {
+                return i;
+            }
+        } else if (state == STATE_AFTER_DOT) {
+            if (c >= '0' && c <= '9') {
+                if (man_index != (u8)sizeof(bcdf_normalize_arg.man)) {
+                    bcdf_normalize_arg.man[man_index] = c - '0';
+                    man_index += 1u8;
+                }
+            } else {
+                return i;
+            }
+        } else if (state == STATE_AFTER_DOT_ZERO) {
+            if (c == '0') {
+                bcdf_normalize_arg.exp -= 1s8;
+            } else if (c > '0' && c <= '9') {
+                state = STATE_AFTER_DOT;
+                i -= 1u8;
+            } else {
+                return i;
+            }
+        }
+    }
+    if (state == STATE_AFTER_DOT || state == STATE_BEFORE_DOT) {
+        return i;
+    } else {
+        return 0u8;
+    }
+}
+
+u8 calculate() {
+    u8 i = 0u8;
+    i = parse_bcdf(i);
+    if (!i) {
+        return 0u8;
+    }
+    bcdf_normalize();
+
+    u8 op = 0u8;
+    for (; i != (u8)sizeof(line_buf); i += 1u8) {
+        u8 c = line_buf[i];
+        if (c == 0u8) {
+            break;
+        } else if (c == '+' || c == '-' || c == '*' || c == '/') {
+            op = c;
+            break;
+        } else if (c != ' ') {
+            return 0u8;
+        }
+    }
+
+    if (op != 0u8) {
+        memcpy((u8*)&bcdf_op_a, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
+        i = parse_bcdf(i + 1u8);
+        if (!i) {
+            return 0u8;
+        }
+        bcdf_normalize();
+        memcpy((u8*)&bcdf_op_b, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
+
+        if (op == '+') {
+            bcdf_add();
+        } else if (op == '-') {
+            bcdf_sub();
+        } else if (op == '*') {
+            bcdf_mul();
+        } else if (op == '/') {
+            bcdf_div();
+        } else {
+            return 0u8;
+        }
+    } else {
+        memcpy((u8*)&bcdf_op_r, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
+    }
+
+    return 1u8;
+}
+
+export u8 main() {
+    ps2_init();
+    vga_console_init(CALC_COLOR);
+    while (1u8) {
+        vga_console_print("> ");
+        line_buf[0] = 0u8;
+        u8 r = vga_console_line_edit((u8*)line_buf, (u8)sizeof(line_buf));
+        if (!r) {
+            return;
+        }
+        r = calculate();
+        if (r) {
+            vga_console_print_bcdf(bcdf_op_r, 16u8);
+        } else {
+            vga_console_print("Error");
+        }
+        vga_console_newline();
+    }
+}
