@@ -122,3 +122,9 @@ env.App('calc', Split('''
 env.App('maze', Split('''
     maze/app.na
     ''') + maze + lib + natrix + app_startup)
+
+env.App('life', Split('''
+    life/app.na
+    ''') + life + lib + natrix + app_startup)
+
+
