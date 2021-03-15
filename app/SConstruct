@@ -55,6 +55,7 @@ bcdf = Split('''
     ''')
 natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
 rom_startup = ['$NATRIX_DIR/runtime/rom_startup.asm']
+os_startup = ['$NATRIX_DIR/runtime/os_startup.asm']
 app_startup = ['$NATRIX_DIR/runtime/app_startup.asm']
 
 ps2 = Split('lib/ps2.na lib/ps2keyboard.na lib/keymap.s')
@@ -74,6 +75,8 @@ lib = bcdf + vga + ps2 + keyboard + Split('''
     lib/line_edit.na
     lib/frame.na
     ''')
+
+syscall = ['lib/os/syscall.asm']
 
 # Apps
 maze = Split('maze/main.na maze/game.na maze/maze.na')
@@ -103,7 +106,9 @@ env.Loader('fileshell', Split('''
     fileshell/loload.asm
     fileshell/lorun.asm
     fileshell/progressbar.na
-    ''') + rom_startup + natrix + lib)
+    fileshell/syscall.asm
+    fileshell/syscall_impl.na
+    ''') + os_startup + natrix + lib)
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
 
@@ -129,5 +134,5 @@ env.App('life', Split('''
 
 env.App('pong', Split('''
     pong/pong.na
-    ''') + lib + natrix + app_startup)
+    ''') + lib + natrix + app_startup + syscall)
 

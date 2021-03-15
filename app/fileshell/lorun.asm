@@ -25,7 +25,7 @@ lorun:
 
     ldi pl, lo(0xff02)
     ldi ph, hi(0xff02)
-    ldi a, 0x3e ; enable segments A-C, both boards, disble lo RAM
+    ldi a, 0x3e ; enable segments A-C, both boards, disable lo RAM
     st a
 
     ldi pl, lo(ret)

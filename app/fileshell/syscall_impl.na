@@ -1,0 +1,40 @@
+#include <os/syscall.h>
+#include <fat.h>
+
+import u32 syscall_ret;
+import u32 syscall_arg0;
+import u32 syscall_arg1;
+import u32 syscall_arg2;
+import u32 syscall_arg3;
+import u32 syscall_arg4;
+import u32 syscall_arg5;
+import u32 syscall_arg6;
+import u32 syscall_arg7;
+import u16 syscall_last_error;
+
+#define SYSCALL_NR ((u8)sycall_arg0)
+
+export u8 syscall_impl() {
+    if (SYSCALL_NR == SYSCALL_OPEN) {
+
+    } else if (SYSCALL_NR == SYSCALL_READ) {
+        syscall_ret = fat_read((u8)syscall_arg1, (u8*)syscall_arg2, (u16)syscall_arg3);
+        syscall_last_error = (u16)fat_last_error;
+
+    } else if (SYSCALL_NR == SYSCALL_WRITE) {
+
+    } else if (SYSCALL_NR == SYSCALL_CLOSE) {
+
+    } else if (SYSCALL_NR == SYSCALL_TRUNCATE) {
+
+    } else if (SYSCALL_NR == SYSCALL_SEEK_END) {
+
+    } else if (SYSCALL_NR == SYSCALL_GET_SIZE) {
+
+    } else if (SYSCALL_NR == SYSCALL_OPEN_DIR) {
+
+    } else if (SYSCALL_NR == SYSCALL_GET_NEXT_DIR_ENTRY) {
+
+    }
+}
+

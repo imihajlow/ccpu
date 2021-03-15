@@ -16,14 +16,29 @@ layout = [
         "target": "ramtext"
     },
     {
+        "name": "syscall_text_origin",
+        "init": True,
+        "target": "syscall_text"
+    },
+    {
         "name": "extension",
         "init": False,
         "begin": 0x8000,
         "end": 0xB800
     },
     {
-        "name": "data",
+        "name": "syscall_args",
         "begin": 0xB800,
+        "init": False
+    },
+    {
+        "name": "syscall_text",
+        "begin": 0xB822,
+        "init": False,
+        "shadow": "syscall_text_origin"
+    },
+    {
+        "name": "data",
         "init": False
     },
     {

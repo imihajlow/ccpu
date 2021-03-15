@@ -1,4 +1,4 @@
-# Default memory layout to use on hardware
+# Memory layout of a loadable application
 
 layout = [
     {
@@ -21,6 +21,16 @@ layout = [
     {
         "name": "stack",
         "end": 0xB800,
+        "init": False
+    },
+    {
+        "name": "syscall_args",
+        "begin": 0xB800,
+        "init": False
+    },
+    {
+        "name": "syscall_text",
+        "begin": 0xB822,
         "init": False
     }
 ]

@@ -83,14 +83,14 @@ class Object:
         self.__curSectionIndex += 1
 
     def defineLabel(self, name):
-        self.__checkRedefinition(name)
+        self.__checkRedefinition(name, False)
         self.sections[self.__curSectionIndex].defineLabel(name)
 
     def defineConstant(self, name, value):
         self.consts[name] = value
 
     def declareGlobal(self, name):
-        self.__checkRedefinition(name)
+        self.__checkRedefinition(name, True)
         self.globalSymbols += [name]
 
     def declareExport(self, name):
@@ -125,9 +125,9 @@ class Object:
         result.update(self.consts)
         return result
 
-    def __checkRedefinition(self, name):
+    def __checkRedefinition(self, name, isGlobal):
         for s in self.sections:
             if name in s.labels:
                 raise ValueError("Label redifinition: {}".format(name))
-        if name in self.globalSymbols:
+        if not isGlobal and name in self.globalSymbols:
             raise ValueError("Label redifinition: {}".format(name))
