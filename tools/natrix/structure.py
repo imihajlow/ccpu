@@ -51,6 +51,8 @@ class MemberAccessTransformer(Transformer):
                 raise SemanticError(Location.fromAny(t), str(e))
             except LookupError as e:
                 raise SemanticError(Location.fromAny(t), str(e))
+            except AttributeError as e:
+                raise SemanticError(Location.fromAny(t), f"{obj} is not a struct")
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
             return Value.withOffset(Location.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)
@@ -67,6 +69,8 @@ class MemberAccessTransformer(Transformer):
                 offset, type = getField(obj.getType(), fields)
             except ValueError as e:
                 raise SemanticError(Location.fromAny(t), str(e))
+            except AttributeError as e:
+                raise SemanticError(Location.fromAny(t), f"{obj} is not a struct")
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
             return Value.withOffset(Location.fromAny(t), PtrType(type), 0 + type.getIndirectionOffset(), obj.getSource(), True, offset)
