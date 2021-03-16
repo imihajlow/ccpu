@@ -1,0 +1,98 @@
+#include "path.h"
+#include "private.h"
+#include <string.h>
+
+import u8 fat_last_error;
+
+u8 *copy_first_entry(u8 *dst, u8 *path) {
+    while (1u8) {
+        u8 c = *path;
+        if (c == 0u8 || c == '/') {
+            *dst = 0u8;
+            return path;
+        }
+        path += 1u8;
+        *dst = c;
+        dst += 1u8;
+    }
+}
+
+export u8 fat_find_path(u8 *path) {
+    u8 r;
+    if (*path != '/') {
+        fat_last_error = FAT_ERROR_RELATIVE_PATH;
+        return FAT_BAD_DESC;
+    }
+    struct FileDescriptor *pfd;
+    u8 fd = fat_private_get_free_fd(&pfd);
+    if (fd == FAT_BAD_DESC) {
+        return FAT_BAD_DESC;
+    }
+
+    pfd->dir_entry.cluster_lo = 0u16; // start with root dir
+    pfd->dir_entry.attrs = FAT_FILE_ATTR_DIRECTORY;
+    u8 filename[8 + 3 + 1 + 1];
+    while (*path != 0u8) {
+        if (*path == '/') {
+            path += 1u8;
+        } else {
+            path = copy_first_entry((u8*)filename, path);
+            r = fat_private_find_file(&pfd->dir_entry, (u8*)filename, pfd);
+            if (!r) {
+                pfd->is_free = 1u8;
+                return FAT_BAD_DESC;
+            }
+        }
+    }
+    return fd;
+}
+
+export u8 fat_open_path(u8 *path) {
+    u8 fd = fat_find_path(path);
+    if (fd == FAT_BAD_DESC) {
+        return FAT_BAD_DESC;
+    }
+    struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
+
+    if (pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY) {
+        fat_last_error = FAT_ERROR_IS_DIR;
+        pfd->is_free = 1u8;
+        return FAT_BAD_DESC;
+    }
+
+    u8 r = fat_private_init_fd(pfd);
+    if (!r) {
+        pfd->is_free = 1u8;
+        return FAT_BAD_DESC;
+    }
+
+    return fd;
+}
+
+export u8 fat_open_dir_path(u8 *path) {
+    u8 fd = fat_find_path(path);
+    if (fd == FAT_BAD_DESC) {
+        return FAT_BAD_DESC;
+    }
+    struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
+
+    if (!(pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY)) {
+        fat_last_error = FAT_ERROR_NOT_A_DIR;
+        pfd->is_free = 1u8;
+        return FAT_BAD_DESC;
+    }
+
+    if (pfd->dir_entry.cluster_lo == 0u16) {
+        // root dir
+        fat_private_init_root_dir(pfd);
+    } else {
+        u8 r = fat_private_init_fd(pfd);
+        if (!r) {
+            pfd->is_free = 1u8;
+            return FAT_BAD_DESC;
+        }
+    }
+
+    return fd;
+}
+

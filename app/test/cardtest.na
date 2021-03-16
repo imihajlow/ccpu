@@ -2,7 +2,7 @@
 #include <vga.h>
 #include <ps2keyboard.h>
 #include <card.h>
-#include <fat.h>
+#include <fat/fat.h>
 #include <more.h>
 #include <line_edit.h>
 

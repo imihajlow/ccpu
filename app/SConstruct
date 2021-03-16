@@ -76,6 +76,12 @@ lib = bcdf + vga + ps2 + keyboard + Split('''
     lib/frame.na
     ''')
 
+fat = Split('''
+    lib/fat/fat.na
+    lib/fat/name.na
+    lib/fat/path.na
+    ''')
+
 syscall = ['lib/os/syscall.asm']
 
 # Apps
@@ -95,12 +101,11 @@ env.Bin('ps2test', Split('test/ps2test.na') + rom_startup + natrix + lib)
 
 env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib)
 
-env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/fat.na lib/log.na') + rom_startup + natrix + lib)
+env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/log.na') + rom_startup + natrix + lib + fat)
 
 env.Loader('fileshell', Split('''
     fileshell/fileshell.na
     lib/card.na
-    lib/fat.na
     lib/log.na
     fileshell/extension.asm
     fileshell/loload.asm
@@ -108,7 +113,7 @@ env.Loader('fileshell', Split('''
     fileshell/progressbar.na
     fileshell/syscall.asm
     fileshell/syscall_impl.na
-    ''') + os_startup + natrix + lib)
+    ''') + os_startup + natrix + lib + fat)
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
 
