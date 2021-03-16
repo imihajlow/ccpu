@@ -6,7 +6,7 @@
 #include <log.h>
 
 #define INVALID_BLOCK_ADDR 0xffffffffu32
-u8 cache_block[CARD_BLOCK_SIZE];
+import u8 cache_block[CARD_BLOCK_SIZE];
 u32 cache_block_addr;
 export u8 fat_last_error;
 

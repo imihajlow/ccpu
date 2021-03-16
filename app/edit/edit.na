@@ -5,14 +5,18 @@
 #include <more.h>
 #include <log.h>
 #include <ps2keyboard.h>
+#include <string.h>
 
 #define MAIN_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
+#define TYPING_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
+#define STATUS_COLOR COLOR(COLOR_LIGHT_RED, COLOR_BLACK)
 
 export u8 main() {
 	ps2_init();
 	vga_clear(MAIN_COLOR);
 	u8 filename[40];
 	u8 r;
+    filename[0] = 0u8;
 	vga_put_text(0u8, 0u8, "Filename: ");
 	r = line_edit((u8*)filename, (u8)sizeof(filename) - 1u8, 10u8, 0u8, MAIN_COLOR);
 	if (!r) {
@@ -24,23 +28,43 @@ export u8 main() {
 		log_u8((u8)syscall_last_error);
 		return;
 	}
-    more_init(MAIN_COLOR);
-    u8 buf[256];
     u8 k = 1u8;
-    while (k) {
-        u16 len = read(fd, (u8*)buf, 256u16);
-        k = more_print((u8*)buf, len);
-        if (len != 256u16) {
-        	if ((u8)syscall_last_error != FAT_EOF) {
-        		log_string("Read error");
-				log_u8((u8)syscall_last_error);
-        	}
-			break;
+    u8 buf[64];
+    u8 append = 0u8;
+    while (1u8) {
+        u8 row = 1u8;
+        vga_clear(TYPING_COLOR);
+        memset((u8*)vga_color_seg, STATUS_COLOR, (u16)VGA_COLS);
+        if (append) {
+            vga_put_text(0u8, 0u8, "Appending");
+            vga_put_text(10u8, 0u8, (u8*)filename);
+        } else {
+            vga_put_text(0u8, 0u8, "Typing");
+            vga_put_text(7u8, 0u8, (u8*)filename);
+        }
+        while (row != VGA_ROWS) {
+            buf[0u8] = 0u8;
+            r = line_edit((u8*)buf, (u8)sizeof(buf), 0u8, row, TYPING_COLOR);
+            if (!r) {
+                r = truncate(fd);
+                if (!r) {
+                    log_string("Can't truncate");
+                    log_u8((u8)syscall_last_error);
+                }
+                close(fd);
+                return;
+            }
+            r = strlen_8((u8*)buf);
+            buf[r] = '\n';
+            buf[r + 1u8] = 0u8;
+            for (u8 i = 0u8; i != 100u8; i += 1u8) {
+                u16 l = write(fd, (u8*)buf, (u16)(r + 1u8));
+                if (l != (u16)(r + 1u8)) {
+                    log_string("Error writing");
+                    log_u8((u8)syscall_last_error);
+                }
+            }
+            row += 1u8;
         }
     }
-    if (k) {
-        vga_put_text(0u8, VGA_ROWS - 1u8, "-- END --");
-        ps2_wait_key_pressed();
-    }
-	close(fd);
 }

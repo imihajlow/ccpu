@@ -1,5 +1,9 @@
 #include "card.h"
 
+// ========================
+// Reference implementation
+// ========================
+
 #define SPI_DATA *((u8*)0xFD02)
 #define SPI_CTRL *((u8*)0xFD03)
 
@@ -39,7 +43,7 @@ u8 spi_transfer(u8 x) {
 #define DATA_RSP_CRC_ERROR   0b01011u8
 #define DATA_RSP_WRITE_ERROR 0b01101u8
 
-u8 delay_1ms() {
+export u8 delay_1ms() {
     for (u16 i = 0u16; i < 1000u16; i += 1u16) {}
 }
 
@@ -171,7 +175,7 @@ export u8 card_read_block(u32 block_index, u8 *dst) {
     }
     if (r) {
         spi_transfer(0xFFu8);
-        if (r | R1_IDLE) {
+        if (r & R1_IDLE) {
             return CARD_ERROR_NOT_INITIALIZED;
         } else {
             return CARD_ERROR_BLOCK_CMD_FAILED;
@@ -225,7 +229,7 @@ export u8 card_write_block(u32 block_index, u8 *src) {
     }
     if (r) {
         spi_transfer(0xFFu8);
-        if (r | R1_IDLE) {
+        if (r & R1_IDLE) {
             return CARD_ERROR_NOT_INITIALIZED;
         } else {
             return CARD_ERROR_BLOCK_CMD_FAILED;

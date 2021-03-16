@@ -101,11 +101,11 @@ env.Bin('ps2test', Split('test/ps2test.na') + rom_startup + natrix + lib)
 
 env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib)
 
-env.Bin('cardtest', Split('test/cardtest.na lib/card.na lib/log.na') + rom_startup + natrix + lib + fat)
+env.Bin('cardtest', Split('test/cardtest.na lib/card.asm lib/log.na') + rom_startup + natrix + lib + fat)
 
 env.Loader('fileshell', Split('''
     fileshell/fileshell.na
-    lib/card.na
+    lib/card.asm
     lib/log.na
     fileshell/extension.asm
     fileshell/loload.asm
@@ -119,11 +119,11 @@ env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix
 
 env.Extension('lo', Split('fileshell.api extension_base.asm test/lotest_ext.na lib/vga.asm'))
 
-env.App('main', Split('''
-    main.na
-    test/trap.asm
-    vga_demo.asm
-    matrix.na''') + lib + natrix + maze + life + calc + app_startup)
+# env.App('main', Split('''
+#     main.na
+#     test/trap.asm
+#     vga_demo.asm
+#     matrix.na''') + lib + natrix + maze + life + calc + app_startup)
 
 env.App('calc', Split('''
     calc/app.na
