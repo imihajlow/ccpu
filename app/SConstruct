@@ -139,5 +139,10 @@ env.App('life', Split('''
 
 env.App('pong', Split('''
     pong/pong.na
+    ''') + lib + natrix + app_startup)
+
+env.App('edit', Split('''
+    edit/edit.na
+    lib/log.na
     ''') + lib + natrix + app_startup + syscall)
 

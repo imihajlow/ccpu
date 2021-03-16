@@ -16,7 +16,8 @@ layout = [
     },
     {
         "name": "bss",
-        "init": False
+        "init": False,
+        "start": 0x8000
     },
     {
         "name": "stack",

@@ -1,0 +1,46 @@
+#include <vga.h>
+#include <line_edit.h>
+#include <fat/error.h>
+#include <os/syscall.h>
+#include <more.h>
+#include <log.h>
+#include <ps2keyboard.h>
+
+#define MAIN_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
+
+export u8 main() {
+	ps2_init();
+	vga_clear(MAIN_COLOR);
+	u8 filename[40];
+	u8 r;
+	vga_put_text(0u8, 0u8, "Filename: ");
+	r = line_edit((u8*)filename, (u8)sizeof(filename) - 1u8, 10u8, 0u8, MAIN_COLOR);
+	if (!r) {
+		return;
+	}
+	u8 fd = open((u8*)filename);
+	if (fd == FAT_BAD_DESC) {
+		log_string("Can't open");
+		log_u8((u8)syscall_last_error);
+		return;
+	}
+    more_init(MAIN_COLOR);
+    u8 buf[256];
+    u8 k = 1u8;
+    while (k) {
+        u16 len = read(fd, (u8*)buf, 256u16);
+        k = more_print((u8*)buf, len);
+        if (len != 256u16) {
+        	if ((u8)syscall_last_error != FAT_EOF) {
+        		log_string("Read error");
+				log_u8((u8)syscall_last_error);
+        	}
+			break;
+        }
+    }
+    if (k) {
+        vga_put_text(0u8, VGA_ROWS - 1u8, "-- END --");
+        ps2_wait_key_pressed();
+    }
+	close(fd);
+}
