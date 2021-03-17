@@ -120,11 +120,11 @@ env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix
 
 env.Extension('lo', Split('fileshell.api extension_base.asm test/lotest_ext.na lib/vga.asm'))
 
-# env.App('main', Split('''
-#     main.na
-#     test/trap.asm
-#     vga_demo.asm
-#     matrix.na''') + lib + natrix + maze + life + calc + app_startup)
+env.App('main', Split('''
+    main.na
+    test/trap.asm
+    vga_demo.asm
+    matrix.na''') + lib + natrix + maze + life + calc + app_startup)
 
 env.App('calc', Split('''
     calc/app.na
