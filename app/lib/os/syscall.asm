@@ -52,6 +52,8 @@
     .export get_next_dir_entry_arg2
     .export get_next_dir_entry_ret
 
+    .export mount
+    .export mount_ret
 
     .section syscall_args
 syscall_ret:
@@ -65,6 +67,7 @@ seek_end_ret:
 get_size_ret:
 open_dir_ret:
 get_next_dir_entry_ret:
+mount_ret:
     res 4
 syscall_arg1:
 open_arg0:
@@ -240,7 +243,23 @@ get_next_dir_entry:
     inc pl
     st a
 
-    ldi a, 1
+    ldi a, 8
+    ldi pl, lo(jmp_syscall)
+    ldi ph, hi(jmp_syscall)
+    jmp
+
+    .section text.mount
+mount:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(ret)
+    ldi ph, hi(ret)
+    st b
+    inc pl
+    st a
+
+    ldi a, 9
     ldi pl, lo(jmp_syscall)
     ldi ph, hi(jmp_syscall)
     jmp

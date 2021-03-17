@@ -43,6 +43,9 @@ export u8 syscall_impl() {
     } else if (SYSCALL_NR == SYSCALL_GET_NEXT_DIR_ENTRY) {
         *(u8*)&syscall_ret = fat_get_next_dir_entry((u8)syscall_arg1, (struct FatDirEntry *)syscall_arg2, (u8)syscall_arg3);
         syscall_last_error = (u16)fat_last_error;
+    } else if (SYSCALL_NR == SYSCALL_MOUNT) {
+        *(u8*)&syscall_ret = fat_mount();
+        syscall_last_error = (u16)fat_last_error;
     }
 }
 

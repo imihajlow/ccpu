@@ -10,6 +10,7 @@
 #define SYSCALL_GET_SIZE 6u8
 #define SYSCALL_OPEN_DIR 7u8
 #define SYSCALL_GET_NEXT_DIR_ENTRY 8u8
+#define SYSCALL_MOUNT 9u8
 
 import u16 syscall_last_error;
 
@@ -32,3 +33,5 @@ import u32 get_size(u8 fd);
 import u8 open_dir(u8 *path);
 
 import u8 get_next_dir_entry(u8 fd, struct FatDirEntry *result, u8 attr_skip_mask);
+
+import u8 mount();

@@ -16,12 +16,26 @@ export struct FileDescriptor fat_private_file_desc[MAX_FILE_DESC];
 export u8 fat_init() {
     for (u8 i = 0u8; i != MAX_FILE_DESC; i += 1u8) {
         fat_private_file_desc[i].is_free = 1u8;
+        fat_private_file_desc[i].is_stale = 0u8;
     }
     cache_block_addr = INVALID_BLOCK_ADDR;
+}
 
+export u8 fat_mount() {
+    cache_block_addr = INVALID_BLOCK_ADDR;
+    for (u8 i = 0u8; i != MAX_FILE_DESC; i += 1u8) {
+        if (!fat_private_file_desc[i].is_free) {
+            fat_private_file_desc[i].is_stale = 1u8;
+        }
+    }
+    u8 r = card_init();
+    if (r != CARD_SUCCESS) {
+        set_fat_error(r);
+        return 0u8;
+    }
     struct Partition partition;
     struct BPB bpb;
-    u8 r = cache(0u32);
+    r = cache(0u32);
     if (!r) {
         return 0u8;
     }
@@ -143,12 +157,15 @@ export u8 fat_change_dir(struct FatDirEntry *parent, u8 *name, struct FatDirEntr
 u8 set_fat_error(u8 card_error) {
     if (card_error == CARD_ERROR_NO_CARD) {
         fat_last_error = FAT_ERROR_NO_CARD;
+        card_power_off();
     } else if (card_error == CARD_ERROR_NOT_INITIALIZED) {
         fat_last_error = FAT_ERROR_CARD_REINSERTED;
+        card_power_off();
     } else if (card_error == CARD_ERROR_OUT_OF_RANGE) {
         fat_last_error = FAT_ERROR_FS_BROKEN;
     } else {
         fat_last_error = FAT_ERROR_CARD;
+        card_power_off();
     }
 }
 
@@ -239,6 +256,10 @@ export u8 fat_get_next_dir_entry(u8 desc, struct FatDirEntry *dst, u8 attr_skip_
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + desc;
     if (pfd->is_free) {
         fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
+        return 0u8;
+    }
+    if (pfd->is_stale) {
+        fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
         return 0u8;
     }
 
@@ -472,7 +493,11 @@ export u16 fat_write(u8 fd, u8 *src, u16 len) {
 u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
     if (pfd->is_free) {
-        fat_last_error = FAT_BAD_DESC;
+        fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
+        return 0u16;
+    }
+    if (pfd->is_stale) {
+        fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
         return 0u16;
     }
     u16 result = 0u16;
@@ -545,20 +570,32 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
 
 
 export u8 fat_close(u8 fd) {
+    u8 result = 1u8;
     struct FileDescriptor *pfd = (struct FileDescriptor*)fat_private_file_desc + fd;
     if (pfd->dir_entry_modified) {
-        cache(pfd->dir_entry_block_addr);
-        memcpy((u8*)cache_block + pfd->dir_entry_index_in_block, (u8*)&pfd->dir_entry, sizeof(struct FatDirEntry));
-        flush_cache();
+        if (pfd->is_stale) {
+            fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
+            result = 0u8;
+        } else {
+            cache(pfd->dir_entry_block_addr);
+            memcpy((u8*)cache_block + pfd->dir_entry_index_in_block, (u8*)&pfd->dir_entry, sizeof(struct FatDirEntry));
+            flush_cache();
+        }
     }
     pfd->is_free = 1u8;
+    pfd->is_stale = 0u8;
+    return result;
 }
 
 export u8 fat_truncate(u8 fd) {
     u8 r;
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
     if (pfd->is_free) {
-        fat_last_error = FAT_BAD_DESC;
+        fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
+        return 0u8;
+    }
+    if (pfd->is_stale) {
+        fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
         return 0u8;
     }
     if (pfd->abs_offset == pfd->dir_entry.size) {
@@ -592,7 +629,11 @@ export u8 fat_truncate(u8 fd) {
 export u8 fat_seek_end(u8 fd) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
     if (pfd->is_free) {
-        fat_last_error = FAT_BAD_DESC;
+        fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
+        return 0u8;
+    }
+    if (pfd->is_stale) {
+        fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
         return 0u8;
     }
 
@@ -613,8 +654,11 @@ export u8 fat_seek_end(u8 fd) {
 export u32 fat_get_size(u8 fd) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
     if (pfd->is_free) {
-        fat_last_error = FAT_BAD_DESC;
-        return 0xFFFFFFFFu32;
+        fat_last_error = FAT_ERROR_BAD_DESCRIPTOR;
+    } else if (pfd->is_stale) {
+        fat_last_error = FAT_ERROR_STALE_DESCRIPTOR;
+    } else {
+        return pfd->dir_entry.size;
     }
-    return pfd->dir_entry.size;
+    return 0xFFFFFFFFu32;
 }

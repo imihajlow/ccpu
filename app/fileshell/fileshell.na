@@ -288,6 +288,7 @@ u8 run_app(u8 *name) {
 
 export u8 main() {
     ps2_init();
+    fat_init();
 
     u8 card_present = 0u8;
     u8 fat_success = 0u8;
@@ -301,15 +302,12 @@ export u8 main() {
             while (!card_present) {
                 card_present = card_is_present();
             }
-            r = card_init();
-            if (!r) {
-                fat_success = fat_init();
-                if (fat_success) {
-                    r = fat_change_dir((struct FatDirEntry*)0, (u8*)0, &current_dir);
-                    if (!r) {
-                        vga_put_text(0u8, VGA_ROWS - 1u8, "fat_change_dir failed");
-                        ps2_wait_key_pressed();
-                    }
+            fat_success = fat_mount();
+            if (fat_success) {
+                r = fat_change_dir((struct FatDirEntry*)0, (u8*)0, &current_dir);
+                if (!r) {
+                    vga_put_text(0u8, VGA_ROWS - 1u8, "fat_change_dir failed");
+                    ps2_wait_key_pressed();
                 }
             }
         } else if (!fat_success) {

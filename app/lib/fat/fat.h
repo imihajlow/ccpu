@@ -7,9 +7,16 @@
 import u8 fat_last_error;
 
 /**
- Returns bool, sets fat_last_error on failure.
+ Initializes data structures. Does not fail.
  */
 import u8 fat_init();
+
+/**
+ Initializes the card and tries to read FAT headers.
+
+ Returns bool, sets fat_last_error on failure.
+ */
+import u8 fat_mount();
 
 /**
  Open a directory
@@ -51,6 +58,9 @@ import u8 fat_truncate(u8 fd);
  */
 import u8 fat_seek_end(u8 fd);
 
+/**
+ Returns bool, set fat_last_error on failure. Fails on a stale descriptor when needs to write out the dir entry.
+ */
 import u8 fat_close(u8 fd);
 
 /**

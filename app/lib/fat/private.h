@@ -47,6 +47,7 @@ struct FatInfo {
 
 struct FileDescriptor {
     u8 is_free;
+    u8 is_stale; // an old open file descriptor becomes stale when the card is mounted
     u16 last_cluster_len; // number of bytes in the last cluster in the chain
     u32 block_addr; // current block
     u8 block_in_cluster; // block index in current cluster
@@ -59,7 +60,7 @@ struct FileDescriptor {
     u8 is_root; // for directory descriptors: if this is a root directory (a special case)
     u8 dir_entry_modified; // need to write out the dir entry on file close
     u32 abs_offset; // absolute read/write pointer
-    u8 filler[6];
+    u8 filler[5];
 };
 
 import struct FileDescriptor fat_private_file_desc[MAX_FILE_DESC];
