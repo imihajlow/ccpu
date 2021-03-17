@@ -152,6 +152,8 @@ def link(objects, layout, fit, sectionsFilter, api):
             if ip > segment["begin"]:
                 raise LinkerError("segment overflow: IP is beyond segment `{}' begin".format(segment["name"]))
             ip = segment["begin"]
+        if segment["min-begin"] is not None:
+            ip = max(ip, segment["min-begin"])
         segBegin = ip
         sectionList = []
         for o in objects:

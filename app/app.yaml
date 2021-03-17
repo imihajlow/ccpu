@@ -12,7 +12,7 @@
   init: No
 
 - name: sys_bss
-  begin: 0x8000
+  min-begin: 0x8000
   init: No
 
 - name: stack
