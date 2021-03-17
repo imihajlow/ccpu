@@ -7,9 +7,7 @@
 #include <line_edit.h>
 #include <log.h>
 #include <keyboard.h>
-#include "loload.h"
-#include "lorun.h"
-#include "progressbar.h"
+#include "exec.h"
 
 #define FILE_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_CYAN)
@@ -27,6 +25,8 @@ struct Filename {
 struct Filename filenames[MAX_FILES];
 
 struct FatDirEntry current_dir;
+
+u8 current_dir_name[256];
 
 u8 load_files() {
     u8 fd = fat_open_dir(&current_dir);
@@ -47,7 +47,7 @@ u8 load_files() {
         name->attrs = ent.attrs;
         name += 1u8;
     }
-    r = fat_last_error == FAT_OK;
+    r = last_error == ERROR_OK;
     fat_close(fd);
     return r;
 }
@@ -141,7 +141,7 @@ u8 print_file(u8 *name) {
         u16 len = fat_read(f, (u8*)buf, 256u16);
         k = more_print((u8*)buf, len);
         if (len < 256u16) {
-            if (fat_last_error != FAT_EOF) {
+            if (last_error != FAT_EOF) {
                 vga_put_text(0u8, VGA_ROWS - 1u8, "ERROR");
                 ps2_wait_key_pressed();
             }
@@ -155,56 +155,6 @@ u8 print_file(u8 *name) {
     fat_close(f);
 }
 
-// u8 type_file(u8 *name, u8 append) {
-//     u8 f = fat_open_file(&current_dir, name);
-//     if (f == FAT_BAD_DESC) {
-//         vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
-//         ps2_wait_key_pressed();
-//         return;
-//     }
-//     u8 r;
-//     if (append) {
-//         r = fat_seek_end(f);
-//         if (!r) {
-//             vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot seek to the end");
-//             ps2_wait_key_pressed();
-//             return;
-//         }
-//     }
-//     u8 buf[64];
-//     while (1u8) {
-//         u8 row = 1u8;
-//         vga_clear(TYPING_COLOR);
-//         memset((u8*)vga_color_seg, STATUS_COLOR, (u16)VGA_COLS);
-//         if (append) {
-//             vga_put_text(0u8, 0u8, "Appending");
-//             vga_put_text(10u8, 0u8, name);
-//         } else {
-//             vga_put_text(0u8, 0u8, "Typing");
-//             vga_put_text(7u8, 0u8, name);
-//         }
-//         while (row != VGA_ROWS) {
-//             buf[0u8] = 0u8;
-//             r = line_edit((u8*)buf, 64u8, 0u8, row, TYPING_COLOR);
-//             if (!r) {
-//                 fat_truncate(f);
-//                 fat_close(f);
-//                 return;
-//             }
-//             r = strlen_8((u8*)buf);
-//             buf[r] = '\n';
-//             buf[r + 1u8] = 0u8;
-//             // for (u8 i = 0u8; i != 100u8; i += 1u8) {
-//                 u16 l = fat_write(f, (u8*)buf, (u16)(r + 1u8));
-//                 if (l != (u16)(r + 1u8)) {
-//                     vga_put_text(0u8, VGA_ROWS - 1u8, "Error writing");
-//                     ps2_wait_key_pressed();
-//                 }
-//             // }
-//             row += 1u8;
-//         }
-//     }
-// }
 
 import u8 __seg_extension_begin[1];
 import u8 __seg_extension_end[1];
@@ -238,52 +188,45 @@ u8 run_extension(u8 *name) {
 }
 
 u8 run_app(u8 *name) {
-    u8 f = fat_open_file(&current_dir, name);
-    if (f == FAT_BAD_DESC) {
-        vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
-        ps2_wait_key_pressed();
+    u8 fd = fat_open_file(&current_dir, name);
+    if (fd == FAT_BAD_DESC) {
+        log_string("Cannot open");
+        log_u8(last_error);
         return;
     }
-    u32 size32 = fat_get_size(f);
-    u16 max_size = (u16)__seg_extension_end;
-    if (size32 > (u32)max_size) {
-        fat_close(f);
-        vga_put_text(0u8, VGA_ROWS - 1u8, "File is too large");
-        ps2_wait_key_pressed();
+    u8 r = exec_fd(fd, (u8*)0, (u8*)0, (u8*)0, (u8*)0, (u8*)0, (u8*)0, (u8*)0);
+    if (!r) {
+        log_string("Cannot exec");
+        log_u8(last_error);
         return;
     }
-    u16 size = (u16)size32;
-    progressbar_init((u8)(size >> 8u8));
-    u8 dst_hi = 0u8;
-    // load lo RAM part
-    while (size != 0u16 && dst_hi != 0x80u8) {
-        u16 r = fat_read(f, (u8*)loload_buf, 256u16);
-        if (r != 256u16) {
-            if (fat_last_error != FAT_EOF) {
-                fat_close(f);
-                vga_put_text(0u8, VGA_ROWS - 1u8, "Read error");
-                ps2_wait_key_pressed();
-                return;
-            }
-        }
-        copy_to_loram(dst_hi);
-        size -= r;
-        dst_hi += 1u8;
-        progressbar_progress(1u8);
+}
+
+u8 run_editor(u8 *target) {
+    u8 *slash = append_path(target);
+    u8 r = exec("/EDIT.APP", (u8*)current_dir_name, (u8*)0, (u8*)0, (u8*)0, (u8*)0, (u8*)0, (u8*)0);
+    if (!r) {
+        log_string("Cannot exec");
+        log_u8(last_error);
     }
-    // load hi RAM part
-    if (size != 0u16) {
-        r = fat_read(f, (u8*)0x8000u16, size);
-        if (r != size) {
-            fat_close(f);
-            vga_put_text(0u8, VGA_ROWS - 1u8, "Read error");
-            ps2_wait_key_pressed();
-            return;
-        }
-        progressbar_progress((u8)(r >> 8u8));
+    *slash = 0u8;
+}
+
+u8 *append_path(u8 *name) {
+    u8 *p = (u8*)current_dir_name;
+    while (*p) {
+        p += 1u8;
     }
-    fat_close(f);
-    lorun();
+    *p = '/';
+    u8 *r = p;
+    p += 1u8;
+    while (*name) {
+        *p = *name;
+        p += 1u8;
+        name += 1u8;
+    }
+    *p = 0u8;
+    return r;
 }
 
 export u8 main() {
@@ -305,6 +248,8 @@ export u8 main() {
             fat_success = fat_mount();
             if (fat_success) {
                 r = fat_change_dir((struct FatDirEntry*)0, (u8*)0, &current_dir);
+                current_dir_name[0] = '/';
+                current_dir_name[1] = 0u8;
                 if (!r) {
                     vga_put_text(0u8, VGA_ROWS - 1u8, "fat_change_dir failed");
                     ps2_wait_key_pressed();
@@ -317,7 +262,7 @@ export u8 main() {
             }
         } else {
             u8 init = 1u8;
-            vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, Enter - run");
+            vga_put_text(0u8, VGA_ROWS - 1u8, "F3 - view, F4 - edit, Enter - run");
             r = load_files();
             if (r) {
                 u16 max_index = display_table(0u16);
@@ -331,13 +276,20 @@ export u8 main() {
                     }
                     if (k == PS2_KEY_F3) {
                         if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                            print_file((u8*)filenames[cursor_file_index].name);
+                            // print_file((u8*)filenames[cursor_file_index].name);
+                            break;
+                        }
+                    } else if (k == PS2_KEY_F4) {
+                        if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
+                            run_editor((u8*)filenames[cursor_file_index].name);
                             break;
                         }
                     } else if (k == PS2_KEY_ENTER) {
                         if (filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY) {
-                            r = fat_change_dir(&current_dir, (u8*)filenames[cursor_file_index].name, &current_dir);
+                            u8 *name = (u8*)filenames[cursor_file_index].name;
+                            r = fat_change_dir(&current_dir, name, &current_dir);
                             if (r) {
+                                append_path(name);
                                 break;
                             }
                         } else {

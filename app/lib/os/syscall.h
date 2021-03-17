@@ -1,5 +1,7 @@
 #pragma once
 #include <fat/types.h>
+#include <fat/error.h>
+#include <last_error.h>
 
 #define SYSCALL_OPEN 0u8
 #define SYSCALL_READ 1u8
@@ -11,8 +13,6 @@
 #define SYSCALL_OPEN_DIR 7u8
 #define SYSCALL_GET_NEXT_DIR_ENTRY 8u8
 #define SYSCALL_MOUNT 9u8
-
-import u16 syscall_last_error;
 
 import u32 syscall(u32 arg0, u32 arg1, u32 arg2, u32 arg3, u32 arg4, u32 arg5, u32 arg6, u32 arg7);
 

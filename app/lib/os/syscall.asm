@@ -1,3 +1,12 @@
+    .export app_param0
+    .export app_param1
+    .export app_param2
+    .export app_param3
+    .export app_param4
+    .export app_param5
+    .export app_param6
+    .export app_param7
+
     .export syscall_ret
     .export syscall_arg0
     .export syscall_arg1
@@ -7,7 +16,7 @@
     .export syscall_arg5
     .export syscall_arg6
     .export syscall_arg7
-    .export syscall_last_error
+    .export last_error
     .export syscall
 
     .export open
@@ -56,6 +65,7 @@
     .export mount_ret
 
     .section syscall_args
+app_param0:
 syscall_ret:
 syscall_arg0:
 open_ret:
@@ -69,6 +79,7 @@ open_dir_ret:
 get_next_dir_entry_ret:
 mount_ret:
     res 4
+app_param1:
 syscall_arg1:
 open_arg0:
 read_arg0:
@@ -80,25 +91,31 @@ get_size_arg0:
 open_dir_arg0:
 get_next_dir_entry_arg0:
     res 4
+app_param2:
 syscall_arg2:
 read_arg1:
 write_arg1:
 get_next_dir_entry_arg1:
     res 4
+app_param3:
 syscall_arg3:
 read_arg2:
 write_arg2:
 get_next_dir_entry_arg2:
     res 4
+app_param4:
 syscall_arg4:
     res 4
+app_param5:
 syscall_arg5:
     res 4
+app_param6:
 syscall_arg6:
     res 4
+app_param7:
 syscall_arg7:
     res 4
-syscall_last_error:
+last_error:
     res 2
 
     .section syscall_text

@@ -1,8 +1,7 @@
 #include "path.h"
 #include "private.h"
 #include <string.h>
-
-import u8 fat_last_error;
+#include <last_error.h>
 
 u8 *copy_first_entry(u8 *dst, u8 *path) {
     while (1u8) {
@@ -20,7 +19,7 @@ u8 *copy_first_entry(u8 *dst, u8 *path) {
 export u8 fat_find_path(u8 *path) {
     u8 r;
     if (*path != '/') {
-        fat_last_error = FAT_ERROR_RELATIVE_PATH;
+        last_error = FAT_ERROR_RELATIVE_PATH;
         return FAT_BAD_DESC;
     }
     struct FileDescriptor *pfd;
@@ -55,7 +54,7 @@ export u8 fat_open_path(u8 *path) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
 
     if (pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY) {
-        fat_last_error = FAT_ERROR_IS_DIR;
+        last_error = FAT_ERROR_IS_DIR;
         pfd->is_free = 1u8;
         return FAT_BAD_DESC;
     }
@@ -77,7 +76,7 @@ export u8 fat_open_dir_path(u8 *path) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
 
     if (!(pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY)) {
-        fat_last_error = FAT_ERROR_NOT_A_DIR;
+        last_error = FAT_ERROR_NOT_A_DIR;
         pfd->is_free = 1u8;
         return FAT_BAD_DESC;
     }

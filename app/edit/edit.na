@@ -1,7 +1,9 @@
 #include <vga.h>
 #include <line_edit.h>
 #include <fat/error.h>
+#include <last_error.h>
 #include <os/syscall.h>
+#include <os/params.h>
 #include <more.h>
 #include <log.h>
 #include <ps2keyboard.h>
@@ -15,24 +17,30 @@ section "sys_bss"
 u8 buf[64];
 
 section "sys_bss"
-u8 filename[40];
+u8 filename_buf[40];
 
 export u8 main() {
-	ps2_init();
-	vga_clear(MAIN_COLOR);
-	u8 r;
-    filename[0] = 0u8;
-	vga_put_text(0u8, 0u8, "Filename: ");
-	r = line_edit((u8*)filename, (u8)sizeof(filename) - 1u8, 10u8, 0u8, MAIN_COLOR);
-	if (!r) {
-		return;
-	}
-	u8 fd = open((u8*)filename);
-	if (fd == FAT_BAD_DESC) {
-		log_string("Can't open");
-		log_u8((u8)syscall_last_error);
-		return;
-	}
+    ps2_init();
+    vga_clear(MAIN_COLOR);
+    u8 r, fd;
+    u8 *filename;
+    if ((u16)app_param1 == 0u16) {
+        filename_buf[0] = 0u8;
+        vga_put_text(0u8, 0u8, "Filename: ");
+        r = line_edit((u8*)filename_buf, (u8)sizeof(filename_buf) - 1u8, 10u8, 0u8, MAIN_COLOR);
+        if (!r) {
+            return;
+        }
+        filename = (u8*)filename_buf;
+    } else {
+        filename = app_param1;
+    }
+    fd = open(app_param1);
+    if (fd == FAT_BAD_DESC) {
+        log_string("Can't open");
+        log_u8(last_error);
+        return;
+    }
     u8 k = 1u8;
 
     u8 append = 0u8;
@@ -54,7 +62,7 @@ export u8 main() {
                 r = truncate(fd);
                 if (!r) {
                     log_string("Can't truncate");
-                    log_u8((u8)syscall_last_error);
+                    log_u8(last_error);
                 }
                 close(fd);
                 return;
@@ -62,12 +70,10 @@ export u8 main() {
             r = strlen_8((u8*)buf);
             buf[r] = '\n';
             buf[r + 1u8] = 0u8;
-            for (u8 i = 0u8; i != 100u8; i += 1u8) {
-                u16 l = write(fd, (u8*)buf, (u16)(r + 1u8));
-                if (l != (u16)(r + 1u8)) {
-                    log_string("Error writing");
-                    log_u8((u8)syscall_last_error);
-                }
+            u16 l = write(fd, (u8*)buf, (u16)(r + 1u8));
+            if (l != (u16)(r + 1u8)) {
+                log_string("Error writing");
+                log_u8(last_error);
             }
             row += 1u8;
         }

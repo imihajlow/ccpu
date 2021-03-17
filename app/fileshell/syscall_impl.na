@@ -11,41 +11,31 @@ import u32 syscall_arg4;
 import u32 syscall_arg5;
 import u32 syscall_arg6;
 import u32 syscall_arg7;
-import u16 syscall_last_error;
+import u16 last_error;
 
 #define SYSCALL_NR ((u8)syscall_arg0)
 
 export u8 syscall_impl() {
     if (SYSCALL_NR == SYSCALL_OPEN) {
         *(u8*)&syscall_ret = fat_open_path((u8*)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_READ) {
         *(u16*)&syscall_ret = fat_read((u8)syscall_arg1, (u8*)syscall_arg2, (u16)syscall_arg3);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_WRITE) {
         *(u16*)&syscall_ret = fat_write((u8)syscall_arg1, (u8*)syscall_arg2, (u16)syscall_arg3);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_CLOSE) {
         *(u8*)&syscall_ret = fat_close((u8)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_TRUNCATE) {
         *(u8*)&syscall_ret = fat_truncate((u8)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_SEEK_END) {
         *(u8*)&syscall_ret = fat_seek_end((u8)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_GET_SIZE) {
         syscall_ret = fat_get_size((u8)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_OPEN_DIR) {
         *(u8*)&syscall_ret = fat_open_dir_path((u8*)syscall_arg1);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_GET_NEXT_DIR_ENTRY) {
         *(u8*)&syscall_ret = fat_get_next_dir_entry((u8)syscall_arg1, (struct FatDirEntry *)syscall_arg2, (u8)syscall_arg3);
-        syscall_last_error = (u16)fat_last_error;
     } else if (SYSCALL_NR == SYSCALL_MOUNT) {
         *(u8*)&syscall_ret = fat_mount();
-        syscall_last_error = (u16)fat_last_error;
     }
 }
 

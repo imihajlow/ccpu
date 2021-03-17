@@ -8,6 +8,8 @@
 
 #define SPI_DATA *((u8*)0xFD02)
 
+export u8 last_error;
+
 export u8 print_hex_char(u8 col, u8 row, u8 v) {
     if (v < 10u8) {
         v += '0';

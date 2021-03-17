@@ -113,6 +113,7 @@ env.Loader('fileshell', Split('''
     fileshell/progressbar.na
     fileshell/syscall.asm
     fileshell/syscall_impl.na
+    fileshell/exec.na
     ''') + os_startup + natrix + lib + fat)
 
 env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)

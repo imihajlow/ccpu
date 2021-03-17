@@ -7,7 +7,7 @@
     .export syscall_arg5
     .export syscall_arg6
     .export syscall_arg7
-    .export syscall_last_error
+    .export last_error
 
     .global syscall_impl
 
@@ -29,7 +29,7 @@ syscall_arg6:
     res 4
 syscall_arg7:
     res 4
-syscall_last_error:
+last_error:
     res 2
 
     .section syscall_text
