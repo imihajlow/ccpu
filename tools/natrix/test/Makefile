@@ -8,7 +8,7 @@ test: test.bin
 sandbox.bin: sandbox.o ../runtime/natrix_runtime.o
 	../../link.py -o $@ -m sandbox.map $^
 
-test.bin: test.o ../runtime/natrix_runtime.o ../../../app/lib/display.o delay_stub.o align.o
+test.bin: test.o ../runtime/natrix_runtime.o ../runtime/rom_startup.o ../../../app/lib/display.o delay_stub.o align.o
 	../../link.py --full --layout=sim -o $@ -m test.map $^
 
 %.o: %.asm

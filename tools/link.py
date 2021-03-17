@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-import importlib
 import argparse
 import json
 import re
 import sys
 import os
+from layout import Layout
 from object import Object
 from expression import evaluate, extractVarNames
 
@@ -242,7 +242,7 @@ def link(objects, layout, fit, sectionsFilter, api):
                     raise LinkerError("error evaluating {}: {}".format(expr, e))
     return symbolMap, apiOut, segments
 
-def createRom(objects, segments, sectionsFilter):
+def createRom(objects, segments, sectionsFilter, layout):
     rom = [None] * 65536
     for o in objects:
         for s in sectionsFilter.filter(o.sections):
@@ -307,11 +307,19 @@ def loadApi(file):
     return g
 
 def findLayouts():
-    r = re.compile(r"^([a-z].*)\.py$")
+    r = re.compile(r"^([a-z].*)\.yaml$")
     for file in os.listdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "layouts")):
         m = re.match(r, file)
         if m is not None:
             yield m.group(1)
+
+def loadLayout(name):
+    if name is None:
+        name = "default"
+    if '.' in name:
+        return Layout(name)
+    else:
+        return Layout(os.path.join(os.path.dirname(os.path.realpath(__file__)), "layouts", f"{name}.yaml"))
 
 if __name__ == '__main__':
     layouts = list(findLayouts())
@@ -321,7 +329,7 @@ if __name__ == '__main__':
     parser.add_argument('--filler', type=int, default=0xff, help="value to fill uninitialized memory (bin output type only)")
     parser.add_argument('--full', required=False, default=False, action='store_true', help='generate full 64k or memory, otherwise just 32k for the ROM')
     parser.add_argument('--slim', required=False, default=False, action='store_true', help='do not fill the file up to 32k/64k')
-    parser.add_argument('--layout', choices=layouts, default="default", help=f'memory layout')
+    parser.add_argument('--layout', default=None, help=f'memory layout: yaml file or one of built-in layouts ({", ".join(layouts)})')
     parser.add_argument('--fit-strategy', choices=["fill", "simple"], default="fill", help='fit strategy')
     parser.add_argument('--no-gc-sections', action='store_true', default=False, help='drop unreachable sections')
     parser.add_argument('--api-in', metavar="MAPFILE", required=False, type=argparse.FileType("r"), help='external global symbols list')
@@ -329,14 +337,14 @@ if __name__ == '__main__':
     parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
-    layout = importlib.import_module("." + args.layout, "layouts")
+    layout = loadLayout(args.layout)
     try:
         apiIn = loadApi(args.api_in)
         objects = [load(filename) for filename in args.file]
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
         sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections, apiIn)
         symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)
-        rom = createRom(objects, segments, sectionsFilter)
+        rom = createRom(objects, segments, sectionsFilter, layout)
         save(rom, args.o, args.type, args.full, args.filler, args.slim)
         saveLabels(args.m, symbolMap)
         saveLabels(args.api_out, apiOut)

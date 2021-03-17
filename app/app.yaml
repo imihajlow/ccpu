@@ -1,0 +1,28 @@
+- name: init
+  begin: 0x0000
+  init: Yes
+
+- name: text
+  init: Yes
+
+- name: data
+  init: Yes
+
+- name: bss
+  init: No
+
+- name: sys_bss
+  begin: 0x8000
+  init: No
+
+- name: stack
+  end: 0xB800
+  init: No
+
+- name: syscall_args
+  begin: 0xB800
+  init: No
+
+- name: syscall_text
+  begin: 0xB822
+  init: No

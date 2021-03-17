@@ -1,0 +1,21 @@
+- name: init_origin
+  begin: 0x0000
+  init: Yes
+  target: init
+
+- name: text_origin
+  init: Yes
+  target: text
+
+- name: init
+  begin: 0x8000
+  init: No
+  shadow: init_origin
+
+- name: text
+  init: No
+  shadow: text_origin
+
+- name: bss
+  init: No
+  end: 0xB800

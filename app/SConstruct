@@ -7,13 +7,13 @@ def linkGenerator(source, target, env, for_signature):
     return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
 def loaderLinkGenerator(source, target, env, for_signature):
-    return f"link.py --layout=loader --api-out={target[2]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+    return f"link.py --layout=loader.yaml --api-out={target[2]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
 def extensionLinkGenerator(source, target, env, for_signature):
-    return f"link.py --slim --layout=extension --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
+    return f"link.py --slim --layout=extension.yaml --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
 
 def appLinkGenerator(source, target, env, for_signature):
-    return f"link.py --slim --layout=app -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+    return f"link.py --slim --layout=app.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
 def linkEmitter(target, source, env):
     t = target[0]

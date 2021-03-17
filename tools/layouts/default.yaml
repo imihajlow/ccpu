@@ -1,0 +1,25 @@
+- name: init
+  begin: 0x0000
+  init: Yes
+
+- name: text
+  init: Yes
+
+- name: ramtext_origin
+  init: Yes
+  target: ramtext
+
+- name: data
+  begin: 0x8000
+  init: No
+
+- name: bss
+  init: No
+
+- name: ramtext
+  init: No
+  shadow: ramtext_origin
+
+- name: stack
+  end: 0xD000
+  init: No
