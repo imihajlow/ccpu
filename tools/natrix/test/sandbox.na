@@ -1,4 +1,6 @@
+section "data"
+u16 x;
+
 export u8 main() {
-    u32 x, y;
-    y = x >> 8u8;
+    u8 n;
 }

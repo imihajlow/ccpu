@@ -122,7 +122,8 @@ def reserveGlobalVars(vs, imports, uniqueId, subsections):
     result = '; global vars:\n'
     for v in vs:
         if v not in imports:
-            result += reserve(v, vs[v].getReserveSize(), "bss", uniqueId, subsections)
+            t, section = vs[v]
+            result += reserve(v, t.getReserveSize(), section, uniqueId, subsections)
     return result
 
 def reserveTempVars(maxIndex, uniqueId, subsections):

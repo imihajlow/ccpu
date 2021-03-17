@@ -88,7 +88,7 @@ class NameInterpreter(Interpreter):
     '''
     def __init__(self):
         self.functions = {} # name -> Function
-        self.globalVars = {} # name -> type
+        self.globalVars = {} # name -> type, section
         self._currentFunction = None
         self.varImports = []
         self.varExports = []
@@ -117,7 +117,8 @@ class NameInterpreter(Interpreter):
             else:
                 i = self.varImports.index(name)
                 del self.varImports[i]
-        self.globalVars[name] = type
+        section = getSection(attrs, "bss")
+        self.globalVars[name] = type, section
         isImported = False
         isExported = False
         for a in attrs:
@@ -127,8 +128,6 @@ class NameInterpreter(Interpreter):
                 isExported = True
             elif a.data == "attr_always_recursion":
                 raise SemanticError(location, "a variable can't be a traitor")
-            else:
-                raise RuntimeError("unhandled attribute {}".format(a.data))
         if isImported and isExported:
             raise SemanticError(location, "nothing can be imported and exported at the same time")
         if isImported:

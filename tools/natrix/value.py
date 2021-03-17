@@ -76,7 +76,7 @@ class Value:
                 newType = self._type.removeUnknown(t)
                 return Value(self._location, newType, self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n), newType.isAlignedByDefault())
             elif self._src in globalVars:
-                t = globalVars[self._src]
+                t, _ = globalVars[self._src]
                 newType = self._type.removeUnknown(t)
                 return Value(self._location, newType, self._level + t.getIndirectionOffset(), self._src, newType.isAlignedByDefault())
             else:
