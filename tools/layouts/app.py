@@ -16,6 +16,10 @@ layout = [
     },
     {
         "name": "bss",
+        "init": False
+    },
+    {
+        "name": "sys_bss",
         "init": False,
         "begin": 0x8000
     },

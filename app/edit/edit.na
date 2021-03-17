@@ -11,10 +11,15 @@
 #define TYPING_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
 #define STATUS_COLOR COLOR(COLOR_LIGHT_RED, COLOR_BLACK)
 
+section "sys_bss"
+u8 buf[64];
+
+section "sys_bss"
+u8 filename[40];
+
 export u8 main() {
 	ps2_init();
 	vga_clear(MAIN_COLOR);
-	u8 filename[40];
 	u8 r;
     filename[0] = 0u8;
 	vga_put_text(0u8, 0u8, "Filename: ");
@@ -29,7 +34,7 @@ export u8 main() {
 		return;
 	}
     u8 k = 1u8;
-    u8 buf[64];
+
     u8 append = 0u8;
     while (1u8) {
         u8 row = 1u8;
