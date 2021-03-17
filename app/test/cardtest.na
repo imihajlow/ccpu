@@ -40,10 +40,8 @@ export u8 spi_transfer(u8 in) {
     return rsp;
 }
 
-u8 buffer[512];
-
 u8 show_buffer() {
-    u8 *ptr = (u8*)buffer;
+    u8 *ptr = (u8*)cache_block;
     u16 offset = 0u16;
 
     vga_clear(COLOR(COLOR_WHITE, COLOR_BLUE));
@@ -175,7 +173,7 @@ export u8 main() {
                 r = card_init();
                 print_hex_char(40u8, 0u8, r);
             } else if (k == PS2_KEY_F2) {
-                r = card_read_block(block, (u8*)buffer);
+                r = card_read_block(block);
                 block += 1u32;
                 print_hex_char(40u8, 0u8, r >> 4u8);
                 print_hex_char(41u8, 0u8, r & 0xfu8);

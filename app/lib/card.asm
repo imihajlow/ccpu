@@ -8,12 +8,10 @@
 
     .export card_read_block
     .export card_read_block_arg0
-    .export card_read_block_arg1
     .export card_read_block_ret
 
     .export card_write_block
     .export card_write_block_arg0
-    .export card_write_block_arg1
     .export card_write_block_ret
 
     .export cache_block
@@ -800,9 +798,6 @@ card_is_present_ret:
 card_read_block_arg0:
 card_write_block_arg0:
     res 4
-card_read_block_arg1:
-card_write_block_arg1:
-    res 2
 delay_ret:
     res 2
 

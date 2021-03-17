@@ -158,7 +158,7 @@ u8 cache(u32 block_addr) {
         return 1u8;
     }
     cache_block_addr = block_addr;
-    u8 r = card_read_block(block_addr, (u8*)cache_block);
+    u8 r = card_read_block(block_addr);
     if (r) {
         cache_block_addr = INVALID_BLOCK_ADDR;
         set_fat_error(r);
@@ -170,7 +170,7 @@ u8 cache(u32 block_addr) {
 // returns bool
 u8 flush_cache() {
     if (cache_block_addr != INVALID_BLOCK_ADDR) {
-        u8 r = card_write_block(cache_block_addr, (u8*)cache_block);
+        u8 r = card_write_block(cache_block_addr);
         if (r) {
             set_fat_error(r);
             return 0u8;
