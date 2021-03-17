@@ -3,6 +3,9 @@ from lark.visitors import Interpreter
 from location import Location
 from exceptions import SemanticError
 
+DEFAULT_CODE_SECTION = "text"
+DEFAULT_DATA_SECTION = "bss"
+
 def unescapeString(s, quote='"', acceptUnknownEscapeSeq=True, findLastQuote=False):
     s = s[1:]
     if not findLastQuote:
@@ -56,7 +59,7 @@ class Function:
         self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
         self.retType = retType
         self.localVars = {}
-        self.section = getSection(attrs, "text")
+        self.section = getSection(attrs, DEFAULT_CODE_SECTION)
         if self.isExported and self.isImported:
             raise ValueError("A function can't be exported and imported at the same time")
 
@@ -117,10 +120,11 @@ class NameInterpreter(Interpreter):
             else:
                 i = self.varImports.index(name)
                 del self.varImports[i]
-        section = getSection(attrs, "bss")
+        section = getSection(attrs, DEFAULT_DATA_SECTION)
         self.globalVars[name] = type, section
         isImported = False
         isExported = False
+        hasSectionAttr = False
         for a in attrs:
             if a.data == "attr_import":
                 isImported = True
@@ -128,8 +132,12 @@ class NameInterpreter(Interpreter):
                 isExported = True
             elif a.data == "attr_always_recursion":
                 raise SemanticError(location, "a variable can't be a traitor")
+            elif a.data == "attr_section":
+                hasSectionAttr = True
         if isImported and isExported:
             raise SemanticError(location, "nothing can be imported and exported at the same time")
+        if isImported and hasSectionAttr:
+            raise SemanticError(location, "can't specify sections for imported variables")
         if isImported:
             self.varImports += [name]
         if isExported:
