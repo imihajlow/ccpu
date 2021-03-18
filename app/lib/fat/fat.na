@@ -358,35 +358,29 @@ u16 alloc_cluster(u16 last) {
                     return 0xffffu16;
                 }
                 // write fat1
-                r = cache(block_addr + fat_info.fat1_offset - fat_info.fat0_offset);
-                if (!r) {
-                    return 0xffffu16;
-                }
-                ((u16*)cache_block)[i] = 0xffffu16;
+                cache_block_addr = block_addr + fat_info.fat1_offset - fat_info.fat0_offset;
                 r = flush_cache();
                 if (!r) {
                     return 0xffffu16;
                 }
 
-                // now write its parent, start with fat1
-                block_addr = fat_info.fat1_offset + (u32)(last >> 8u8);
-                r = cache(block_addr);
-                if (!r) {
-                    return 0xffffu16;
-                }
-                ((u16*)cache_block)[(u8)last] = result;
-                r = flush_cache();
-                if (!r) {
-                    return 0xffffu16;
-                }
-                r = cache(block_addr + fat_info.fat0_offset - fat_info.fat1_offset);
-                if (!r) {
-                    return 0xffffu16;
-                }
-                ((u16*)cache_block)[(u8)last] = result;
-                r = flush_cache();
-                if (!r) {
-                    return 0xffffu16;
+                if (last != 0u16) {
+                    // now write its parent, start with fat1
+                    block_addr = fat_info.fat1_offset + (u32)(last >> 8u8);
+                    r = cache(block_addr);
+                    if (!r) {
+                        return 0xffffu16;
+                    }
+                    ((u16*)cache_block)[(u8)last] = result;
+                    r = flush_cache();
+                    if (!r) {
+                        return 0xffffu16;
+                    }
+                    cache_block_addr = block_addr + fat_info.fat0_offset - fat_info.fat1_offset;
+                    r = flush_cache();
+                    if (!r) {
+                        return 0xffffu16;
+                    }
                 }
                 return result;
             }
@@ -478,8 +472,12 @@ u8 seek_begin(struct FileDescriptor *pfd) {
     pfd->block_addr += (u32)(pfd->dir_entry.cluster_lo - 2u16) << fat_info.log_sectors_per_cluster;
     pfd->block_in_cluster = 0u8;
     pfd->index_in_block = 0u16;
-    pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
     pfd->cur_cluster = pfd->dir_entry.cluster_lo;
+    if (pfd->cur_cluster != 0u16) {
+        pfd->next_cluster = read_fat_entry(pfd->dir_entry.cluster_lo);
+    } else {
+        pfd->next_cluster = 0xffffu16;
+    }
     pfd->abs_offset = 0u32;
     return pfd->next_cluster != 0u16;
 }
@@ -501,8 +499,22 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
     }
     u16 result = 0u16;
     u8 r;
+    u16 new_cluster;
     while (len != 0u16) {
         u16 chunk_len = CARD_BLOCK_SIZE - pfd->index_in_block;
+        if (is_write && pfd->cur_cluster == 0u16) {
+            // virgin empty file
+            new_cluster = alloc_cluster(0u16);
+            if (new_cluster == 0xffffu16) {
+                return result;
+            }
+            pfd->cur_cluster = new_cluster;
+            pfd->next_cluster = 0xffffu16;
+            pfd->dir_entry_modified = 1u8;
+            pfd->dir_entry.cluster_lo = new_cluster;
+            pfd->block_addr = fat_info.data_offset;
+            pfd->block_addr += (u32)(new_cluster - 2u16) << fat_info.log_sectors_per_cluster;
+        }
         if (pfd->next_cluster >= FAT_MIN_LAST_CLUSTER) {
             // last cluster
             u16 remainder = pfd->last_cluster_len - ((u16)pfd->block_in_cluster << 9u8);
@@ -523,7 +535,7 @@ u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
                         pfd->dir_entry_modified = 1u8;
                         if (pfd->last_cluster_len == (CARD_BLOCK_SIZE << fat_info.log_sectors_per_cluster)) {
                             // need next block
-                            u16 new_cluster = alloc_cluster(pfd->cur_cluster);
+                            new_cluster = alloc_cluster(pfd->cur_cluster);
                             if (new_cluster == 0xffffu16) {
                                 return result;
                             }
