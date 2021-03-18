@@ -295,9 +295,7 @@ export u8 main() {
                         } else {
                             u8 fat_name[11];
                             to_fat_name((u8*)fat_name, (u8*)filenames[cursor_file_index].name);
-                            if (fat_name[8] == 'E' && fat_name[9] == 'X' && fat_name[10] == 'T') {
-                                run_extension((u8*)filenames[cursor_file_index].name);
-                            } else if (fat_name[8] == 'A' && fat_name[9] == 'P' && fat_name[10] == 'P') {
+                            if (fat_name[8] == 'A' && fat_name[9] == 'P' && fat_name[10] == 'P') {
                                 run_app((u8*)filenames[cursor_file_index].name);
                             }
                             break;
