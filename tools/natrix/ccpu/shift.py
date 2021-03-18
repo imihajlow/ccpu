@@ -584,37 +584,17 @@ def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
 # src1Loc var or const, 2 bytes
 def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
     result = '; {} = shift {}, {}\n'.format(resultLoc, src1Loc, src2Loc)
-    if src1Loc.getIndirLevel() == 0:
-        result += '''
-            ldi a, hi({0})
-            ldi b, lo({0})
-        '''.format(src1Loc.getSource())
-    else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
-            ld a
-        '''.format(src1Loc.getSource()) # TODO optimize aligned
-    result += '''
-        ldi pl, lo(__cc_sh_val)
-        ldi ph, hi(__cc_sh_val)
-        st b
-        inc pl
-        st a
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        ld b
-    '''.format(src2Loc.getSource())
     if src2Loc.getType().getSize() == 2:
-        result += '''
-            ldi pl, lo({0} + 1)
-            ldi ph, hi({0} + 1)
-            ld a
-        '''.format(src2Loc.getSource()) # TODO optimize aligned
+        assert(not src2Loc.getSource().isRegister())
+        result += f'''
+            ldi pl, lo({src2Loc.getSource()})
+            ldi ph, hi({src2Loc.getSource()})
+            ld b
+        '''
+        result += incP(src1Loc.isAligned())
+        result += 'ld a\n'
     else:
+        result += loadByte('b', src2Loc, 0)
         result += 'mov a, 0\n'
     result += '''
         ldi pl, lo(__cc_sh_count)
@@ -622,20 +602,38 @@ def _genShiftWordCall(resultLoc, src1Loc, src2Loc, label):
         st b
         inc pl
         st a
-        ldi pl, lo({0})
-        ldi ph, hi({0})
+    '''
+    if src1Loc.getIndirLevel() == 0:
+        result += loadByte('a', src1Loc, 1)
+        result += loadByte('b', src1Loc, 0)
+    else:
+        result += f'''
+            ldi pl, lo({src1Loc.getSource()})
+            ldi ph, hi({src1Loc.getSource()})
+            ld b
+        '''
+        result += incP(src1Loc.isAligned())
+        result += 'ld a\n'
+    result += f'''
+        ldi pl, lo(__cc_sh_val)
+        ldi ph, hi(__cc_sh_val)
+        st b
+        inc pl
+        st a
+        ldi pl, lo({label})
+        ldi ph, hi({label})
         jmp
         ldi pl, lo(__cc_sh_val)
         ldi ph, hi(__cc_sh_val)
         ld b
         inc pl
         ld a
-        ldi pl, lo({1})
-        ldi ph, hi({1})
+        ldi pl, lo({resultLoc.getSource()})
+        ldi ph, hi({resultLoc.getSource()})
         st b
         inc pl
         st a
-    '''.format(label, resultLoc.getSource())
+    '''
     return resultLoc, result
 
 # src2Loc is a var, 1 or 2 bytes

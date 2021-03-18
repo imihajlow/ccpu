@@ -382,16 +382,24 @@ def genCast(resultLoc, t, srcLoc):
             result += '''
                 ; widening cast
             '''
-            for offset in range(srcSize):
-                # copy the low part
+            if srcSize == 1:
+                result += loadByte('a', srcLoc, 0)
                 result += f'''
-                    ldi pl, lo({srcLoc.getSource()} + {offset})
-                    ldi ph, hi({srcLoc.getSource()} + {offset})
-                    ld a
-                    ldi pl, lo({resultLoc.getSource()} + {offset})
-                    ldi ph, hi({resultLoc.getSource()} + {offset})
+                    ldi pl, lo({resultLoc.getSource()})
+                    ldi ph, hi({resultLoc.getSource()})
                     st a
                 '''
+            else:
+                for offset in range(srcSize):
+                    # copy the low part
+                    result += f'''
+                        ldi pl, lo({srcLoc.getSource()} + {offset})
+                        ldi ph, hi({srcLoc.getSource()} + {offset})
+                        ld a
+                        ldi pl, lo({resultLoc.getSource()} + {offset})
+                        ldi ph, hi({resultLoc.getSource()} + {offset})
+                        st a
+                    '''
             if srcLoc.getType().getSign():
                 # sign expand
                 # a contains MSB of src
