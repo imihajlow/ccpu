@@ -4,6 +4,7 @@ from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import labelname
 from position import Position
+from location import Location
 
 '''
 Value class
@@ -22,18 +23,12 @@ class Value:
         self._position = position
         self._type = type
         self._level = indirLevel
-        self._src = src
+        self._src = Location(src)
         self._isAligned = aligned
 
     @staticmethod
     def withOffset(position, type, indirLevel, src, aligned, offset):
-        source = src
-        if offset != 0:
-            if isinstance(src, int):
-                source = src + offset
-            else:
-                source = f"({src}) + {offset}"
-        return Value(position, type, indirLevel, source, aligned)
+        return Value(position, type, indirLevel, Location(src) + Location(offset), aligned)
 
     @staticmethod
     def variable(position, name, type=UnknownType()):
@@ -64,7 +59,7 @@ class Value:
         return self._level > 0
 
     def resolveName(self, fn, localVars, globalVars, paramVars):
-        if isinstance(self._src, int):
+        if self._src.isNumber():
             return self
         else:
             if self._src in localVars:
@@ -101,10 +96,10 @@ class Value:
         return self._level == 0
 
     def isConstNumber(self):
-        return self._level == 0 and isinstance(self._src, int)
+        return self._level == 0 and self._src.isNumber()
 
     def isConstLabel(self):
-        return self._level == 0 and not isinstance(self._src, int)
+        return self._level == 0 and not self._src.isNumber()
 
     def isAligned(self):
         return self._isAligned

@@ -170,21 +170,14 @@ def genPopLocals(fn):
 
 def _loadConst(size, value, offset=0):
     # load const into a:b
-    if isinstance(value, int):
-        value = (value >> (offset * 8)) & 0xffff
-        result = 'ldi b, {}\n'.format(lo(value))
-        if size > 1:
-            h = hi(value)
-            if h == 0:
-                result += 'mov a, 0\n'
-            else:
-                result += 'ldi a, {}\n'.format(h)
-    else:
-        if offset != 0:
-            RuntimeError("WTF? Labels are 16 bits max.")
-        result = f'ldi b, lo({value})\n'
-        if size > 1:
-            result += f'ldi a, hi({value})\n'
+    lo = value.byte(offset)
+    result = f"ldi b, {lo}\n"
+    if size > 1:
+        h = value.byte(offset + 1)
+        if h.isNumber() and int(h) == 0:
+            result += 'mov a, 0\n'
+        else:
+            result += f'ldi a, {h}\n'
     return result
 
 def genMove(resultLoc, srcLoc, avoidCopy):
@@ -368,9 +361,9 @@ def genCast(resultLoc, t, srcLoc):
         # cast into a different destination
         if srcLoc.getIndirLevel() == 0:
             # cast a constant
-            if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
+            if srcLoc.getSource().isNumber() and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(srcLoc.getPosition(), t, 0, signExpandByte(srcLoc.getSource())), True)
+                return genMove(resultLoc, Value(srcLoc.getPosition(), t, 0, srcLoc.getSource().widen(True)), True)
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         srcSize = srcLoc.getType().getSize()
@@ -490,7 +483,7 @@ def genInvCondJump(condLoc, label):
     assert(l == 0 or l == 1)
     result = '; jump if not {}\n'.format(condLoc)
     if l == 0:
-        if isinstance(s, int):
+        if s.isNumber():
             if not bool(s):
                 result += '''
                     ldi pl, lo({0})

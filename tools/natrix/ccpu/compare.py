@@ -27,14 +27,7 @@ def _genEqNeCmp(src1Loc, src2Loc):
             ldi ph, hi({s1})
             ld b
         '''
-        if isinstance(s2, int):
-            l = lo(s2)
-            if l == 0:
-                result += 'mov a, 0\n'
-            else:
-                result += f'ldi a, {l}\n'
-        else:
-            result += f'ldi a, lo({s2})\n'
+        result += loadByte('a', src2Loc, 0)
         result += 'sub b, a\n'
         if size > 1:
             if src1Loc.isAligned():
@@ -48,14 +41,7 @@ def _genEqNeCmp(src1Loc, src2Loc):
                     ldi ph, hi({s1} + 1)
                     ld pl
                 '''
-            if isinstance(s2, int):
-                h = hi(s2)
-                if h == 0:
-                    result += 'mov a, 0\n'
-                else:
-                    result += f'ldi a, {h}\n'
-            else:
-                result += f'ldi a, hi({s2})\n'
+            result += loadByte('a', src2Loc, 1)
             result += '''
                 sub a, pl
                 or b, a
@@ -66,14 +52,7 @@ def _genEqNeCmp(src1Loc, src2Loc):
                 ldi ph, hi({s1} + {offset})
                 ld pl
             '''
-            if isinstance(s2, int):
-                h = lo(s2 >> (offset * 8))
-                if h == 0:
-                    result += 'mov a, 0\n'
-                else:
-                    result += f'ldi a, {h}\n'
-            else:
-                result += f'ldi a, lo({s2} >> ({offset * 8}))\n'
+            result += loadByte('a', src2Loc, offset)
             result += '''
                 sub a, pl
                 or b, a
@@ -116,8 +95,8 @@ def genEq(resultLoc, src1Loc, src2Loc):
     if l1 == 0 and l2 == 0:
         # const == const
         pos = src1Loc.getPosition() - src2Loc.getPosition()
-        if isinstance(s1, int) and isinstance(s2, int):
-            return Value(pos, BoolType(), 0, int(s1 == s2), True), result
+        if s1.isNumber() and s2.isNumber():
+            return Value(pos, BoolType(), 0, int(int(s1) == int(s2)), True), result
         else:
             return Value(pos, BoolType(), 0, "int(({}) == ({}))".format(s1, s2), True), result
     else:
@@ -148,8 +127,8 @@ def genNe(resultLoc, src1Loc, src2Loc):
     if l1 == 0 and l2 == 0:
         # const == const
         pos = src1Loc.getPosition() - src2Loc.getPosition()
-        if isinstance(s1, int) and isinstance(s2, int):
-            return Value(pos, BoolType(), 0, int(s1 != s2), True), result
+        if s1.isNumber() and s2.isNumber():
+            return Value(pos, BoolType(), 0, int(int(s1) != int(s2)), True), result
         else:
             return Value(pos, BoolType(), 0, "int(({}) != ({}))".format(s1, s2), True), result
     else:
@@ -194,12 +173,8 @@ def _genCmpSub(src1Loc, src2Loc, op):
     result = ''
     if l1 == 0:
         # const and var
-        if isinstance(s1, int):
-            l = lo(s1)
-            h = hi(s1)
-        else:
-            l = "lo({})".format(s1)
-            h = "hi({})".format(s1)
+        l = s1.lo()
+        h = s1.hi()
         result += '''
             ldi pl, lo({0})
             ldi ph, hi({0})
@@ -221,27 +196,23 @@ def _genCmpSub(src1Loc, src2Loc, op):
                 result += 'ldi pl, 0\n'
     elif l2 == 0:
         # var and const
-        if isinstance(s2, int):
-            l = lo(s2)
-            h = hi(s2)
-        else:
-            l = "lo({})".format(s2)
-            h = "hi({})".format(s2)
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
+        result += f'''
+            ldi pl, lo({s1})
+            ldi ph, hi({s1})
             ld b
-            ldi a, {1}
-        '''.format(s1, l)
+        '''
+        result += loadByte('a', src2Loc, 0)
         if isWord:
-            result += '''
+            result += f'''
                 sub b, a
-                ldi pl, lo({1} + 1)
-                ldi ph, hi({1} + 1)
+                ldi pl, lo({s1} + 1)
+                ldi ph, hi({s1} + 1)
                 ld pl
-                ldi a, {0}
+            '''
+            result += loadByte('a', src2Loc, 1)
+            result += '''
                 sbb pl, a
-            '''.format(h, s1)
+            '''
         else:
             result += 'sub b, a\n'
             if op == 'le' or op == 'gt':
@@ -297,9 +268,9 @@ def _genCmpUnsigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     if l1 == 0 and l2 == 0:
         # const and const
         pos = src1Loc.getPosition() - src2Loc.getPosition()
-        if isinstance(s1, int) and isinstance(s2, int):
+        if s1.isNumber() and s2.isNumber():
             pyop = {"gt": operator.gt, "lt": operator.lt, "ge": operator.ge, "le": operator.le}[op]
-            return Value(pos, BoolType(), 0, int(pyop(s1, s2)), True), result
+            return Value(pos, BoolType(), 0, int(pyop(int(s1), int(s2))), True), result
         else:
             pyop = {"gt": ">", "lt": "<", "ge": ">=", "le": "<="}[op]
             return Value(pos, BoolType(), 0, "int(({}) {} ({}))".format(s1, pyop, s2), True), result
@@ -616,10 +587,7 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const and const
-        if isinstance(s1, int) and isinstance(s2, int):
-            raise NotImplementedError("signed const comparison")
-        else:
-            raise NotImplementedError("signed const comparison")
+        raise NotImplementedError("signed const comparison")
     else:
         if not isWord:
             return _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider)

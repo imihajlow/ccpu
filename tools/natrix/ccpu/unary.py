@@ -78,10 +78,7 @@ def genBNot(resultLoc, srcLoc):
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
-        if isinstance(c, int):
-            c = ~c
-        else:
-            c = '~({})'.format(c) # Warning
+        c = ~c
         return Value(srcLoc.getPosition(), t, 0, c, True), result
     # var
     s = srcLoc.getSource()
@@ -134,7 +131,7 @@ def genLNot(resultLoc, srcLoc):
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
-        if isinstance(c, int):
+        if c.isNumber():
             c = int(not bool(c))
         else:
             c = 'int(not bool({}))'.format(c) # Warning
@@ -173,8 +170,8 @@ def genNeg(resultLoc, srcLoc):
     if srcLoc.getIndirLevel() == 0:
         # constant
         c = srcLoc.getSource()
-        if isinstance(c, int):
-            c = -c & (0xff if t.getSize() == 1 else 0xffff)
+        if c.isNumber():
+            c = -int(c) & (0xff if t.getSize() == 1 else 0xffff)
         else:
             c = '-({})'.format(c) # Warning
         return Value(srcLoc.getPosition(), t, 0, c, True), result

@@ -130,7 +130,7 @@ class PtrType(Type):
 class ArrayType(PtrType):
     def __init__(self, t, n):
         super().__init__(t)
-        self._n = n
+        self._n = int(n)
 
     def getCount(self):
         return self._n
@@ -279,8 +279,8 @@ class TypeTransformer(Transformer):
         size = t.children[2]
         from value import Value
         if isinstance(size, Value):
-            if isinstance(size.getSource(), int):
-                if size.getIndirLevel() == 0 and size.getSource() > 0:
+            if size.getSource().isNumber():
+                if size.getIndirLevel() == 0 and int(size.getSource()) > 0:
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
         raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
@@ -289,8 +289,8 @@ class TypeTransformer(Transformer):
         attrs, type, name, size = t.children
         from value import Value
         if isinstance(size, Value):
-            if isinstance(size.getSource(), int):
-                if size.getIndirLevel() == 0 and size.getSource() > 0:
+            if size.getSource().isNumber():
+                if size.getIndirLevel() == 0 and int(size.getSource()) > 0:
                     return Tree("gl_decl_var", [attrs, ArrayType(type, size.getSource()), name], t.meta)
         raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
@@ -299,8 +299,8 @@ class TypeTransformer(Transformer):
         type, name, size = t.children
         from value import Value
         if isinstance(size, Value):
-            if isinstance(size.getSource(), int):
-                if size.getIndirLevel() == 0 and size.getSource() > 0:
+            if size.getSource().isNumber():
+                if size.getIndirLevel() == 0 and int(size.getSource()) > 0:
                     return Tree("field_declaration", [ArrayType(type, size.getSource()), name], t.meta)
         raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
@@ -317,18 +317,10 @@ class CastTransformer(Transformer):
                 raise SemanticError(Position.fromAny(t), f"{str(v.getType())} has size > 2, cannot cast")
             if type.getSize() > v.getType().getSize():
                 # widening cast
-                if isinstance(s, int):
-                    if v.getType().getSign():
-                        s = s | (0xff00 if bool(s & 0x80) else 0)
-                else:
-                    if v.getType().getSign():
-                        s = "(({0}) | (0xff00 if bool(({0}) & 0x80) else 0))".format(s)
+                s = s.widen(v.getType().getSign())
             elif type.getSize() < v.getType().getSize():
                 # narrowing cast
-                if isinstance(s, int):
-                    s = s & 0xff
-                else:
-                    s = "lo({})".format(s)
+                s = s.lo()
             return Value(Position.fromAny(t), type, 0, s, True)
         else:
             return t

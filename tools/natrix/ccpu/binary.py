@@ -84,7 +84,8 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
                         ldi ph, hi({0} + 1)
                     '''.format(src1Loc.getSource())
             c = src2Loc.getSource()
-            if isinstance(c, int):
+            if c.isNumber():
+                c = int(c)
                 l = lo(c)
                 if l == 0:
                     result += 'mov a, 0\n'
@@ -142,7 +143,8 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
                         ldi ph, hi({0} + 1)
                     '''.format(src2Loc.getSource())
             c = src1Loc.getSource()
-            if isinstance(c, int):
+            if c.isNumber():
+                c = int(c)
                 l = lo(c)
                 result += 'ldi b, {}\n'.format(l)
                 result += '{} b, a\n'.format(opLo)
@@ -289,23 +291,24 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     pos = src1Loc.getPosition() - src2Loc.getPosition()
     if l1 == 0 and l2 == 0:
         # const and const
-        if isinstance(s1, int) and isinstance(s2, int):
+        if s1.isNumber() and s2.isNumber():
             return Value(pos, BoolType(), 0, int(constLambda(bool(s1), bool(s2))), True), result
         else:
-            return Value(pos, BoolType(), 0, pyPattern.format(src1Loc, src2Loc), True), result
+            return Value(pos, BoolType(), 0, pyPattern.format(s1, s2), True), result
     elif l1 == 0 or l2 == 0:
         # var and const
         if l1 == 0:
             s1, s2 = s2, s1
             src1Loc, src2Loc = src2Loc, src1Loc
-        if isinstance(s2, int):
+        if s2.isNumber():
+            s2 = bool(s2)
             if op == 'or':
-                if s2 == 0:
+                if not s2:
                     return src1Loc, ""
                 else:
                     return Value(pos, BoolType(), 0, 1, True), ""
             elif op == 'and':
-                if s2 == 0:
+                if not s2:
                     return Value(pos, BoolType(), 0, 0, True), ""
                 else:
                     return src1Loc, result
@@ -476,10 +479,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if memberSize > 2:
         if src2Loc.getIndirLevel() == 0:
             pos = src1Loc.getPosition() - src2Loc.getPosition()
-            if isinstance(s2, int):
-                offset = s2 * memberSize
-            else:
-                offset = "({}) * {}".format(s2, memberSize)
+            offset = s2 * memberSize
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         elif not isPowerOfTwo(memberSize):
@@ -501,10 +501,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
                 pos = src1Loc.getPosition() - src2Loc.getPosition()
-                if isinstance(s2, int):
-                    offset = s2 * 2
-                else:
-                    offset = "({}) * 2".format(s2)
+                offset = s2 * 2
                 loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
                 return loc, result + code
             else:
@@ -584,12 +581,8 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             pos = src1Loc.getPosition() - src2Loc.getPosition()
-            if src2Loc.getType().getSign():
-                s2 = signExpandByte(s2)
-            if isinstance(s2, int):
-                offset = s2 * memberSize
-            else:
-                offset = "({}) * {}".format(s2, memberSize)
+            s2 = s2.widen(src2Loc.getType().getSign())
+            offset = s2 * memberSize
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         if src2Loc.getType().getSign():
@@ -683,10 +676,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     if memberSize > 2:
         if src2Loc.getIndirLevel() == 0:
             pos = src1Loc.getPosition() - src2Loc.getPosition()
-            if isinstance(s2, int):
-                offset = s2 * memberSize
-            else:
-                offset = "({}) * {}".format(s2, memberSize)
+            offset = s2 * memberSize
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         elif not isPowerOfTwo(memberSize):
@@ -708,10 +698,7 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
                 pos = src1Loc.getPosition() - src2Loc.getPosition()
-                if isinstance(s2, int):
-                    offset = s2 * 2
-                else:
-                    offset = "({}) * 2".format(s2)
+                offset = s2 * 2
                 loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
                 return loc, result + code
             else:
@@ -777,12 +764,8 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
             pos = src1Loc.getPosition() - src2Loc.getPosition()
-            if src2Loc.getType().getSign():
-                s2 = signExpandByte(s2)
-            if isinstance(s2, int):
-                offset = s2 * memberSize
-            else:
-                offset = "({}) * {}".format(s2, memberSize)
+            s2 = s2.widen(src2Loc.getType().getSign())
+            offset = s2 * memberSize
             loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         if src2Loc.getType().getSign():

@@ -2,6 +2,7 @@ from lark import Visitor, v_args, Tree
 from lark.visitors import Interpreter
 from position import Position
 from exceptions import SemanticError
+from location import Location
 
 DEFAULT_CODE_SECTION = "text"
 DEFAULT_DATA_SECTION = "bss"
@@ -56,7 +57,7 @@ class Function:
         self.isImported = hasAttr(attrs, "attr_import")
         self.isAlwaysRecursion = hasAttr(attrs, "attr_always_recursion")
         self.args = [a.children[0] for a in args] # type
-        self.paramVars = {str(a.children[1]): (a.children[0], i) for i,a in enumerate(args)}
+        self.paramVars = {Location(str(a.children[1])): (a.children[0], i) for i,a in enumerate(args)}
         self.retType = retType
         self.localVars = {}
         self.section = getSection(attrs, DEFAULT_CODE_SECTION)
@@ -112,6 +113,7 @@ class NameInterpreter(Interpreter):
 
     def gl_decl_var(self, t):
         attrTree, type, name = t.children
+        name = Location(name)
         attrs = attrTree.children
         position = Position.fromAny(t)
         if name in self.globalVars:
@@ -161,7 +163,7 @@ class NameInterpreter(Interpreter):
 
     def decl_var(self, t):
         type = t.children[0]
-        name = t.children[1]
+        name = Location(t.children[1])
         lv = self._currentFunction.localVars
         if name in lv:
             raise SemanticError(Position.fromAny(t), f"Local variable {name} redifinition")

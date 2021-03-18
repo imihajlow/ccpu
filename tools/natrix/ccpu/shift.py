@@ -21,14 +21,14 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
         raise NatrixNotImplementedError(Position.fromAny(resultLoc), "Stop doing shit with pointers!")
     if l2 == 0:
         c = src2Loc.getSource()
-        if isinstance(c, int):
+        if c.isNumber():
             if op == 'shl':
-                return genSHLVarByConst(resultLoc, src1Loc, c)
+                return genSHLVarByConst(resultLoc, src1Loc, int(c))
             elif op == 'shr':
                 if t.getSign():
-                    return _genSARVarByConst(resultLoc, src1Loc, c)
+                    return _genSARVarByConst(resultLoc, src1Loc, int(c))
                 else:
-                    return _genSHRVarByConst(resultLoc, src1Loc, c)
+                    return _genSHRVarByConst(resultLoc, src1Loc, int(c))
         else:
             raise NatrixNotImplementedError(Position.fromAny(resultLoc), "Stop doing shit with pointers!")
     else:

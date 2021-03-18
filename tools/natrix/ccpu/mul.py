@@ -62,14 +62,14 @@ def genMul(resultLoc, src1Loc, src2Loc):
         raise NotImplementedError("doing shit with pointers?")
     elif l1 == 0:
         s = src1Loc.getSource()
-        if isinstance(s, int):
-            return _genMulVC(resultLoc, src2Loc, s)
+        if s.isNumber():
+            return _genMulVC(resultLoc, src2Loc, int(s))
         else:
             raise NotImplementedError("doing shit with pointers?")
     elif l2 == 0:
         s = src2Loc.getSource()
-        if isinstance(s, int):
-            return _genMulVC(resultLoc, src1Loc, s)
+        if s.isNumber():
+            return _genMulVC(resultLoc, src1Loc, int(s))
         else:
             raise NotImplementedError("doing shit with pointers?")
     else:

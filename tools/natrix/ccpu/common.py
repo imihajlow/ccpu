@@ -4,15 +4,6 @@ def align(x, a):
     else:
         return (x // a)  * a + a
 
-def signExpandByte(x):
-    if isinstance(x, int):
-        if bool(x & 0x80):
-            return x | 0xff00
-        else:
-            return x
-    else:
-        return "(({0}) | 0xff00 if bool({0} & 0x80) else ({0}))"
-
 def hi(x):
     return (x >> 8) & 0xff
 
@@ -32,19 +23,14 @@ def log(x):
 def loadByte(reg, loc, offset):
     v = loc.getSource()
     if loc.getIndirLevel() == 0:
-        if isinstance(v, int):
-            b = lo(v >> (8 * offset))
-            if b == 0 and reg == 'a':
+        b = v.byte(offset)
+        if b.isNumber():
+            if int(b) == 0 and reg == 'a':
                 return 'mov a, 0\n'
             else:
                 return f'ldi {reg}, {b}\n'
         else:
-            if offset == 0:
-                return f'ldi {reg}, lo({v})\n'
-            elif offset == 1:
-                return f'ldi {reg}, hi({v})\n'
-            else:
-                raise RuntimeError("symbols are 2 bytes")
+            return f'ldi {reg}, {b}\n'
     else:
         return f'''
             ldi pl, lo({v} + {offset})

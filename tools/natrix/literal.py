@@ -60,7 +60,7 @@ class LiteralTransformer(Transformer):
             if type != v.getType():
                 raise LiteralError(Position.fromAny(v), "type mismatch with previous members of an array literal ({} expected)".format(str(type)))
             s = v.getSource()
-            if not isinstance(s, int):
+            if not s.isNumber():
                 raise LiteralError(Position.fromAny(v), "variable references aren't allowed in array literals")
             result += [v.getSource()]
         return self._addLiteral(Position.fromAny(t), type, result)

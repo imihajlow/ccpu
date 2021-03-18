@@ -10,6 +10,7 @@ from typeof import TypeofTransformer
 import exceptions
 
 def signExpand(t, value):
+    value = int(value)
     if t.getSign():
         bits = t.getSize() * 8
         sign = bool(value & (1 << (bits - 1)))
@@ -95,7 +96,8 @@ def unary(tree, op):
         return _const(Position.fromAny(tree), a.getType(), op(sa))
 
 def cast(v, oldType, newType):
-    if oldType.getSize() < newType.getSize() and oldType.getSign() and isinstance(v, int):
+    if oldType.getSize() < newType.getSize() and oldType.getSign() and v.isNumber():
+        v = int(v)
         bits = oldType.getSize() * 8
         sign = bool(v & (1 << (bits - 1)))
         if sign:
