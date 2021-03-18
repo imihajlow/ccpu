@@ -55,7 +55,7 @@ def genDiv(resultLoc, src1Loc, src2Loc):
     else:
         result += '''
             ldi pl, lo(__cc_r_quotient)
-            ldi ph, lo(__cc_r_quotient)
+            ldi ph, hi(__cc_r_quotient)
             ld a
         '''
         return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), resultLoc.getType()), result
@@ -68,7 +68,7 @@ def genMod(resultLoc, src1Loc, src2Loc):
     else:
         result += '''
             ldi pl, lo(__cc_r_remainder)
-            ldi ph, lo(__cc_r_remainder)
+            ldi ph, hi(__cc_r_remainder)
             ld a
         '''
         return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), resultLoc.getType()), result
