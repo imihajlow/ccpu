@@ -4,30 +4,27 @@ from .common import *
 
 def _genMulVCByte(rs, v, c):
     result = '; {} = {} * {} (byte)\n'.format(rs, v, c)
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        ld b
-    '''.format(v)
+    result += loadByte('a', v, 0)
     firstAdd = True
+    inA = True
     for bit in range(8):
-        if bool(c & 1):
+        curBit = bool(c & 1)
+        c >>= 1
+        if curBit:
             if firstAdd:
-                result += 'mov a, b'
+                if c == 0:
+                    break
+                result += 'mov b, a\n'
                 firstAdd = False
             else:
-                result += 'add a, b'
-        c >>= 1
-        if c == 0:
-            break
+                result += 'add b, a\n'
+                if c == 0:
+                    break
         result += '''
-            shl b
+            shl a
         '''
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st a
-    '''.format(rs)
+    if not firstAdd:
+        result += 'mov a, b\n'
     return result
 
 def _genMulVCWord(rs, v, c):
@@ -46,7 +43,7 @@ def _genMulVC(resultLoc, v, c):
         return v, ""
     t = resultLoc.getType()
     if t.getSize() == 1:
-        return resultLoc, _genMulVCByte(resultLoc.getSource(), v.getSource(), c)
+        return Value.register(v.getPosition(), t), _genMulVCByte(resultLoc.getSource(), v, c)
     else:
         return resultLoc, _genMulVCWord(resultLoc, v, c)
 
@@ -80,9 +77,21 @@ def genMul(resultLoc, src1Loc, src2Loc):
             result += copyW(src2Loc.getSource(), "__cc_r_b", src2Loc.isAligned(), True)
             result += call("__cc_mul_word")
             result += copyW("__cc_r_r", resultLoc.getSource(), True, resultLoc.isAligned())
+            return resultLoc, result
         else:
-            result += copyB(src1Loc.getSource(), "__cc_r_a")
-            result += copyB(src2Loc.getSource(), "__cc_r_b")
+            result += loadByte('b', src1Loc, 0)
+            result += loadByte('a', src2Loc, 0)
+            result += '''
+                ldi pl, lo(__cc_r_a)
+                ldi ph, hi(__cc_r_a)
+                st b
+                ldi pl, lo(__cc_r_b)
+                st a
+            '''
             result += call("__cc_mul_byte")
-            result += copyB("__cc_r_r", resultLoc.getSource())
-        return resultLoc, result
+            result += '''
+                ldi pl, lo(__cc_r_r)
+                ldi ph, hi(__cc_r_r)
+                ld a
+            '''
+            return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), t), result

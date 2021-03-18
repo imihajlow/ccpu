@@ -1,5 +1,5 @@
 from lark import Lark, Transformer, v_args, Tree
-from exceptions import SemanticError
+from exceptions import SemanticError, RegisterNotSupportedError
 from value import Value
 from type import Type, BoolType, UnknownType, PtrType
 from function import Function
@@ -96,8 +96,8 @@ class Generator:
                         argCode1 = ""
                     else:
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                        rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex,
-                            Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
+                        tmp0 = Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex))
+                        rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex, tmp0, curFn)
                         hasFirstArg = True
 
                     if isinstance(ch[1], Value):
@@ -106,10 +106,24 @@ class Generator:
                     else:
                         indexIncrement = 1 if hasFirstArg else 0
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
-                        rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement,
-                            Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement)), curFn)
+                        tmp1 = Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement))
+                        rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement, tmp1, curFn)
+                        if rv1.getSource().isRegister():
+                            rv1, moveCode = self.backend.genMove(tmp0, rv1, False)
+                            argCode1 += moveCode
 
-                    resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
+                    try:
+                        resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
+                    except RegisterNotSupportedError as e:
+                        if e.argNumber == 0:
+                            rv1, moveCode = self.backend.genMove(tmp0, rv1, False)
+                            argCode1 += moveCode
+                        elif e.argNumber == 1:
+                            rv2, moveCode = self.backend.genMove(tmp1, rv2, False)
+                            argCode2 += moveCode
+                        else:
+                            raise
+                        resultLoc, myCode = self.backend.genBinary(t.data, resultLoc, rv1, rv2, self)
                     return resultLoc, argCode1 + argCode2 + myCode
                 else:
                     raise RuntimeError("Too many children")
@@ -148,6 +162,7 @@ class Generator:
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
                         Value.variable(Position.fromAny(ptr), labelname.getTempName(0)), curFn)
+            assert(not rvPtr.getSource().isRegister())
             rvR, codeR = self.generateExpression(r, 1,
                         Value.variable(Position.fromAny(r), labelname.getTempName(1)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
@@ -159,6 +174,7 @@ class Generator:
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
                 Value.variable(Position.fromAny(ptr), labelname.getTempName(0)), curFn)
+            assert(not rvPtr.getSource().isRegister())
             offset, type = structure.getField(rvPtr.getType().deref(), fields)
             if type.getIndirectionOffset() < 0:
                 raise SemanticError(Position.fromAny(l), "Cannot assign to an r-value")

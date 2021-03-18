@@ -15,3 +15,8 @@ class LiteralError(NatrixError):
 class NatrixNotImplementedError(NatrixError):
     def __init__(self, position, msg):
         super().__init__(position, f"Not implemented: {msg}", "Not implemented error")
+
+
+class RegisterNotSupportedError(Exception):
+    def __init__(self, argNumber):
+        self.argNumber = argNumber

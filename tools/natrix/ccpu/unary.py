@@ -1,5 +1,6 @@
 from value import Value
 from type import BoolType
+from location import Location
 from .common import *
 import operator
 import labelname
@@ -21,35 +22,40 @@ def genDeref(resultLoc, srcLoc, offset=0):
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
     result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")
     rs = resultLoc.getSource()
-    for byteOffset in reversed(range(0, t.getSize(), 2)):
-        rest = min(2, t.getSize() - byteOffset)
-        result += loadP(srcLoc, byteOffset + offset)
-        result += 'ld b\n'
-        if rest > 1:
-            result += '''
-                mov a, 0
-                inc pl
-                adc ph, a
-                ld a
-            '''
-        result += f'''
-            ldi pl, lo({rs} + {byteOffset})
-            ldi ph, hi({rs} + {byteOffset})
-            st b
-        '''
-        if rest > 1:
-            if resultLoc.isAligned():
+    if t.getSize() == 1:
+        result += loadP(srcLoc, offset)
+        result += 'ld a\n'
+        return Value.register(srcLoc.getPosition(), t), result
+    else: # t.getSize() > 1
+        for byteOffset in reversed(range(0, t.getSize(), 2)):
+            rest = min(2, t.getSize() - byteOffset)
+            result += loadP(srcLoc, byteOffset + offset)
+            result += 'ld b\n'
+            if rest > 1:
                 result += '''
+                    mov a, 0
                     inc pl
-                    st a
+                    adc ph, a
+                    ld a
                 '''
-            else:
-                result += f'''
-                    ldi pl, lo({rs} + {byteOffset + 1})
-                    ldi ph, hi({rs} + {byteOffset + 1})
-                    st a
-                '''
-    return resultLoc, result
+            result += f'''
+                ldi pl, lo({rs} + {byteOffset})
+                ldi ph, hi({rs} + {byteOffset})
+                st b
+            '''
+            if rest > 1:
+                if resultLoc.isAligned():
+                    result += '''
+                        inc pl
+                        st a
+                    '''
+                else:
+                    result += f'''
+                        ldi pl, lo({rs} + {byteOffset + 1})
+                        ldi ph, hi({rs} + {byteOffset + 1})
+                        st a
+                    '''
+        return resultLoc, result
 
 def genUnary(op, resultLoc, srcLoc):
     if srcLoc.getType().isUnknown():
@@ -83,39 +89,44 @@ def genBNot(resultLoc, srcLoc):
     # var
     s = srcLoc.getSource()
     rs = resultLoc.getSource()
-    for offset in range(0, t.getSize(), 2):
-        rest = t.getSize() - offset
-        result += f'''
-            ldi pl, lo({s} + {offset})
-            ldi ph, hi({s} + {offset})
-            ld b
-        '''
-        if rest > 1:
-            result += incP(srcLoc.isAligned())
-            result += 'ld a\n'
-        result += f'''
-            ldi pl, lo({rs} + {offset})
-            ldi ph, hi({rs} + {offset})
-            not b
-            st b
-        '''
-        if rest > 1:
-            if resultLoc.isAligned:
-                result += '''
-                    inc pl
-                    not a
-                    st a
-                '''
-            else:
-                result += '''
-                    mov b, a
-                    inc pl
-                    mov a, 0
-                    adc ph, a
-                    not b
-                    st b
-                '''
-    return resultLoc, result
+    if t.getSize() == 1:
+        result += loadByte('a', srcLoc, 0)
+        result += 'not a\n'
+        return Value.register(srcLoc.getPosition(), t), result
+    else: # size > 1
+        for offset in range(0, t.getSize(), 2):
+            rest = t.getSize() - offset
+            result += f'''
+                ldi pl, lo({s} + {offset})
+                ldi ph, hi({s} + {offset})
+                ld b
+            '''
+            if rest > 1:
+                result += incP(srcLoc.isAligned())
+                result += 'ld a\n'
+            result += f'''
+                ldi pl, lo({rs} + {offset})
+                ldi ph, hi({rs} + {offset})
+                not b
+                st b
+            '''
+            if rest > 1:
+                if resultLoc.isAligned:
+                    result += '''
+                        inc pl
+                        not a
+                        st a
+                    '''
+                else:
+                    result += '''
+                        mov b, a
+                        inc pl
+                        mov a, 0
+                        adc ph, a
+                        not b
+                        st b
+                    '''
+        return resultLoc, result
 
 def genLNot(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
@@ -138,19 +149,13 @@ def genLNot(resultLoc, srcLoc):
         return Value(srcLoc.getPosition(), BoolType(), 0, c, True), result
     else:
         # var
+        result += loadByte('a', srcLoc, 0)
         result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-            dec b ; c = b == 0
+            dec a ; c = a == 0
             mov a, 0
             adc a, 0
         '''.format(srcLoc.getSource())
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            st a
-        '''.format(resultLoc.getSource())
+        return Value.register(srcLoc.getPosition(), BoolType()), result
     return resultLoc, result
 
 def genNeg(resultLoc, srcLoc):
@@ -177,32 +182,31 @@ def genNeg(resultLoc, srcLoc):
         return Value(srcLoc.getPosition(), t, 0, c, True), result
     else:
         # var
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-        '''.format(srcLoc.getSource())
-
-        if t.getSize() > 1:
+        if t.getSize() == 1:
+            result += loadByte('a', srcLoc, 0)
+            result += 'neg a\n'
+            return Value.register(srcLoc.getPosition(), t), result
+        else:
+            result += f'''
+                ldi pl, lo({srcLoc.getSource()})
+                ldi ph, hi({srcLoc.getSource()})
+                ld b
+            '''
+            result += incP(srcLoc.isAligned())
             result += '''
-                ldi pl, lo({0} + 1)
-                ldi ph, hi({0} + 1)
                 ld a
                 not a
                 not b
                 inc b
                 adc a, 0
-            '''.format(srcLoc.getSource())
-        else:
-            result += 'neg b\n'
-    result += '''
-        ldi pl, lo({0})
-        ldi ph, hi({0})
-        st b
-    '''.format(resultLoc.getSource())
-    if t.getSize() > 1:
+            '''
+        result += f'''
+            ldi pl, lo({resultLoc.getSource()})
+            ldi ph, hi({resultLoc.getSource()})
+            st b
+        '''
+        result += incP(resultLoc.isAligned())
         result += '''
-            inc pl
             st a
         '''
-    return resultLoc, result
+        return resultLoc, result

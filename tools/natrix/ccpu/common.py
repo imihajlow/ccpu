@@ -32,11 +32,19 @@ def loadByte(reg, loc, offset):
         else:
             return f'ldi {reg}, {b}\n'
     else:
-        return f'''
-            ldi pl, lo({v} + {offset})
-            ldi ph, hi({v} + {offset})
-            ld {reg}
-        '''
+        if v.isRegister():
+            assert(loc.getType().getSize() == 1)
+            assert(offset == 0)
+            if reg == 'a':
+                return ''
+            else:
+                return f'mov {reg}, a\n'
+        else:
+            return f'''
+                ldi pl, lo({v} + {offset})
+                ldi ph, hi({v} + {offset})
+                ld {reg}
+            '''
 
 def loadP(loc, offset=0):
     """

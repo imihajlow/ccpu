@@ -34,6 +34,10 @@ class Value:
     def variable(position, name, type=UnknownType()):
         return Value(position, type, 1, name, True)
 
+    @staticmethod
+    def register(position, type):
+        return Value(position, type, 1, Location.register(), True)
+
     def getPosition(self):
         return self._position
 

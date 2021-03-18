@@ -3,7 +3,8 @@ from type import BoolType
 import operator
 import labelname
 from position import Position
-from exceptions import SemanticError, NatrixNotImplementedError
+from exceptions import SemanticError, NatrixNotImplementedError, RegisterNotSupportedError
+from .common import *
 
 def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(resultLoc.getIndirLevel() == 1)
@@ -42,6 +43,7 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
 
 def _genSHLVarByConstLarge(resultLoc, srcLoc, n):
     assert(resultLoc != srcLoc)
+    assert(not srcLoc.getSource().isRegister())
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
     size = srcLoc.getType().getSize()
@@ -130,6 +132,7 @@ def _adjustP(resultLoc, offset, oldP):
 
 def _genSHLVarByConstLargeInplace(resultLoc, n):
     rs = resultLoc.getSource()
+    assert(not rs.isRegister())
     size = resultLoc.getType().getSize()
     n = min(n, size * 8)
     byteShift = n // 8
@@ -205,11 +208,7 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
                         result += 'adc ph, a\n'
                     result += 'st a\n'
                 else:
-                    result += f'''
-                        ldi pl, lo({s})
-                        ldi ph, hi({s})
-                        ld b
-                    '''
+                    result += loadByte('b', srcLoc, 0)
                     for i in range(n):
                         result += 'shl b\n'
                     result += f'''
@@ -225,16 +224,10 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
             else:
                 result += f'''
                     mov a, 0
-                    ldi pl, lo({rs})
-                    ldi ph, hi({rs})
-                    st a
                 '''
+                return Value.register(srcLoc.getPosition(), resultLoc.getType()), result
         else:
-            result += f'''
-                ldi pl, lo({s})
-                ldi ph, hi({s})
-                ld b
-            '''
+            result += loadByte('b', srcLoc, 0)
             if expandToWord:
                 if not signed:
                     result += 'mov a, 0\n'
@@ -254,12 +247,12 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
                         '''
                 else:
                     result += 'shl b\n'
-            result += f'''
-                ldi pl, lo({rs})
-                ldi ph, hi({rs})
-                st b
-            '''
             if expandToWord:
+                result += f'''
+                    ldi pl, lo({rs})
+                    ldi ph, hi({rs})
+                    st b
+                '''
                 if resultLoc.isAligned():
                     result += 'inc pl\n'
                 else:
@@ -268,8 +261,12 @@ def genSHLVarByConst(resultLoc, srcLoc, n):
                         ldi ph, hi({rs} + 1)
                     '''
                 result += 'st a\n'
+            else:
+                result += 'mov a, b\n'
+                return Value.register(srcLoc.getPosition(), resultLoc.getType()), result
     elif size == 2:
         assert(resultLoc.getType().getSize() == 2)
+        assert(not s.isRegister())
         if n >= 16:
             result += '''
                 mov a, 0
@@ -330,7 +327,7 @@ def _genSHRVarByConstLarge(resultLoc, srcLoc, n):
     s = srcLoc.getSource()
     rs = resultLoc.getSource()
     size = srcLoc.getType().getSize()
-    result = f'; {resultLoc} = shr {srcLoc}, {n}'
+    result = f'; {resultLoc} = shr {srcLoc}, {n}\n'
     bitShift = n % 8
     byteShift = n // 8
     p = None
@@ -366,31 +363,21 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
     size = srcLoc.getType().getSize()
-    result = '; shr {}, {}'.format(srcLoc, n)
+    result = '; shr {}, {}\n'.format(srcLoc, n)
     if n == 0:
         return srcLoc, result
     if size == 1:
         if n >= 8:
             result += '''
                 mov a, 0
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-            '''.format(rs)
+            '''
         else:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
-            '''.format(s)
+            result += loadByte('a', srcLoc, 0)
             for i in range(n):
                 result += 'shr a\n'
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-            '''.format(rs)
+        return Value.register(srcLoc.getPosition(), resultLoc.getType()), result
     elif size == 2:
+        assert(not s.isRegister())
         if n >= 16:
             result += '''
                 mov a, 0
@@ -459,36 +446,24 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
     size = srcLoc.getType().getSize()
-    result = '; sar {}, {}'.format(srcLoc, n)
+    result = '; sar {}, {}\n'.format(srcLoc, n)
     if n == 0:
         return srcLoc, result
     if size == 1:
         if n >= 8:
+            result += loadByte('a', srcLoc, 0)
             result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
                 shl a
                 mov a, 0
                 sbb a, 0
-                ldi pl, lo({1})
-                ldi ph, hi({1})
-                st a
             '''.format(s, rs)
         else:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld a
-            '''.format(s)
+            result += loadByte('a', srcLoc, 0)
             for i in range(n):
                 result += 'sar a\n'
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                st a
-            '''.format(rs)
+        return Value.register(srcLoc.getPosition(), resultLoc.getType()), result
     elif size == 2:
+        assert(not s.isRegister())
         if n >= 16:
             result += '''
                 ldi pl, lo({0} + 1)
@@ -556,78 +531,54 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
     return resultLoc, result
 
 def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
+    if src2Loc.getType().getSize() > 1:
+        raise NatrixNotImplementedError(src2Loc.getPosition(), "Shift by variables over 8 bits")
     lBegin = labelProvider.allocLabel("shift_begin")
     lLoop = labelProvider.allocLabel("shift_loop")
     lEnd = labelProvider.allocLabel("shift_end")
     lInf = labelProvider.allocLabel("shift_inf")
-    result = '; {} = {} {}, {} (byte)'.format(resultLoc, op, src1Loc, src2Loc)
-    if src2Loc.getType().getSize() != 1:
-        result += '''
-            ldi pl, lo({src2} + 1)
-            ldi ph, hi({src2} + 1)
-            ld a
-            add a, 0
-            ldi pl, lo({labelInf})
-            ldi ph, hi({labelInf})
-            jnz
-        '''.format(src2 = src2Loc.getSource(), labelInf = lInf)
-    result += '''
-        ldi pl, lo({src2})
-        ldi ph, hi({src2})
-        ld a
+    if src1Loc.getSource().isRegister():
+        raise RegisterNotSupportedError(0)
+    result = '; {} = {} {}, {} (byte)\n'.format(resultLoc, op, src1Loc, src2Loc)
+    result += loadByte('a', src2Loc, 0)
+    result += f'''
         ldi b, 7
         sub b, a
-        ldi pl, lo({labelBegin})
-        ldi ph, hi({labelBegin})
+        ldi pl, lo({lBegin})
+        ldi ph, hi({lBegin})
         jnc ; a <= 7
-    {labelInf}:
-    '''.format(src2 = src2Loc.getSource(), labelBegin = lBegin, labelInf = lInf)
+    {lInf}:
+    '''
     if src1Loc.getType().getSign() and op != 'shl':
-        if src1Loc.getIndirLevel() == 0:
-            result += 'ldi b, lo({})\n'.format(src1Loc.getSource())
-        else:
-            result += '''
-                ldi pl, lo({0})
-                ldi ph, hi({0})
-                ld b
-            '''.format(src1Loc.getSource())
+        result += loadByte('b', src1Loc, 0)
         result += '''
             shl b
             exp b
         '''
     else:
         result += 'ldi b, 0\n'
-    result += '''
-        ldi pl, lo({labelEnd})
-        ldi ph, hi({labelEnd})
+    result += f'''
+        ldi pl, lo({lEnd})
+        ldi ph, hi({lEnd})
         jmp
-    {labelBegin}:
-    '''.format(labelBegin = lBegin, labelEnd = lEnd)
-    if src1Loc.getIndirLevel() == 0:
-        result += 'ldi b, lo({})\n'.format(src1Loc.getSource())
-    else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld b
-        '''.format(src1Loc.getSource())
-    result += '''
-        ldi pl, lo({labelEnd})
-        ldi ph, hi({labelEnd})
+    {lBegin}:
+    '''
+    result += loadByte('b', src1Loc, 0)
+    result += f'''
+        ldi pl, lo({lEnd})
+        ldi ph, hi({lEnd})
         add a, 0
         jz ; a == 0
-    {labelLoop}:
+    {lLoop}:
         {op} b
         dec a
-        ldi pl, lo({labelLoop})
-        ldi ph, hi({labelLoop})
+        ldi pl, lo({lLoop})
+        ldi ph, hi({lLoop})
         jnz
-    {labelEnd}:
-        ldi pl, lo({res})
-        ldi ph, hi({res})
-        st b
-    '''.format(src2 = src2Loc.getSource(), labelEnd = lEnd, labelLoop = lLoop, res = resultLoc.getSource(), op = op)
-    return resultLoc, result
+    {lEnd}:
+        mov a, b
+    '''
+    return Value.register(resultLoc.getPosition(), resultLoc.getType()), result
 
 # src2Loc is a var, 1 or 2 bytes
 # src1Loc var or const, 2 bytes
@@ -696,13 +647,11 @@ def _genShiftLargeCall(resultLoc, src1Loc, src2Loc, label):
     rs = resultLoc.getSource()
     if src2Loc.getType().getSize() == 2:
         raise NatrixNotImplementedError(Position.fromAny(src2Loc), "Shift large by word")
+    result += loadByte('a', src2Loc, 0)
     result += f'''
-        ldi pl, lo({s2})
-        ldi ph, hi({s2})
-        ld b
         ldi pl, lo(__cc_sh_count)
         ldi ph, hi(__cc_sh_count)
-        st b
+        st a
     '''
     size = src1Loc.getType().getSize()
     for offset in range(0, size, 2):

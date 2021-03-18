@@ -197,7 +197,16 @@ def genMove(resultLoc, srcLoc, avoidCopy):
             if resultLoc.getIndirLevel() != 1:
                 raise RuntimeError("Compiler error: move destination level of indirection is not 1")
             size = srcLoc.getType().getSize()
-            if size <= 2:
+            if size == 1 and srcLoc.getSource().isRegister():
+                assert(srcLoc.getIndirLevel() == 1)
+                rs = resultLoc.getSource()
+                result = f'''
+                    ldi pl, lo({rs})
+                    ldi ph, hi({rs})
+                    st a
+                '''
+                return resultLoc, result
+            elif size <= 2:
                 loadCode = "; {} := {}\n".format(resultLoc, srcLoc)
                 if srcLoc.getIndirLevel() == 0:
                     # var := const
@@ -233,7 +242,7 @@ def genMove(resultLoc, srcLoc, avoidCopy):
                             '''.format(resultLoc.getSource())
                     storeCode += 'st a\n'
                 return resultLoc, loadCode + storeCode
-            else:
+            else: # size > 2
                 result = f"; {resultLoc} := {srcLoc} (large)\n"
                 if srcLoc.getIndirLevel() == 0:
                     for offset in range(0, size, 2):
@@ -455,7 +464,7 @@ def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     if t.getSize() <= 2:
         isWord = t.getSize() == 2
         if not isWord:
-            result += _loadAB(srcLoc) # only b is used
+            result += loadByte('b', srcLoc, 0)
             result += loadP(resultAddrLoc, offset) # a is overwritten
             result += 'st b\n'
         else:
@@ -499,15 +508,18 @@ def genInvCondJump(condLoc, label):
                 jz
             '''.format(s, label)
     else:
-        result += '''
-            ldi pl, lo({0})
-            ldi ph, hi({0})
-            ld a
-            ldi pl, lo({1})
-            ldi ph, hi({1})
+        if not s.isRegister():
+            result += f'''
+                ldi pl, lo({s})
+                ldi ph, hi({s})
+                ld a
+            '''
+        result += f'''
+            ldi pl, lo({label})
+            ldi ph, hi({label})
             add a, 0
             jz
-        '''.format(s, label)
+        '''
     return result
 
 def genJump(label):

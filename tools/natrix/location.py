@@ -11,7 +11,7 @@ class Location:
             self._isNumber = isinstance(v, int)
 
     @staticmethod
-    def register(self):
+    def register():
         l = Location("")
         l._isRegister = True
         return l
@@ -33,7 +33,7 @@ class Location:
 
     def __str__(self):
         if self._isRegister:
-            return "a"
+            return "reg a"
         else:
             return str(self._v)
 
