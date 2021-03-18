@@ -1,6 +1,6 @@
 from lark import Tree, Token
 
-class Location:
+class Position:
     def __init__(self, line, column, end_line, end_column):
         self._line = line
         self._column = column
@@ -13,9 +13,9 @@ class Location:
     @staticmethod
     def fromAny(t):
         if isinstance(t, Tree) or isinstance(t, Token):
-            return Location(t.line, t.column, t.end_line, t.end_column)
+            return Position(t.line, t.column, t.end_line, t.end_column)
         else:
-            return t.getLocation()
+            return t.getPosition()
 
 
     def __sub__(self, other):
@@ -38,7 +38,7 @@ class Location:
         else:
             end_line = other._end_line
             end_column = other._end_column
-        return Location(line, column, end_line, end_column)
+        return Position(line, column, end_line, end_column)
 
     def __str__(self):
         if self._end_line == self._line:

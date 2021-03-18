@@ -49,10 +49,10 @@ def _genIntBinary(resultLoc, src1Loc, src2Loc, opLo, opHi, pyPattern, constLambd
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise SemanticError(resultLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition(),
             "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType() != src2Loc.getType():
-        raise SemanticError(resultLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition(),
             "Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     assert(resultLoc.getIndirLevel() == 1)
     l1 = src1Loc.getIndirLevel()
@@ -271,13 +271,13 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise SemanticError(resultLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition(),
             "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType() != src2Loc.getType():
-        raise SemanticError(src1Loc.getLocation() - src2Loc.getLocation(),
+        raise SemanticError(src1Loc.getPosition() - src2Loc.getPosition(),
             "Incompatible source types: {} and {}".format(src1Loc.getType(), src2Loc.getType()))
     if src1Loc.getType() != BoolType():
-        raise SemanticError(src1Loc.getLocation(),
+        raise SemanticError(src1Loc.getPosition(),
             "Bool type (u8) expected")
     assert(resultLoc.getIndirLevel() == 1)
     rs = resultLoc.getSource()
@@ -286,13 +286,13 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     result = '; {} = bool {} {}, {}\n'.format(resultLoc, op, src1Loc, src2Loc)
-    loc = src1Loc.getLocation() - src2Loc.getLocation()
+    pos = src1Loc.getPosition() - src2Loc.getPosition()
     if l1 == 0 and l2 == 0:
         # const and const
         if isinstance(s1, int) and isinstance(s2, int):
-            return Value(loc, BoolType(), 0, int(constLambda(bool(s1), bool(s2))), True), result
+            return Value(pos, BoolType(), 0, int(constLambda(bool(s1), bool(s2))), True), result
         else:
-            return Value(loc, BoolType(), 0, pyPattern.format(src1Loc, src2Loc), True), result
+            return Value(pos, BoolType(), 0, pyPattern.format(src1Loc, src2Loc), True), result
     elif l1 == 0 or l2 == 0:
         # var and const
         if l1 == 0:
@@ -303,10 +303,10 @@ def _genBoolBinary(resultLoc, src1Loc, src2Loc, op, pyPattern, constLambda):
                 if s2 == 0:
                     return src1Loc, ""
                 else:
-                    return Value(loc, BoolType(), 0, 1, True), ""
+                    return Value(pos, BoolType(), 0, 1, True), ""
             elif op == 'and':
                 if s2 == 0:
-                    return Value(loc, BoolType(), 0, 0, True), ""
+                    return Value(pos, BoolType(), 0, 0, True), ""
                 else:
                     return src1Loc, result
             else:
@@ -462,7 +462,7 @@ def _genIncDecPtr(resultLoc, srcLoc, shift, opLo, opHi):
 
 def _genAddPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
-        raise SemanticError(src2Loc.getLocation(),
+        raise SemanticError(src2Loc.getPosition(),
             "Can only add ponters and integers, not pointers and other types")
     memberSize = src1Loc.getType().deref().getSize()
     s1 = src1Loc.getSource()
@@ -470,20 +470,20 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
     rs = resultLoc.getSource()
     t = resultLoc.getType()
     if src2Loc.getType().getSize() > 2:
-        raise NatrixNotImplementedError(src2Loc.getLocation(), "Can only add integers up to 16 bit to pointers")
+        raise NatrixNotImplementedError(src2Loc.getPosition(), "Can only add integers up to 16 bit to pointers")
     result = '; {} = {} + {} * {}\n'.format(resultLoc, src1Loc, src2Loc, memberSize)
     isWord = src2Loc.getType().getSize() == 2
     if memberSize > 2:
         if src2Loc.getIndirLevel() == 0:
-            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            pos = src1Loc.getPosition() - src2Loc.getPosition()
             if isinstance(s2, int):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         elif not isPowerOfTwo(memberSize):
-            raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+            raise NatrixNotImplementedError(src2Loc.getPosition(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
         elif src1Loc == resultLoc:
             shift = log(memberSize)
             loc, code = _genIncDecPtr(resultLoc, src2Loc, shift, "add", "adc")
@@ -500,12 +500,12 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
             return loc, result + code
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
-                loc = src1Loc.getLocation() - src2Loc.getLocation()
+                pos = src1Loc.getPosition() - src2Loc.getPosition()
                 if isinstance(s2, int):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
                 return loc, result + code
             else:
                 result += '''
@@ -583,17 +583,17 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
                         '''.format(rs)
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
-            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            pos = src1Loc.getPosition() - src2Loc.getPosition()
             if src2Loc.getType().getSign():
                 s2 = signExpandByte(s2)
             if isinstance(s2, int):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
             return loc, result + code
         if src2Loc.getType().getSign():
-            raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
+            raise SemanticError(src2Loc.getPosition(), "pointer arithmetic with s8 is not implemented")
         # s2.indirLevel == 1
         result += '''
             ldi pl, lo({0})
@@ -671,7 +671,7 @@ def _genAddPtr(resultLoc, src1Loc, src2Loc):
 
 def _genSubPtr(resultLoc, src1Loc, src2Loc):
     if not src2Loc.getType().isInteger():
-        raise SemanticError(src2Loc.getLocation(),
+        raise SemanticError(src2Loc.getPosition(),
             "Can only subtract ponters and integers, not pointers and other types")
     memberSize = src1Loc.getType().deref().getSize()
     s1 = src1Loc.getSource()
@@ -682,15 +682,15 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     isWord = src2Loc.getType().getSize() == 2
     if memberSize > 2:
         if src2Loc.getIndirLevel() == 0:
-            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            pos = src1Loc.getPosition() - src2Loc.getPosition()
             if isinstance(s2, int):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         elif not isPowerOfTwo(memberSize):
-            raise NatrixNotImplementedError(src2Loc.getLocation(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
+            raise NatrixNotImplementedError(src2Loc.getPosition(), f"sizeof({src1Loc.getType().deref()}) = {memberSize} is not a power of two")
         elif src1Loc == resultLoc:
             shift = log(memberSize)
             loc, code = _genIncDecPtr(resultLoc, src2Loc, shift, "sub", "sbb")
@@ -707,12 +707,12 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
             return loc, result + code
         elif memberSize == 2:
             if src2Loc.getIndirLevel() == 0:
-                loc = src1Loc.getLocation() - src2Loc.getLocation()
+                pos = src1Loc.getPosition() - src2Loc.getPosition()
                 if isinstance(s2, int):
                     offset = s2 * 2
                 else:
                     offset = "({}) * 2".format(s2)
-                loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
+                loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
                 return loc, result + code
             else:
                 result += '''
@@ -776,17 +776,17 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
                 result += 'st b\n'
     else: # not isWord
         if src2Loc.getIndirLevel() == 0:
-            loc = src1Loc.getLocation() - src2Loc.getLocation()
+            pos = src1Loc.getPosition() - src2Loc.getPosition()
             if src2Loc.getType().getSign():
                 s2 = signExpandByte(s2)
             if isinstance(s2, int):
                 offset = s2 * memberSize
             else:
                 offset = "({}) * {}".format(s2, memberSize)
-            loc, code = _genIntBinary(resultLoc, src1Loc, Value(loc, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
+            loc, code = _genIntBinary(resultLoc, src1Loc, Value(pos, t, 0, offset, True), "sub", "sbb", "({}) - ({})", operator.sub, False)
             return loc, result + code
         if src2Loc.getType().getSign():
-            raise SemanticError(src2Loc.getLocation(), "pointer arithmetic with s8 is not implemented")
+            raise SemanticError(src2Loc.getPosition(), "pointer arithmetic with s8 is not implemented")
         # s2.indirLevel == 1
         result += '''
             ldi pl, lo({0})
@@ -866,13 +866,13 @@ def _genSubPtr(resultLoc, src1Loc, src2Loc):
     return resultLoc, result
 
 def genAddPointerOffset(resultLoc, src, offset):
-    return _genIntBinary(resultLoc, src, Value(resultLoc.getLocation(), src.getType(), 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
+    return _genIntBinary(resultLoc, src, Value(resultLoc.getPosition(), src.getType(), 0, offset, True), "add", "adc", "({}) + ({})", operator.add, False)
 
 def genAdd(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise SemanticError(resultLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition(),
             "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType().isPointer():
         return _genAddPtr(resultLoc, src1Loc, src2Loc)
@@ -883,7 +883,7 @@ def genSub(resultLoc, src1Loc, src2Loc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(src1Loc.getType())
     if resultLoc.getType() != src1Loc.getType():
-        raise SemanticError(resultLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition(),
             "Incompatible result and source types: {} and {}".format(resultLoc.getType(), src1Loc.getType()))
     if src1Loc.getType().isPointer():
         return _genSubPtr(resultLoc, src1Loc, src2Loc)

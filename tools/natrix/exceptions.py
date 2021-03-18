@@ -1,17 +1,17 @@
 class NatrixError(Exception):
-    def __init__(self, location, msg, errorType):
-        self.location = location
+    def __init__(self, position, msg, errorType):
+        self.position = position
         self.msg = msg
-        super().__init__("{} at {}: {}".format(errorType, str(location), msg))
+        super().__init__("{} at {}: {}".format(errorType, str(position), msg))
 
 class SemanticError(NatrixError):
-    def __init__(self, location, msg):
-        super().__init__(location, msg, "Semantic error")
+    def __init__(self, position, msg):
+        super().__init__(position, msg, "Semantic error")
 
 class LiteralError(NatrixError):
-    def __init__(self, location, msg):
-        super().__init__(location, msg, "Literal parsing error")
+    def __init__(self, position, msg):
+        super().__init__(position, msg, "Literal parsing error")
 
 class NatrixNotImplementedError(NatrixError):
-    def __init__(self, location, msg):
-        super().__init__(location, f"Not implemented: {msg}", "Not implemented error")
+    def __init__(self, position, msg):
+        super().__init__(position, f"Not implemented: {msg}", "Not implemented error")

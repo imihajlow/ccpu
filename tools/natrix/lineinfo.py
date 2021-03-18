@@ -1,6 +1,6 @@
 from lark import Transformer, v_args, Discard
 from literal import unescapeString
-from location import Location
+from position import Position
 
 class LineInfo():
 	def __init__(self, filename, code):
@@ -8,7 +8,7 @@ class LineInfo():
 		self._defaultFilename = filename
 		self._parse(code)
 
-	def translateLocation(self, loc):
+	def translatePosition(self, loc):
 		return self.translateLine(loc.getLine())
 
 	def translateLine(self, raw_line):

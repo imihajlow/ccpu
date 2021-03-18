@@ -109,11 +109,11 @@ if __name__ == '__main__':
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:
-        file, line = lit.translateLocation(e.location)
+        file, line = lit.translatePosition(e.position)
         sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.msg))
         sys.exit(1)
     except VisitError as e:
-        file, line = lit.translateLocation(e.orig_exc.location)
+        file, line = lit.translatePosition(e.orig_exc.position)
         sys.stderr.write("Error: {}:{}: {}\n".format(file, line, e.orig_exc.msg))
         sys.exit(1)
     except LarkError as e:

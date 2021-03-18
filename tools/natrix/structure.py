@@ -1,7 +1,7 @@
 from lark import Transformer, v_args, Tree, Discard
 from value import Value
 from type import StructType, PtrType
-from location import Location
+from position import Position
 from exceptions import SemanticError
 
 def getField(t, fields):
@@ -24,7 +24,7 @@ class StructDeclarationTransformer(Transformer):
             fname = c.children[1]
             fields += [(fname, ftype)]
         if name in self._dict:
-            raise SemanticError(Location.fromAny(t), f"struct {name} redefinition")
+            raise SemanticError(Position.fromAny(t), f"struct {name} redefinition")
         self._dict[name] = fields
         raise Discard
 
@@ -48,14 +48,14 @@ class MemberAccessTransformer(Transformer):
             try:
                 offset, type = getField(obj.getType(), fields)
             except ValueError as e:
-                raise SemanticError(Location.fromAny(t), str(e))
+                raise SemanticError(Position.fromAny(t), str(e))
             except LookupError as e:
-                raise SemanticError(Location.fromAny(t), str(e))
+                raise SemanticError(Position.fromAny(t), str(e))
             except AttributeError as e:
-                raise SemanticError(Location.fromAny(t), f"{obj} is not a struct")
+                raise SemanticError(Position.fromAny(t), f"{obj} is not a struct")
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
-            return Value.withOffset(Location.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)
+            return Value.withOffset(Position.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)
         elif obj.data == 'deref':
             return Tree("arrow", [obj.children[0]] + fields, t.meta)
         else:
@@ -68,12 +68,12 @@ class MemberAccessTransformer(Transformer):
             try:
                 offset, type = getField(obj.getType(), fields)
             except ValueError as e:
-                raise SemanticError(Location.fromAny(t), str(e))
+                raise SemanticError(Position.fromAny(t), str(e))
             except AttributeError as e:
-                raise SemanticError(Location.fromAny(t), f"{obj} is not a struct")
+                raise SemanticError(Position.fromAny(t), f"{obj} is not a struct")
             if obj.getIndirLevel() != 1:
                 raise RuntimeError("WTF is that")
-            return Value.withOffset(Location.fromAny(t), PtrType(type), 0 + type.getIndirectionOffset(), obj.getSource(), True, offset)
+            return Value.withOffset(Position.fromAny(t), PtrType(type), 0 + type.getIndirectionOffset(), obj.getSource(), True, offset)
         elif obj.data == 'deref':
             return Tree("p_arrow", [obj.children[0]] + fields, t.meta)
         else:

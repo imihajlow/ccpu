@@ -4,7 +4,7 @@ from .common import *
 
 def _genDMCommon(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
-        raise SemanticError(src1Loc.getLocation() - src2Loc.getLocation(), "division types mismatch")
+        raise SemanticError(src1Loc.getPosition() - src2Loc.getPosition(), "division types mismatch")
     t = src1Loc.getType()
     resultLoc = resultLoc.withType(t)
     assert(t.getSize() == 1 or t.getSize() == 2)

@@ -189,11 +189,11 @@ def _loadConst(size, value, offset=0):
 
 def genMove(resultLoc, srcLoc, avoidCopy):
     if srcLoc.getType().isUnknown():
-        raise SemanticError(srcLoc.getLocation(), "Unknown source type")
+        raise SemanticError(srcLoc.getPosition(), "Unknown source type")
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise SemanticError(resultLoc.getLocation() - srcLoc.getLocation(),
+        raise SemanticError(resultLoc.getPosition() - srcLoc.getPosition(),
             "Incompatible types to assign: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if srcLoc == resultLoc:
         return resultLoc, ""
@@ -370,7 +370,7 @@ def genCast(resultLoc, t, srcLoc):
             # cast a constant
             if isinstance(srcLoc.getSource(), int) and srcLoc.getType().getSize() == 1 and srcLoc.getType().getSign():
                 # a signed byte into something -> sign expand it
-                return genMove(resultLoc, Value(srcLoc.getLocation(), t, 0, signExpandByte(srcLoc.getSource())), True)
+                return genMove(resultLoc, Value(srcLoc.getPosition(), t, 0, signExpandByte(srcLoc.getSource())), True)
             else:
                 return genMove(resultLoc, srcLoc.withType(t), True)
         srcSize = srcLoc.getType().getSize()
@@ -449,11 +449,11 @@ def _loadAB(loc):
 
 def genPutIndirect(resultAddrLoc, srcLoc, offset=0):
     if srcLoc.getType().isUnknown():
-        raise SemanticError(srcLoc.getLocation(), "Unknown source type")
+        raise SemanticError(srcLoc.getPosition(), "Unknown source type")
     if resultAddrLoc.getType().isUnknown():
         resultAddrLoc = resultAddrLoc.removeUnknown(srcLoc.getType())
     if resultAddrLoc.getType().deref() != srcLoc.getType():
-        raise SemanticError(resultAddrLoc.getLocation() - srcLoc.getLocation(),
+        raise SemanticError(resultAddrLoc.getPosition() - srcLoc.getPosition(),
             "Incompatible types for put indirect: {} and {}".format(resultAddrLoc.getType().deref(), srcLoc.getType()))
     t = srcLoc.getType()
     result = "; *({} + {}) = {}\n".format(resultAddrLoc, offset, srcLoc)
@@ -484,7 +484,7 @@ def genInvCondJump(condLoc, label):
     Jump if condLoc is 0
     '''
     if condLoc.getType() != BoolType():
-        raise SemanticError(condLoc.getLocation(), "Should be a bool type (u8) for a condition, got {}".format(str(condLoc.getType())))
+        raise SemanticError(condLoc.getPosition(), "Should be a bool type (u8) for a condition, got {}".format(str(condLoc.getType())))
     l = condLoc.getIndirLevel()
     s = condLoc.getSource()
     assert(l == 0 or l == 1)

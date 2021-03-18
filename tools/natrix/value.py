@@ -3,7 +3,7 @@ from lark.visitors import Interpreter
 from type import UnknownType, PtrType, ArrayType
 from exceptions import SemanticError
 import labelname
-from location import Location
+from position import Position
 
 '''
 Value class
@@ -16,40 +16,40 @@ s8 a[10];   a -> Value(ArrayType(IntType(True, 1), 10), 0, Symbol("a"))
             a[2] -> Value(IntType(True, 1), 1, Symbol("a+2"))
 '''
 class Value:
-    def __init__(self, location, type, indirLevel, src, aligned):
+    def __init__(self, position, type, indirLevel, src, aligned):
         if indirLevel < 0:
-            raise SemanticError(location, "Cannot take address")
-        self._location = location
+            raise SemanticError(position, "Cannot take address")
+        self._position = position
         self._type = type
         self._level = indirLevel
         self._src = src
         self._isAligned = aligned
 
     @staticmethod
-    def withOffset(location, type, indirLevel, src, aligned, offset):
+    def withOffset(position, type, indirLevel, src, aligned, offset):
         source = src
         if offset != 0:
             if isinstance(src, int):
                 source = src + offset
             else:
                 source = f"({src}) + {offset}"
-        return Value(location, type, indirLevel, source, aligned)
+        return Value(position, type, indirLevel, source, aligned)
 
     @staticmethod
-    def variable(location, name, type=UnknownType()):
-        return Value(location, type, 1, name, True)
+    def variable(position, name, type=UnknownType()):
+        return Value(position, type, 1, name, True)
 
-    def getLocation(self):
-        return self._location
+    def getPosition(self):
+        return self._position
 
     def getType(self):
         return self._type
 
     def withType(self, t):
-        return Value(self._location, t, self._level, self._src, self._isAligned)
+        return Value(self._position, t, self._level, self._src, self._isAligned)
 
     def withIndirectionOffset(self, offset):
-        return Value(self._location, self._type, self._level + offset, self._src, self._isAligned)
+        return Value(self._position, self._type, self._level + offset, self._src, self._isAligned)
 
     def getIndirLevel(self):
         '''
@@ -70,20 +70,20 @@ class Value:
             if self._src in localVars:
                 t = localVars[self._src]
                 newType = self._type.removeUnknown(t)
-                return Value(self._location, newType, self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src), newType.isAlignedByDefault())
+                return Value(self._position, newType, self._level + t.getIndirectionOffset(), labelname.getLocalName(fn, self._src), newType.isAlignedByDefault())
             elif self._src in paramVars:
                 t, n = paramVars[self._src]
                 newType = self._type.removeUnknown(t)
-                return Value(self._location, newType, self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n), newType.isAlignedByDefault())
+                return Value(self._position, newType, self._level + t.getIndirectionOffset(), labelname.getArgumentName(fn, n), newType.isAlignedByDefault())
             elif self._src in globalVars:
                 t, _ = globalVars[self._src]
                 newType = self._type.removeUnknown(t)
-                return Value(self._location, newType, self._level + t.getIndirectionOffset(), self._src, newType.isAlignedByDefault())
+                return Value(self._position, newType, self._level + t.getIndirectionOffset(), self._src, newType.isAlignedByDefault())
             else:
-                raise SemanticError(self._location, "Undeclared variable {}".format(self._src))
+                raise SemanticError(self._position, "Undeclared variable {}".format(self._src))
 
     def removeUnknown(self, newType):
-        return Value(self._location, self._type.removeUnknown(newType), self._level, self._src, self._isAligned)
+        return Value(self._position, self._type.removeUnknown(newType), self._level, self._src, self._isAligned)
 
     def __str__(self):
         return "({}, {}, {})".format(self._type, self._level, self._src)
@@ -91,11 +91,11 @@ class Value:
     def __eq__(self, other):
         return isinstance(other, Value) and self._type == other._type and self._level == other._level and self._src == other._src
 
-    def takeAddress(self, newLocation=None):
+    def takeAddress(self, newPosition=None):
         if self._level > 0:
-            return Value(self._location if newLocation is None else newLocation, PtrType(self._type), self._level - 1, self._src, True)
+            return Value(self._position if newPosition is None else newPosition, PtrType(self._type), self._level - 1, self._src, True)
         else:
-            raise SemanticError(self._location, "Cannot get address of this: {}".format(str(self)))
+            raise SemanticError(self._position, "Cannot get address of this: {}".format(str(self)))
 
     def isConst(self):
         return self._level == 0
@@ -115,7 +115,7 @@ class VarTransformerStageOne(Transformer):
         sym = t.children[0]
         # all variables are aligned by default
         # having unaligned variables (for example, imported from assembly) may lead to errors!
-        return Tree("var", [Value(Location.fromAny(t), UnknownType(), 1, str(sym), True)], t.meta) # will be processed later
+        return Tree("var", [Value(Position.fromAny(t), UnknownType(), 1, str(sym), True)], t.meta) # will be processed later
 
 class VarTransformerStageTwo(Transformer):
     @v_args(inline = True)
@@ -126,10 +126,10 @@ class VarTransformerStageTwo(Transformer):
     def addr(self, t):
         val = t.children[0]
         if isinstance(val, Value):
-            return val.takeAddress(Location.fromAny(t))
+            return val.takeAddress(Position.fromAny(t))
         elif val.data == "member_access":
             return Tree("member_address", val.children, t.meta)
         elif val.data == "arrow":
             return Tree("p_arrow", val.children, t.meta)
         else:
-            raise SemanticError(Location.fromAny(t), "Cannot get address")
+            raise SemanticError(Position.fromAny(t), "Cannot get address")

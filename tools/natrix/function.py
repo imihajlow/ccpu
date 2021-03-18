@@ -1,6 +1,6 @@
 from lark import Visitor, v_args, Tree
 from lark.visitors import Interpreter
-from location import Location
+from position import Position
 from exceptions import SemanticError
 
 DEFAULT_CODE_SECTION = "text"
@@ -104,19 +104,19 @@ class NameInterpreter(Interpreter):
         try:
             fn = Function(name, retType, attrs, args)
         except ValueError as e:
-            raise SemanticError(Location.fromAny(t), str(e))
+            raise SemanticError(Position.fromAny(t), str(e))
         if name in self.functions and not fn.equal(self.functions[name], isDefinition):
-            raise SemanticError(Location.fromAny(t), "conflicting declarations of {}".format(name))
+            raise SemanticError(Position.fromAny(t), "conflicting declarations of {}".format(name))
         self.functions[name] = fn
         return fn
 
     def gl_decl_var(self, t):
         attrTree, type, name = t.children
         attrs = attrTree.children
-        location = Location.fromAny(t)
+        position = Position.fromAny(t)
         if name in self.globalVars:
             if not name in self.varImports:
-                raise SemanticError(location, "conflicting declarations of {}".format(name))
+                raise SemanticError(position, "conflicting declarations of {}".format(name))
             else:
                 i = self.varImports.index(name)
                 del self.varImports[i]
@@ -131,13 +131,13 @@ class NameInterpreter(Interpreter):
             elif a.data == "attr_export":
                 isExported = True
             elif a.data == "attr_always_recursion":
-                raise SemanticError(location, "a variable can't be a traitor")
+                raise SemanticError(position, "a variable can't be a traitor")
             elif a.data == "attr_section":
                 hasSectionAttr = True
         if isImported and isExported:
-            raise SemanticError(location, "nothing can be imported and exported at the same time")
+            raise SemanticError(position, "nothing can be imported and exported at the same time")
         if isImported and hasSectionAttr:
-            raise SemanticError(location, "can't specify sections for imported variables")
+            raise SemanticError(position, "can't specify sections for imported variables")
         if isImported:
             self.varImports += [name]
         if isExported:
@@ -154,7 +154,7 @@ class NameInterpreter(Interpreter):
         decl, body = t.children
         fn = self._addFunction(decl, True)
         if fn.isImported:
-            raise SemanticError(Location.fromAny(decl), "Cannot define an imported function")
+            raise SemanticError(Position.fromAny(decl), "Cannot define an imported function")
         self._currentFunction = fn
         self.visit(body)
         self._currentFunction = None
@@ -164,5 +164,5 @@ class NameInterpreter(Interpreter):
         name = t.children[1]
         lv = self._currentFunction.localVars
         if name in lv:
-            raise SemanticError(Location.fromAny(t), f"Local variable {name} redifinition")
+            raise SemanticError(Position.fromAny(t), f"Local variable {name} redifinition")
         lv[name] = type

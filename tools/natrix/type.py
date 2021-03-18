@@ -2,7 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from lark import Transformer, v_args, Tree
 from exceptions import SemanticError
-from location import Location
+from position import Position
 
 class Type(ABC):
     @abstractmethod
@@ -265,12 +265,12 @@ class TypeTransformer(Transformer):
         try:
             return IntType.parse(s)
         except ValueError as e:
-            raise SemanticError(Location.fromAny(t), str(e))
+            raise SemanticError(Position.fromAny(t), str(e))
 
     @v_args(tree = True)
     def struct_type(self, t):
         st = StructType(t.children[0])
-        self._structsToPopulate += [(st, Location.fromAny(t))]
+        self._structsToPopulate += [(st, Position.fromAny(t))]
         return st
 
     @v_args(tree = True)
@@ -282,7 +282,7 @@ class TypeTransformer(Transformer):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("decl_var", [ArrayType(type, size.getSource()), t.children[1]], t.meta)
-        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+        raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
     @v_args(tree = True)
     def gl_decl_array(self, t):
@@ -292,7 +292,7 @@ class TypeTransformer(Transformer):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("gl_decl_var", [attrs, ArrayType(type, size.getSource()), name], t.meta)
-        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+        raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
     @v_args(tree = True)
     def array_field_declaration(self, t):
@@ -302,7 +302,7 @@ class TypeTransformer(Transformer):
             if isinstance(size.getSource(), int):
                 if size.getIndirLevel() == 0 and size.getSource() > 0:
                     return Tree("field_declaration", [ArrayType(type, size.getSource()), name], t.meta)
-        raise SemanticError(Location.fromAny(t), "Array size must be a positive constant expression")
+        raise SemanticError(Position.fromAny(t), "Array size must be a positive constant expression")
 
 class CastTransformer(Transformer):
     @v_args(tree = True)
@@ -312,9 +312,9 @@ class CastTransformer(Transformer):
         if isinstance(v, Value) and v.getIndirLevel() == 0:
             s = v.getSource()
             if type.getSize() > 2:
-                raise SemanticError(Location.fromAny(t), f"{str(type)} has size > 2, cannot cast")
+                raise SemanticError(Position.fromAny(t), f"{str(type)} has size > 2, cannot cast")
             if v.getType().getSize() > 2:
-                raise SemanticError(Location.fromAny(t), f"{str(v.getType())} has size > 2, cannot cast")
+                raise SemanticError(Position.fromAny(t), f"{str(v.getType())} has size > 2, cannot cast")
             if type.getSize() > v.getType().getSize():
                 # widening cast
                 if isinstance(s, int):
@@ -329,6 +329,6 @@ class CastTransformer(Transformer):
                     s = s & 0xff
                 else:
                     s = "lo({})".format(s)
-            return Value(Location.fromAny(t), type, 0, s, True)
+            return Value(Position.fromAny(t), type, 0, s, True)
         else:
             return t

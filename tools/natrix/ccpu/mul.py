@@ -41,7 +41,7 @@ def _genMulVCWord(rs, v, c):
 
 def _genMulVC(resultLoc, v, c):
     if c == 0:
-        return Value(resultLoc.getLocation(), v.getType(), 0, 0, True), ""
+        return Value(resultLoc.getPosition(), v.getType(), 0, 0, True), ""
     elif c == 1:
         return v, ""
     t = resultLoc.getType()
@@ -52,7 +52,7 @@ def _genMulVC(resultLoc, v, c):
 
 def genMul(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
-        raise SemanticError(src1Loc.getLocation() - src2Loc.getLocation(), "multiplication types mismatch")
+        raise SemanticError(src1Loc.getPosition() - src2Loc.getPosition(), "multiplication types mismatch")
     t = src1Loc.getType()
     resultLoc = resultLoc.withType(t)
     assert(t.getSize() == 1 or t.getSize() == 2)

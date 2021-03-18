@@ -2,23 +2,23 @@ from value import Value
 from type import BoolType
 import operator
 import labelname
-from location import Location
+from position import Position
 from exceptions import SemanticError, NatrixNotImplementedError
 
 def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(resultLoc.getIndirLevel() == 1)
     t = src1Loc.getType()
     if not t.isInteger():
-        raise SemanticError(src1Loc.getLocation(), "Can only shift integers")
+        raise SemanticError(src1Loc.getPosition(), "Can only shift integers")
     if not src2Loc.getType().isInteger() or src2Loc.getType().getSign():
-        raise SemanticError(src2Loc.getLocation(), "Can only shift by unsigned integers")
+        raise SemanticError(src2Loc.getPosition(), "Can only shift by unsigned integers")
     resultLoc = resultLoc.withType(t)
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     assert(l1 == 0 or l1 == 1)
     assert(l2 == 0 or l2 == 1)
     if l1 == 0 and l2 == 0:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "Stop doing shit with pointers!")
+        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "Stop doing shit with pointers!")
     if l2 == 0:
         c = src2Loc.getSource()
         if isinstance(c, int):
@@ -30,7 +30,7 @@ def genShift(resultLoc, src1Loc, src2Loc, op, labelProvider):
                 else:
                     return _genSHRVarByConst(resultLoc, src1Loc, c)
         else:
-            raise NatrixNotImplementedError(Location.fromAny(resultLoc), "Stop doing shit with pointers!")
+            raise NatrixNotImplementedError(Position.fromAny(resultLoc), "Stop doing shit with pointers!")
     else:
         if op == 'shl':
             return _genSHLByVar(resultLoc, src1Loc, src2Loc, labelProvider)
@@ -447,7 +447,7 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
             '''.format(rs)
     else:
         if n >= 8 * size:
-            return Value(srcLoc.getLocation(), resultLoc.getType(), 0, 0, True), ''
+            return Value(srcLoc.getPosition(), resultLoc.getType(), 0, 0, True), ''
         elif resultLoc == srcLoc:
             return _genSHRVarByConstLarge(resultLoc, srcLoc, n)
         else:
@@ -552,7 +552,7 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 st a
             '''.format(rs)
     else:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SAR large numbers")
+        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "SAR large numbers")
     return resultLoc, result
 
 def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
@@ -695,7 +695,7 @@ def _genShiftLargeCall(resultLoc, src1Loc, src2Loc, label):
     s1 = src1Loc.getSource()
     rs = resultLoc.getSource()
     if src2Loc.getType().getSize() == 2:
-        raise NatrixNotImplementedError(Location.fromAny(src2Loc), "Shift large by word")
+        raise NatrixNotImplementedError(Position.fromAny(src2Loc), "Shift large by word")
     result += f'''
         ldi pl, lo({s2})
         ldi ph, hi({s2})
@@ -762,7 +762,7 @@ def _genSHLByVar(resultLoc, src1Loc, src2Loc, labelProvider):
     elif size == 4:
         return _genShiftLargeCall(resultLoc, src1Loc, src2Loc, "__cc_asl_dword")
     else:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHL large by var")
+        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "SHL large by var")
 
 def _genSHRByVar(resultLoc, src1Loc, src2Loc, labelProvider):
     size = src1Loc.getType().getSize()
@@ -773,7 +773,7 @@ def _genSHRByVar(resultLoc, src1Loc, src2Loc, labelProvider):
     elif size == 4:
         return _genShiftLargeCall(resultLoc, src1Loc, src2Loc, "__cc_lsr_dword")
     else:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SHR large by var")
+        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "SHR large by var")
 
 def _genSARByVar(resultLoc, src1Loc, src2Loc, labelProvider):
     size = src1Loc.getType().getSize()
@@ -782,4 +782,4 @@ def _genSARByVar(resultLoc, src1Loc, src2Loc, labelProvider):
     elif size == 2:
         return _genShiftWordCall(resultLoc, src1Loc, src2Loc, "__cc_asr")
     else:
-        raise NatrixNotImplementedError(Location.fromAny(resultLoc), "SAR large by var")
+        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "SAR large by var")

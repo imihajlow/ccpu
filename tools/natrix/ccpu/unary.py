@@ -9,14 +9,14 @@ def genDeref(resultLoc, srcLoc, offset=0):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType().deref())
     if srcLoc.getType().deref() != resultLoc.getType() and not srcLoc.getType().deref().isStruct():
-        raise SemanticError(srcLoc.getLocation(),
+        raise SemanticError(srcLoc.getPosition(),
             "Incompatible types for deref: {} and {}".format(srcLoc.getType().deref(), resultLoc.getType()))
     assert(srcLoc.getIndirLevel() <= 1)
 
     t = resultLoc.getType()
 
     if srcLoc.getIndirLevel() == 0:
-        return Value.withOffset(srcLoc.getLocation(), resultLoc.getType(), 1, srcLoc.getSource(), True, offset), ""
+        return Value.withOffset(srcLoc.getPosition(), resultLoc.getType(), 1, srcLoc.getSource(), True, offset), ""
 
     result = '; {} = deref {} + {}\n'.format(resultLoc, srcLoc, offset)
     result += '; result is {}aligned, srcLoc is {}aligned'.format("" if resultLoc.isAligned() else "not ", "" if srcLoc.isAligned() else "not ")
@@ -70,7 +70,7 @@ def genBNot(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getPosition(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
     t = srcLoc.getType()
@@ -82,7 +82,7 @@ def genBNot(resultLoc, srcLoc):
             c = ~c
         else:
             c = '~({})'.format(c) # Warning
-        return Value(srcLoc.getLocation(), t, 0, c, True), result
+        return Value(srcLoc.getPosition(), t, 0, c, True), result
     # var
     s = srcLoc.getSource()
     rs = resultLoc.getSource()
@@ -124,9 +124,9 @@ def genLNot(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getPosition(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if srcLoc.getType().getSize() != 1 or srcLoc.getType().getSign():
-        raise SemanticError(srcLoc.getLocation(), "Argument for `!' should be of type u8")
+        raise SemanticError(srcLoc.getPosition(), "Argument for `!' should be of type u8")
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
@@ -138,7 +138,7 @@ def genLNot(resultLoc, srcLoc):
             c = int(not bool(c))
         else:
             c = 'int(not bool({}))'.format(c) # Warning
-        return Value(srcLoc.getLocation(), BoolType(), 0, c, True), result
+        return Value(srcLoc.getPosition(), BoolType(), 0, c, True), result
     else:
         # var
         result += '''
@@ -160,15 +160,15 @@ def genNeg(resultLoc, srcLoc):
     if resultLoc.getType().isUnknown():
         resultLoc = resultLoc.removeUnknown(srcLoc.getType())
     if resultLoc.getType() != srcLoc.getType():
-        raise SemanticError(srcLoc.getLocation(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
+        raise SemanticError(srcLoc.getPosition(), "Incompatible types: {} and {}".format(resultLoc.getType(), srcLoc.getType()))
     if not srcLoc.getType().getSign():
-        raise SemanticError(srcLoc.getLocation(), "Argument for unary `-' should be of a signed type")
+        raise SemanticError(srcLoc.getPosition(), "Argument for unary `-' should be of a signed type")
     assert(resultLoc.getIndirLevel() == 1)
     assert(srcLoc.getIndirLevel() == 1 or srcLoc.getIndirLevel() == 0)
 
     t = srcLoc.getType()
     if t.getSize() > 2:
-        raise NatrixNotImplementedError(srcLoc.getLocation(), "Negation of ints wider than s16 is not implemented")
+        raise NatrixNotImplementedError(srcLoc.getPosition(), "Negation of ints wider than s16 is not implemented")
     result = '; {} = -{}\n'.format(resultLoc, srcLoc)
     if srcLoc.getIndirLevel() == 0:
         # constant
@@ -177,7 +177,7 @@ def genNeg(resultLoc, srcLoc):
             c = -c & (0xff if t.getSize() == 1 else 0xffff)
         else:
             c = '-({})'.format(c) # Warning
-        return Value(srcLoc.getLocation(), t, 0, c, True), result
+        return Value(srcLoc.getPosition(), t, 0, c, True), result
     else:
         # var
         result += '''

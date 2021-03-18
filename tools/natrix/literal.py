@@ -1,6 +1,6 @@
 from lark import Transformer, v_args, Tree
 from exceptions import LiteralError
-from location import Location
+from position import Position
 from type import IntType, PtrType
 from value import Value
 from function import unescapeString
@@ -20,10 +20,10 @@ class LiteralTransformer(Transformer):
         self._index += 1
         return "__lit_{}".format(i)
 
-    def _addLiteral(self, loc, t, v):
+    def _addLiteral(self, pos, t, v):
         label = self._allocLiteralLabel()
         self._new_literals += [(label, t, v)]
-        return Value(loc, PtrType(t), 0, label, True)
+        return Value(pos, PtrType(t), 0, label, True)
 
     @v_args(tree = True)
     def function_definition(self, t):
@@ -37,16 +37,16 @@ class LiteralTransformer(Transformer):
 
     @v_args(inline = True)
     def string_literal(self, lt):
-        loc = Location.fromAny(lt)
+        pos = Position.fromAny(lt)
         try:
             s = unescapeString(str(lt))
         except ValueError as e:
-            raise LiteralError(loc, str(e))
+            raise LiteralError(pos, str(e))
         result = []
         for c in s:
             result += [ord(c)]
         result += [0]
-        return self._addLiteral(loc, IntType(False, 1), result)
+        return self._addLiteral(pos, IntType(False, 1), result)
 
     @v_args(tree = True)
     def array_literal(self, t):
@@ -54,14 +54,14 @@ class LiteralTransformer(Transformer):
         type = None
         for v in t.children:
             if not isinstance(v, Value) or v.getIndirLevel() != 0:
-                raise LiteralError(Location.fromAny(v), "only constant expressions are allowed in array literals")
+                raise LiteralError(Position.fromAny(v), "only constant expressions are allowed in array literals")
             if type is None:
                 type = v.getType()
             if type != v.getType():
-                raise LiteralError(Location.fromAny(v), "type mismatch with previous members of an array literal ({} expected)".format(str(type)))
+                raise LiteralError(Position.fromAny(v), "type mismatch with previous members of an array literal ({} expected)".format(str(type)))
             s = v.getSource()
             if not isinstance(s, int):
-                raise LiteralError(Location.fromAny(v), "variable references aren't allowed in array literals")
+                raise LiteralError(Position.fromAny(v), "variable references aren't allowed in array literals")
             result += [v.getSource()]
-        return self._addLiteral(Location.fromAny(t), type, result)
+        return self._addLiteral(Position.fromAny(t), type, result)
 

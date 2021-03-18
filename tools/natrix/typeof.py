@@ -3,7 +3,7 @@ import operator
 from lark import Lark, Transformer, v_args, Tree
 from value import Value
 from type import IntType, Type, BoolType, PtrType
-from location import Location
+from position import Position
 from literal import unescapeString
 import exceptions
 
@@ -22,14 +22,14 @@ def _addsub(t):
         if t2.isInteger():
             return t1
         else:
-            raise exceptions.SemanticError(Location.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
+            raise exceptions.SemanticError(Position.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
     elif t1.isInteger():
         if t2 == t1:
             return t1
         else:
-            raise exceptions.SemanticError(Location.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
+            raise exceptions.SemanticError(Position.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
     else:
-        raise exceptions.SemanticError(Location.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
+        raise exceptions.SemanticError(Position.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
 
 def _arithm(t):
     t1 = _typeof(t.children[0])
@@ -38,9 +38,9 @@ def _arithm(t):
         if t2 == t1:
             return t1
         else:
-            raise exceptions.SemanticError(Location.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
+            raise exceptions.SemanticError(Position.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
     else:
-        raise exceptions.SemanticError(Location.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
+        raise exceptions.SemanticError(Position.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
 
 def _cmp(t):
     t1 = _typeof(t.children[0])
@@ -49,9 +49,9 @@ def _cmp(t):
         if t2 == t1:
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
+            raise exceptions.SemanticError(Position.fromAny(t), f"Incompatible types: {str(t1)} and {str(t2)}")
     else:
-        raise exceptions.SemanticError(Location.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
+        raise exceptions.SemanticError(Position.fromAny(t), f"Wrong arithmetic type: {str(t1)}")
 
 def _shift(t):
     t1 = _typeof(t.children[0])
@@ -59,7 +59,7 @@ def _shift(t):
     if t1.isInteger() and t2.isInteger():
         return t1
     else:
-        raise exceptions.SemanticError(Location.fromAny(t), f"Wrong types for bit shift: {str(t1)} and {str(t2)}")
+        raise exceptions.SemanticError(Position.fromAny(t), f"Wrong types for bit shift: {str(t1)} and {str(t2)}")
 
 @v_args(tree = True)
 class TypeofTransformer(Transformer):
@@ -104,14 +104,14 @@ class TypeofTransformer(Transformer):
         if t.isInteger():
             return t
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Wrong type for negation: {str(t)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Wrong type for negation: {str(t)}")
 
     def lnot(self, tree):
         t = _typeof(tree.children[0])
         if t.isBool():
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Wrong type for logical not: {str(t)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Wrong type for logical not: {str(t)}")
 
     def lor(self, tree):
         t0 = _typeof(tree.children[0])
@@ -119,7 +119,7 @@ class TypeofTransformer(Transformer):
         if t0.isBool() and t1.isBool():
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Wrong types for logical or: {str(t0)}, {str(t1)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Wrong types for logical or: {str(t0)}, {str(t1)}")
 
     def land(self, tree):
         t0 = _typeof(tree.children[0])
@@ -127,14 +127,14 @@ class TypeofTransformer(Transformer):
         if t0.isBool() and t1.isBool():
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Wrong types for logical and: {str(t0)}, {str(t1)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Wrong types for logical and: {str(t0)}, {str(t1)}")
 
     def bnot(self, tree):
         t = _typeof(tree.children[0])
         if t.isInteger():
             return t
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Wrong type for bitwise not: {str(t)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Wrong type for bitwise not: {str(t)}")
 
     def lt(self, tree):
         return _cmp(tree)
@@ -154,7 +154,7 @@ class TypeofTransformer(Transformer):
         if t0 == t1:
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Incompatible types: {str(t0)}, {str(t1)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Incompatible types: {str(t0)}, {str(t1)}")
 
     def ne(self, tree):
         t0 = _typeof(tree.children[0])
@@ -162,18 +162,18 @@ class TypeofTransformer(Transformer):
         if t0 == t1:
             return BoolType()
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Incompatible types: {str(t0)}, {str(t1)}")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Incompatible types: {str(t0)}, {str(t1)}")
 
     def arrow(self, tree):
         try:
             ts = _typeof(tree.children[0])
             return ts.deref().getFieldType(tree.children[1])
         except LookupError as e:
-            raise exceptions.SemanticError(Location.fromAny(tree), str(e))
+            raise exceptions.SemanticError(Position.fromAny(tree), str(e))
 
     def p_arrow(self, tree):
         try:
             ts = _typeof(tree.children[0])
             return PtrType(ts.deref().getFieldType(tree.children[1]))
         except LookupError as e:
-            raise exceptions.SemanticError(Location.fromAny(tree), str(e))
+            raise exceptions.SemanticError(Position.fromAny(tree), str(e))

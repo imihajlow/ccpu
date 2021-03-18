@@ -4,7 +4,7 @@ from lark import Lark, Transformer, v_args, Tree
 from lark.visitors import VisitError
 from value import Value
 from type import IntType
-from location import Location
+from position import Position
 from literal import unescapeString
 from typeof import TypeofTransformer
 import exceptions
@@ -21,9 +21,9 @@ def signExpand(t, value):
     else:
         return value
 
-def _const(location, t, value):
+def _const(position, t, value):
     mask = ~(~0 << (t.getSize() * 8))
-    return Value(location, t, 0, int(value) & mask, True)
+    return Value(position, t, 0, int(value) & mask, True)
 
 def sameTypeChecker(a, b):
     return a.getType() == b.getType()
@@ -44,9 +44,9 @@ def binary(tree, op, overrideType=None, typeChecker=sameTypeChecker):
                 newType = overrideType
             sa = signExpand(a.getType(), a.getSource())
             sb = signExpand(b.getType(), b.getSource())
-            return _const(Location.fromAny(tree), newType, op(sa, sb))
+            return _const(Position.fromAny(tree), newType, op(sa, sb))
         else:
-            raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
+            raise exceptions.SemanticError(Position.fromAny(tree), "Incompatible types in an expression")
 
 def addsub(tree, op, pattern):
     a, b = tree.children
@@ -56,35 +56,35 @@ def addsub(tree, op, pattern):
         return tree
     if a.getType().isPointer():
         if not b.getType().isInteger():
-            raise exceptions.SemanticError(Location.fromAny(tree), f"Cannot add {str(b.getType())} to a pointer")
+            raise exceptions.SemanticError(Position.fromAny(tree), f"Cannot add {str(b.getType())} to a pointer")
     else:
         if a.getType() != b.getType():
-            raise exceptions.SemanticError(Location.fromAny(tree), "Incompatible types in an expression")
+            raise exceptions.SemanticError(Position.fromAny(tree), "Incompatible types in an expression")
     if not a.isConstNumber() or not b.isConstNumber():
         if not a.getType().isPointer():
             if a.getType().getSign():
                 print(str(a))
                 print(str(b))
-                raise exceptions.SemanticError(Location.fromAny(tree), "Signed label? WTF is that? 1")
-            return Value(Location.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), b.getSource()), True)
+                raise exceptions.SemanticError(Position.fromAny(tree), "Signed label? WTF is that? 1")
+            return Value(Position.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), b.getSource()), True)
         else:
             if b.isConstNumber() or not b.getType().getSign():
                 sb = signExpand(b.getType(), b.getSource())
                 memberSize = a.getType().deref().getReserveSize()
-                return Value(Location.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), sb * memberSize), True)
+                return Value(Position.fromAny(tree), a.getType(), 0, pattern.format(a.getSource(), sb * memberSize), True)
             else:
-                raise exceptions.SemanticError(Location.fromAny(tree), "Signed label? WTF is that? 2")
+                raise exceptions.SemanticError(Position.fromAny(tree), "Signed label? WTF is that? 2")
     elif not a.getType().isPointer():
         newType = a.getType()
         sa = signExpand(a.getType(), a.getSource())
         sb = signExpand(b.getType(), b.getSource())
-        return _const(Location.fromAny(tree), newType, op(sa, sb))
+        return _const(Position.fromAny(tree), newType, op(sa, sb))
     else:
         newType = a.getType()
         memberSize = a.getType().deref().getReserveSize()
         sa = signExpand(a.getType(), a.getSource())
         sb = signExpand(b.getType(), b.getSource())
-        return _const(Location.fromAny(tree), newType, op(sa, sb * memberSize))
+        return _const(Position.fromAny(tree), newType, op(sa, sb * memberSize))
 
 def unary(tree, op):
     a = tree.children[0]
@@ -92,7 +92,7 @@ def unary(tree, op):
         return tree
     else:
         sa = signExpand(a.getType(), a.getSource())
-        return _const(Location.fromAny(tree), a.getType(), op(sa))
+        return _const(Position.fromAny(tree), a.getType(), op(sa))
 
 def cast(v, oldType, newType):
     if oldType.getSize() < newType.getSize() and oldType.getSign() and isinstance(v, int):
@@ -126,7 +126,7 @@ class SizeofExprTransformer(Transformer):
                 raise e.orig_exc
         else:
             type = child.getType()
-        return _const(Location.fromAny(t), IntType(False, 2), type.getReserveSize())
+        return _const(Position.fromAny(t), IntType(False, 2), type.getReserveSize())
 
 @v_args(tree = True)
 class ConstTransformer(Transformer):
@@ -143,7 +143,7 @@ class ConstTransformer(Transformer):
         m = self._intRe[base].match(value)
         n = int(m.group(1) if len(m.group(1)) > 0 else '0', base)
         suffix = m.group(2)
-        return _const(Location.fromAny(t), _parseTypeSuffix(suffix), n)
+        return _const(Position.fromAny(t), _parseTypeSuffix(suffix), n)
 
     def n10(self, t):
         return self._constFromLiteral(t, 10)
@@ -158,7 +158,7 @@ class ConstTransformer(Transformer):
         return self._constFromLiteral(t, 2)
 
     def char(self, t):
-        l = Location.fromAny(t)
+        l = Position.fromAny(t)
         try:
             value = str(t.children[0])
             return _const(l, IntType(False, 1), ord(unescapeString(value, "'", False)[0]))
@@ -193,7 +193,7 @@ class ConstTransformer(Transformer):
         elif not a.isConstNumber():
             return tree
         else:
-            return _const(Location.fromAny(tree), IntType(False, 1), 1 if a.getSource() == 0 else 0)
+            return _const(Position.fromAny(tree), IntType(False, 1), 1 if a.getSource() == 0 else 0)
 
     def lor(self, tree):
         a, b = tree.children
@@ -201,7 +201,7 @@ class ConstTransformer(Transformer):
             return tree
         elif a.isConstNumber():
             if bool(a.getSource()):
-                return _const(Location.fromAny(tree), IntType(False, 1), 1)
+                return _const(Position.fromAny(tree), IntType(False, 1), 1)
             else:
                 return b
         else:
@@ -215,7 +215,7 @@ class ConstTransformer(Transformer):
             if bool(a.getSource()):
                 return b
             else:
-                return _const(Location.fromAny(tree), IntType(False, 1), 0)
+                return _const(Position.fromAny(tree), IntType(False, 1), 0)
         else:
             return tree
 
@@ -255,11 +255,11 @@ class ConstTransformer(Transformer):
         t, v = tree.children
         if isinstance(v, Tree) or not v.isConstNumber():
             return tree
-        return _const(Location.fromAny(tree), t, cast(v.getSource(), v.getType(), t))
+        return _const(Position.fromAny(tree), t, cast(v.getSource(), v.getType(), t))
 
     def sizeof_type(self, t):
         if self._transformCast:
             type = t.children[0]
-            return _const(Location.fromAny(t), IntType(False, 2), type.getReserveSize())
+            return _const(Position.fromAny(t), IntType(False, 2), type.getReserveSize())
         else:
             return t
