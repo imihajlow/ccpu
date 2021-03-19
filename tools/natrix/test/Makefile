@@ -1,7 +1,7 @@
 .PHONY: test test.o sandbox.na
 
 test: test.bin
-	../../sim.py test.bin test.map -c 'protect_rom 0' -c 'b fail' -c 'b success' -c 'r' -c 'p w fail_arg0'
+	../../sim/sim.py test.bin test.map -c 'protect_rom 0' -c 'b fail' -c 'b success' -c 'r' -c 'p w fail_arg0'
 	rm -f test.o
 	coverage html
 
