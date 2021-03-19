@@ -13,11 +13,69 @@
 #define TYPING_COLOR COLOR(COLOR_GREEN, COLOR_BLACK)
 #define STATUS_COLOR COLOR(COLOR_LIGHT_RED, COLOR_BLACK)
 
+#define MAX_LINES 480
+
+struct Line {
+    u8 len;
+    struct Line *prev;
+    struct Line *next;
+    u8 data[59];
+};
+
+struct Line line_pool[MAX_LINES];
+
+struct Line *head;
+
 section "sys_bss"
-u8 buf[64];
+u8 buf[59];
 
 section "sys_bss"
 u8 filename_buf[40];
+
+u8 load(u8 *filename) {
+    u8 fd = open(filename);
+    if (fd == FAT_BAD_DESC) {
+        log_string("Can't open");
+        log_u8(last_error);
+        return 0u8;
+    }
+    head = (struct Line*)line_pool;
+    struct Line *cur_line = (struct Line*)line_pool;
+    cur_line->len = 0u8;
+    cur_line->prev = (struct Line*)0;
+    while (1u8) {
+        u16 r16 = read(fd, (u8*)buf, sizeof(cur_line->data));
+        u8 r = (u8)r16;
+        u8 *pc = (u8*)buf;
+        u8 i = 0u8;
+        while (r) {
+            u8 c = *pc;
+            cur_line->data[i] = c;
+            pc += 1u8;
+            r -= 1u8;
+            i += 1u8;
+            if (c == '\n' || i == (u8)sizeof(cur_line->data)) {
+                cur_line->len = i;
+                struct Line *next_line = cur_line + 1u8;
+                if (next_line == (struct Line *)line_pool + MAX_LINES) {
+                    log_string("Out of lines");
+                    close(fd);
+                    return 0u8;
+                }
+                cur_line->next = next_line;
+                cur_line = next_line;
+            }
+        }
+        if (r != sizeof(cur_line->data)) {
+            if (last_error == FAT_EOF) {
+                break;
+            } else {
+
+            }
+        }
+    }
+    close(fd);
+}
 
 export u8 main() {
     ps2_init();

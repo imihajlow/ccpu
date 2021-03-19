@@ -276,7 +276,7 @@ export u8 main() {
                     }
                     if (k == PS2_KEY_F3) {
                         if (!(filenames[cursor_file_index].attrs & FAT_FILE_ATTR_DIRECTORY)) {
-                            // print_file((u8*)filenames[cursor_file_index].name);
+                            print_file((u8*)filenames[cursor_file_index].name);
                             break;
                         }
                     } else if (k == PS2_KEY_F4) {
