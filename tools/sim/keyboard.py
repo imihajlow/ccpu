@@ -2,9 +2,9 @@ from memory import MemoryModule
 
 matrix = [
     ['f1', 'f2', 'hash', 'star'],
-    ['7', '8', '9', 'up'],
+    ['1', '2', '3', 'up'],
     ['4', '5', '6', 'down'],
-    ['1', '2', '3', 'escape'],
+    ['7', '8', '9', 'escape'],
     ['left', '0', 'right', 'enter']
 ]
 class Keyboard(MemoryModule):

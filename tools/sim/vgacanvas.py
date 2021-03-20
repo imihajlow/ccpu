@@ -44,9 +44,12 @@ class VgaCanvas(IVgaCanvas):
                 self._glyphs.append(Glyph(d))
 
     def renderChar(self, col, row, char, color):
-        x = col * 8
-        y = row * 16
-        self._glyphs[char].render(self._img, x, y, color)
+        if col < 80 and row < 30:
+            x = col * 8
+            y = row * 16
+            self._glyphs[char].render(self._img, x, y, color)
+        else:
+            print(f"VGA index out of range: ({col}, {row})")
 
     def update(self):
         phi = ImageTk.PhotoImage(self._img)
