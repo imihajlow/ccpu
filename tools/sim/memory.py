@@ -17,14 +17,19 @@ class MemoryModule(ABC):
     def get(self, address):
         return 0
 
+CR_ADDRESS = 0xff02
+
 class Memory:
     def __init__(self, rom):
         self.memory = rom + [0] * (65536 - len(rom))
+        self.loRam = [0] * 32768
         self.verbose = False
         self.watches = []
         self.reachedWatch = None
         self.protectRom = True
         self.emulateIo = True
+        self.emulateCr = True
+        self.cr = 0
         self.modules = []
 
     def registerModule(self, module):
@@ -40,13 +45,25 @@ class Memory:
         for module in self.modules:
             if module.isAddressHandled(address):
                 module.set(address, value)
-        if address < 0x8000 and self.protectRom:
+        if address < 0x8000 and self.protectRom and not (self.emulateCr and bool(self.cr & 1)):
             return
         if self.verbose:
             print("[0x{:04X}] <- 0x{:02X}".format(address, value))
-        self.memory[address] = value
         if watch:
             self.__checkWatch(address, WATCH_WRITE)
+        if self.emulateCr:
+            if address == CR_ADDRESS:
+                print(f"CR <- 0x{value:02X}")
+                self.cr = value
+                return
+            if address >= 0xa000:
+                bit = 3 + (address >> 12) - 0xa
+                if not bool(self.cr & (1 << bit)):
+                    return
+            if address < 0x8000 and bool(self.cr & 1):
+                self.loRam[address] = value
+                return
+        self.memory[address] = value
 
     def get(self, address):
         self.__checkWatch(address, WATCH_READ)
@@ -55,6 +72,8 @@ class Memory:
                 return module.get(address)
         if address >= 0xf000 and self.emulateIo:
             return 0x00
+        if self.emulateCr and address < 0x8000 and bool(self.cr & 1):
+            return self.loRam[address]
         return self.memory[address]
 
     def printValue(self, address, fmt, count):
