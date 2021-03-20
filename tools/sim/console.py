@@ -15,11 +15,9 @@ def update():
     root.after(200, update)
 
 def keydown(e):
-    print(f"down {e.keysym}")
     ps2client.press(e.keysym)
 
 def keyup(e):
-    print(f"up {e.keysym}")
     ps2client.release(e.keysym)
 
 if __name__ == '__main__':
