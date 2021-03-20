@@ -23,7 +23,6 @@ class ConnectionHandler(socketserver.StreamRequestHandler, MemoryModule):
             else:
                 b,e = [int(x, 0) for x in ends]
             self._ranges.append((b,e))
-        print(f"ranges: {self._ranges}")
         self._mem.registerModule(self)
 
     def isAddressHandled(self, address):
@@ -40,33 +39,32 @@ class ConnectionHandler(socketserver.StreamRequestHandler, MemoryModule):
         return self._rspqueue.get()
 
     def handle(self):
-        print("new connection")
-        self._factory.register(self)
-        l = self.rfile.readline().strip()
-        l = l.decode("utf-8")
-        self._register(l)
-        while True:
-            t = self._cmdqueue.get()
-            action = t[0]
-            params = t[1:]
-            if action == 'set':
-                addr, value = params
-                self.wfile.write(f"set {addr} {value}\n".encode('utf-8'))
-                self.wfile.flush()
-            elif action == 'get':
-                addr = params[0]
-                self.wfile.write(f"get {addr}\n".encode('utf-8'))
-                self.wfile.flush()
-                l = self.rfile.readline().strip()
-                self._rspqueue.put(int(l, 0), block=False)
-            elif action == 'stop':
-                return
-
-    def finish(self):
-        print("finish")
+        try:
+            print("new connection")
+            self._factory.register(self)
+            l = self.rfile.readline().strip()
+            l = l.decode("utf-8")
+            self._register(l)
+            while True:
+                t = self._cmdqueue.get()
+                action = t[0]
+                params = t[1:]
+                if action == 'set':
+                    addr, value = params
+                    self.wfile.write(f"set {addr} {value}\n".encode('utf-8'))
+                    self.wfile.flush()
+                elif action == 'get':
+                    addr = params[0]
+                    self.wfile.write(f"get {addr}\n".encode('utf-8'))
+                    self.wfile.flush()
+                    l = self.rfile.readline().strip()
+                    self._rspqueue.put(int(l, 0), block=False)
+                elif action == 'stop':
+                    return
+        except Exception as e:
+            print(e)
 
     def stop_(self):
-        print(f"stopping {self}")
         self._cmdqueue.put(("stop",""))
 
 class ConnectionFactory:
@@ -81,10 +79,8 @@ class ConnectionFactory:
         self._handlers.append(h)
 
     def stop(self):
-        print(f"stopping factory {len(self._handlers)}, {self}")
         for h in self._handlers:
             h.stop_()
-        print("stopped")
 
 class Server(threading.Thread):
     def __init__(self, port, memory):
