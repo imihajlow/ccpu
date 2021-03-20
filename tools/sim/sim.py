@@ -6,7 +6,6 @@ import readline
 from machine import Machine
 from memory import Memory
 from keyboard import Keyboard
-from lcd16x2 import Display
 from vga import VgaModule
 from server import Server
 
@@ -39,12 +38,12 @@ def lookupAddress(s, labels):
 def loop(program, labels, initialCommand, aluRevision, port):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
-    keyboard = Keyboard()
-    display = Display()
     vgaMod = VgaModule()
-    memory = Memory(program, keyboard, display)
+    memory = Memory(program)
     memory.setVerbose(False)
+    keyboard = Keyboard()
     memory.registerModule(vgaMod)
+    memory.registerModule(keyboard)
     server = Server(port, memory)
     server.start()
     m = Machine(memory, aluRevision)
@@ -83,8 +82,6 @@ def loop(program, labels, initialCommand, aluRevision, port):
             reason, number = m.run(until)
             newState = True
             print("{} {}".format(reason, number))
-            display.print()
-            display.resetText()
         elif cmd == 'b' or cmd == 'break':
             try:
                 address = m.ip
@@ -148,16 +145,12 @@ def loop(program, labels, initialCommand, aluRevision, port):
                 memory.protectRom = value
             print("ROM write protection is {}".format("ON" if memory.protectRom else "OFF"))
         elif cmd == 'press':
-            if len(tokens) == 3:
-                row = int(tokens[1])
-                col = int(tokens[2])
-                keyboard.press(row, col)
-                print("Pressed {},{}".format(row, col))
+            if len(tokens) == 2:
+                keyboard.press(tokens[1])
             elif len(tokens) == 1:
                 keyboard.release()
-                print("Released")
             else:
-                print("Either two args or no args")
+                print("Either one arg or no args")
         elif cmd == 'mem_verbose':
             if len(tokens) != 2:
                 print("one arg is required")

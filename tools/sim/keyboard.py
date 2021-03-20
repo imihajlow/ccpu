@@ -1,14 +1,24 @@
-#!/usr/bin/env python3
+from memory import MemoryModule
 
-class Keyboard:
+matrix = [
+    ['f1', 'f2', 'hash', 'star'],
+    ['7', '8', '9', 'up'],
+    ['4', '5', '6', 'down'],
+    ['1', '2', '3', 'escape'],
+    ['left', '0', 'right', 'enter']
+]
+class Keyboard(MemoryModule):
     def __init__(self):
         self.value = 0x00
         self.pressed = None
 
-    def write(self, v):
+    def isAddressHandled(self, a):
+        return a == 0xff00
+
+    def set(self, a, v):
         self.value = v
 
-    def read(self):
+    def get(self, a):
         if self.pressed is None:
             return 0xff
         else:
@@ -18,8 +28,14 @@ class Keyboard:
             else:
                 return ~(1 << col) & 0xff
 
-    def press(self, row, col):
-        self.pressed = row, col
+    def press(self, key):
+        for row in range(5):
+            for col in range(4):
+                if key == matrix[4 - row][3 - col]:
+                    self.pressed = row, col
+                    print(f"pressed {row}, {col}")
+                    return
+        print(f"Wrong key: {key}")
 
     def release(self):
         self.pressed = None
