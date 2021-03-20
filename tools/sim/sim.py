@@ -8,6 +8,7 @@ from memory import Memory
 from keyboard import Keyboard
 from lcd16x2 import Display
 from vga import VgaModule
+from server import Server
 
 def load(file):
     ba = file.read()
@@ -35,7 +36,7 @@ def lookupAddress(s, labels):
                 return labels[l]
         raise
 
-def loop(program, labels, initialCommand, aluRevision):
+def loop(program, labels, initialCommand, aluRevision, port):
     rlabels = {labels[k]: k for k in labels}
     labelAddresses = sorted(rlabels.keys())
     keyboard = Keyboard()
@@ -44,6 +45,8 @@ def loop(program, labels, initialCommand, aluRevision):
     memory = Memory(program, keyboard, display)
     memory.setVerbose(False)
     memory.registerModule(vgaMod)
+    server = Server(port, memory)
+    server.start()
     m = Machine(memory, aluRevision)
     newState = True
     while True:
@@ -66,6 +69,7 @@ def loop(program, labels, initialCommand, aluRevision):
             try:
                 line = input("> ")
             except EOFError:
+                server.stop()
                 return
         tokens = line.split(' ')
         cmd = tokens[0]
@@ -170,12 +174,13 @@ if __name__ == "__main__":
     parser.add_argument('file', type=argparse.FileType("rb"), help='program file')
     parser.add_argument('mapfile', type=argparse.FileType("r"), help='label map file')
     parser.add_argument('-a', '--alu-revision', type=int, default=2, choices=[1,2], help='ALU revision (default = 2)')
+    parser.add_argument('-p', '--port', type=int, default=7002, help='TCP listen port')
     args = parser.parse_args()
 
     # try:
     program = load(args.file)
     labels = loadLabels(args.mapfile)
-    loop(program, labels, args.c, args.alu_revision)
+    loop(program, labels, args.c, args.alu_revision, args.port)
     # except Exception as e:
     #     print(e)
     #     sys.exit(1)

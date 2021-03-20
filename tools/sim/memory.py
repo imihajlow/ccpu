@@ -32,6 +32,9 @@ class Memory:
     def registerModule(self, module):
         self.modules += [module]
 
+    def unregisterModule(self, module):
+        self.modules.remove(module)
+
     def setVerbose(self, verbose):
         self.verbose = verbose
 
