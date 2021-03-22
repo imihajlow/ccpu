@@ -1,5 +1,6 @@
-
 use std::fmt;
+use std::ops::Deref;
+use std::sync::atomic::{AtomicBool, Ordering};
 use crate::memory;
 use crate::instruction::Instruction;
 use crate::instruction::AluOperation;
@@ -214,8 +215,10 @@ impl State {
         self.step_impl(mem, false)
     }
 
-    pub fn until<M: memory::Memory>(&mut self, mem: &mut M, until_addr: u16) -> Result<StepResult, memory::MemoryError> {
-        while self.ip != until_addr {
+    pub fn until<M, C>(&mut self, mem: &mut M, until_addr: Option<u16>, ctrlc_pressed: &C) -> Result<StepResult, memory::MemoryError>
+    where M: memory::Memory,
+          C: Deref<Target = AtomicBool> {
+        while !ctrlc_pressed.load(Ordering::SeqCst) && until_addr != Some(self.ip) {
             match self.step_impl(mem, true) {
                 Ok(StepResult::Ok) => {},
                 Ok(x) => return Ok(x),

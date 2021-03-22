@@ -7,12 +7,58 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3f8ebf5827e4ac4fd5946560e6a99776ea73b596d80898f357007317a7141e47"
 
 [[package]]
+name = "bitflags"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
+
+[[package]]
+name = "cc"
+version = "1.0.67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
+
+[[package]]
+name = "cfg-if"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "ctrlc"
+version = "3.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c15b8ec3b5755a188c141c1f6a98e76de31b936209bf066b647979e2a84764a9"
+dependencies = [
+ "nix",
+ "winapi",
+]
+
+[[package]]
 name = "heck"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87cbf45460356b7deeb5e3415b5563308c0a9b057c85e12b06ad551f98d0a6ac"
 dependencies = [
  "unicode-segmentation",
+]
+
+[[package]]
+name = "libc"
+version = "0.2.90"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba4aede83fc3617411dc6993bc8c70919750c1c257c6ca6a502aed6e0e2394ae"
+
+[[package]]
+name = "nix"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa9b4819da1bc61c0ea48b63b7bc8604064dd43013e7cc325df098d49cd7c18a"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if",
+ "libc",
 ]
 
 [[package]]
@@ -38,6 +84,7 @@ name = "rsim"
 version = "0.1.0"
 dependencies = [
  "argparse",
+ "ctrlc",
  "strum",
  "strum_macros",
 ]
@@ -82,3 +129,25 @@ name = "unicode-xid"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f7fe0bb3479651439c9112f72b6c505038574c9fbb575ed1bf3b797fa39dd564"
+
+[[package]]
+name = "winapi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"
+dependencies = [
+ "winapi-i686-pc-windows-gnu",
+ "winapi-x86_64-pc-windows-gnu",
+]
+
+[[package]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
+
+[[package]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
