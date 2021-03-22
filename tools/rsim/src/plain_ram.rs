@@ -12,7 +12,6 @@ impl Memory for PlainRam {
     }
 
     fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryError> {
-        println!("{:04X} := {:02X}", addr, value);
         self.contents[addr as usize] = value;
         Ok(())
     }

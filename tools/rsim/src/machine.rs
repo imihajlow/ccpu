@@ -133,7 +133,7 @@ fn gen_ovf(a: u8, b: u8, r: u8, is_sum: bool) -> bool {
     };
     let r_bit = r & 0x80 != 0;
     if a_bit == b_bit {
-        return a_bit == r_bit;
+        return a_bit != r_bit;
     } else {
         return false;
     }
@@ -163,7 +163,10 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         DEC => arg1.overflowing_sub(1),
         NEG => ((!arg1).wrapping_add(1), false),
         NOT => (!arg1, false),
-        SHL => arg1.overflowing_shl(1),
+        SHL => {
+            let carry = arg1 & 0x80 != 0;
+            (arg1 << 1, carry)
+        }
         SHR => {
             let c = (arg1 & 1) == 1;
             (arg1 >> 1, c)

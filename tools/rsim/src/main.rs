@@ -2,6 +2,7 @@ mod instruction;
 mod memory;
 mod machine;
 mod plain_ram;
+mod symmap;
 
 use std::env;
 use std::fs::File;
@@ -10,16 +11,27 @@ use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use ctrlc;
+use parse_int::parse;
 
 enum Command {
     Error,
     Next,
     Until(u16),
     Run,
+    Breakpoint(u16),
+    Print(u16, Type, u16),
     Quit,
 }
 
-fn parse_command(s: &String) -> Command {
+#[derive(Copy, Clone)]
+pub enum Type {
+    Byte,
+    Word,
+    Dword
+}
+
+
+fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
     use Command::*;
     if s.len() == 0 {
         return Quit;
@@ -32,8 +44,8 @@ fn parse_command(s: &String) -> Command {
 
         Some("u") |
         Some("until") => {
-            match iter.next().unwrap_or("").parse::<u16>() {
-                Ok(x) => Until(x),
+            match select_address(syms, iter.next().unwrap_or("")) {
+                Some(x) => Until(x),
                 _ => Error
             }
         },
@@ -41,16 +53,174 @@ fn parse_command(s: &String) -> Command {
         Some("r") |
         Some("run") => Run,
 
+        Some("b") |
+        Some("break") |
+        Some("breakpoint") => {
+            match select_address(syms, iter.next().unwrap_or("")) {
+                Some(x) => Breakpoint(x),
+                _ => Error
+            }
+        },
+
+        Some("p") |
+        Some("print") => {
+            let args: Vec<&str> = iter.collect();
+            let (i_addr, i_type, i_count) = match args.len() {
+                0 => return Error,
+                1 => {
+                    // p var
+                    (0, None, None)
+                },
+                2 => {
+                    // p w var
+                    (1, Some(0), None)
+                },
+                3 => {
+                    // p 100 b var
+                    (2, Some(1), Some(0))
+                },
+                _ => return Error
+            };
+            let t = if let Some(i) = i_type {
+                match args[i] {
+                    "b" |
+                    "byte" |
+                    "bytes" => Type::Byte,
+
+                    "w" |
+                    "word" |
+                    "words" => Type::Word,
+
+                    "d" |
+                    "dword" |
+                    "dwords" => Type::Dword,
+
+                    _ => return Error
+                }
+            } else {
+                Type::Byte
+            };
+
+            let count = if let Some(i) = i_count {
+                match parse::<u16>(args[i]) {
+                    Ok(n) => n,
+                    _ => return Error
+                }
+            } else {
+                1
+            };
+
+            let addr = match select_address(syms, args[i_addr]) {
+                Some(x) => x,
+                None => return Error
+            };
+            Print(addr, t, count)
+        }
+
         _ => Error
     }
+}
+
+fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
+    match parse::<u16>(&name) {
+        Ok(addr) => return Some(addr),
+        _ => {}
+    }
+
+    let symbols = syms.find_symbol(name);
+    match symbols.len() {
+        0 => {
+            println!("Symbol not found: {}", name);
+            None
+        },
+        1 => {
+            let (name,addr) = &symbols[0];
+            println!("{} => 0x{:04X}", name, addr);
+            Some(*addr)
+        },
+        n if n < 10 => {
+            println!("Choose wisely:");
+            for (i, (name, addr)) in symbols.iter().enumerate() {
+                println!("{}. {} (0x{:04X})", i, name, addr);
+            }
+            print!("Which one? ");
+            io::stdout().flush().unwrap();
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).unwrap();
+            match parse::<usize>(&input) {
+                Ok(i) if i < n => {
+                    Some(symbols[i].1)
+                },
+                _ => {
+                    println!("As you wish.");
+                    None
+                }
+            }
+        },
+        _ => {
+            println!("Too many choises");
+            None
+        }
+    }
+}
+
+fn get_value<T>(mem: &T, addr: u16, t: Type) -> Option<u32>
+where T: memory::Memory {
+    match t {
+        Type::Byte => {
+            let b = mem.get(addr).ok()?;
+            Some(b.into())
+        }
+        Type::Word => {
+            let b0 = mem.get(addr).ok()?;
+            let b1 = mem.get(addr + 1).ok()?;
+            Some(u16::from_le_bytes([b0, b1]).into())
+        }
+        Type::Dword => {
+            let b0 = mem.get(addr).ok()?;
+            let b1 = mem.get(addr + 1).ok()?;
+            let b2 = mem.get(addr + 2).ok()?;
+            let b3 = mem.get(addr + 3).ok()?;
+            Some(u32::from_le_bytes([b0, b1, b2, b3]).into())
+        }
+    }
+}
+
+fn dump_mem<T>(mem: &T, addr: u16, t: Type, count: u16)
+where T: memory::Memory {
+    let size = match t {
+        Type::Byte => 1,
+        Type::Word => 2,
+        Type::Dword => 4
+    };
+    if count == 1 {
+        let val = get_value(mem, addr, t);
+        match val {
+            Some(x) => println!("0x{:04X} = {:X} ({})", addr, x, x),
+            None => println!("0x{:04X} = X", addr)
+        };
+    } else {
+        for i in 0..count {
+            let val = get_value(mem, addr + i * size, t);
+            match val {
+                Some(x) => print!("{:0width$X} ", x, width=(size * 2).into()),
+                None => print!("XX")
+            }
+        }
+        println!("");
+    }
+
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let fname = &args[1];
-    let mut file = File::open(fname).expect("Can't open");
-    let mut ram = plain_ram::PlainRam::load(&mut file).expect("Read failed");
+    let fname_bin = &args[1];
+    let fname_map = &args[2];
+    let mut file_bin = File::open(fname_bin).expect("Can't open");
+    let mut file_map = File::open(fname_map).expect("Can't open");
+    let mut ram = plain_ram::PlainRam::load(&mut file_bin).expect("Read failed");
+    let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
 
     let ctrlc_pressed = Arc::new(AtomicBool::new(false));
     {
@@ -62,6 +232,10 @@ fn main() {
 
     let mut state = machine::State::new();
     loop {
+        match syms.associate_address(state.ip) {
+            Some((addr, offset)) => println!("{} + 0x{:X}:", addr, offset),
+            None => {}
+        }
         machine::disasm(&ram, state.ip, state.ip).expect("Can't disasm");
         println!("{}", &state);
         print!("> ");
@@ -69,11 +243,20 @@ fn main() {
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
         ctrlc_pressed.store(false, Ordering::SeqCst);
-        let result = match parse_command(&input) {
+        let result = match parse_command(&syms, &input) {
             Command::Quit => break,
             Command::Next => state.step(&mut ram),
             Command::Until(x) => state.until(&mut ram, Some(x), &ctrlc_pressed),
             Command::Run => state.until(&mut ram, None, &ctrlc_pressed),
+            Command::Breakpoint(x) => {
+                let id = state.set_breakpoint(x);
+                println!("Breakpoint {} at 0x{:04X}", id, x);
+                Ok(machine::StepResult::Ok)
+            },
+            Command::Print(addr, t, count) => {
+                dump_mem(&ram, addr, t, count);
+                Ok(machine::StepResult::Ok)
+            }
             Command::Error => {
                 println!("Bad command");
                 Ok(machine::StepResult::Ok)

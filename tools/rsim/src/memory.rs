@@ -1,5 +1,4 @@
 
-
 pub trait Memory {
     fn get(&self, addr: u16) -> Result<u8, MemoryError>;
 
