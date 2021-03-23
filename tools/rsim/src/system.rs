@@ -2,13 +2,15 @@ use crate::memory::{Memory, MemoryReadError, MemoryWriteError, ErrorChainable};
 use crate::real_mem;
 use crate::plain_ram;
 use crate::keyboard;
+use crate::vga;
 use std::io;
 
 pub enum System {
     Plain(crate::plain_ram::PlainRam),
     Real {
         mem: real_mem::Mem,
-        kbd: keyboard::Keyboard
+        kbd: keyboard::Keyboard,
+        vga: vga::Vga,
     }
 }
 
@@ -30,7 +32,7 @@ impl From<io::Error> for LoadError {
 }
 
 impl System {
-    pub fn new<T>(plain: bool, prog_reader: &mut T) -> Result<System, LoadError>
+    pub fn new<T>(plain: bool, prog_reader: &mut T, font_reader: &mut Option<T>) -> Result<System, LoadError>
     where T: io::Read + io::Seek {
         if plain {
             let mem = plain_ram::PlainRam::load(prog_reader)?;
@@ -39,7 +41,8 @@ impl System {
             let mem = real_mem::Mem::load(prog_reader)?;
             Ok(System::Real {
                 mem,
-                kbd: keyboard::Keyboard::new()
+                kbd: keyboard::Keyboard::new(),
+                vga: vga::Vga::new(font_reader)?,
             })
         }
     }
@@ -50,15 +53,23 @@ impl System {
             System::Real{ ref mut kbd, .. } => Some(kbd)
         }
     }
+
+    pub fn get_vga(&self) -> Option<&vga::Vga> {
+        match self {
+            System::Plain(_) => None,
+            System::Real{ ref vga, ..} => Some(vga)
+        }
+    }
 }
 
 impl Memory for System {
     fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
         match self {
             System::Plain(m) => m.get(addr),
-            System::Real { mem, kbd } => {
+            System::Real { mem, kbd, vga } => {
                 mem.get(addr)
                     .chain_error(kbd.get(addr))
+                    .chain_error(vga.get(addr))
             }
         }
     }
@@ -66,9 +77,10 @@ impl Memory for System {
     fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
         match self {
             System::Plain(m) => m.set(addr, value),
-            System::Real { mem, kbd } => {
+            System::Real { mem, kbd, vga } => {
                 mem.set(addr, value)
                     .chain_error(kbd.set(addr, value))
+                    .chain_error(vga.set(addr, value))
             }
         }
     }

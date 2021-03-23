@@ -6,6 +6,7 @@ mod real_mem;
 mod symmap;
 mod system;
 mod keyboard;
+mod vga;
 
 use std::fs::File;
 use std::io;
@@ -14,7 +15,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use ctrlc;
 use parse_int::parse;
-use argparse::{ArgumentParser, StoreTrue, Store};
+use argparse::{ArgumentParser, StoreTrue, StoreOption, Store};
 use crate::machine::StepResult;
 
 enum Command {
@@ -25,6 +26,7 @@ enum Command {
     Breakpoint(u16),
     Print(u16, Type, u16),
     Press(Option<(u8,u8)>),
+    Png(String),
     Quit,
 }
 
@@ -149,7 +151,14 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
                     _ => Error
                 }
             }
-        }
+        },
+
+        Some("png") => {
+            match iter.next() {
+                Some(s) => Png(s.to_string()),
+                None => Error,
+            }
+        },
 
         _ => Error
     }
@@ -247,12 +256,14 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
 fn main() {
     let mut fname_bin = String::new();
     let mut fname_map = String::new();
+    let mut fname_font: Option<String> = None;
     let mut mem_plain = false;
 
     {
         let mut ap = ArgumentParser::new();
         ap.set_description("CCPU simulator");
         ap.refer(&mut mem_plain).add_option(&["--plain"], StoreTrue, "Plain 64k of RAM, no IO");
+        ap.refer(&mut fname_font).add_option(&["--font"], StoreOption, "Font file for VGA simulation");
         ap.refer(&mut fname_bin).add_argument("file", Store, "Program file");
         ap.refer(&mut fname_map).add_argument("mapfile", Store, "Label map file");
         ap.parse_args_or_exit();
@@ -261,7 +272,11 @@ fn main() {
 
     let mut file_bin = File::open(fname_bin).expect("Can't open");
     let mut file_map = File::open(fname_map).expect("Can't open");
-    let mut system = system::System::new(mem_plain, &mut file_bin).expect("Can't load");
+    let mut file_font = match fname_font {
+        Some(name) => Some(File::open(name).expect("Can't open")),
+        None => None
+    };
+    let mut system = system::System::new(mem_plain, &mut file_bin, &mut file_font).expect("Can't load");
     let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
 
     let ctrlc_pressed = Arc::new(AtomicBool::new(false));
@@ -310,6 +325,32 @@ fn main() {
                     }
                     None => {
                         println!("No keyboard in current configuration. Try running without --plain.");
+                    }
+                }
+                StepResult::Ok
+            }
+            Command::Png(ref s) => {
+                match system.get_vga() {
+                    Some(vga) => {
+                        match File::create(s) {
+                            Err(x) => {
+                                println!("Can't open file {}: {}", s, x);
+                            }
+                            Ok(mut f) => {
+                                match vga.create_image(&mut f) {
+                                    Ok(()) => {
+                                        println!("{} has been written", s);
+                                    }
+                                    Err(x) => match x {
+                                        vga::RenderError::NoFont => println!("No font. Use --font."),
+                                        _ => println!("Error saving {}: {:?}", s, x)
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    None => {
+                        println!("No VGA in current configuration. Try running without --plain.");
                     }
                 }
                 StepResult::Ok
