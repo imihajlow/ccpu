@@ -1,4 +1,5 @@
-use crate::memory::MemoryError;
+use crate::memory::MemoryReadError;
+use crate::memory::MemoryWriteError;
 use crate::memory::Memory;
 use std::io;
 
@@ -7,11 +8,11 @@ pub struct PlainRam {
 }
 
 impl Memory for PlainRam {
-    fn get(&self, addr: u16) -> Result<u8, MemoryError> {
+    fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
         Ok(self.contents[addr as usize])
     }
 
-    fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryError> {
+    fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
         self.contents[addr as usize] = value;
         Ok(())
     }

@@ -5,10 +5,13 @@ use crate::memory;
 use crate::instruction::Instruction;
 use crate::instruction::AluOperation;
 use crate::instruction;
+use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 
 #[derive(Debug)]
 pub enum StepResult {
     Ok,
+    ReadError(u16, MemoryReadError),
+    WriteError(u16, MemoryWriteError),
     Breakpoint(u32),
     Watchpoint(u32)
 }
@@ -115,7 +118,7 @@ impl fmt::Display for State {
     }
 }
 
-pub fn disasm<M: memory::Memory>(mem: &M, start: u16, end: u16) -> Result<(), memory::MemoryError> {
+pub fn disasm(mem: &dyn Memory, start: u16, end: u16) -> Result<(), memory::MemoryReadError> {
     let mut ip = start;
     while ip <= end {
         let (instr, new_ip) = Instruction::load(mem, ip)?;
@@ -214,24 +217,22 @@ impl State {
         return self.last_id
     }
 
-    pub fn step<M: memory::Memory>(&mut self, mem: &mut M) -> Result<StepResult, memory::MemoryError> {
+    pub fn step(&mut self, mem: &mut dyn Memory) -> StepResult {
         self.step_impl(mem, false)
     }
 
-    pub fn until<M, C>(&mut self, mem: &mut M, until_addr: Option<u16>, ctrlc_pressed: &C) -> Result<StepResult, memory::MemoryError>
-    where M: memory::Memory,
-          C: Deref<Target = AtomicBool> {
+    pub fn until<C>(&mut self, mem: &mut dyn Memory, until_addr: Option<u16>, ctrlc_pressed: &C) -> StepResult
+    where C: Deref<Target = AtomicBool> {
         while !ctrlc_pressed.load(Ordering::SeqCst) && until_addr != Some(self.ip) {
             match self.step_impl(mem, true) {
-                Ok(StepResult::Ok) => {},
-                Ok(x) => return Ok(x),
-                Err(e) => return Err(e)
+                StepResult::Ok => {},
+                x => return x
             }
         }
-        Ok(StepResult::Ok)
+        StepResult::Ok
     }
 
-    fn step_impl<M: memory::Memory>(&mut self, mem: &mut M, check_bp: bool) -> Result<StepResult, memory::MemoryError> {
+    fn step_impl(&mut self, mem: &mut dyn Memory, check_bp: bool) -> StepResult {
         let result = {
             match self.breakpoints.iter().find(|(_,a)| *a == self.ip) {
                 Some((id, _)) => StepResult::Breakpoint(*id),
@@ -240,10 +241,13 @@ impl State {
         };
         if check_bp {
             if let StepResult::Breakpoint(_) = result {
-                return Ok(result);
+                return result;
             }
         }
-        let (instr, new_ip) = Instruction::load(mem, self.ip)?;
+        let (instr, new_ip) = match Instruction::load(mem, self.ip) {
+            Ok(instr) => instr,
+            Err(x) => return StepResult::ReadError(self.ip, x)
+        };
         match instr {
             Instruction::ALU { op, inverse, reg } => {
                 let arg = self.get_alu_b(reg);
@@ -262,7 +266,10 @@ impl State {
                 self.ip = new_ip;
             },
             Instruction::LD(reg) => {
-                let value = mem.get(self.p)?;
+                let value = match mem.get(self.p) {
+                    Ok(x) => x,
+                    Err(e) => return StepResult::ReadError(self.p, e)
+                };
                 self.ip = new_ip;
                 self.set_reg(reg, value);
             },
@@ -272,7 +279,10 @@ impl State {
             },
             Instruction::ST(reg) => {
                 let value = self.get_reg(reg);
-                mem.set(self.p, value)?;
+                match mem.set(self.p, value) {
+                    Ok(()) => {},
+                    Err(e) => return StepResult::WriteError(self.p, e)
+                }
                 self.ip = new_ip;
             },
             Instruction::NOP => {
@@ -292,6 +302,6 @@ impl State {
                 }
             }
         };
-        Ok(result)
+        result
     }
 }

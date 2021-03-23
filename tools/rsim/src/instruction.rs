@@ -1,6 +1,7 @@
 use std::fmt;
 use strum_macros::Display;
 use crate::memory;
+use crate::memory::Memory;
 
 pub enum Instruction {
     ALU { op: AluOperation, inverse: bool, reg: Register },
@@ -181,7 +182,7 @@ fn jc_flag(op: u8) -> Flag {
 }
 
 impl Instruction {
-    pub fn load<T: memory::Memory>(mem: &T, offset: u16) -> Result<(Instruction, u16), memory::MemoryError> {
+    pub fn load(mem: &dyn Memory, offset: u16) -> Result<(Instruction, u16), memory::MemoryReadError> {
         let opcode = mem.get(offset)?;
         match opcode {
             _ if is_alu(opcode) => {

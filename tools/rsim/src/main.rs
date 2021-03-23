@@ -2,9 +2,9 @@ mod instruction;
 mod memory;
 mod machine;
 mod plain_ram;
+mod real_mem;
 mod symmap;
 
-use std::env;
 use std::fs::File;
 use std::io;
 use std::io::Write;
@@ -12,6 +12,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use ctrlc;
 use parse_int::parse;
+use argparse::{ArgumentParser, StoreTrue, Store};
+use crate::machine::StepResult;
 
 enum Command {
     Error,
@@ -164,8 +166,7 @@ fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
     }
 }
 
-fn get_value<T>(mem: &T, addr: u16, t: Type) -> Option<u32>
-where T: memory::Memory {
+fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u32> {
     match t {
         Type::Byte => {
             let b = mem.get(addr).ok()?;
@@ -186,8 +187,7 @@ where T: memory::Memory {
     }
 }
 
-fn dump_mem<T>(mem: &T, addr: u16, t: Type, count: u16)
-where T: memory::Memory {
+fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
     let size = match t {
         Type::Byte => 1,
         Type::Word => 2,
@@ -213,13 +213,27 @@ where T: memory::Memory {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let mut fname_bin = String::new();
+    let mut fname_map = String::new();
+    let mut mem_plain = false;
 
-    let fname_bin = &args[1];
-    let fname_map = &args[2];
+    {
+        let mut ap = ArgumentParser::new();
+        ap.set_description("CCPU simulator");
+        ap.refer(&mut mem_plain).add_option(&["--plain"], StoreTrue, "Plain 64k of RAM, no IO");
+        ap.refer(&mut fname_bin).add_argument("file", Store, "Program file");
+        ap.refer(&mut fname_map).add_argument("mapfile", Store, "Label map file");
+        ap.parse_args_or_exit();
+    }
+
+
     let mut file_bin = File::open(fname_bin).expect("Can't open");
     let mut file_map = File::open(fname_map).expect("Can't open");
-    let mut ram = plain_ram::PlainRam::load(&mut file_bin).expect("Read failed");
+    let mut ram: Box<dyn memory::Memory> = if mem_plain {
+        Box::new(plain_ram::PlainRam::load(&mut file_bin).expect("Read failed"))
+    } else {
+        Box::new(real_mem::Mem::load(&mut file_bin).expect("Read failed"))
+    };
     let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
 
     let ctrlc_pressed = Arc::new(AtomicBool::new(false));
@@ -236,7 +250,7 @@ fn main() {
             Some((addr, offset)) => println!("{} + 0x{:X}:", addr, offset),
             None => {}
         }
-        machine::disasm(&ram, state.ip, state.ip).expect("Can't disasm");
+        machine::disasm(&*ram, state.ip, state.ip).expect("Can't disasm");
         println!("{}", &state);
         print!("> ");
         io::stdout().flush().unwrap();
@@ -245,34 +259,38 @@ fn main() {
         ctrlc_pressed.store(false, Ordering::SeqCst);
         let result = match parse_command(&syms, &input) {
             Command::Quit => break,
-            Command::Next => state.step(&mut ram),
-            Command::Until(x) => state.until(&mut ram, Some(x), &ctrlc_pressed),
-            Command::Run => state.until(&mut ram, None, &ctrlc_pressed),
+            Command::Next => state.step(&mut *ram),
+            Command::Until(x) => state.until(&mut *ram, Some(x), &ctrlc_pressed),
+            Command::Run => state.until(&mut *ram, None, &ctrlc_pressed),
             Command::Breakpoint(x) => {
                 let id = state.set_breakpoint(x);
                 println!("Breakpoint {} at 0x{:04X}", id, x);
-                Ok(machine::StepResult::Ok)
+                StepResult::Ok
             },
             Command::Print(addr, t, count) => {
-                dump_mem(&ram, addr, t, count);
-                Ok(machine::StepResult::Ok)
+                dump_mem(&*ram, addr, t, count);
+                StepResult::Ok
             }
             Command::Error => {
                 println!("Bad command");
-                Ok(machine::StepResult::Ok)
+                StepResult::Ok
             }
         };
 
         match result {
-            Ok(machine::StepResult::Ok) => {
+            StepResult::Ok => {
             },
-            Ok(machine::StepResult::Breakpoint(id)) => {
+            StepResult::Breakpoint(id) => {
                 println!("Breakpoint {} reached", id);
-            }
-            Ok(_) => {
             },
-            Err(e) => {
-                println!("Can't execute {:?}", e);
+            StepResult::Watchpoint(id) => {
+                println!("Watchpoint {} reached", id);
+            },
+            StepResult::ReadError(addr, err) => {
+                println!("Read error at 0x{:04X}: {}", addr, err);
+            },
+            StepResult::WriteError(addr, err) => {
+                println!("Write error at 0x{:04X}: {}", addr, err);
             }
         }
     }
