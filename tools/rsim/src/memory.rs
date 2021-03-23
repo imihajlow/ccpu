@@ -33,3 +33,32 @@ impl fmt::Display for MemoryWriteError {
         }
     }
 }
+
+pub trait ErrorChainable {
+    fn chain_error(self, other: Self) -> Self;
+}
+
+impl ErrorChainable for Result<u8, MemoryReadError> {
+    fn chain_error(self, other: Self) -> Self {
+        use MemoryReadError::*;
+        match self {
+            Err(Empty) => other,
+            Err(Contention) => Err(Contention),
+            Ok(_) => match other {
+                Ok(_) => Err(Contention),
+                Err(Empty) => self,
+                Err(Contention) => Err(Contention)
+            }
+        }
+    }
+}
+
+impl ErrorChainable for Result<(), MemoryWriteError> {
+    fn chain_error(self, other: Self) -> Self {
+        use MemoryWriteError::*;
+        match self {
+            Err(Empty) => other,
+            Ok(()) => Ok(())
+        }
+    }
+}

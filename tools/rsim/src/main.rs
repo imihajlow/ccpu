@@ -4,6 +4,8 @@ mod machine;
 mod plain_ram;
 mod real_mem;
 mod symmap;
+mod system;
+mod keyboard;
 
 use std::fs::File;
 use std::io;
@@ -22,6 +24,7 @@ enum Command {
     Run,
     Breakpoint(u16),
     Print(u16, Type, u16),
+    Press(Option<(u8,u8)>),
     Quit,
 }
 
@@ -117,6 +120,35 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
                 None => return Error
             };
             Print(addr, t, count)
+        },
+
+        Some("press") => {
+            match iter.next() {
+                None => Press(None),
+                Some(s) => match s.to_uppercase().as_str() {
+                    "F1" => Press(Some(keyboard::KEY_F1)),
+                    "F2" => Press(Some(keyboard::KEY_F2)),
+                    "*" => Press(Some(keyboard::KEY_STAR)),
+                    "#" => Press(Some(keyboard::KEY_HASH)),
+                    "1" => Press(Some(keyboard::KEY_1)),
+                    "2" => Press(Some(keyboard::KEY_2)),
+                    "3" => Press(Some(keyboard::KEY_3)),
+                    "UP" => Press(Some(keyboard::KEY_UP)),
+                    "4" => Press(Some(keyboard::KEY_4)),
+                    "5" => Press(Some(keyboard::KEY_5)),
+                    "6" => Press(Some(keyboard::KEY_6)),
+                    "DOWN" => Press(Some(keyboard::KEY_DOWN)),
+                    "7" => Press(Some(keyboard::KEY_7)),
+                    "8" => Press(Some(keyboard::KEY_8)),
+                    "9" => Press(Some(keyboard::KEY_9)),
+                    "ESCAPE" | "ESC" => Press(Some(keyboard::KEY_ESCAPE)),
+                    "LEFT" => Press(Some(keyboard::KEY_LEFT)),
+                    "0" => Press(Some(keyboard::KEY_0)),
+                    "RIGHT" => Press(Some(keyboard::KEY_RIGHT)),
+                    "ENTER" => Press(Some(keyboard::KEY_ENTER)),
+                    _ => Error
+                }
+            }
         }
 
         _ => Error
@@ -229,11 +261,7 @@ fn main() {
 
     let mut file_bin = File::open(fname_bin).expect("Can't open");
     let mut file_map = File::open(fname_map).expect("Can't open");
-    let mut ram: Box<dyn memory::Memory> = if mem_plain {
-        Box::new(plain_ram::PlainRam::load(&mut file_bin).expect("Read failed"))
-    } else {
-        Box::new(real_mem::Mem::load(&mut file_bin).expect("Read failed"))
-    };
+    let mut system = system::System::new(mem_plain, &mut file_bin).expect("Can't load");
     let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
 
     let ctrlc_pressed = Arc::new(AtomicBool::new(false));
@@ -250,7 +278,7 @@ fn main() {
             Some((addr, offset)) => println!("{} + 0x{:X}:", addr, offset),
             None => {}
         }
-        machine::disasm(&*ram, state.ip, state.ip).expect("Can't disasm");
+        machine::disasm(&system, state.ip, state.ip).expect("Can't disasm");
         println!("{}", &state);
         print!("> ");
         io::stdout().flush().unwrap();
@@ -259,16 +287,31 @@ fn main() {
         ctrlc_pressed.store(false, Ordering::SeqCst);
         let result = match parse_command(&syms, &input) {
             Command::Quit => break,
-            Command::Next => state.step(&mut *ram),
-            Command::Until(x) => state.until(&mut *ram, Some(x), &ctrlc_pressed),
-            Command::Run => state.until(&mut *ram, None, &ctrlc_pressed),
+            Command::Next => state.step(&mut system),
+            Command::Until(x) => state.until(&mut system, Some(x), &ctrlc_pressed),
+            Command::Run => state.until(&mut system, None, &ctrlc_pressed),
             Command::Breakpoint(x) => {
                 let id = state.set_breakpoint(x);
                 println!("Breakpoint {} at 0x{:04X}", id, x);
                 StepResult::Ok
-            },
+            }
             Command::Print(addr, t, count) => {
-                dump_mem(&*ram, addr, t, count);
+                dump_mem(&system, addr, t, count);
+                StepResult::Ok
+            }
+            Command::Press(v) => {
+                match system.get_keyboard_mut() {
+                    Some(kbd) => {
+                        kbd.press(v);
+                        match v {
+                            Some((r,c)) => println!("Pressed {}, {}.", r, c),
+                            None => println!("Released.")
+                        }
+                    }
+                    None => {
+                        println!("No keyboard in current configuration. Try running without --plain.");
+                    }
+                }
                 StepResult::Ok
             }
             Command::Error => {
