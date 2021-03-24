@@ -48,7 +48,7 @@ impl std::ops::Drop for System {
 }
 
 impl System {
-    pub fn new<T>(plain: bool, prog_reader: &mut T, font_reader: &mut Option<T>) -> Result<System, LoadError>
+    pub fn new<T>(plain: bool, prog_reader: &mut T, font_reader: &mut Option<T>, server_port: u16) -> Result<System, LoadError>
     where T: io::Read + io::Seek {
         if plain {
             let mem = plain_ram::PlainRam::load(prog_reader)?;
@@ -61,7 +61,7 @@ impl System {
                 mem,
                 kbd: keyboard::Keyboard::new(),
                 vga: vga,
-                server: server::Server::start(vga2)
+                server: server::Server::start(server_port, vga2)
             })
         }
     }

@@ -259,12 +259,14 @@ fn main() {
     let mut fname_map = String::new();
     let mut fname_font: Option<String> = None;
     let mut mem_plain = false;
+    let mut port: Option<u16> = None;
 
     {
         let mut ap = ArgumentParser::new();
         ap.set_description("CCPU simulator");
         ap.refer(&mut mem_plain).add_option(&["--plain"], StoreTrue, "Plain 64k of RAM, no IO");
         ap.refer(&mut fname_font).add_option(&["--font"], StoreOption, "Font file for VGA simulation");
+        ap.refer(&mut port).add_option(&["--port"], StoreOption, "Web server port (default: 3000)");
         ap.refer(&mut fname_bin).add_argument("file", Store, "Program file");
         ap.refer(&mut fname_map).add_argument("mapfile", Store, "Label map file");
         ap.parse_args_or_exit();
@@ -277,7 +279,7 @@ fn main() {
         Some(name) => Some(File::open(name).expect("Can't open")),
         None => None
     };
-    let mut system = system::System::new(mem_plain, &mut file_bin, &mut file_font).expect("Can't load");
+    let mut system = system::System::new(mem_plain, &mut file_bin, &mut file_font, port.unwrap_or(3000)).expect("Can't load");
     let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
 
     let ctrlc_pressed = Arc::new(AtomicBool::new(false));

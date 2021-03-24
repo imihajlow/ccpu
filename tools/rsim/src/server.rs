@@ -9,7 +9,7 @@ use std::io::BufReader;
 use std::io::BufRead;
 use std::io::Write;
 use regex::Regex;
-use crate::vga::{Vga, RenderError};
+use crate::vga::Vga;
 use std::sync::{Arc, Mutex};
 
 pub struct Server {
@@ -18,16 +18,14 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn start(vga: Arc<Mutex<Vga>>) -> Self {
+    pub fn start(port: u16, vga: Arc<Mutex<Vga>>) -> Self {
         let (tx,rx) = mpsc::channel();
         Server {
             tx: tx,
             handle: Some(std::thread::spawn(move || {
-                println!("Started server");
-                if let Err(e) = serve(rx, vga) {
+                if let Err(e) = serve(port, rx, vga) {
                     eprintln!("Server died: {:?}", e);
                 }
-                println!("Server quit");
             }))
         }
     }
@@ -111,13 +109,13 @@ fn handle_connection(mut s: TcpStream, vga: &Arc<Mutex<Vga>>) -> std::io::Result
     Ok(())
 }
 
-fn serve(rx: mpsc::Receiver<()>, vga: Arc<Mutex<Vga>>) -> std::io::Result<()> {
-    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000);
+fn serve(port: u16, rx: mpsc::Receiver<()>, vga: Arc<Mutex<Vga>>) -> std::io::Result<()> {
+    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), port);
     let mut listener = TcpListener::bind(address)?;
     let mut poll = Poll::new()?;
     let mut events = Events::with_capacity(128);
     poll.registry().register(&mut listener, Token(0), Interest::READABLE)?;
-    println!("server started");
+    println!("Server started at http://localhost:{}", port);
     loop {
         poll.poll(&mut events, Some(Duration::from_millis(100)))?;
         match listener.accept() {
@@ -136,6 +134,5 @@ fn serve(rx: mpsc::Receiver<()>, vga: Arc<Mutex<Vga>>) -> std::io::Result<()> {
             Err(mpsc::TryRecvError::Empty) => {}
         }
     }
-    println!("bye-bye");
     Ok(())
 }
