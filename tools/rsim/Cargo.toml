@@ -16,3 +16,4 @@ regex = "1"
 rand = "0.8"
 png = "0.16"
 itertools = "0.10"
+mio = { version="0.7", features=["net", "os-poll"] }

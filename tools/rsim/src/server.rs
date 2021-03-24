@@ -1,0 +1,145 @@
+use std::thread::JoinHandle;
+use std::sync::mpsc;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+use mio::net::TcpListener;
+use mio::net::TcpStream;
+use mio::{Events, Interest, Poll, Token};
+use std::time::Duration;
+use std::io::BufReader;
+use std::io::BufRead;
+use std::io::Write;
+use regex::Regex;
+use crate::vga::{Vga, RenderError};
+use std::sync::{Arc, Mutex};
+
+pub struct Server {
+    tx: mpsc::Sender<()>,
+    handle: Option<JoinHandle<()>>
+}
+
+impl Server {
+    pub fn start(vga: Arc<Mutex<Vga>>) -> Self {
+        let (tx,rx) = mpsc::channel();
+        Server {
+            tx: tx,
+            handle: Some(std::thread::spawn(move || {
+                println!("Started server");
+                if let Err(e) = serve(rx, vga) {
+                    eprintln!("Server died: {:?}", e);
+                }
+                println!("Server quit");
+            }))
+        }
+    }
+
+    pub fn shutdown_and_join(&mut self) {
+        self.tx.send(()).unwrap();
+        if let Some(h) = self.handle.take() {
+            h.join().unwrap();
+        }
+    }
+}
+
+fn bad_request() -> Vec<u8> {
+    "HTTP/1.1 400 Bad Request
+Content-Type: text/plain
+Connection: close
+
+Bad request
+".as_bytes().to_vec()
+}
+
+fn get_root() -> Vec<u8> {
+    let contents = include_str!("index.html");
+    ("HTTP/1.1 200 OK
+Content-Type: text/html
+Connection: close
+
+".to_string() + contents).into_bytes()
+}
+
+fn get_vga_picture(vga: &Arc<Mutex<Vga>>) -> Vec<u8> {
+    let mut png: Vec<u8> = "HTTP/1.1 200 Ok\nContent-Type: image/png\n\n".as_bytes().to_vec();
+    // match vga.lock().unwrap().create_image(png) {
+    //     Ok(()) => {
+    //         png
+    //     }
+    //     Err(RenderError::NoFont) => {
+    //         "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\n\nNo font loaded".as_bytes().to_vec()
+    //     }
+    //     Err(_) => {
+    //         "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\n\nOther error".as_bytes().to_vec()
+    //     }
+    // }
+    png
+}
+
+fn not_found() -> Vec<u8> {
+    "HTTP/1.1 404 Not found
+Content-Type: text/plain
+Connection: close
+
+Not found
+".as_bytes().to_vec()
+}
+
+fn handle_connection(mut s: TcpStream, vga: &Arc<Mutex<Vga>>) -> std::io::Result<()> {
+    let mut poll = Poll::new().unwrap();
+    let mut events = Events::with_capacity(128);
+    poll.registry().register(&mut s, Token(0), Interest::READABLE)?;
+    poll.poll(&mut events, None).unwrap();
+    let reader = BufReader::new(&s);
+    let re = Regex::new(r"^GET (\S+) HTTP/1.1$").unwrap();
+    let rsp = match reader.lines().next() {
+        Some(Ok(line)) => {
+            match re.captures(&line) {
+                None => bad_request(),
+                Some(cap) => {
+                    match &cap[1] {
+                        "/" => get_root(),
+                        "/vga.png" => get_vga_picture(vga),
+                        _ => not_found()
+                    }
+                }
+            }
+        }
+        e => {
+            println!("{:?}", e);
+            bad_request()
+        }
+    };
+    match s.write_all(&rsp) {
+        Err(e) => eprintln!("{:?}", e),
+        _ => ()
+    }
+    Ok(())
+}
+
+fn serve(rx: mpsc::Receiver<()>, vga: Arc<Mutex<Vga>>) -> std::io::Result<()> {
+    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 3000);
+    let mut listener = TcpListener::bind(address)?;
+    let mut poll = Poll::new()?;
+    let mut events = Events::with_capacity(128);
+    poll.registry().register(&mut listener, Token(0), Interest::READABLE)?;
+    println!("server started");
+    loop {
+        poll.poll(&mut events, Some(Duration::from_millis(100)))?;
+        match listener.accept() {
+            Ok((s,_)) => {
+                handle_connection(s, &vga)?;
+            }
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
+            Err(e) => return Err(e)
+        }
+        match rx.try_recv() {
+            Ok(()) => break,
+            Err(mpsc::TryRecvError::Disconnected) => {
+                eprintln!("Sender disconnected");
+                break;
+            }
+            Err(mpsc::TryRecvError::Empty) => {}
+        }
+    }
+    println!("bye-bye");
+    Ok(())
+}

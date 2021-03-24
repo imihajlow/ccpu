@@ -1,7 +1,6 @@
 use rand::{thread_rng, RngCore};
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 use std::io;
-use std::ops::Index;
 use png;
 use itertools::concat;
 
