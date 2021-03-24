@@ -27,7 +27,7 @@ enum Command {
     Breakpoint(u16),
     Print(u16, Type, u16),
     Press(Option<(u8,u8)>),
-    // Png(String),
+    Png(String),
     Quit,
 }
 
@@ -154,12 +154,12 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
             }
         },
 
-        // Some("png") => {
-        //     match iter.next() {
-        //         Some(s) => Png(s.to_string()),
-        //         None => Error,
-        //     }
-        // },
+        Some("png") => {
+            match iter.next() {
+                Some(s) => Png(s.to_string()),
+                None => Error,
+            }
+        },
 
         _ => Error
     }
@@ -330,32 +330,32 @@ fn main() {
                 }
                 StepResult::Ok
             }
-            // Command::Png(ref s) => {
-            //     match system.get_vga() {
-            //         Some(vga) => {
-            //             match File::create(s) {
-            //                 Err(x) => {
-            //                     println!("Can't open file {}: {}", s, x);
-            //                 }
-            //                 Ok(mut f) => {
-            //                     match vga.create_image(&mut f) {
-            //                         Ok(()) => {
-            //                             println!("{} has been written", s);
-            //                         }
-            //                         Err(x) => match x {
-            //                             vga::RenderError::NoFont => println!("No font. Use --font."),
-            //                             _ => println!("Error saving {}: {:?}", s, x)
-            //                         }
-            //                     }
-            //                 }
-            //             };
-            //         }
-            //         None => {
-            //             println!("No VGA in current configuration. Try running without --plain.");
-            //         }
-            //     }
-            //     StepResult::Ok
-            // }
+            Command::Png(ref s) => {
+                match system.get_vga() {
+                    Some(vga) => {
+                        match File::create(s) {
+                            Err(x) => {
+                                println!("Can't open file {}: {}", s, x);
+                            }
+                            Ok(mut f) => {
+                                match vga.lock().unwrap().create_image(&mut f) {
+                                    Ok(()) => {
+                                        println!("{} has been written", s);
+                                    }
+                                    Err(x) => match x {
+                                        vga::RenderError::NoFont => println!("No font. Use --font."),
+                                        _ => println!("Error saving {}: {:?}", s, x)
+                                    }
+                                }
+                            }
+                        };
+                    }
+                    None => {
+                        println!("No VGA in current configuration. Try running without --plain.");
+                    }
+                }
+                StepResult::Ok
+            }
             Command::Error => {
                 println!("Bad command");
                 StepResult::Ok

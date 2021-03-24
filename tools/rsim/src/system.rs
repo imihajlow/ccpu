@@ -73,12 +73,12 @@ impl System {
         }
     }
 
-    // pub fn get_vga(&self) -> Option<&vga::Vga> {
-    //     match self {
-    //         System::Plain(_) => None,
-    //         System::Real{ ref vga, ..} => Some(&vga.lock().unwrap())
-    //     }
-    // }
+    pub fn get_vga(&self) -> Option<Arc<Mutex<vga::Vga>>> {
+        match self {
+            System::Plain(_) => None,
+            System::Real{ ref vga, ..} => Some(Arc::clone(vga))
+        }
+    }
 }
 
 impl Memory for System {

@@ -4,6 +4,19 @@
 	<title>CCPU Simulator</title>
 </head>
 <body>
-	<h1>Hello world</h1>
+	<div>
+		<img id="vga" src="/vga.png" alt="vga" style="margin: 0 auto; width: 640px;" onload="imageLoaded()" />
+	</div>
+	<script type="text/javascript">
+		var number = 0;
+		function updateImage() {
+			document.getElementById("vga").src = "/vga.png?" + number;
+			number += 1;
+		}
+
+		function imageLoaded() {
+			window.setTimeout(updateImage, 200);
+		}
+	</script>
 </body>
 </html>

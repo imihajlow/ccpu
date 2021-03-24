@@ -40,47 +40,43 @@ impl Server {
     }
 }
 
-fn bad_request() -> Vec<u8> {
-    "HTTP/1.1 400 Bad Request
+fn bad_request(mut s: TcpStream) -> std::io::Result<()> {
+    s.write_all("HTTP/1.1 400 Bad Request
 Content-Type: text/plain
 Connection: close
 
 Bad request
-".as_bytes().to_vec()
+".as_bytes())
 }
 
-fn get_root() -> Vec<u8> {
+fn get_root(mut s: TcpStream) -> std::io::Result<()> {
     let contents = include_str!("index.html");
-    ("HTTP/1.1 200 OK
+    s.write_all(("HTTP/1.1 200 OK
 Content-Type: text/html
 Connection: close
 
-".to_string() + contents).into_bytes()
+".to_string() + contents).as_bytes())
 }
 
-fn get_vga_picture(vga: &Arc<Mutex<Vga>>) -> Vec<u8> {
-    let mut png: Vec<u8> = "HTTP/1.1 200 Ok\nContent-Type: image/png\n\n".as_bytes().to_vec();
-    // match vga.lock().unwrap().create_image(png) {
-    //     Ok(()) => {
-    //         png
-    //     }
-    //     Err(RenderError::NoFont) => {
-    //         "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\n\nNo font loaded".as_bytes().to_vec()
-    //     }
-    //     Err(_) => {
-    //         "HTTP/1.1 500 Internal Server Error\nContent-Type: text/plain\n\nOther error".as_bytes().to_vec()
-    //     }
-    // }
-    png
+fn get_vga_picture(mut s: TcpStream, vga: &Arc<Mutex<Vga>>) -> std::io::Result<()> {
+    s.write_all("HTTP/1.1 200 Ok\nContent-Type: image/png\n\n".as_bytes())?;
+    match vga.lock().unwrap().create_image(s) {
+        Ok(()) => {
+            Ok(())
+        }
+        _ => {
+            Ok(())
+        }
+    }
 }
 
-fn not_found() -> Vec<u8> {
-    "HTTP/1.1 404 Not found
+fn not_found(mut s: TcpStream) -> std::io::Result<()> {
+    s.write_all("HTTP/1.1 404 Not found
 Content-Type: text/plain
 Connection: close
 
 Not found
-".as_bytes().to_vec()
+".as_bytes())
 }
 
 fn handle_connection(mut s: TcpStream, vga: &Arc<Mutex<Vga>>) -> std::io::Result<()> {
@@ -89,26 +85,26 @@ fn handle_connection(mut s: TcpStream, vga: &Arc<Mutex<Vga>>) -> std::io::Result
     poll.registry().register(&mut s, Token(0), Interest::READABLE)?;
     poll.poll(&mut events, None).unwrap();
     let reader = BufReader::new(&s);
-    let re = Regex::new(r"^GET (\S+) HTTP/1.1$").unwrap();
-    let rsp = match reader.lines().next() {
+    let re = Regex::new(r"^GET ([^ ?]+)(?:\?\S*)? HTTP/1.1$").unwrap();
+    let result = match reader.lines().next() {
         Some(Ok(line)) => {
             match re.captures(&line) {
-                None => bad_request(),
+                None => bad_request(s),
                 Some(cap) => {
                     match &cap[1] {
-                        "/" => get_root(),
-                        "/vga.png" => get_vga_picture(vga),
-                        _ => not_found()
+                        "/" => get_root(s),
+                        "/vga.png" => get_vga_picture(s, vga),
+                        _ => not_found(s)
                     }
                 }
             }
         }
         e => {
             println!("{:?}", e);
-            bad_request()
+            bad_request(s)
         }
     };
-    match s.write_all(&rsp) {
+    match result {
         Err(e) => eprintln!("{:?}", e),
         _ => ()
     }
