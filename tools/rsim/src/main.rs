@@ -8,6 +8,7 @@ mod system;
 mod keyboard;
 mod vga;
 mod server;
+mod ps2;
 
 use std::fs::File;
 use std::io;

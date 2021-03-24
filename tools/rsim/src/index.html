@@ -1,22 +1,136 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>CCPU Simulator</title>
+    <title>CCPU Simulator</title>
 </head>
 <body>
-	<div>
-		<img id="vga" src="/vga.png" alt="vga" style="margin: 0 auto; width: 640px;" onload="imageLoaded()" />
-	</div>
-	<script type="text/javascript">
-		var number = 0;
-		function updateImage() {
-			document.getElementById("vga").src = "/vga.png?" + number;
-			number += 1;
-		}
+    <div>
+        <img id="vga" src="/vga.png" alt="vga" style="margin: 0 auto; width: 640px;" onload="imageLoaded()" />
+    </div>
+    <script type="text/javascript">
+        var number = 0;
+        function updateImage() {
+            document.getElementById("vga").src = "/vga.png?" + number;
+            number += 1;
+        }
 
-		function imageLoaded() {
-			window.setTimeout(updateImage, 200);
-		}
-	</script>
+        function imageLoaded() {
+            window.setTimeout(updateImage, 200);
+        }
+
+        document.addEventListener('keydown', keyDown);
+        document.addEventListener('keyup', keyUp);
+
+        var mapping = {
+            'KeyQ': [0x15],
+            'KeyW': [0x1d],
+            'KeyE': [0x24],
+            'KeyR': [0x2d],
+            'KeyT': [0x2c],
+            'KeyY': [0x35],
+            'KeyU': [0x3c],
+            'KeyI': [0x43],
+            'KeyO': [0x44],
+            'KeyP': [0x4d],
+            'KeyA': [0x1c],
+            'KeyS': [0x1b],
+            'KeyD': [0x23],
+            'KeyF': [0x2b],
+            'KeyG': [0x34],
+            'KeyH': [0x33],
+            'KeyJ': [0x3b],
+            'KeyK': [0x42],
+            'KeyL': [0x4b],
+            'KeyZ': [0x1a],
+            'KeyX': [0x22],
+            'KeyC': [0x21],
+            'KeyV': [0x2a],
+            'KeyB': [0x32],
+            'KeyN': [0x31],
+            'KeyM': [0x3a],
+            'Digit1': [0x16],
+            'Digit2': [0x1e],
+            'Digit3': [0x26],
+            'Digit4': [0x25],
+            'Digit5': [0x2e],
+            'Digit6': [0x36],
+            'Digit7': [0x3d],
+            'Digit8': [0x3e],
+            'Digit9': [0x46],
+            'Digit0': [0x45],
+
+            'Space': [0x29],
+            'Tab': [0x0d],
+            'Enter': [0x5a],
+            'Backquote': [0x0e],
+            'Escape': [0x76],
+            'F1': [0x05],
+            'F2': [0x06],
+            'F3': [0x04],
+            'F4': [0x0c],
+            'F5': [0x03],
+            'F6': [0x0b],
+            'F7': [0x83],
+            'F8': [0x05],
+            'F9': [0x01],
+            'F10': [0x09],
+            'F11': [0x78],
+            'F12': [0x07],
+            'Equal': [0x55],
+            'Minus': [0x4e],
+            'Backspace': [0x66],
+            'BracketLeft': [0x54],
+            'BracketRight': [0x5b],
+            'Semicolon': [0x4c],
+            'Quote': [0x52],
+            'Comma': [0x41],
+            'Period': [0x49],
+            'Slash': [0x4a],
+            'ArrowLeft': [0xe0, 0x6b],
+            'ArrowRight': [0xe0, 0x74],
+            'ArrowUp': [0xe0, 0x75],
+            'ArrowDown': [0xe0, 0x72],
+            'ControlLeft': [0x14],
+            'ControlRight': [0xe0, 0x14],
+            'AltLeft': [0x11],
+            'AltRight': [0xe0, 0x11],
+            'IntlBackslash': [0x61],
+            'Backslash': [0x5d],
+            'ShiftLeft': [0x12],
+            'ShiftRight': [0x59]
+        };
+
+        function updatePs2(a) {
+            var req = new XMLHttpRequest();
+            req.open("GET", "/ps2?" + a.join('&'));
+            req.send();
+        }
+
+        function keyDown(e) {
+            e.stopPropagation();
+            var m = mapping[e.code];
+            if (m !== undefined) {
+                updatePs2(m);
+            } else {
+                console.log("Unhandled", e);
+            }
+        }
+
+        function keyUp(e) {
+            console.log(e);
+            e.stopPropagation();
+            var m = mapping[e.code];
+            if (m !== undefined) {
+                if (m.length > 1) {
+                    updatePs2([m[0]].concat([0xf0], m.slice(1)));
+                } else {
+                    updatePs2([0xf0].concat(m));
+
+                }
+            } else {
+                console.log("Unhandled", e);
+            }
+        }
+    </script>
 </body>
 </html>
