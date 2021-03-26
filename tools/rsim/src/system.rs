@@ -5,6 +5,7 @@ use crate::keyboard;
 use crate::vga;
 use crate::server;
 use crate::ps2;
+use crate::spi;
 use std::io;
 use std::sync::{Arc, Mutex};
 
@@ -15,7 +16,8 @@ pub enum System {
         kbd: keyboard::Keyboard,
         vga: Arc<Mutex<vga::Vga>>,
         server: server::Server,
-        ps2: Arc<Mutex<ps2::Ps2>>
+        ps2: Arc<Mutex<ps2::Ps2>>,
+        spi: spi::Spi,
     }
 }
 
@@ -61,11 +63,13 @@ impl System {
             let vga2 = Arc::clone(&vga);
             let ps2 = Arc::new(Mutex::new(ps2::Ps2::new()));
             let ps22 = Arc::clone(&ps2);
+            let spi = spi::Spi::new();
             Ok(System::Real {
                 mem,
                 kbd: keyboard::Keyboard::new(),
                 vga: vga,
                 ps2: ps2,
+                spi: spi,
                 server: server::Server::start(server_port, vga2, ps22)
             })
         }
@@ -84,15 +88,23 @@ impl System {
             System::Real{ ref vga, ..} => Some(Arc::clone(vga))
         }
     }
+
+    pub fn get_spi_mut(&mut self) -> Option<&mut spi::Spi> {
+        match self {
+            System::Plain(_) => None,
+            System::Real{ ref mut spi, .. } => Some(spi)
+        }
+    }
 }
 
 impl Memory for System {
     fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
         match self {
             System::Plain(m) => m.get(addr),
-            System::Real { mem, kbd, vga, ps2, .. } => {
+            System::Real { mem, kbd, vga, ps2, spi, .. } => {
                 mem.get(addr)
                     .chain_error(kbd.get(addr))
+                    .chain_error(spi.get(addr))
                     .chain_error(vga.lock().unwrap().get(addr))
                     .chain_error(ps2.lock().unwrap().get(addr))
             }
@@ -102,9 +114,10 @@ impl Memory for System {
     fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
         match self {
             System::Plain(m) => m.set(addr, value),
-            System::Real { mem, kbd, vga, ps2, .. } => {
+            System::Real { mem, kbd, vga, ps2, spi, .. } => {
                 mem.set(addr, value)
                     .chain_error(kbd.set(addr, value))
+                    .chain_error(spi.set(addr, value))
                     .chain_error(vga.lock().unwrap().set(addr, value))
                     .chain_error(ps2.lock().unwrap().set(addr, value))
             }

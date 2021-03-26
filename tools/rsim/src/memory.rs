@@ -15,6 +15,7 @@ pub enum MemoryReadError {
 #[derive(Debug)]
 pub enum MemoryWriteError {
     Empty,
+    DeviceError,
 }
 
 impl fmt::Display for MemoryReadError {
@@ -29,7 +30,8 @@ impl fmt::Display for MemoryReadError {
 impl fmt::Display for MemoryWriteError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            MemoryWriteError::Empty => write!(f, "no write consumers")
+            MemoryWriteError::Empty => write!(f, "no write consumers"),
+            MemoryWriteError::DeviceError => write!(f, "device error")
         }
     }
 }
@@ -58,6 +60,7 @@ impl ErrorChainable for Result<(), MemoryWriteError> {
         use MemoryWriteError::*;
         match self {
             Err(Empty) => other,
+            Err(DeviceError) => Err(DeviceError),
             Ok(()) => Ok(())
         }
     }

@@ -9,6 +9,8 @@ mod keyboard;
 mod vga;
 mod server;
 mod ps2;
+mod spi;
+mod card;
 
 use std::fs::File;
 use std::io;
@@ -29,6 +31,8 @@ enum Command {
     Print(u16, Type, u16),
     Press(Option<(u8,u8)>),
     Png(String),
+    Insert(File),
+    Eject,
     Quit,
 }
 
@@ -153,14 +157,31 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
                     _ => Error
                 }
             }
-        },
+        }
 
         Some("png") => {
             match iter.next() {
                 Some(s) => Png(s.to_string()),
                 None => Error,
             }
-        },
+        }
+
+        Some("insert") => {
+            match iter.next() {
+                Some(s) => {
+                    match File::open(s) {
+                        Ok(f) => Insert(f),
+                        Err(e) => {
+                            eprintln!("Can't open {}: {:?}", s, e);
+                            Error
+                        }
+                    }
+                }
+                None => Error
+            }
+        }
+
+        Some("eject") => Eject,
 
         _ => Error
     }
@@ -356,6 +377,27 @@ fn main() {
                     None => {
                         println!("No VGA in current configuration. Try running without --plain.");
                     }
+                }
+                StepResult::Ok
+            }
+            Command::Insert(f) => {
+                match system.get_spi_mut() {
+                    Some(ref mut spi) => {
+                        spi.insert(card::Card::new(f));
+                        println!("Inserted.");
+                    }
+                    None => {
+                        println!("No SPI in current configuration. Try running without --plain.");
+                    }
+                }
+                StepResult::Ok
+            }
+            Command::Eject => {
+                match system.get_spi_mut() {
+                    Some(spi) => {
+                        spi.eject();
+                    }
+                    None => {}
                 }
                 StepResult::Ok
             }

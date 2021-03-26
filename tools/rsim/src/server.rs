@@ -122,8 +122,7 @@ fn handle_connection(mut s: TcpStream, vga: &Arc<Mutex<Vga>>, ps2: &Arc<Mutex<Ps
                 }
             }
         }
-        e => {
-            println!("{:?}", e);
+        _ => {
             bad_request(s)
         }
     };
