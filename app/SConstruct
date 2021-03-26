@@ -33,7 +33,7 @@ loaderLinkBuilder = Builder(generator=loaderLinkGenerator, suffix=".bin", src_su
 extensionLinkBuilder = Builder(generator=extensionLinkGenerator, suffix=".ext", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 appLinkBuilder = Builder(generator=appLinkGenerator, suffix=".app", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 
-imageBuilder = Builder(action = './mkfat.sh $SOURCES', suffix=".img", src_suffix=[".app", ".ext"])
+imageBuilder = Builder(action = './mkfat.sh data $SOURCES', suffix=".img", src_suffix=[".app", ".ext"])
 
 env = Environment(BUILDERS = {
     'Asm' : asmBuilder,

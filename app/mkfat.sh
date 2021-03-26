@@ -15,6 +15,6 @@ EOM
 mkdir -p mnt
 newfs_msdos -F 16 -S 512 -c 4 ${DEV}s1
 mount -t msdos ${DEV}s1 mnt
-cp "$@" mnt
+cp -R "$@" mnt
 umount mnt
 hdiutil detach ${DEV}

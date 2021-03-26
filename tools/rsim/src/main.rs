@@ -12,7 +12,7 @@ mod ps2;
 mod spi;
 mod card;
 
-use std::fs::File;
+use std::fs::{File,OpenOptions};
 use std::io;
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -169,7 +169,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
         Some("insert") => {
             match iter.next() {
                 Some(s) => {
-                    match File::open(s) {
+                    match OpenOptions::new().write(true).read(true).open(s) {
                         Ok(f) => Insert(f),
                         Err(e) => {
                             eprintln!("Can't open {}: {:?}", s, e);

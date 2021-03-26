@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Seek, Read};
+use std::io::{Seek, Read, Write};
 
 
 const CMD_0: u8 = 0x40;
@@ -42,6 +42,11 @@ enum SoftState {
     Read {
         buf: [u8; 512],
         index: usize
+    },
+    WaitWrite,
+    Write {
+        buf: [u8; 512],
+        index: usize,
     },
     BlockCrc1,
     BlockCrc2
@@ -151,7 +156,23 @@ impl Card {
 
                             Some(R1_READY)
                         }
-                        _ => {
+                        CMD_24 if !is_acmd && is_ready => {
+                            let pos = u32::from_be_bytes([data[1], data[2], data[3], data[4]]);
+                            println!("Write block from 0x{:08X}", pos);
+                            match self.image.seek(std::io::SeekFrom::Start(pos as u64)) {
+                                Ok(_) => {
+                                    *state = WaitWrite;
+                                    Some(R1_READY)
+                                }
+                                Err(e) => {
+                                    eprintln!("Can't seek to {}: {:?}", pos, e);
+                                    *state = Idle;
+                                    Some(0b00001001) // out of range, error
+                                }
+                            }
+                        }
+                        x => {
+                            println!("Illegal card command: {:02X}", x);
                             self.state = ON {
                                 is_ready,
                                 is_acmd: false,
@@ -187,21 +208,63 @@ impl Card {
                             Some(0b00001001) // out of range, error
                         }
                     }
-                },
+                }
                 DelayRead { ref mut counter, .. } => {
                     *counter -= 1;
                     Some(0xFF)
-                },
+                }
                 Read { index: 511, buf } => {
                     let val = buf[511];
                     *state = BlockCrc1;
                     Some(val)
-                },
+                }
                 Read { ref mut index, buf } => {
                     let i = *index;
                     *index += 1;
                     Some(buf[i])
-                },
+                }
+                WaitWrite => {
+                    match v {
+                        0xFE => {
+                            *state = Write {
+                                index: 0,
+                                buf: [0; 512]
+                            };
+                            Some(0xFF)
+                        }
+                        0xFF => {
+                            Some(0xFF)
+                        }
+                        _ => {
+                            *state = Idle;
+                            eprintln!("Wrong block start: {}", v);
+                            Some(0xFF)
+                        }
+                    }
+                }
+                Write { index, buf } if *index < 512 => {
+                    buf[*index as usize] = v;
+                    *index += 1;
+                    Some(0xFF)
+                }
+                Write { index, .. } if *index < 514 => {
+                    // CRC
+                    *index += 1;
+                    Some(0xFF)
+                }
+                Write { buf, .. } => {
+                    match self.image.write_all(&buf[..]) {
+                        Ok(()) => {
+                            *state = Idle;
+                            Some(0b0000_0101) // data accepted
+                        }
+                        Err(e) => {
+                            *state = Idle;
+                            eprintln!("Can't write image: {:?}", e);
+                            Some(0b0000_1101) // write error
+                        }
+                    }
+                }
                 BlockCrc1 => {
                     *state = BlockCrc2;
                     Some(0xff)
