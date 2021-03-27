@@ -9,11 +9,11 @@
 #include <ps2keyboard.h>
 #include <string.h>
 
-#define TYPING_COLOR COLOR(COLOR_GRAY, COLOR_BLUE)
-#define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_GRAY)
+#define TYPING_COLOR COLOR(COLOR_LIGHT_BLUE, COLOR_BLUE)
+#define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_LIGHT_BLUE)
 #define STATUS_COLOR COLOR(COLOR_BLACK, COLOR_CYAN)
 
-#define MAX_LINES 480u16
+#define MAX_LINES 460u16
 
 #define NO_NEWLINE 128u8
 
@@ -146,6 +146,17 @@ struct Line *alloc_line() {
     return result;
 }
 
+u8 free_line(struct Line *l) {
+    if ((u16)pool_head == 0u16) {
+        pool_head = l;
+        pool_tail = l;
+        l->next = (struct Line *)0;
+    } else {
+        pool_tail->next = l;
+        pool_tail = l;
+    }
+}
+
 u8 insert(u8 c) {
     if ((u16)pool_head == 0u16) {
         return 0u8; // can't insert, no lines left
@@ -251,6 +262,101 @@ u8 insert(u8 c) {
     return 1u8;
 }
 
+u8 break_line() {
+    if ((u16)pool_head == 0u16) {
+        return 0u8; // can't insert, no lines left
+    }
+    struct Line *new_line;
+    if (cursor_line->len != NO_NEWLINE) {
+        new_line = alloc_line();
+        new_line->len = cursor_line->len - cursor_col;
+        memcpy((u8*)new_line->data, (u8*)cursor_line->data + cursor_col, (u16)new_line->len);
+        cursor_line->len = cursor_col;
+        if ((u16)cursor_line->next != 0u16) {
+            cursor_line->next->prev = new_line;
+        }
+        new_line->next = cursor_line->next;
+        new_line->prev = cursor_line;
+        cursor_line->next = new_line;
+        cursor_line = new_line;
+        cursor_row += 1u8;
+        cursor_col = 0u8;
+    } else {
+        if (cursor_col == (u8)sizeof(cursor_line->data)) {
+            cursor_line->len = (u8)sizeof(cursor_line->data);
+            cursor_line = cursor_line->next;
+            cursor_row += 1u8;
+            cursor_col = 0u8;
+        } else if (cursor_col == 0u8) {
+            if ((u16)cursor_line->prev == 0u16) {
+                new_line = alloc_line();
+                head = new_line;
+                new_line->prev = (struct Line*)0;
+                new_line->next = cursor_line;
+                new_line->len = 0u8;
+                cursor_line->prev = new_line;
+                screen_ptrs[0] = new_line;
+                cursor_row += 1u8;
+            } else if (cursor_line->prev->len == NO_NEWLINE) {
+                cursor_line->prev->len = (u8)sizeof(cursor_line->data);
+            } else {
+                new_line = alloc_line();
+                new_line->prev = cursor_line->prev;
+                new_line->next = cursor_line;
+                cursor_line->prev->next = new_line;
+                cursor_line->prev = new_line;
+                if (cursor_row == 0u8) {
+                    screen_ptrs[screen_idx] = new_line;
+                }
+                cursor_row += 1u8;
+            }
+            cursor_col = 0u8;
+        } else {
+            u8 rest = (u8)sizeof(cursor_line->data) - cursor_col; // how many bytes to carry over to the next line
+            // Cursor line is a part of a list of long lines.
+            // Find the last line in the list.
+            struct Line *tail = cursor_line;
+            while (tail->len == NO_NEWLINE) { // tail can't be 0
+                tail = tail->next;
+            }
+            if (tail->len >= cursor_col) {
+                // the last line doesn't fit the carry-over part and the original contents
+                new_line = alloc_line();
+                new_line->prev = tail;
+                new_line->next = tail->next;
+                tail->next = new_line;
+                if ((u16)new_line->next != 0u16) {
+                    new_line->next->prev = new_line;
+                }
+                new_line->len = tail->len - cursor_col;
+                memcpy((u8*)new_line->data, (u8*)tail->data + cursor_col, (u16)new_line->len);
+                tail->len = NO_NEWLINE;
+            } else {
+                tail->len += rest;
+            }
+
+            while (tail != cursor_line) {
+                for (s8 i = (s8)cursor_col - 1s8; i >= 0s8; i -= 1s8) {
+                    tail->data[(u8)i + rest] = tail->data[(u8)i];
+                }
+                memcpy((u8*)tail->data, (u8*)tail->prev->data + cursor_col, (u16)rest);
+                tail = tail->prev;
+            }
+            cursor_line->len = cursor_col;
+            cursor_line = cursor_line->next;
+            cursor_row += 1u8;
+            cursor_col = 0u8;
+        }
+    }
+    if (cursor_row == VGA_ROWS - 1u8) {
+        screen_idx += 1u8;
+        screen_ptrs[screen_idx] = new_line;
+        cursor_row = 0u8;
+    }
+    next_screen = show_lines(screen_ptrs[screen_idx]);
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+}
+
 export u8 main() {
     ps2_init();
     vga_clear(TYPING_COLOR);
@@ -283,6 +389,8 @@ export u8 main() {
         }
         if (PS2_IS_ASCII(k)) {
             insert((u8)k);
+        } else if ((u8)k == PS2_KEY_ENTER || (u8)k == PS2_KEY_NUM_ENTER) {
+            break_line();
         } else if ((u8)k == PS2_KEY_UP) {
             if (cursor_row == 0u8) {
                 if (screen_idx != 0u8) {
@@ -294,11 +402,13 @@ export u8 main() {
                 vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = TYPING_COLOR;
                 cursor_row -= 1u8;
             }
-            cursor_line = cursor_line->prev;
-            if (cursor_line->len < cursor_col) {
-                cursor_col = cursor_line->len;
+            if ((u16)cursor_line->prev != 0u16) {
+                cursor_line = cursor_line->prev;
+                if (cursor_line->len < cursor_col) {
+                    cursor_col = cursor_line->len;
+                }
+                vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
             }
-            vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
         } else if ((u8)k == PS2_KEY_DOWN) {
             if ((u16)cursor_line->next != 0u16) {
                 if (cursor_row == VGA_ROWS - 2u8) {
