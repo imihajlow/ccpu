@@ -28,6 +28,7 @@ enum Command {
     Until(u16),
     Run,
     Breakpoint(u16),
+    Delete(u32),
     Print(u16, Type, u16),
     Press(Option<(u8,u8)>),
     Png(String),
@@ -73,7 +74,18 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
                 Some(x) => Breakpoint(x),
                 _ => Error
             }
-        },
+        }
+
+        Some("del") |
+        Some("delete") => {
+            match iter.next() {
+                Some(s) => match parse::<u32>(s) {
+                    Ok(x) => Delete(x),
+                    _ => Error
+                }
+                None => Error
+            }
+        }
 
         Some("p") |
         Some("print") => {
@@ -333,6 +345,10 @@ fn main() {
             Command::Breakpoint(x) => {
                 let id = state.set_breakpoint(x);
                 println!("Breakpoint {} at 0x{:04X}", id, x);
+                StepResult::Ok
+            }
+            Command::Delete(x) => {
+                state.del_breakpoint(x);
                 StepResult::Ok
             }
             Command::Print(addr, t, count) => {

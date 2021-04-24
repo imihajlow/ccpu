@@ -217,6 +217,10 @@ impl State {
         return self.last_id
     }
 
+    pub fn del_breakpoint(&mut self, id_to_del: u32) {
+        self.breakpoints.retain(|(id, _)| *id != id_to_del);
+    }
+
     pub fn step(&mut self, mem: &mut dyn Memory) -> StepResult {
         self.step_impl(mem, false)
     }
