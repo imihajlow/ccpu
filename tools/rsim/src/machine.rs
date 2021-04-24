@@ -221,14 +221,10 @@ impl State {
         self.breakpoints.retain(|(id, _)| *id != id_to_del);
     }
 
-    pub fn step(&mut self, mem: &mut dyn Memory) -> StepResult {
-        self.step_impl(mem, false)
-    }
-
     pub fn until<C>(&mut self, mem: &mut dyn Memory, until_addr: Option<u16>, ctrlc_pressed: &C) -> StepResult
     where C: Deref<Target = AtomicBool> {
         while !ctrlc_pressed.load(Ordering::SeqCst) && until_addr != Some(self.ip) {
-            match self.step_impl(mem, true) {
+            match self.step(mem) {
                 StepResult::Ok => {},
                 x => return x
             }
@@ -236,18 +232,7 @@ impl State {
         StepResult::Ok
     }
 
-    fn step_impl(&mut self, mem: &mut dyn Memory, check_bp: bool) -> StepResult {
-        let result = {
-            match self.breakpoints.iter().find(|(_,a)| *a == self.ip) {
-                Some((id, _)) => StepResult::Breakpoint(*id),
-                None => StepResult::Ok
-            }
-        };
-        if check_bp {
-            if let StepResult::Breakpoint(_) = result {
-                return result;
-            }
-        }
+    pub fn step(&mut self, mem: &mut dyn Memory) -> StepResult {
         let (instr, new_ip) = match Instruction::load(mem, self.ip) {
             Ok(instr) => instr,
             Err(x) => return StepResult::ReadError(self.ip, x)
@@ -306,6 +291,9 @@ impl State {
                 }
             }
         };
-        result
+        match self.breakpoints.iter().find(|(_,a)| *a == self.ip) {
+            Some((id, _)) => StepResult::Breakpoint(*id),
+            None => StepResult::Ok
+        }
     }
 }
