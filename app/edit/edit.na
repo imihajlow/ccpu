@@ -357,6 +357,174 @@ u8 break_line() {
     vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
 }
 
+u8 delete(struct Line *l, u8 col) {
+    u8 signle_line = 1u8;
+    while (1u8) {
+        if (l->len == 0u8) {
+            if ((u16)l->prev == 0u16 && (u16)l->next == 0u16) {
+                break; // the only line
+            } else if ((u16)l->next == 0u16) {
+                // last line
+                if (l == cursor_line) {
+                    cursor_line = cursor_line->prev;
+                    if (cursor_row == 0u8) {
+                        screen_idx -= 1u8;
+                        cursor_row = VGA_ROWS - 2u8;
+                    } else {
+                        cursor_row -= 1u8;
+                    }
+                }
+                l = l->prev;
+                free_line(l->next);
+                l->next = (struct Line *)0;
+            } else if ((u16)l->prev == 0u16) {
+                // first line
+                head = head->next;
+                head->prev = (struct Line *)0;
+                screen_ptrs[0] = head;
+                if (cursor_line == l) {
+                    cursor_line = head;
+                }
+                free_line(l);
+            } else {
+                // line with both neighbors
+                l->prev->next = l->next;
+                l->next->prev = l->prev;
+                if (cursor_line == l) {
+                    cursor_line = l->next;
+                }
+                free_line(l);
+            }
+            signle_line = 0u8;
+            break;
+        } else if (l->len != NO_NEWLINE) {
+            l->len -= 1u8;
+            for (u8 i = col; i != l->len; i += 1u8) {
+                l->data[i] = l->data[i + 1u8];
+            }
+            break;
+        } else {
+            signle_line = 0u8;
+            for (i = col; i != (u8)sizeof(l->data) - 1u8; i += 1u8) {
+                l->data[i] = l->data[i + 1u8];
+            }
+            if (l->next->len != 0u8) {
+                l->data[(u8)sizeof(l->data) - 1u8] = l->next->data[0];
+            } else {
+                l->len = (u8)sizeof(l->data) - 1u8;
+            }
+            l = l->next;
+            col = 0u8;
+        }
+    }
+    return signle_line;
+}
+
+// Merge l and l->next
+// l has newline
+u8 merge_lines(struct Line *l) {
+    struct Line *next = l->next;
+    if ((u16)next == 0u16) {
+        return;
+    }
+    u8 tail = (u8)sizeof(l->data) - l->len;
+    while (1u8) {
+        if (next->len <= tail) {
+            memcpy((u8*)l->data + l->len, (u8*)next->data, (u16)next->len);
+            l->len += next->len;
+            l->next = next->next;
+            if ((u16)l->next != 0u16) {
+                l->next->prev = l;
+            }
+            free_line(next);
+            break;
+        } else {
+            memcpy((u8*)l->data + l->len, (u8*)next->data, (u16)tail);
+            l->len = NO_NEWLINE;
+            if (next->len != NO_NEWLINE) {
+                next->len -= tail;
+                memcpy((u8*)next->data, (u8*)next->data + tail, (u16)next->len);
+                break;
+            } else {
+                next->len = (u8)sizeof(next->data) - tail;
+                memcpy((u8*)next->data, (u8*)next->data + tail, (u16)next->len);
+                l = next;
+                next = l->next;
+            }
+        }
+    }
+}
+
+u8 delete_right() {
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = TYPING_COLOR;
+    if (cursor_col != (u8)sizeof(cursor_line->data) && cursor_col != cursor_line->len) {
+        u8 single = delete(cursor_line, cursor_col);
+        if (single) {
+            u8 last = cursor_line->len;
+            if (last == NO_NEWLINE) {
+                last = (u8)sizeof(cursor_line->data);
+            }
+            memcpy((u8*)vga_char_seg + VGA_OFFSET(cursor_col, cursor_row), (u8*)cursor_line->data + cursor_col, (u16)(last - cursor_col));
+            vga_char_seg[VGA_OFFSET(last, cursor_row)] = 0u8;
+        } else {
+            next_screen = show_lines(screen_ptrs[screen_idx]);
+        }
+    } else {
+        if (cursor_line->len == NO_NEWLINE) {
+            delete(cursor_line->next, 0u8);
+        } else {
+            merge_lines(cursor_line);
+        }
+        next_screen = show_lines(screen_ptrs[screen_idx]);
+    }
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+}
+
+u8 delete_left() {
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = TYPING_COLOR;
+    if (cursor_col != 0u8) {
+        cursor_col -= 1u8;
+        u8 single = delete(cursor_line, cursor_col);
+        if (single) {
+            u8 last = cursor_line->len;
+            if (last == NO_NEWLINE) {
+                last = (u8)sizeof(cursor_line->data);
+            }
+            memcpy((u8*)vga_char_seg + VGA_OFFSET(cursor_col, cursor_row), (u8*)cursor_line->data + cursor_col, (u16)(last - cursor_col));
+            vga_char_seg[VGA_OFFSET(last, cursor_row)] = 0u8;
+        } else {
+            next_screen = show_lines(screen_ptrs[screen_idx]);
+        }
+    } else {
+        struct Line *prev_line = cursor_line->prev;
+        if ((u16)prev_line != 0u16) {
+            cursor_line = prev_line;
+            if (cursor_row == 0u8) {
+                cursor_row = VGA_ROWS - 2u8;
+                screen_idx -= 1u8;
+            } else {
+                cursor_row -= 1u8;
+            }
+
+            if (prev_line->len == NO_NEWLINE) {
+                cursor_col = (u8)sizeof(prev_line->data) - 1u8;
+            } else if (prev_line->len != 0u8) {
+                cursor_col = prev_line->len;
+            } else {
+                cursor_col = 0u8;
+            }
+
+            if (prev_line->len == NO_NEWLINE) {
+                delete(prev_line, cursor_col);
+            } else {
+                merge_lines(prev_line);
+            }
+        }
+        next_screen = show_lines(screen_ptrs[screen_idx]);
+    }
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+}
+
 export u8 main() {
     ps2_init();
     vga_clear(TYPING_COLOR);
@@ -391,6 +559,10 @@ export u8 main() {
             insert((u8)k);
         } else if ((u8)k == PS2_KEY_ENTER || (u8)k == PS2_KEY_NUM_ENTER) {
             break_line();
+        } else if ((u8)k == PS2_KEY_BACKSPACE) {
+            delete_left();
+        } else if ((u8)k == PS2_KEY_DELETE || (u8)k == PS2_KEY_F1) {
+            delete_right();
         } else if ((u8)k == PS2_KEY_UP) {
             if (cursor_row == 0u8) {
                 if (screen_idx != 0u8) {
