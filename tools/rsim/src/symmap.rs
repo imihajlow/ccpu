@@ -97,8 +97,8 @@ impl SymMap {
         self.labels.iter()
             .filter(|(sym, _)|
                 match sym {
-                    Symbol::Global(n) => n == name,
-                    Symbol::Local(_, n) => n == name
+                    Symbol::Global(n) => n.ends_with(name),
+                    Symbol::Local(_, n) => n.ends_with(name)
                 })
             .collect()
     }
