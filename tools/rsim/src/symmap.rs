@@ -6,13 +6,19 @@ use serde_yaml;
 
 pub struct SymMap {
     labels: Vec<(Symbol, u16)>,
-    lines: Vec<((String, u32), u16)>,
+    lines: Vec<(LineInfo, u16)>,
 }
 
 #[derive(Clone, Debug)]
 pub enum Symbol {
     Global(String),
     Local(String, String)
+}
+
+#[derive(Clone, Debug)]
+pub struct LineInfo {
+    filename: String,
+    line: u32
 }
 
 #[derive(Debug)]
@@ -39,6 +45,12 @@ impl fmt::Display for Symbol {
             Symbol::Global(label) => write!(f, "{}", label),
             Symbol::Local(file, label) => write!(f, "{} ({})", label, file)
         }
+    }
+}
+
+impl fmt::Display for LineInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.filename, self.line)
     }
 }
 
@@ -69,7 +81,10 @@ impl SymMap {
 
         for (file, lines) in de.lines {
             for (line, address) in lines {
-                result.lines.push(((file.clone(), line), address));
+                result.lines.push((LineInfo {
+                    filename: file.clone(),
+                    line: line
+                }, address));
             }
         }
 
@@ -78,14 +93,20 @@ impl SymMap {
         Ok(result)
     }
 
-    pub fn find_symbol(&self, name: &str) -> Vec<(Symbol, u16)> {
+    pub fn find_symbol(&self, name: &str) -> Vec<&(Symbol, u16)> {
         self.labels.iter()
             .filter(|(sym, _)|
                 match sym {
                     Symbol::Global(n) => n == name,
                     Symbol::Local(_, n) => n == name
                 })
-            .map(|(s,a)| (s.clone(), *a))
+            .collect()
+    }
+
+    pub fn find_line(&self, filename: &str, line: u32) -> Vec<&(LineInfo, u16)> {
+        self.lines.iter()
+            .filter(|(LineInfo{ filename: fname, line: ln }, _)|
+                *ln == line && fname.ends_with(filename))
             .collect()
     }
 
@@ -106,8 +127,8 @@ impl SymMap {
     pub fn associate_line(&self, address: u16) -> Option<(&String, u32)> {
         match self.lines.binary_search_by(|(_,a)| a.cmp(&address)) {
             Ok(n) => {
-                let ((file, line), _) = &self.lines[n];
-                Some((file, *line))
+                let (li, _) = &self.lines[n];
+                Some((&li.filename, li.line))
             }
             _ => None
         }

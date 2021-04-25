@@ -17,6 +17,8 @@ use std::io;
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use regex::Regex;
+#[macro_use] extern crate lazy_static;
 use ctrlc;
 use parse_int::parse;
 use argparse::{ArgumentParser, StoreTrue, StoreOption, Store};
@@ -202,16 +204,9 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
     }
 }
 
-fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
-    match parse::<u16>(&name) {
-        Ok(addr) => return Some(addr),
-        _ => {}
-    }
-
-    let symbols = syms.find_symbol(name);
+fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>) -> Option<u16> {
     match symbols.len() {
         0 => {
-            println!("Symbol not found: {}", name);
             None
         },
         1 => {
@@ -243,6 +238,47 @@ fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
             None
         }
     }
+}
+
+fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|(0x[0-9a-f]+)$").unwrap();
+    }
+
+    match RE.captures(name) {
+        None => {
+            println!("Bad address");
+            return None;
+        }
+        Some(cap) => {
+            match cap.get(2) {
+                Some(line) => {
+                    let file  = &cap[1];
+                    let line = parse::<u32>(line.as_str()).unwrap();
+                    let options = syms.find_line(file, line);
+                    return select_symbol(&options);
+                }
+                None => {}
+            }
+            match cap.get(3) {
+                Some(name) => {
+                    let symbols = syms.find_symbol(name.as_str());
+                    return select_symbol(&symbols);
+                }
+                None => {}
+            }
+            match cap.get(4) {
+                Some(addr) => {
+                    match parse::<u16>(addr.as_str()) {
+                        Ok(addr) => return Some(addr),
+                        _ => {}
+                    }
+                }
+                None => {}
+            }
+        }
+    }
+    None
 }
 
 fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u32> {

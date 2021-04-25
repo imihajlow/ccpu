@@ -19,3 +19,4 @@ itertools = "0.10"
 mio = { version="0.7", features=["net", "os-poll"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
+lazy_static = "1.4.0"
