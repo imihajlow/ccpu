@@ -25,6 +25,7 @@ use crate::machine::StepResult;
 enum Command {
     Error,
     Next,
+    NextLine,
     Until(u16),
     Run,
     Breakpoint(u16),
@@ -55,6 +56,8 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
         None |
         Some("n") |
         Some("next") => Next,
+
+        Some("l") => NextLine,
 
         Some("u") |
         Some("until") => {
@@ -325,9 +328,14 @@ fn main() {
     }
 
     let mut state = machine::State::new();
+    let mut last_input = "\n".to_string();
     loop {
+        match syms.associate_line(state.ip) {
+            Some((filename, line)) => println!("{}:{}", filename, line),
+            None => {}
+        }
         match syms.associate_address(state.ip) {
-            Some((addr, offset)) => println!("{} + 0x{:X}:", addr, offset),
+            Some((sym, offset)) => println!("{} + 0x{:X}:", sym, offset),
             None => {}
         }
         machine::disasm(&system, state.ip, state.ip).expect("Can't disasm");
@@ -336,10 +344,16 @@ fn main() {
         io::stdout().flush().unwrap();
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
+        if input == "\n" {
+            input = last_input.clone();
+        } else {
+            last_input = input.clone();
+        }
         ctrlc_pressed.store(false, Ordering::SeqCst);
         let result = match parse_command(&syms, &input) {
             Command::Quit => break,
             Command::Next => state.step(&mut system),
+            Command::NextLine => state.step_line(&mut system, &syms, &ctrlc_pressed),
             Command::Until(x) => state.until(&mut system, Some(x), &ctrlc_pressed),
             Command::Run => state.until(&mut system, None, &ctrlc_pressed),
             Command::Breakpoint(x) => {

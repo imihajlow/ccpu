@@ -6,6 +6,7 @@ use crate::instruction::Instruction;
 use crate::instruction::AluOperation;
 use crate::instruction;
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
+use crate::symmap::SymMap;
 
 #[derive(Debug)]
 pub enum StepResult {
@@ -227,6 +228,21 @@ impl State {
             match self.step(mem) {
                 StepResult::Ok => {},
                 x => return x
+            }
+        }
+        StepResult::Ok
+    }
+
+    pub fn step_line<C>(&mut self, mem: &mut dyn Memory, symmap: &SymMap, ctrlc_pressed: &C) -> StepResult
+    where C: Deref<Target = AtomicBool> {
+        while !ctrlc_pressed.load(Ordering::SeqCst) {
+            match self.step(mem) {
+                StepResult::Ok => {},
+                x => return x
+            }
+            match symmap.associate_line(self.ip) {
+                Some(_) => return StepResult::Ok,
+                None => {}
             }
         }
         StepResult::Ok

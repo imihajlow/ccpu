@@ -1,19 +1,24 @@
 use std::io;
-use std::io::BufRead;
-use parse_int::parse;
-use parse_int;
-use regex::Regex;
-use core::num;
-
+use std::collections::HashMap;
+use std::fmt;
+use serde::Deserialize;
+use serde_yaml;
 
 pub struct SymMap {
-    by_address: Vec<(String, u16)>,
+    labels: Vec<(Symbol, u16)>,
+    lines: Vec<((String, u32), u16)>,
+}
+
+#[derive(Clone, Debug)]
+pub enum Symbol {
+    Global(String),
+    Local(String, String)
 }
 
 #[derive(Debug)]
 pub enum SymMapLoadError {
     IoError(io::Error),
-    ParseError(num::ParseIntError)
+    ParseError(serde_yaml::Error)
 }
 
 impl From<io::Error> for SymMapLoadError {
@@ -22,52 +27,89 @@ impl From<io::Error> for SymMapLoadError {
     }
 }
 
-impl From<num::ParseIntError> for SymMapLoadError {
-    fn from(error: num::ParseIntError) -> Self {
+impl From<serde_yaml::Error> for SymMapLoadError {
+    fn from(error: serde_yaml::Error) -> Self {
         SymMapLoadError::ParseError(error)
     }
 }
 
+impl fmt::Display for Symbol {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Symbol::Global(label) => write!(f, "{}", label),
+            Symbol::Local(file, label) => write!(f, "{} ({})", label, file)
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+struct SymMapRepr {
+    labels: HashMap<Option<String>, HashMap<String, u16>>,
+    lines: HashMap<String, HashMap<u32, u16>>
+}
+
 impl SymMap {
     pub fn load<T: io::Read>(f: &mut T) -> Result<SymMap, SymMapLoadError> {
-        let lines = io::BufReader::new(f).lines();
-        let re = Regex::new(r"^(\w+)\s*=\s*(0x[0-9a-f]+|[1-9]\d*)\s*$").unwrap();
         let mut result = SymMap{
-            by_address: Vec::new()
+            labels: Vec::new(),
+            lines: Vec::new()
         };
-        for line in lines {
-            let l = line?;
-            match re.captures(&l) {
-                None => {},
-                Some(cap) => {
-                    let name = &cap[1];
-                    let value = parse::<u16>(&cap[2])?;
-                    result.by_address.push((name.to_string(), value));
-                }
-            };
+
+        let de: SymMapRepr = serde_yaml::from_reader(f)?;
+
+        for (file, symbols) in de.labels {
+            for (symbol, address) in symbols {
+                let sym = match file {
+                    Some(ref f) => Symbol::Local(f.clone(), symbol),
+                    None => Symbol::Global(symbol)
+                };
+                result.labels.push((sym, address));
+            }
         }
-        result.by_address.sort_unstable_by(|(_,a), (_,b)| a.cmp(b));
+
+        for (file, lines) in de.lines {
+            for (line, address) in lines {
+                result.lines.push(((file.clone(), line), address));
+            }
+        }
+
+        result.labels.sort_unstable_by(|(_,a), (_,b)| a.cmp(b));
+        result.lines.sort_unstable_by(|(_,a), (_,b)| a.cmp(b));
         Ok(result)
     }
 
-    pub fn find_symbol(&self, name: &str) -> Vec<(String, u16)> {
-        self.by_address.iter()
-            .filter(|(n,_)| n.ends_with(name))
-            .map(|(n,a)| (n.clone(), *a))
+    pub fn find_symbol(&self, name: &str) -> Vec<(Symbol, u16)> {
+        self.labels.iter()
+            .filter(|(sym, _)|
+                match sym {
+                    Symbol::Global(n) => n == name,
+                    Symbol::Local(_, n) => n == name
+                })
+            .map(|(s,a)| (s.clone(), *a))
             .collect()
     }
 
-    pub fn associate_address(&self, address: u16) -> Option<(&String, u16)> {
-        match self.by_address.binary_search_by(|(_,a)| a.cmp(&address)) {
+    pub fn associate_address(&self, address: u16) -> Option<(Symbol, u16)> {
+        match self.labels.binary_search_by(|(_,a)| a.cmp(&address)) {
             Ok(n) => {
-                let (name, _) = &self.by_address[n];
-                Some((name, 0))
+                let (name, _) = &self.labels[n];
+                Some((name.clone(), 0))
             },
             Err(0) => None,
             Err(n) => {
-                let (name, sym_addr) = &self.by_address[n - 1];
-                Some((name, address - sym_addr))
+                let (name, sym_addr) = &self.labels[n - 1];
+                Some((name.clone(), address - sym_addr))
             }
+        }
+    }
+
+    pub fn associate_line(&self, address: u16) -> Option<(&String, u32)> {
+        match self.lines.binary_search_by(|(_,a)| a.cmp(&address)) {
+            Ok(n) => {
+                let ((file, line), _) = &self.lines[n];
+                Some((file, *line))
+            }
+            _ => None
         }
     }
 }
