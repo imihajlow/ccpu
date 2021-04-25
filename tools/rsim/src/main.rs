@@ -21,6 +21,8 @@ use regex::Regex;
 #[macro_use] extern crate lazy_static;
 use ctrlc;
 use parse_int::parse;
+use rustyline::error::ReadlineError;
+use rustyline::Editor;
 use argparse::{ArgumentParser, StoreTrue, StoreOption, Store};
 use crate::machine::StepResult;
 
@@ -50,9 +52,6 @@ pub enum Type {
 
 fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
     use Command::*;
-    if s.len() == 0 {
-        return Quit;
-    }
     let mut iter = s.split_whitespace();
     match iter.next() {
         None |
@@ -199,6 +198,8 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
         }
 
         Some("eject") => Eject,
+
+        Some("quit") => Quit,
 
         _ => Error
     }
@@ -365,6 +366,7 @@ fn main() {
 
     let mut state = machine::State::new();
     let mut last_input = "\n".to_string();
+    let mut rl = Editor::<()>::new();
     loop {
         match syms.associate_line(state.ip) {
             Some((filename, line)) => println!("{}:{}", filename, line),
@@ -376,17 +378,29 @@ fn main() {
         }
         machine::disasm(&system, state.ip, state.ip).expect("Can't disasm");
         println!("{}", &state);
-        print!("> ");
-        io::stdout().flush().unwrap();
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).unwrap();
-        if input == "\n" {
+        let mut input = match rl.readline("> ") {
+            Ok(l) => l,
+            Err(ReadlineError::Eof) => break,
+            Err(ReadlineError::Interrupted) => continue,
+            Err(e) => {
+                println!("Error {:?}", e);
+                return;
+            }
+        };
+        if input == "" {
             input = last_input.clone();
         } else {
             last_input = input.clone();
         }
         ctrlc_pressed.store(false, Ordering::SeqCst);
-        let result = match parse_command(&syms, &input) {
+        let cmd = parse_command(&syms, &input);
+        match cmd {
+            Command::Error => {},
+            _ => {
+                rl.add_history_entry(input.as_str());
+            }
+        }
+        let result = match cmd {
             Command::Quit => break,
             Command::Next => state.step(&mut system),
             Command::NextLine => state.step_line(&mut system, &syms, &ctrlc_pressed),
