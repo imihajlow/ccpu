@@ -217,9 +217,11 @@ u8 *append_path(u8 *name) {
     while (*p) {
         p += 1u8;
     }
-    *p = '/';
     u8 *r = p;
-    p += 1u8;
+    if ((u8*)current_dir_name != p && *(p - 1u8) != '/') {
+        *p = '/';
+        p += 1u8;
+    }
     while (*name) {
         *p = *name;
         p += 1u8;
