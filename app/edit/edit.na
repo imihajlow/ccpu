@@ -13,7 +13,7 @@
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_LIGHT_BLUE)
 #define STATUS_COLOR COLOR(COLOR_BLACK, COLOR_CYAN)
 
-#define MAX_LINES 460u16
+#define MAX_LINES 300u16
 
 #define NO_NEWLINE 128u8
 
@@ -111,6 +111,46 @@ u8 load(u8 *filename) {
     }
     pool_head = cur_line->next;
     cur_line->next = (struct Line*)0;
+    close(fd);
+    return 1u8;
+}
+
+u8 save(u8 *filename) {
+    u8 fd = open(filename);
+    if (fd == FAT_BAD_DESC) {
+        log_string("Can't open");
+        log_u8(last_error);
+        return 0u8;
+    }
+
+    struct Line *l = head;
+    u8 nl = '\n';
+    while ((u16)l != 0u16) {
+        u16 to_write = (u16)l->len;
+        if (l->len == NO_NEWLINE) {
+            to_write = sizeof(l->data);
+        }
+        memcpy((u8*)buf, (u8*)l->data, to_write);
+        if (l->len != NO_NEWLINE) {
+            buf[l->len] = '\n';
+            to_write += 1u16;
+        }
+        u16 written = write(fd, (u8*)buf, to_write);
+        if (written != to_write) {
+            log_string("Write error");
+            log_u8(last_error);
+            close(fd);
+            return 0u8;
+        }
+        l = l->next;
+    }
+    u8 r = truncate(fd);
+    if (!r) {
+        log_string("Can't truncate");
+        log_u8(last_error);
+        close(fd);
+        return 0u8;
+    }
     close(fd);
     return 1u8;
 }
@@ -618,6 +658,8 @@ export u8 main() {
             }
         } else if ((u8)k == PS2_KEY_ESCAPE) {
             break;
+        } else if ((u8)k == PS2_KEY_F2) {
+            save(filename);
         }
     }
 }
