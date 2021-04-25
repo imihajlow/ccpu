@@ -13,7 +13,7 @@
 #define CURSOR_COLOR COLOR(COLOR_BLUE, COLOR_LIGHT_BLUE)
 #define STATUS_COLOR COLOR(COLOR_BLACK, COLOR_CYAN)
 
-#define MAX_LINES 300u16
+#define MAX_LINES 360u16
 
 #define NO_NEWLINE 128u8
 
@@ -47,6 +47,8 @@ u8 filename_buf[40];
 
 // actual file name
 u8 *filename;
+
+u8 dirty;
 
 u8 cursor_col;
 u8 cursor_row;
@@ -152,13 +154,23 @@ u8 save(u8 *filename) {
         return 0u8;
     }
     close(fd);
+    dirty = 0u8;
     return 1u8;
 }
 
 u8 init_layout() {
     vga_clear(TYPING_COLOR);
     memset((u8*)vga_color_seg + VGA_OFFSET(0, VGA_ROWS - 1u8), STATUS_COLOR, (u16)VGA_COLS);
-    vga_put_text(1u8, VGA_ROWS - 1u8, filename);
+    vga_put_text(3u8, VGA_ROWS - 1u8, filename);
+    show_dirty();
+}
+
+u8 show_dirty() {
+    if (dirty) {
+        vga_char_seg[VGA_OFFSET(1u8, VGA_ROWS - 1u8)] = '*';
+    } else {
+        vga_char_seg[VGA_OFFSET(1u8, VGA_ROWS - 1u8)] = 0u8;
+    }
 }
 
 struct Line *show_lines(struct Line *start) {
@@ -299,6 +311,7 @@ u8 insert(u8 c) {
         cursor_row = 0u8;
     }
     vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+    dirty = 1u8;
     return 1u8;
 }
 
@@ -395,6 +408,7 @@ u8 break_line() {
     }
     next_screen = show_lines(screen_ptrs[screen_idx]);
     vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+    dirty = 1u8;
 }
 
 u8 delete(struct Line *l, u8 col) {
@@ -518,6 +532,7 @@ u8 delete_right() {
         next_screen = show_lines(screen_ptrs[screen_idx]);
     }
     vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+    dirty = 1u8;
 }
 
 u8 delete_left() {
@@ -563,6 +578,7 @@ u8 delete_left() {
         next_screen = show_lines(screen_ptrs[screen_idx]);
     }
     vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = CURSOR_COLOR;
+    dirty = 1u8;
 }
 
 export u8 main() {
@@ -584,6 +600,7 @@ export u8 main() {
     if (!r) {
         return;
     }
+    dirty = 0u8;
     cursor_col = 0u8;
     cursor_row = 0u8;
     next_screen = show_lines(head);
@@ -694,5 +711,6 @@ export u8 main() {
         } else if ((u8)k == PS2_KEY_F2) {
             save(filename);
         }
+        show_dirty();
     }
 }
