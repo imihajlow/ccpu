@@ -417,8 +417,15 @@ export u8 fat_open_file(struct FatDirEntry *dir, u8 *name) {
 // returns bool
 export u8 fat_private_init_fd(struct FileDescriptor *pfd) {
     pfd->is_root = 0u8;
-    u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
-    pfd->last_cluster_len = (u16)pfd->dir_entry.size & cluster_mask;
+    if (pfd->dir_entry.size == 0u32) {
+        pfd->last_cluster_len = 0u16;
+    } else {
+        u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
+        pfd->last_cluster_len = (u16)pfd->dir_entry.size & cluster_mask;
+        if (pfd->last_cluster_len == 0u16) {
+            pfd->last_cluster_len = cluster_mask + 1u16; // full cluster
+        }
+    }
 
     pfd->dir_entry_modified = 0u8;
     return seek_begin(pfd);
@@ -448,7 +455,7 @@ u8 seek_advance(struct FileDescriptor *pfd, u16 advance) {
             // next cluster
             if (pfd->is_root) {
                 pfd->block_addr += 1u32;
-            } else {
+            } else if (pfd->next_cluster < FAT_MIN_LAST_CLUSTER) {
                 pfd->block_addr = fat_info.data_offset;
                 pfd->block_addr += (u32)(pfd->next_cluster - 2u16) << fat_info.log_sectors_per_cluster;
                 pfd->cur_cluster = pfd->next_cluster;
@@ -487,6 +494,7 @@ export u16 fat_write(u8 fd, u8 *src, u16 len) {
 }
 
 // return number of bytes processed
+// TODO!!! check write if file size is divisible by cluster size!
 u16 fat_action(u8 fd, u8 *data, u16 len, u8 is_write) {
     struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
     if (pfd->is_free) {
@@ -632,8 +640,15 @@ export u8 fat_truncate(u8 fd) {
         }
         pfd->next_cluster = 0xffffu16;
     }
-    u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
-    pfd->last_cluster_len = (u16)pfd->abs_offset & cluster_mask;
+    if (pfd->abs_offset == 0u32) {
+        pfd->last_cluster_len = 0u16;
+    } else {
+        u16 cluster_mask = ~(0xffffu16 << (fat_info.log_sectors_per_cluster + 9u8));
+        pfd->last_cluster_len = (u16)pfd->abs_offset & cluster_mask;
+        if (pfd->last_cluster_len == 0u16) {
+            pfd->last_cluster_len = cluster_mask + 1u16;
+        }
+    }
     return 1u8;
 }
 

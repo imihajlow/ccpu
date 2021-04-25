@@ -33,15 +33,15 @@ export u8 exec_fd(u8 fd, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, u8 *a
     }
     u8 *ext = (u8*)de->filename + 8u8;
     if (ext[0] != 'A' || ext[1] != 'P' || ext[2] != 'P') {
-        last_error = EXEC_ERROR_WRONG_EXTENSION;
         fat_close(fd);
+        last_error = EXEC_ERROR_WRONG_EXTENSION;
         return 0u8;
     }
     u32 size32 = de->size;
     u16 max_size = (u16)__seg_extension_end;
     if (size32 > (u32)max_size) {
-        last_error = EXEC_ERROR_FILE_TOO_LARGE;
         fat_close(fd);
+        last_error = EXEC_ERROR_FILE_TOO_LARGE;
         return 0u8;
     }
     u16 size = (u16)size32;
@@ -66,7 +66,7 @@ export u8 exec_fd(u8 fd, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, u8 *a
         r = fat_read(fd, (u8*)0x8000u16, size);
         if (r != size) {
             fat_close(fd);
-            return;
+            return 0u8;
         }
         progressbar_progress((u8)(r >> 8u8));
     }
