@@ -3,6 +3,7 @@ import argparse
 import json
 import re
 import sys
+import yaml
 import os
 from layout import Layout
 from object import Object
@@ -142,6 +143,30 @@ class SectionsFilter:
         else:
             return section.name in self.reachable
 
+class SymbolMap:
+    def __init__(self, globalSymbols):
+        self._labels = { None: globalSymbols.copy() } # objectName -> {label -> ip}
+        self._lines = {} # filename -> {line -> ip}
+
+    def addLabel(self, objName, label, ip):
+        if objName not in self._labels:
+            self._labels[objName] = {}
+        self._labels[objName][label] = ip
+
+    def addLineInfo(self, offset, mapping):
+        for filename in mapping:
+            if filename not in self._lines:
+                self._lines[filename] = {}
+            d = self._lines[filename]
+            m = mapping[filename]
+            for line in m:
+                d[int(line)] = offset + m[line]
+
+    def save(self, f):
+        if f is not None:
+            yaml.dump({"labels": self._labels, "lines": self._lines}, f)
+
+
 def link(objects, layout, fit, sectionsFilter, api):
     ip = 0
     exportedSymbolValues = dict()
@@ -218,7 +243,7 @@ def link(objects, layout, fit, sectionsFilter, api):
             if not found:
                 raise LinkerError("symbol `{}' is exported, but not defined".format(label), o)
     # assign local symbol values and evaluate references
-    symbolMap = exportedSymbolValues.copy()
+    symbolMap = SymbolMap(exportedSymbolValues)
     apiOut = dict()
     for o in objects:
         localSymbolValues = {}
@@ -227,9 +252,10 @@ def link(objects, layout, fit, sectionsFilter, api):
                 value = s.offset + s.labels[label]
                 localSymbolValues[label] = value
                 if label not in o.exportSymbols:
-                    symbolMap["{}_{}".format(o.name, label)] = value
+                    symbolMap.addLabel(o.name, label, value)
                 else:
                     apiOut[label] = value
+            symbolMap.addLineInfo(s.offset, s.lineInfo)
         localSymbolValues.update(o.consts)
         for label in o.consts:
             if label in o.exportSymbols:
@@ -263,8 +289,7 @@ def createRom(objects, segments, sectionsFilter, layout):
 
 def load(filename):
     with open(filename, "r") as f:
-        objectName = "_" + re.sub(r"\W", "_", filename)
-        return Object.fromDict(objectName, json.load(f))
+        return Object.fromDict(filename, json.load(f))
 
 def save(data, filename, type, full, filler, slim):
     mode = "wb" if type == "bin" else "w"
@@ -348,7 +373,7 @@ if __name__ == '__main__':
         symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)
         rom = createRom(objects, segments, sectionsFilter, layout)
         save(rom, args.o, args.type, args.full, args.filler, args.slim)
-        saveLabels(args.m, symbolMap)
+        symbolMap.save(args.m)
         saveLabels(args.api_out, apiOut)
     except LinkerError as e:
         sys.stderr.write(str(e) + "\n")
