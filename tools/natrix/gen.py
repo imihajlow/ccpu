@@ -13,7 +13,7 @@ def randomString(n):
     return "".join(chr(x) for x in random.choices(range(ord('A'), ord('Z') + 1), k=n))
 
 class Generator:
-    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections):
+    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections, lineInfo):
         self.maxTempVarIndex = -1
         self.labelIndex = 0
         self.breakLabel = [] # stack
@@ -24,6 +24,7 @@ class Generator:
         self.nameInfo = nameInfo
         self.createSubsections = createSubsections
         self.uniqueId = randomString(10)
+        self.lineInfo = lineInfo
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -280,45 +281,50 @@ class Generator:
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
     def generateStatement(self, t, curFn):
+        pos = Position.fromAny(t)
+        f, l = self.lineInfo.translatePosition(pos)
+        result = self.backend.sourceFilename(f)
+        result += self.backend.lineNumber(l)
         if t.data == 'assignment':
             l, r = t.children
-            return self.generateAssignment(l, r, curFn)
+            result += self.generateAssignment(l, r, curFn)
         elif t.data == 'decl_var':
-            return ""
+            result += ""
         elif t.data == 'block':
-            return "".join(self.generateStatement(child, curFn) for child in t.children)
+            result += "".join(self.generateStatement(child, curFn) for child in t.children)
         elif t.data == 'conditional':
-            return self.generateConditional(t.children[0], t.children[1], t.children[2] if len(t.children) == 3 else None, curFn)
+            result += self.generateConditional(t.children[0], t.children[1], t.children[2] if len(t.children) == 3 else None, curFn)
         elif t.data == 'while_loop':
-            return self.generateWhile(t.children[0], t.children[1], curFn)
+            result += self.generateWhile(t.children[0], t.children[1], curFn)
         elif t.data == 'for_loop':
-            return self.generateFor(t.children[0], t.children[1], t.children[2], t.children[3], curFn)
+            result += self.generateFor(t.children[0], t.children[1], t.children[2], t.children[3], curFn)
         elif t.data == 'break_statement':
             if len(self.breakLabel) == 0:
                 raise SemanticError(t.line, "Not in a loop")
-            return self.backend.genJump(self.breakLabel[0])
+            result += self.backend.genJump(self.breakLabel[0])
         elif t.data == 'continue_statement':
             if len(self.continueLabel) == 0:
                 raise SemanticError(t.line, "Not in a loop")
-            return self.backend.genJump(self.continueLabel[0])
+            result += self.backend.genJump(self.continueLabel[0])
         elif t.data == 'function_call':
-            return self.generateFunctionCall(Position.fromAny(t), str(t.children[0]), t.children[1:], curFn)
+            result += self.generateFunctionCall(Position.fromAny(t), str(t.children[0]), t.children[1:], curFn)
         elif t.data == 'assignment_function':
             call = t.children[1]
-            return self.generateFunctionAssignment(Position.fromAny(t.children[0]), Position.fromAny(call),
+            result += self.generateFunctionAssignment(Position.fromAny(t.children[0]), Position.fromAny(call),
                 t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
             dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
-            return self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
+            result += self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
-            return self.backend.genReturn(curFn)
+            result += self.backend.genReturn(curFn)
         elif t.data == 'return_fc_statement':
             call = t.children[0]
             dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
             callCode = self.generateFunctionAssignment(Position.fromAny(t), Position.fromAny(call),
                 dest, str(call.children[0]), call.children[1:], curFn)
             retCode = self.backend.genReturn(curFn)
-            return callCode + retCode
+            result += callCode + retCode
+        return result
 
     def generateFunctionDefinition(self, decl, body):
         name = str(decl.children[2])

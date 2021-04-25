@@ -8,10 +8,11 @@ class Section:
         self.refs = []
         self.align = align
         self.offset = None
+        self.lineInfo = {} # filename -> (line -> ip)
         self.__ip = 0
 
     def toDict(self):
-        return {"segment": self.segment, "name": self.name, "align": self.align, "text": self.text, "labels": self.labels, "refs": self.refs}
+        return {"segment": self.segment, "name": self.name, "align": self.align, "text": self.text, "labels": self.labels, "refs": self.refs, "lines": self.lineInfo}
 
     @staticmethod
     def fromDict(d):
@@ -19,6 +20,7 @@ class Section:
         o.text = d["text"]
         o.labels = d["labels"]
         o.refs = d["refs"]
+        o.lineInfo = d["lines"]
         return o
 
     def advance(self, n):
@@ -38,6 +40,11 @@ class Section:
     def placeExpression(self, offset, x):
         self.refs += [(self.__ip + offset, x)]
 
+    def setLineNumber(self, f, n):
+        if f not in self.lineInfo:
+            self.lineInfo[f] = {}
+        self.lineInfo[f][n] = self.__ip
+
 class Object:
     def __init__(self):
         self.name = ""
@@ -47,13 +54,14 @@ class Object:
         self.consts = {}
         self.__allocated = False
         self.__curSectionIndex = -1
+        self.__sourceFilename = None
 
     def toDict(self):
         return {
             "globalSymbols": self.globalSymbols,
             "exportSymbols": self.exportSymbols,
             "sections": [s.toDict() for s in self.sections],
-            "consts": self.consts
+            "consts": self.consts,
         }
 
     @staticmethod
@@ -124,6 +132,13 @@ class Object:
             result.update((l, 0) for l in s.labels)
         result.update(self.consts)
         return result
+
+    def setSource(self, n):
+        self.__sourceFilename = n
+
+    def setLineNumber(self, n):
+        if self.__sourceFilename is not None:
+            self.sections[self.__curSectionIndex].setLineNumber(self.__sourceFilename, n)
 
     def __checkRedefinition(self, name, isGlobal):
         for s in self.sections:

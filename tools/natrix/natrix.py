@@ -105,7 +105,7 @@ if __name__ == '__main__':
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(cg, lt, ni, backend, not args.no_subsections)
+        g = Generator(cg, lt, ni, backend, not args.no_subsections, lit)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:

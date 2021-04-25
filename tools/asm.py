@@ -263,6 +263,10 @@ def assemble(lines, aluRevision):
                 result.declareGlobal(args)
             elif op == '.export':
                 pass
+            elif op == '.source':
+                result.setSource(args)
+            elif op == '.line':
+                result.setLineNumber(int(args, 0))
             else:
                 result.advance(updateIp(op, args))
         except ValueError as e:

@@ -132,6 +132,12 @@ def reserveTempVars(maxIndex, uniqueId, subsections):
 def reserveVar(label, type):
     return reserve(label, type.getReserveSize())
 
+def lineNumber(n):
+    return f".line {n}\n"
+
+def sourceFilename(n):
+    return f".source {n}\n"
+
 def genFunctionPrologue(fn):
     return genLabel(fn) + '''
         mov a, pl
