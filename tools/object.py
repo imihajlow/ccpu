@@ -43,7 +43,8 @@ class Section:
     def setLineNumber(self, f, n):
         if f not in self.lineInfo:
             self.lineInfo[f] = {}
-        self.lineInfo[f][n] = self.__ip
+        if n not in self.lineInfo[f]:
+            self.lineInfo[f][n] = self.__ip
 
 class Object:
     def __init__(self):
