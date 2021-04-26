@@ -1,7 +1,7 @@
 .PHONY: test test.o sandbox.na
 
 test: test.bin
-	../../sim/sim.py test.bin test.map -c 'protect_rom 0' -c 'b fail' -c 'b success' -c 'r' -c 'p w fail_arg0'
+	../../rsim/target/release/rsim --plain -c 'b fail' -c 'b success' -c 'r' -c 'p w fail_arg0' -c 'quit' test.bin test.map
 	rm -f test.o
 	coverage html
 

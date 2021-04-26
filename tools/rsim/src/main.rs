@@ -23,7 +23,7 @@ use ctrlc;
 use parse_int::parse;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use argparse::{ArgumentParser, StoreTrue, StoreOption, Store};
+use argparse::{ArgumentParser, StoreTrue, StoreOption, Store, Collect};
 use crate::machine::StepResult;
 
 enum Command {
@@ -334,6 +334,7 @@ fn main() {
     let mut fname_font: Option<String> = None;
     let mut mem_plain = false;
     let mut port: Option<u16> = None;
+    let mut startup_commands: Vec<String> = Vec::new();
 
     {
         let mut ap = ArgumentParser::new();
@@ -341,11 +342,13 @@ fn main() {
         ap.refer(&mut mem_plain).add_option(&["--plain"], StoreTrue, "Plain 64k of RAM, no IO");
         ap.refer(&mut fname_font).add_option(&["--font"], StoreOption, "Font file for VGA simulation");
         ap.refer(&mut port).add_option(&["--port"], StoreOption, "Web server port (default: 3000)");
+        ap.refer(&mut startup_commands).add_option(&["-c"], Collect, "Commands to run on startup");
         ap.refer(&mut fname_bin).add_argument("file", Store, "Program file");
         ap.refer(&mut fname_map).add_argument("mapfile", Store, "Label map file");
         ap.parse_args_or_exit();
     }
 
+    startup_commands.reverse();
 
     let mut file_bin = File::open(fname_bin).expect("Can't open");
     let mut file_map = File::open(fname_map).expect("Can't open");
@@ -378,13 +381,19 @@ fn main() {
         }
         machine::disasm(&system, state.ip, state.ip).expect("Can't disasm");
         println!("{}", &state);
-        let mut input = match rl.readline("> ") {
-            Ok(l) => l,
-            Err(ReadlineError::Eof) => break,
-            Err(ReadlineError::Interrupted) => continue,
-            Err(e) => {
-                println!("Error {:?}", e);
-                return;
+        let mut input = match startup_commands.pop() {
+            Some(s) => {
+                println!("> {}", s);
+                s
+            }
+            None => match rl.readline("> ") {
+                Ok(l) => l,
+                Err(ReadlineError::Eof) => break,
+                Err(ReadlineError::Interrupted) => continue,
+                Err(e) => {
+                    println!("Error {:?}", e);
+                    return;
+                }
             }
         };
         if input == "" {
