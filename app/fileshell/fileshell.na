@@ -129,7 +129,7 @@ u8 table_cursor_loop(u8 max_index, u8 reset_cursor) {
 
 u8 print_file(u8 *name) {
     more_init(COLOR(COLOR_WHITE, COLOR_GREEN));
-    u8 f = fat_open_file(&current_dir, name);
+    u8 f = fat_open_file(&current_dir, name, 0u8);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, 0u8, "Error");
         ps2_wait_key_pressed();
@@ -161,7 +161,7 @@ import u8 __seg_extension_end[1];
 import u8 extension_start();
 
 u8 run_extension(u8 *name) {
-    u8 f = fat_open_file(&current_dir, name);
+    u8 f = fat_open_file(&current_dir, name, 0u8);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
         ps2_wait_key_pressed();
@@ -188,7 +188,7 @@ u8 run_extension(u8 *name) {
 }
 
 u8 run_app(u8 *name) {
-    u8 fd = fat_open_file(&current_dir, name);
+    u8 fd = fat_open_file(&current_dir, name, 0u8);
     if (fd == FAT_BAD_DESC) {
         log_string("Cannot open");
         log_u8(last_error);

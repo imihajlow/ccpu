@@ -17,7 +17,7 @@ import u8 *syscall_arg6;
 import u8 *syscall_arg7;
 
 export u8 exec(u8 *filename, u8 *arg1, u8 *arg2, u8 *arg3, u8 *arg4, u8 *arg5, u8 *arg6, u8 *arg7) {
-    u8 fd = fat_open_path(filename);
+    u8 fd = fat_open_path(filename, 0u8);
     if (fd == FAT_BAD_DESC) {
         return 0u8;
     }

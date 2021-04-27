@@ -1,5 +1,8 @@
 #pragma once
 
+#define O_CREAT (1u8 << 0u8)
+#define O_EXCL (1u8 << 1u8)
+
 #define FAT_FILE_ATTR_READ_ONLY 1u8
 #define FAT_FILE_ATTR_HIDDEN 2u8
 #define FAT_FILE_ATTR_SYSTEM 4u8

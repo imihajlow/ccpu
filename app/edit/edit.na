@@ -57,7 +57,7 @@ struct Line *cursor_line;
 struct Line *next_screen;
 
 u8 load(u8 *filename) {
-    u8 fd = open(filename);
+    u8 fd = open(filename, O_CREAT);
     if (fd == FAT_BAD_DESC) {
         log_string("Can't open");
         log_u8(last_error);
@@ -118,7 +118,7 @@ u8 load(u8 *filename) {
 }
 
 u8 save(u8 *filename) {
-    u8 fd = open(filename);
+    u8 fd = open(filename, 0u8); // file must already exist
     if (fd == FAT_BAD_DESC) {
         log_string("Can't open");
         log_u8(last_error);

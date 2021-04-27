@@ -68,7 +68,7 @@ import struct FileDescriptor fat_private_file_desc[MAX_FILE_DESC];
 
 // Find file in dir by name and fill out dir_entry-related fields in file descriptor
 // returns bool
-import u8 fat_private_find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd);
+import u8 fat_private_find_file(struct FatDirEntry *dir, u8 *name, struct FileDescriptor *pfd, u8 mode);
 
 // Finds a free slot, clears free flag
 // returns fd or FAT_BAD_DESC on error

@@ -21,6 +21,7 @@
 
     .export open
     .export open_arg0
+    .export open_arg1
     .export open_ret
 
     .export read
@@ -51,10 +52,6 @@
     .export get_size_arg0
     .export get_size_ret
 
-    .export open_dir
-    .export open_dir_arg0
-    .export open_dir_ret
-
     .export get_next_dir_entry
     .export get_next_dir_entry_arg0
     .export get_next_dir_entry_arg1
@@ -75,7 +72,6 @@ close_ret:
 truncate_ret:
 seek_end_ret:
 get_size_ret:
-open_dir_ret:
 get_next_dir_entry_ret:
 mount_ret:
     res 4
@@ -88,11 +84,11 @@ close_arg0:
 truncate_arg0:
 seek_end_arg0:
 get_size_arg0:
-open_dir_arg0:
 get_next_dir_entry_arg0:
     res 4
 app_param2:
 syscall_arg2:
+open_arg1:
 read_arg1:
 write_arg1:
 get_next_dir_entry_arg1:
@@ -229,22 +225,6 @@ get_size:
     st a
 
     ldi a, 6
-    ldi pl, lo(jmp_syscall)
-    ldi ph, hi(jmp_syscall)
-    jmp
-
-.section text.open_dir
-open_dir:
-    mov a, pl
-    mov b, a
-    mov a, ph
-    ldi pl, lo(ret)
-    ldi ph, hi(ret)
-    st b
-    inc pl
-    st a
-
-    ldi a, 7
     ldi pl, lo(jmp_syscall)
     ldi ph, hi(jmp_syscall)
     jmp

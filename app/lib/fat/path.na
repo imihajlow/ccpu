@@ -16,7 +16,7 @@ u8 *copy_first_entry(u8 *dst, u8 *path) {
     }
 }
 
-export u8 fat_find_path(u8 *path) {
+export u8 fat_find_path(u8 *path, u8 mode) {
     u8 r;
     if (*path != '/') {
         last_error = FAT_ERROR_RELATIVE_PATH;
@@ -36,7 +36,13 @@ export u8 fat_find_path(u8 *path) {
             path += 1u8;
         } else {
             path = copy_first_entry((u8*)filename, path);
-            r = fat_private_find_file(&pfd->dir_entry, (u8*)filename, pfd);
+            u8 cur_mode;
+            if (*path == 0u8) {
+                cur_mode = mode;
+            } else {
+                cur_mode = 0u8;
+            }
+            r = fat_private_find_file(&pfd->dir_entry, (u8*)filename, pfd, cur_mode);
             if (!r) {
                 pfd->is_free = 1u8;
                 return FAT_BAD_DESC;
@@ -46,8 +52,8 @@ export u8 fat_find_path(u8 *path) {
     return fd;
 }
 
-export u8 fat_open_path(u8 *path) {
-    u8 fd = fat_find_path(path);
+export u8 fat_open_path(u8 *path, u8 mode) {
+    u8 fd = fat_find_path(path, mode);
     if (fd == FAT_BAD_DESC) {
         return FAT_BAD_DESC;
     }
@@ -59,29 +65,7 @@ export u8 fat_open_path(u8 *path) {
         return FAT_BAD_DESC;
     }
 
-    u8 r = fat_private_init_fd(pfd);
-    if (!r) {
-        pfd->is_free = 1u8;
-        return FAT_BAD_DESC;
-    }
-
-    return fd;
-}
-
-export u8 fat_open_dir_path(u8 *path) {
-    u8 fd = fat_find_path(path);
-    if (fd == FAT_BAD_DESC) {
-        return FAT_BAD_DESC;
-    }
-    struct FileDescriptor *pfd = (struct FileDescriptor *)fat_private_file_desc + fd;
-
-    if (!(pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY)) {
-        last_error = FAT_ERROR_NOT_A_DIR;
-        pfd->is_free = 1u8;
-        return FAT_BAD_DESC;
-    }
-
-    if (pfd->dir_entry.cluster_lo == 0u16) {
+    if ((pfd->dir_entry.attrs & FAT_FILE_ATTR_DIRECTORY) && pfd->dir_entry.cluster_lo == 0u16) {
         // root dir
         fat_private_init_root_dir(pfd);
     } else {
@@ -91,7 +75,6 @@ export u8 fat_open_dir_path(u8 *path) {
             return FAT_BAD_DESC;
         }
     }
-
     return fd;
 }
 

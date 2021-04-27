@@ -17,7 +17,7 @@ import u16 last_error;
 
 export u8 syscall_impl() {
     if (SYSCALL_NR == SYSCALL_OPEN) {
-        *(u8*)&syscall_ret = fat_open_path((u8*)syscall_arg1);
+        *(u8*)&syscall_ret = fat_open_path((u8*)syscall_arg1, (u8)syscall_arg2);
     } else if (SYSCALL_NR == SYSCALL_READ) {
         *(u16*)&syscall_ret = fat_read((u8)syscall_arg1, (u8*)syscall_arg2, (u16)syscall_arg3);
     } else if (SYSCALL_NR == SYSCALL_WRITE) {
@@ -30,8 +30,6 @@ export u8 syscall_impl() {
         *(u8*)&syscall_ret = fat_seek_end((u8)syscall_arg1);
     } else if (SYSCALL_NR == SYSCALL_GET_SIZE) {
         syscall_ret = fat_get_size((u8)syscall_arg1);
-    } else if (SYSCALL_NR == SYSCALL_OPEN_DIR) {
-        *(u8*)&syscall_ret = fat_open_dir_path((u8*)syscall_arg1);
     } else if (SYSCALL_NR == SYSCALL_GET_NEXT_DIR_ENTRY) {
         *(u8*)&syscall_ret = fat_get_next_dir_entry((u8)syscall_arg1, (struct FatDirEntry *)syscall_arg2, (u8)syscall_arg3);
     } else if (SYSCALL_NR == SYSCALL_MOUNT) {

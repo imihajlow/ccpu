@@ -84,7 +84,7 @@ u8 print_u16(u8 col, u8 row, u16 v) {
 
 u8 print_file(struct FatDirEntry *parent, u8 *name) {
     more_init(COLOR(COLOR_WHITE, COLOR_GREEN));
-    u8 f = fat_open_file(parent, name);
+    u8 f = fat_open_file(parent, name, 0u8);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, 0u8, "Error");
         ps2_wait_key_pressed();
@@ -113,7 +113,7 @@ u8 print_file(struct FatDirEntry *parent, u8 *name) {
 
 u8 type_file(struct FatDirEntry *parent, u8 *name) {
     u8 color = COLOR(COLOR_GREEN, COLOR_BLACK);
-    u8 f = fat_open_file(parent, name);
+    u8 f = fat_open_file(parent, name, 0u8);
     if (f == FAT_BAD_DESC) {
         vga_put_text(0u8, VGA_ROWS - 1u8, "Cannot open");
         ps2_wait_key_pressed();

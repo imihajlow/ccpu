@@ -34,7 +34,7 @@ import u8 fat_get_next_dir_entry(u8 dir_desc, struct FatDirEntry *dst, u8 attr_s
 /**
  Returns file descriptor or FAT_BAD_DESC on error, sets last_error on failure.
  */
-import u8 fat_open_file(struct FatDirEntry *dir, u8 *name);
+import u8 fat_open_file(struct FatDirEntry *dir, u8 *name, u8 mode);
 
 /**
  Returns number of bytes actually read, sets last_error on failure.
