@@ -174,7 +174,6 @@ u8 show_dirty() {
 }
 
 struct Line *show_lines(struct Line *start) {
-    init_layout();
     u8 row = 0u8;
     while (row != VGA_ROWS - 1u8 && (u16)start != 0u16) {
         u8 *p = (u8*)vga_char_seg + VGA_OFFSET(0, row);
@@ -183,11 +182,18 @@ struct Line *show_lines(struct Line *start) {
             *p = c;
             p += 1u8;
         }
+        for (; i < VGA_COLS; i += 1u8) {
+            *p = 0u8;
+            p += 1u8;
+        }
         row += 1u8;
         start = start->next;
     }
     if (row != VGA_ROWS - 1u8) {
         start = (struct Line *)0u8;
+    }
+    for (; row != VGA_ROWS - 1u8; row += 1u8) {
+        memset((u8*)vga_char_seg + VGA_OFFSET(0, row), 0u8, (u16)VGA_COLS);
     }
     return start;
 }
@@ -320,6 +326,7 @@ u8 break_line() {
         return 0u8; // can't insert, no lines left
     }
     struct Line *new_line;
+    vga_color_seg[VGA_OFFSET(cursor_col, cursor_row)] = TYPING_COLOR;
     if (cursor_line->len != NO_NEWLINE) {
         new_line = alloc_line();
         new_line->len = cursor_line->len - cursor_col;
@@ -603,6 +610,7 @@ export u8 main() {
     dirty = 0u8;
     cursor_col = 0u8;
     cursor_row = 0u8;
+    init_layout();
     next_screen = show_lines(head);
     vga_color_seg[VGA_OFFSET(0, 0)] = CURSOR_COLOR;
     screen_ptrs[0] = head;
