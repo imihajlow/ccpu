@@ -69,7 +69,7 @@ u8 ball_step() {
     if (last_ball_col != ball_col || last_ball_row != ball_row) {
         u16 last_offset = VGA_OFFSET(last_ball_col, last_ball_row >> 1u8);
         u16 new_offset = VGA_OFFSET(ball_col, ball_screen_row);
-        if (last_offset != new_offset) {
+        if (last_offset != new_offset && last_ball_col != 0u8 && last_ball_col != VGA_COLS - 1u8) {
             vga_char_seg[last_offset] = 0u8;
         }
 
@@ -79,7 +79,9 @@ u8 ball_step() {
         } else {
             c = CHAR_TOP;
         }
-        vga_char_seg[new_offset] = c;
+        if (ball_col != 0u8 && ball_col != VGA_COLS - 1u8) {
+            vga_char_seg[new_offset] = c;
+        }
         last_ball_row = ball_row;
         last_ball_col = ball_col;
     }
