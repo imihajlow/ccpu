@@ -92,6 +92,15 @@ export u8 qp_set(u8 x, u8 y, u8 v) {
     qp_fb[index] = value;
 }
 
+export u8 qp_get(u8 x, u8 y) {
+    u16 index = VGA_OFFSET(x, y >> 1u8);
+    u8 value = qp_fb[index];
+    if (y & 1u8) {
+        value >>= 1u;
+    }
+    return value & 1u8;
+}
+
 u8 qp_render_one(u8 x, u8 y) {
     y >>= 1u8;
     u16 offset = VGA_OFFSET(x, y);

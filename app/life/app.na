@@ -45,24 +45,23 @@ export u8 main() {
                 qp_move_cursor(-1s8, 0s8);
             } else if (key == PS2_KEY_RIGHT) {
                 qp_move_cursor(1s8, 0s8);
-            } else if (key == PS2_KEY_ENTER) {
-                qp_set_and_render(qp_cursor_x, qp_cursor_y, 1u8);
+            } else if (key == PS2_KEY_SPACE) {
+                u8 v = qp_get(qp_cursor_x, qp_cursor_y);
+                qp_set_and_render(qp_cursor_x, qp_cursor_y, !v);
             } else if (key == PS2_KEY_ESCAPE) {
-                qp_set_and_render(qp_cursor_x, qp_cursor_y, 0u8);
+                return;
             } else if (key == PS2_KEY_F12) {
                 qp_render();
-            } else if (key == PS2_KEY_F1) {
+            } else if (key == PS2_KEY_ENTER) {
                 running = 1u8;
                 qp_set_cursor_enabled(0u8);
-            } else if (key == PS2_KEY_F2) {
-                return;
             }
         } else {
             // running mode
             key = keyboard_get_if_pressed();
             if (key == KEY_NO_KEY) {
                 key = ps2_get_key_event();
-                if (key == PS2_KEY_F2) {
+                if (key == PS2_KEY_ESCAPE) {
                     return;
                 } else if (key != PS2_KEY_NONE && !(key & PS2_KEY_RELEASE)) {
                     running = 0u8;

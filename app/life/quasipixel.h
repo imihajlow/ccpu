@@ -13,6 +13,8 @@ import u8 qp_init(u8 fg_color, u8 bg_color);
  */
 import u8 qp_set(u8 x, u8 y, u8 v);
 
+import u8 qp_get(u8 x, u8 y);
+
 /*
     Sets the pixel to the value v and renders it immediately.
  */
