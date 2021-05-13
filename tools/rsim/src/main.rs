@@ -13,8 +13,6 @@ mod spi;
 mod card;
 
 use std::fs::{File,OpenOptions};
-use std::io;
-use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use regex::Regex;
@@ -50,7 +48,7 @@ pub enum Type {
 }
 
 
-fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
+fn parse_command(syms: &symmap::SymMap, s: &String, rl: &mut Editor<()>) -> Command {
     use Command::*;
     let mut iter = s.split_whitespace();
     match iter.next() {
@@ -62,7 +60,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
 
         Some("u") |
         Some("until") => {
-            match select_address(syms, iter.next().unwrap_or("")) {
+            match select_address(syms, iter.next().unwrap_or(""), rl) {
                 Some(x) => Until(x),
                 _ => Error
             }
@@ -74,7 +72,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
         Some("b") |
         Some("break") |
         Some("breakpoint") => {
-            match select_address(syms, iter.next().unwrap_or("")) {
+            match select_address(syms, iter.next().unwrap_or(""), rl) {
                 Some(x) => Breakpoint(x),
                 _ => Error
             }
@@ -139,7 +137,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
                 1
             };
 
-            let addr = match select_address(syms, args[i_addr]) {
+            let addr = match select_address(syms, args[i_addr], rl) {
                 Some(x) => x,
                 None => return Error
             };
@@ -205,7 +203,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String) -> Command {
     }
 }
 
-fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>) -> Option<u16> {
+fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>, rl: &mut Editor<()>) -> Option<u16> {
     match symbols.len() {
         0 => {
             None
@@ -220,10 +218,15 @@ fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>) -> Option<u16> 
             for (i, (name, addr)) in symbols.iter().enumerate() {
                 println!("{}. {} (0x{:04X})", i, name, addr);
             }
-            print!("Which one? ");
-            io::stdout().flush().unwrap();
-            let mut input = String::new();
-            io::stdin().read_line(&mut input).unwrap();
+            let input = match rl.readline("Which one? ") {
+                Ok(l) => l,
+                Err(ReadlineError::Eof) |
+                Err(ReadlineError::Interrupted) => return None,
+                Err(e) => {
+                    println!("Error {:?}", e);
+                    return None;
+                }
+            };
             match parse::<usize>(&input) {
                 Ok(i) if i < n => {
                     Some(symbols[i].1)
@@ -241,7 +244,7 @@ fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>) -> Option<u16> 
     }
 }
 
-fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
+fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Option<u16> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|(0x[0-9a-f]+)$").unwrap();
     }
@@ -257,14 +260,14 @@ fn select_address(syms: &symmap::SymMap, name: &str) -> Option<u16> {
                     let file  = &cap[1];
                     let line = parse::<u32>(line.as_str()).unwrap();
                     let options = syms.find_line(file, line);
-                    return select_symbol(&options);
+                    return select_symbol(&options, rl);
                 }
                 None => {}
             }
             match cap.get(3) {
                 Some(name) => {
                     let symbols = syms.find_symbol(name.as_str());
-                    return select_symbol(&symbols);
+                    return select_symbol(&symbols, rl);
                 }
                 None => {}
             }
@@ -402,7 +405,7 @@ fn main() {
             last_input = input.clone();
         }
         ctrlc_pressed.store(false, Ordering::SeqCst);
-        let cmd = parse_command(&syms, &input);
+        let cmd = parse_command(&syms, &input, &mut rl);
         match cmd {
             Command::Error => {},
             _ => {
