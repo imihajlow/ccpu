@@ -4,6 +4,10 @@
 #include <random.h>
 #include <entropy.h>
 
+#define BG_COLOR COLOR(COLOR_GRAY, COLOR_BLUE)
+#define EMPTY_COLOR COLOR_BLACK
+#define TETRIS_COLOR COLOR_WHITE
+
 #define WIDTH 10u8
 #define HEIGHT 20u8
 #define LEFT 35u8
@@ -103,8 +107,8 @@ u8 paint_bg() {
     for (u8 r = 0u8; r != VGA_ROWS; r += 1u8) {
         for (u8 c = 0u8; c != VGA_COLS; c += 1u8) {
             if (r < TOP / 2u8 || r >= TOP / 2u8 + HEIGHT / 2u8 || c < LEFT || c >= LEFT + WIDTH) {
-                vga_char_seg[offset] = r + c;
-                vga_color_seg[offset] = COLOR(COLOR_GRAY, COLOR_BLUE);
+                vga_char_seg[offset] = 0u8;
+                vga_color_seg[offset] = BG_COLOR;
             }
             offset += 1u16;
         }
@@ -112,28 +116,117 @@ u8 paint_bg() {
     }
 }
 
+u8 check_line(u8 l) {
+    for (u8 x = LEFT; x != LEFT + WIDTH; x += 1u8) {
+        u8 v = qp_get(x, l);
+        if (!v) {
+            return;
+        }
+    }
+    for (u8 y = l; y != TOP + 1u8; y -= 1u8) {
+        for (x = LEFT; x != LEFT + WIDTH; x += 1u8) {
+            v = qp_get(x, y - 1u8);
+            qp_set(x, y, v);
+        }
+    }
+    for (x = LEFT; x != LEFT + WIDTH; x += 1u8) {
+        qp_set(x, TOP, 0u8);
+    }
+}
+
+u8 check_lines(s8 l) {
+    for (u8 y = TOP; y != TOP + 4u8; y += 1u8) {
+        check_line(y + (u8)l);
+    }
+}
+
 export u8 main() {
     rotation = ROTATION;
-    qp_init(COLOR_WHITE, COLOR_BLACK);
+    qp_init(TETRIS_COLOR, EMPTY_COLOR);
     paint_bg();
     ps2_init();
 
     ps2_wait_key_pressed_entropy();
     srand(entropy);
 
-    s8 x = 4s8;
-    s8 y = 0s8;
-    u16 piece_index = random((u16)N_PIECES); // TODO u8
-    piece_index <<= 2u8;
-    u16 piece = rotation[piece_index];
-    put(x, y, piece);
-    qp_render_rect(LEFT, TOP / 2u8, LEFT + WIDTH, TOP / 2u8 + HEIGHT / 2u8);
+    s8 x;
+    s8 y;
+    u8 piece_index;
+    u16 piece;
     u8 not_lost = 1u8;
+    u8 next = 1u8;
+    u16 counter = 0u16;
+    u8 render = 1u8;
     while(not_lost) {
         u8 r;
-        u8 key = ps2_wait_key_pressed();
+        if (next) {
+            check_lines(y);
+
+            x = (s8)(WIDTH / 2u8 - 2u8);
+            y = -3s8;
+            u16 rand = random((u16)N_PIECES);
+            piece_index = (u8)rand << 2u8;
+            piece = rotation[piece_index];
+            r = put(x, y, piece);
+            if (r) {
+                not_lost = 0u8;
+                break;
+            }
+            next = 0u8;
+        }
+        if (render) {
+            qp_render_rect(LEFT, TOP / 2u8, LEFT + WIDTH, TOP / 2u8 + HEIGHT / 2u8);
+        }
+        u8 step_down = 0u8;
+        u8 key = ps2_get_key_event();
+        if (counter == 100u16) {
+            counter = 0u16;
+            step_down = 1u8;
+        } else {
+            counter += 1u16;
+        }
         if (key == PS2_KEY_DOWN) {
-            u8 next = 0u8;
+            step_down = 1u8;
+            counter = 0u16;
+        } else if (key == PS2_KEY_LEFT) {
+            if (x > -3s8) {
+                erase(x, y, piece);
+                r = put(x - 1s8, y, piece);
+                if (r) {
+                    put(x, y, piece);
+                } else {
+                    x -= 1s8;
+                }
+            }
+            render = 1u8;
+        } else if (key == PS2_KEY_RIGHT) {
+            if (x < (s8)WIDTH) {
+                erase(x, y, piece);
+                r = put(x + 1s8, y, piece);
+                if (r) {
+                    put(x, y, piece);
+                } else {
+                    x += 1s8;
+                }
+            }
+            render = 1u8;
+        } else if (key == PS2_KEY_UP) {
+            u8 angle = (u8)piece_index & 0b11u8;
+            angle += 1u8;
+            angle &= 0b11u8;
+            u8 new_index = ((u8)piece_index & ~0b11u8) | angle;
+            u16 new_piece = rotation[new_index];
+            erase(x, y, piece);
+            r = put(x, y, new_piece);
+            if (r) {
+                put(x, y, piece);
+            } else {
+                piece_index = new_index;
+                piece = new_piece;
+            }
+            render = 1u8;
+        }
+        if (step_down) {
             if (y + 4s8 != (s8)HEIGHT) {
                 erase(x, y, piece);
                 r = put(x, y + 1s8, piece);
@@ -146,52 +239,7 @@ export u8 main() {
             } else {
                 next = 1u8;
             }
-            if (next) {
-                x = 4s8;
-                y = -3s8;
-                piece_index = random((u16)N_PIECES);
-                piece_index <<= 2u8;
-                piece = rotation[piece_index];
-                r = put(x, y, piece);
-                if (r) {
-                    not_lost = 0u8;
-                }
-            }
-        } else if (key == PS2_KEY_LEFT) {
-            if (x > -3s8) {
-                erase(x, y, piece);
-                r = put(x - 1s8, y, piece);
-                if (r) {
-                    put(x, y, piece);
-                } else {
-                    x -= 1s8;
-                }
-            }
-        } else if (key == PS2_KEY_RIGHT) {
-            if (x < (s8)WIDTH) {
-                erase(x, y, piece);
-                r = put(x + 1s8, y, piece);
-                if (r) {
-                    put(x, y, piece);
-                } else {
-                    x += 1s8;
-                }
-            }
-        } else if (key == PS2_KEY_UP) {
-            u8 angle = (u8)piece_index & 0b11u8;
-            angle += 1u8;
-            angle &= 0b11u8;
-            u8 new_index = ((u8)piece_index & ~0b11u8) | angle;
-            u16 new_piece = rotation[new_index];
-            erase(x, y, piece);
-            r = put(x, y, new_piece);
-            if (r) {
-                put(x, y, piece);
-            } else {
-                piece_index = (u16)new_index;
-                piece = new_piece;
-            }
+            render = 1u8;
         }
-        qp_render_rect(LEFT, TOP / 2u8, LEFT + WIDTH, TOP / 2u8 + HEIGHT / 2u8);
     }
 }
