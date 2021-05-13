@@ -150,4 +150,12 @@ export u8 qp_move_cursor(s8 dx, s8 dy) {
     qp_set_cursor_pos((u8)new_x, (u8)new_y);
 }
 
-
+export u8 qp_render_rect(u8 col_from, u8 row_from, u8 col_to, u8 row_to) {
+    for (; row_from != row_to; row_from += 1u8) {
+        u16 index = VGA_OFFSET(col_from, row_from);
+        for (u8 col = col_from; col != col_to; col += 1u8) {
+            render_one_char(col, row_from, index);
+            index += 1u16;
+        }
+    }
+}

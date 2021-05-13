@@ -1,0 +1,197 @@
+#include <vga.h>
+#include <ps2keyboard.h>
+#include <qp/quasipixel.h>
+#include <random.h>
+#include <entropy.h>
+
+#define WIDTH 10u8
+#define HEIGHT 20u8
+#define LEFT 35u8
+#define TOP 20u8
+
+#define N_PIECES 7u8
+/*
+ Tetriminos encoding: u16 bit mask 4x4.
+ */
+#define T_I_H        0b0000000000001111u16
+#define T_I_V        0b0100010001000100u16
+#define T_O          0b0000000001100110u16
+#define T_T_DOWN     0b0000000011100100u16
+#define T_T_UP       0b0000000001001110u16
+#define T_T_LEFT     0b0000001001100010u16
+#define T_T_RIGHT    0b0000010001100100u16
+#define T_J_DOWN     0b0000011001000100u16
+#define T_J_UP       0b0000001000100110u16
+#define T_J_LEFT     0b0000000011100010u16
+#define T_J_RIGHT    0b0000000010001110u16
+#define T_L_UP       0b0000010001000110u16
+#define T_L_DOWN     0b0000011000100010u16
+#define T_L_LEFT     0b0000000000101110u16
+#define T_L_RIGHT    0b0000000011101000u16
+#define T_S_H        0b0000000001101100u16
+#define T_S_V        0b0000100011000100u16
+#define T_Z_H        0b0000000011000110u16
+#define T_Z_V        0b0000010011001000u16
+
+// TODO compiler: allow const array definition
+#define ROTATION {\
+    T_I_H, T_I_V, T_I_H, T_I_V,\
+    T_O, T_O, T_O, T_O,\
+    T_T_DOWN, T_T_RIGHT, T_T_UP, T_T_LEFT,\
+    T_J_DOWN, T_J_RIGHT, T_J_UP, T_J_LEFT,\
+    T_L_DOWN, T_L_RIGHT, T_L_UP, T_L_LEFT,\
+    T_S_H, T_S_V, T_S_H, T_S_V,\
+    T_Z_H, T_Z_V, T_Z_H, T_Z_V\
+}
+u16 *rotation;
+
+u16 take_mask(s8 x0, s8 y0) {
+    u16 r = 0u16;
+    for (u8 y = TOP; y != TOP + 4u8; y += 1u8) {
+        for (u8 x = LEFT; x != LEFT + 4u8; x += 1u8) {
+            u8 v = qp_get((u8)(x0 + (s8)x), (u8)(y0 + (s8)y));
+            r <<= 1u8;
+            *((u8*)&r) |= v;
+        }
+    }
+    return r;
+}
+
+u8 paint_mask(s8 x0, s8 y0, u16 mask) {
+    for (u8 y = 3u8 + TOP; y != TOP - 1u8; y -= 1u8) {
+        for (u8 x = 3u8 + LEFT; x != LEFT - 1u8; x -= 1u8) {
+            qp_set((u8)(x0 + (s8)x), (u8)(y0 + (s8)y), (u8)mask & 1u8);
+            mask >>= 1u8;
+        }
+    }
+}
+
+#define PUT_OK 0u8
+#define PUT_STUCK 1u8
+#define PUT_EDGE 2u8
+u8 put(s8 x, s8 y, u16 piece) {
+    if (y + 4s8 > (s8)HEIGHT) {
+        return PUT_STUCK;
+    }
+    u8 edge_mask = 0u8;
+    if (x < 0s8) {
+        edge_mask = 0b1111u8 << (u8)(4s8 + x);
+        edge_mask &= 0b1111u8;
+    } else if (x + 4s8 > (s8)WIDTH) {
+        edge_mask = 0b1111u8 >> (u8)((s8)WIDTH - x);
+    }
+    edge_mask |= edge_mask << 4u8;
+    u16 edge_mask16 = (u16)edge_mask | ((u16)edge_mask << 8u8);
+    if ((piece & edge_mask16) != 0u16) {
+        return PUT_EDGE;
+    }
+    u16 mask = take_mask(x, y);
+    if ((piece & mask) != 0u16) {
+        return PUT_STUCK;
+    }
+    paint_mask(x, y, piece | mask);
+    return PUT_OK;
+}
+
+u8 erase(s8 x, s8 y, u16 piece) {
+    u16 mask = take_mask(x, y);
+    paint_mask(x, y, mask & ~piece);
+}
+
+u8 paint_bg() {
+    u16 offset = 0u16;
+    for (u8 r = 0u8; r != VGA_ROWS; r += 1u8) {
+        for (u8 c = 0u8; c != VGA_COLS; c += 1u8) {
+            if (r < TOP / 2u8 || r >= TOP / 2u8 + HEIGHT / 2u8 || c < LEFT || c >= LEFT + WIDTH) {
+                vga_char_seg[offset] = r + c;
+                vga_color_seg[offset] = COLOR(COLOR_GRAY, COLOR_BLUE);
+            }
+            offset += 1u16;
+        }
+        offset += (u16)(128u8 - VGA_COLS);
+    }
+}
+
+export u8 main() {
+    rotation = ROTATION;
+    qp_init(COLOR_WHITE, COLOR_BLACK);
+    paint_bg();
+    ps2_init();
+
+    ps2_wait_key_pressed_entropy();
+    srand(entropy);
+
+    s8 x = 4s8;
+    s8 y = 0s8;
+    u16 piece_index = random((u16)N_PIECES); // TODO u8
+    piece_index <<= 2u8;
+    u16 piece = rotation[piece_index];
+    put(x, y, piece);
+    qp_render_rect(LEFT, TOP / 2u8, LEFT + WIDTH, TOP / 2u8 + HEIGHT / 2u8);
+    u8 not_lost = 1u8;
+    while(not_lost) {
+        u8 r;
+        u8 key = ps2_wait_key_pressed();
+        if (key == PS2_KEY_DOWN) {
+            u8 next = 0u8;
+            if (y + 4s8 != (s8)HEIGHT) {
+                erase(x, y, piece);
+                r = put(x, y + 1s8, piece);
+                if (r) {
+                    put(x, y, piece);
+                    next = 1u8;
+                } else {
+                    y += 1s8;
+                }
+            } else {
+                next = 1u8;
+            }
+            if (next) {
+                x = 4s8;
+                y = -3s8;
+                piece_index = random((u16)N_PIECES);
+                piece_index <<= 2u8;
+                piece = rotation[piece_index];
+                r = put(x, y, piece);
+                if (r) {
+                    not_lost = 0u8;
+                }
+            }
+        } else if (key == PS2_KEY_LEFT) {
+            if (x > -3s8) {
+                erase(x, y, piece);
+                r = put(x - 1s8, y, piece);
+                if (r) {
+                    put(x, y, piece);
+                } else {
+                    x -= 1s8;
+                }
+            }
+        } else if (key == PS2_KEY_RIGHT) {
+            if (x < (s8)WIDTH) {
+                erase(x, y, piece);
+                r = put(x + 1s8, y, piece);
+                if (r) {
+                    put(x, y, piece);
+                } else {
+                    x += 1s8;
+                }
+            }
+        } else if (key == PS2_KEY_UP) {
+            u8 angle = (u8)piece_index & 0b11u8;
+            angle += 1u8;
+            angle &= 0b11u8;
+            u8 new_index = ((u8)piece_index & ~0b11u8) | angle;
+            u16 new_piece = rotation[new_index];
+            erase(x, y, piece);
+            r = put(x, y, new_piece);
+            if (r) {
+                put(x, y, piece);
+            } else {
+                piece_index = (u16)new_index;
+                piece = new_piece;
+            }
+        }
+        qp_render_rect(LEFT, TOP / 2u8, LEFT + WIDTH, TOP / 2u8 + HEIGHT / 2u8);
+    }
+}

@@ -22,6 +22,11 @@ import u8 qp_set_and_render(u8 x, u8 y, u8 v);
 
 import u8 qp_render();
 
+/*
+	Renders only part of the screen. Coordinates are character coordinates.
+ */
+import u8 qp_render_rect(u8 col_from, u8 row_from, u8 col_to, u8 row_to);
+
 import u8 qp_set_cursor_enabled(u8 enabled);
 import u8 qp_set_cursor_pos(u8 x, u8 y);
 import u8 qp_move_cursor(s8 dx, s8 dy);

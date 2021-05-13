@@ -1,5 +1,5 @@
 #include "life.h"
-#include "quasipixel.h"
+#include <qp/quasipixel.h>
 #include <keyboard.h>
 #include <ps2keyboard.h>
 #include <vga.h>

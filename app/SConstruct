@@ -84,11 +84,13 @@ fat = Split('''
     lib/fat/path.na
     ''')
 
+quasipixel = Split('lib/qp/quasipixel.na lib/qp/qp_render.asm')
+
 syscall = ['lib/os/syscall.asm']
 
 # Apps
 maze = Split('maze/main.na maze/game.na maze/maze.na')
-life = Split('life/quasipixel.na life/life.na life/life_next.asm life/qp_render.asm')
+life = Split('life/life.na life/life_next.asm')
 calc = Split('calc/calc.asm')
 
 env.Bin('alutest', 'test/alutest.asm')
@@ -104,6 +106,9 @@ env.Bin('ps2test', Split('test/ps2test.na') + rom_startup + natrix + lib)
 env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib)
 
 env.Bin('cardtest', Split('test/cardtest.na lib/card.asm lib/log.na') + rom_startup + natrix + lib + fat)
+
+
+env.Bin('tetris', Split('tetris/main.na') + rom_startup + natrix + lib + quasipixel)
 
 env.Loader('fileshell', Split('''
     fileshell/fileshell.na
@@ -126,7 +131,7 @@ env.App('main', Split('''
     main.na
     test/trap.asm
     vga_demo.asm
-    matrix.na''') + lib + natrix + maze + life + calc + app_startup)
+    matrix.na''') + lib + natrix + maze + life + calc + app_startup + quasipixel)
 
 env.App('calc', Split('''
     calc/app.na
@@ -138,7 +143,7 @@ env.App('maze', Split('''
 
 env.App('life', Split('''
     life/app.na
-    ''') + life + lib + natrix + app_startup)
+    ''') + life + quasipixel + lib + natrix + app_startup)
 
 env.App('pong', Split('''
     pong/pong.na

@@ -107,7 +107,7 @@ row_loop:
     mov pl, a
     jmp
 
-
+    .section text.qp_vga_clear
 qp_vga_clear:
     mov a, pl
     mov b, a

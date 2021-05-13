@@ -4,7 +4,7 @@
 #include <entropy.h>
 #include <ps2keyboard.h>
 #include <frame.h>
-#include "life/quasipixel.h"
+#include <qp/quasipixel.h>
 #include "life/life.h"
 #include "calc/main.h"
 #include "maze/main.h"

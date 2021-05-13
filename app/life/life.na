@@ -1,7 +1,7 @@
 #include "life.h"
 #include <string.h>
 #include <vga.h>
-#include "quasipixel.h"
+#include <qp/quasipixel.h>
 
 #define LAST_ROW_OFFSET VGA_OFFSET(0u8, VGA_ROWS - 1u8)
 
