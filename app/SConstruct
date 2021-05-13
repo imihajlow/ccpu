@@ -108,7 +108,7 @@ env.Bin('ps2hightest', Split('test/ps2hightest.na') + rom_startup + natrix + lib
 env.Bin('cardtest', Split('test/cardtest.na lib/card.asm lib/log.na') + rom_startup + natrix + lib + fat)
 
 
-env.Bin('tetris', Split('tetris/main.na') + rom_startup + natrix + lib + quasipixel)
+env.Bin('tetris_rom', Split('tetris/main.na') + rom_startup + natrix + lib + quasipixel)
 
 env.Loader('fileshell', Split('''
     fileshell/fileshell.na
@@ -154,10 +154,13 @@ env.App('edit', Split('''
     lib/log.na
     ''') + lib + natrix + app_startup + syscall)
 
+env.App('tetris', Split('tetris/main.na') + app_startup + natrix + lib + quasipixel)
+
 env.Image('image', Split('''
     main.app
     maze.app
     life.app
     pong.app
     edit.app
+    tetris.app
     '''))

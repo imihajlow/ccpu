@@ -4,6 +4,9 @@
 #include <random.h>
 #include <entropy.h>
 
+#define LINES_PER_LEVEL 10u8
+#define LEVEL_ONE_SPEED 20u8
+
 #define BG_COLOR COLOR(COLOR_GRAY, COLOR_BLUE)
 #define EMPTY_COLOR COLOR_BLACK
 #define TETRIS_COLOR COLOR_WHITE
@@ -120,7 +123,7 @@ u8 check_line(u8 l) {
     for (u8 x = LEFT; x != LEFT + WIDTH; x += 1u8) {
         u8 v = qp_get(x, l);
         if (!v) {
-            return;
+            return 0u8;
         }
     }
     for (u8 y = l; y != TOP + 1u8; y -= 1u8) {
@@ -132,11 +135,35 @@ u8 check_line(u8 l) {
     for (x = LEFT; x != LEFT + WIDTH; x += 1u8) {
         qp_set(x, TOP, 0u8);
     }
+    return 1u8;
 }
 
 u8 check_lines(s8 l) {
+    u8 n = 0u8;
     for (u8 y = TOP; y != TOP + 4u8; y += 1u8) {
-        check_line(y + (u8)l);
+        u8 d = check_line(y + (u8)l);
+        n += d;
+    }
+    return n;
+}
+
+u8 show_score(u16 score) {
+    u8 *offset = (u8*)vga_char_seg + VGA_OFFSET(LEFT + WIDTH - 1u8, TOP / 2u8 + HEIGHT / 2u8 + 1u8);
+    for (u8 i = 0u8; i != 5u8; i += 1u8) {
+        u16 mod = score % 10u16;
+        *offset = (u8)mod + '0';
+        offset -= 1u8;
+        score = score / 10u16;
+    }
+}
+
+u8 show_level(u8 level) {
+    u8 *offset = (u8*)vga_char_seg + VGA_OFFSET(LEFT + 1u8, TOP / 2u8 + HEIGHT / 2u8 + 1u8);
+    for (u8 i = 0u8; i != 2u8; i += 1u8) {
+        u8 mod = level % 10u8;
+        *offset = (u8)mod + '0';
+        offset -= 1u8;
+        level = level / 10u8;
     }
 }
 
@@ -155,12 +182,33 @@ export u8 main() {
     u16 piece;
     u8 not_lost = 1u8;
     u8 next = 1u8;
-    u16 counter = 0u16;
+    u8 counter = 0u8;
     u8 render = 1u8;
+    u16 score = 0u16;
+    u8 level = 1u8;
+    u8 lines_in_level = 0u8;
+    u8 speed = LEVEL_ONE_SPEED;
+    show_score(score);
+    show_level(level);
     while(not_lost) {
         u8 r;
         if (next) {
-            check_lines(y);
+            u8 lines = check_lines(y);
+            lines_in_level += lines;
+            u8 line_score = (1u8 << lines) - 1u8;
+            u16 delta = (u16)level * (u16)line_score;
+            if (delta != 0u16) {
+                score += delta;
+                show_score(score);
+            }
+            if (lines_in_level >= LINES_PER_LEVEL) {
+                if (speed != 0u8) {
+                    level += 1u8;
+                    speed -= 1u8;
+                    show_level(level);
+                }
+                lines_in_level = 0u8;
+            }
 
             x = (s8)(WIDTH / 2u8 - 2u8);
             y = -3s8;
@@ -179,15 +227,15 @@ export u8 main() {
         }
         u8 step_down = 0u8;
         u8 key = ps2_get_key_event();
-        if (counter == 100u16) {
-            counter = 0u16;
+        if (counter >= speed) {
+            counter = 0u8;
             step_down = 1u8;
         } else {
-            counter += 1u16;
+            counter += 1u8;
         }
         if (key == PS2_KEY_DOWN) {
             step_down = 1u8;
-            counter = 0u16;
+            counter = 0u8;
         } else if (key == PS2_KEY_LEFT) {
             if (x > -3s8) {
                 erase(x, y, piece);
@@ -225,6 +273,14 @@ export u8 main() {
                 piece = new_piece;
             }
             render = 1u8;
+        } else if (key == PS2_KEY_ESCAPE) {
+            return;
+        } else if (key == PS2_KEY_PAGEDOWN) {
+            if (speed != 0u8) {
+                level += 1u8;
+                speed -= 1u8;
+                show_level(level);
+            }
         }
         if (step_down) {
             if (y + 4s8 != (s8)HEIGHT) {
@@ -242,4 +298,7 @@ export u8 main() {
             render = 1u8;
         }
     }
+    vga_clear(BG_COLOR);
+    vga_put_text(0u8, 0u8, "Game over.");
+    ps2_wait_key_pressed();
 }
