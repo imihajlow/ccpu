@@ -16,6 +16,7 @@
     .export __cc_r_r
     .export __cc_mul_byte
     .export __cc_mul_word
+    .export __cc_mul_dword
     .export __cc_div_byte
     .export __cc_div_word
     .export __cc_udiv_byte
@@ -942,6 +943,177 @@ __cc_mul_word_added:
     ldi ph, hi(exit)
     jmp
 
+; multiply A and B, result into R
+    .section text.__cc_mul_dword
+__cc_mul_dword:
+    mov a, pl
+    mov b, a
+    mov a, ph
+    ldi pl, lo(int_ret)
+    ldi ph, hi(int_ret)
+    st b
+    inc pl
+    st a
+
+    ; R := 0
+    ldi pl, lo(__cc_r_r)
+    ldi ph, hi(__cc_r_r)
+    mov a, 0
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
+    inc pl
+    st a
+
+__cc_mul_dword_loop:
+    ; lo(B) >>= 1
+    ldi pl, lo(__cc_r_b)
+    ldi ph, hi(__cc_r_b)
+    ld a
+    shr a
+    st a
+    ldi pl, lo(__cc_mul_dword_added)
+    ldi ph, hi(__cc_mul_dword_added)
+    jnc ; no need to add
+    ; R += A
+    ldi pl, lo(__cc_r_a)
+    ldi ph, hi(__cc_r_a)
+    ld a
+    ldi pl, lo(__cc_r_r)
+    ld b
+    add b, a
+    st b
+    ldi pl, lo(__cc_r_a + 1)
+    ld a
+    ldi pl, lo(__cc_r_r + 1)
+    ld b
+    adc b, a
+    st b
+    ldi pl, lo(__cc_r_a + 2)
+    ld a
+    ldi pl, lo(__cc_r_r + 2)
+    ld b
+    adc b, a
+    st b
+    ldi pl, lo(__cc_r_a + 3)
+    ld a
+    ldi pl, lo(__cc_r_r + 3)
+    ld b
+    adc b, a
+    st b
+__cc_mul_dword_added:
+    ; B[1] >>= 1
+    ldi pl, lo(__cc_r_b + 1)
+    ldi ph, hi(__cc_r_b)
+    ld b
+    shr b
+    st b
+    exp b
+    ldi a, 0x80
+    and a, b
+    ; B[0] |= c ? 0x80 : 0
+    dec pl
+    ld b
+    or a, b
+    st a
+
+    ; B[2] >>= 1
+    ldi pl, lo(__cc_r_b + 2)
+    ldi ph, hi(__cc_r_b)
+    ld b
+    shr b
+    st b
+    exp b
+    ldi a, 0x80
+    and a, b
+    ; B[1] |= c ? 0x80 : 0
+    dec pl
+    ld b
+    or a, b
+    st a
+
+    ; B[3] >>= 1
+    ldi pl, lo(__cc_r_b + 3)
+    ldi ph, hi(__cc_r_b)
+    ld b
+    shr b
+    st b
+    exp b
+    ldi a, 0x80
+    and a, b
+    ; B[2] |= c ? 0x80 : 0
+    dec pl
+    ld b
+    or a, b
+    st a
+
+    ; A <<= 1
+    ldi pl, lo(__cc_r_a)
+    ld a
+    shl a
+    st a
+    mov a, 0
+    adc a, 0
+
+    inc pl
+    ld pl
+    shl pl
+    exp b
+    or a, pl
+    ldi pl, lo(__cc_r_a + 1)
+    st a
+    ldi a, 1
+    and a, b
+
+    inc pl
+    ld pl
+    shl pl
+    exp b
+    or a, pl
+    ldi pl, lo(__cc_r_a + 2)
+    st a
+    ldi a, 1
+    and a, b
+
+    inc pl
+    ld b
+    shl b
+    or a, b
+    st a
+
+    ; A | B == 0?
+    ; a = A[3]
+    dec pl
+    ld b
+    or a, b
+    dec pl
+    ld b
+    or a, b
+    dec pl
+    ld b
+    or a, b
+    ldi pl, lo(__cc_r_b)
+    ld b
+    or a, b
+    inc pl
+    ld b
+    or a, b
+    inc pl
+    ld b
+    or a, b
+    inc pl
+    ld b
+    or a, b
+    ldi pl, lo(__cc_mul_dword_loop)
+    ldi ph, hi(__cc_mul_dword_loop)
+    jnz ; A | B != 0
+
+    ldi pl, lo(exit)
+    ldi ph, hi(exit)
+    jmp
+
 ; A / B
 ; __cc_r_a / __cc_r_b -> __cc_r_quotient, __cc_r_remainder
     ; .section text.__cc_div_word
@@ -1601,10 +1773,10 @@ __cc_sh_count: res 2
 __cc_from: res 2
 __cc_to: res 2
 numerator:
-__cc_r_a: res 2
+__cc_r_a: res 4
 denominator:
-__cc_r_b: res 2
-__cc_r_r: res 2
+__cc_r_b: res 4
+__cc_r_r: res 4
 
 int_ret: res 2
 memcpy_arg1:

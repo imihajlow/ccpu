@@ -36,6 +36,18 @@ def _genMulVCWord(rs, v, c):
     result += copyW("__cc_r_r", rs.getSource(), True, rs.isAligned())
     return result
 
+def _genMulVCDword(rs, v, c):
+    result = '; {} = {} * {} (dword)\n'.format(rs.getSource(), v.getSource(), c)
+    # TODO optimize
+    result += copyW(v.getSource(), "__cc_r_a", v.isAligned(), True, 0)
+    result += copyW(v.getSource(), "__cc_r_a", v.isAligned(), True, 2)
+    result += storeConstD(c, "__cc_r_b", True)
+    result += call("__cc_mul_dword")
+    result += copyW("__cc_r_r", rs.getSource(), True, rs.isAligned(), 0)
+    result += copyW("__cc_r_r", rs.getSource(), True, rs.isAligned(), 2)
+    return result
+
+
 def _genMulVC(resultLoc, v, c):
     if c == 0:
         return Value(resultLoc.getPosition(), v.getType(), 0, 0, True), ""
@@ -44,15 +56,18 @@ def _genMulVC(resultLoc, v, c):
     t = resultLoc.getType()
     if t.getSize() == 1:
         return Value.register(v.getPosition(), t), _genMulVCByte(resultLoc.getSource(), v, c)
-    else:
+    elif t.getSize() == 2:
         return resultLoc, _genMulVCWord(resultLoc, v, c)
+    elif t.getSize() == 4:
+        return resultLoc, _genMulVCDword(resultLoc, v, c)
 
 def genMul(resultLoc, src1Loc, src2Loc):
     if src1Loc.getType() != src2Loc.getType():
         raise SemanticError(src1Loc.getPosition() - src2Loc.getPosition(), "multiplication types mismatch")
     t = src1Loc.getType()
     resultLoc = resultLoc.withType(t)
-    assert(t.getSize() == 1 or t.getSize() == 2)
+    if t.getSize() not in {1,2,4}:
+        raise NotImplementedError(f"multiplication of {t.getSize() * 8}-bit integers is not implemented")
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     if l1 == 0 and l2 == 0:
@@ -71,14 +86,13 @@ def genMul(resultLoc, src1Loc, src2Loc):
             raise NotImplementedError("doing shit with pointers?")
     else:
         result = '; {} = {} * {}\n'.format(resultLoc, src1Loc, src2Loc)
-        isWord = t.getSize() == 2
-        if isWord:
+        if t.getSize() == 2:
             result += copyW(src1Loc.getSource(), "__cc_r_a", src1Loc.isAligned(), True)
             result += copyW(src2Loc.getSource(), "__cc_r_b", src2Loc.isAligned(), True)
             result += call("__cc_mul_word")
             result += copyW("__cc_r_r", resultLoc.getSource(), True, resultLoc.isAligned())
             return resultLoc, result
-        else:
+        elif t.getSize() == 1:
             result += loadByte('b', src1Loc, 0)
             result += loadByte('a', src2Loc, 0)
             result += '''
@@ -95,3 +109,12 @@ def genMul(resultLoc, src1Loc, src2Loc):
                 ld a
             '''
             return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), t), result
+        elif t.getSize() == 4:
+            result += copyW(src1Loc.getSource(), "__cc_r_a", src1Loc.isAligned(), True, 0)
+            result += copyW(src1Loc.getSource(), "__cc_r_a", src1Loc.isAligned(), True, 2)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", src1Loc.isAligned(), True, 0)
+            result += copyW(src2Loc.getSource(), "__cc_r_b", src1Loc.isAligned(), True, 2)
+            result += call("__cc_mul_dword")
+            result += copyW("__cc_r_r", resultLoc.getSource(), True, resultLoc.isAligned(), 0)
+            result += copyW("__cc_r_r", resultLoc.getSource(), True, resultLoc.isAligned(), 2)
+            return resultLoc, result

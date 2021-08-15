@@ -49,6 +49,7 @@ def _dumpRuntimeImports():
     .global __cc_pop
     .global __cc_from
     .global __cc_to
+    .global __cc_mul_dword
     .global __cc_mul_word
     .global __cc_mul_byte
     .global __cc_div_word

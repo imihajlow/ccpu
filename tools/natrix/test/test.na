@@ -1359,6 +1359,75 @@ u8 test_for() {
     ASSERT_TRUE(s == 10u8);
 }
 
+u8 test_mul_32() {
+    u32 a, b, c;
+
+    // var and const
+    a = 0u32;
+    c = a * 0xbau32;
+    ASSERT_TRUE(c == 0u32);
+
+    a = 1u32;
+    c = a * 0xbau32;
+    ASSERT_TRUE(c == 0xbau32);
+
+    a = 15u32;
+    c = a * 15u32;
+    ASSERT_TRUE(c == 225u32);
+
+    a = 30u32;
+    c = a * 70u32;
+    ASSERT_TRUE(c == 2100u32);
+
+    a = 50000u32;
+    c = a * 20000u32;
+    ASSERT_TRUE(c == 1000000000u32);
+
+    a = 0x7fffffffu32;
+    c = a * 2u32;
+    ASSERT_TRUE(c == 0xfffffffeu32);
+
+    a = 0x2u32;
+    c = a * 0x7fffffffu32;
+    ASSERT_TRUE(c == 0xfffffffeu32);
+
+    // var and var
+    a = 0u32;
+    b = 0xbau32;
+    c = a * b;
+    ASSERT_TRUE(c == 0u32);
+
+    a = 1u32;
+    b = 0xbau32;
+    c = a * b;
+    ASSERT_TRUE(c == 0xbau32);
+
+    a = 15u32;
+    b = 15u32;
+    c = a * b;
+    ASSERT_TRUE(c == 225u32);
+
+    a = 30u32;
+    b = 70u32;
+    c = a * b;
+    ASSERT_TRUE(c == 2100u32);
+
+    a = 50000u32;
+    b = 20000u32;
+    c = a * b;
+    ASSERT_TRUE(c == 1000000000u32);
+
+    a = 0x7fffffffu32;
+    b = 0x2u32;
+    c = a * b;
+    ASSERT_TRUE(c == 0xfffffffeu32);
+
+    b = 0x7fffffffu32;
+    a = 0x2u32;
+    c = a * b;
+    ASSERT_TRUE(c == 0xfffffffeu32);
+}
+
 export u8 main() {
     display_init();
     test_type_cast();
@@ -1378,6 +1447,7 @@ export u8 main() {
     test_sizeof();
     test_copy();
     test_for();
+    test_mul_32();
     display_print("Success!");
     success();
 }
