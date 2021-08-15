@@ -170,6 +170,7 @@ u8 test_jump() {
 #define C1_32 0xdeadbeefu32
 #define C2_32 0x90817263u32
 #define C3_32 0xBABEB00Bu32
+#define C4_32 0x12345678u32
 
 u8 test_unary() {
     s16 x16 = C1_16;
@@ -1022,6 +1023,30 @@ u8 test_shr_dword() {
     ASSERT_TRUE(a32 >> a8 == C1_32 >> 17);
     a8 = 22u8;
     ASSERT_TRUE(a32 >> a8 == C1_32 >> 22);
+
+    // signed
+    s32 as32;
+    as32 = (s32)C2_32;
+    ASSERT_TRUE(as32 >> 0u8 == (s32)C2_32);
+    ASSERT_TRUE(as32 >> 8u8 == (s32)C2_32 >> 8u8);
+    ASSERT_TRUE(as32 >> 16u8 == (s32)C2_32 >> 16u8);
+    ASSERT_TRUE(as32 >> 24u8 == (s32)C2_32 >> 24u8);
+    ASSERT_TRUE(as32 >> 32u8 == -1s32);
+    ASSERT_TRUE(as32 >> 1u8 == (s32)C2_32 >> 1u8);
+    ASSERT_TRUE(as32 >> 5u8 == (s32)C2_32 >> 5u8);
+    ASSERT_TRUE(as32 >> 9u8 == (s32)C2_32 >> 9u8);
+    ASSERT_TRUE(as32 >> 22u8 == (s32)C2_32 >> 22u8);
+
+    as32 = (s32)C4_32;
+    ASSERT_TRUE(as32 >> 0u8 == (s32)C4_32);
+    ASSERT_TRUE(as32 >> 8u8 == (s32)C4_32 >> 8u8);
+    ASSERT_TRUE(as32 >> 16u8 == (s32)C4_32 >> 16u8);
+    ASSERT_TRUE(as32 >> 24u8 == (s32)C4_32 >> 24u8);
+    ASSERT_TRUE(as32 >> 32u8 == 0s32);
+    ASSERT_TRUE(as32 >> 1u8 == (s32)C4_32 >> 1u8);
+    ASSERT_TRUE(as32 >> 5u8 == (s32)C4_32 >> 5u8);
+    ASSERT_TRUE(as32 >> 9u8 == (s32)C4_32 >> 9u8);
+    ASSERT_TRUE(as32 >> 22u8 == (s32)C4_32 >> 22u8);
 }
 
 u8 test_shl() {
@@ -1426,6 +1451,12 @@ u8 test_mul_32() {
     a = 0x2u32;
     c = a * b;
     ASSERT_TRUE(c == 0xfffffffeu32);
+
+    s32 sa, sb, sc;
+    sb = 20s32;
+    sa = -20s32;
+    sc = sa * sb;
+    ASSERT_TRUE(sc == -400s32);
 }
 
 export u8 main() {

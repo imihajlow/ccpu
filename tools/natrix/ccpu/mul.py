@@ -67,7 +67,7 @@ def genMul(resultLoc, src1Loc, src2Loc):
     t = src1Loc.getType()
     resultLoc = resultLoc.withType(t)
     if t.getSize() not in {1,2,4}:
-        raise NotImplementedError(f"multiplication of {t.getSize() * 8}-bit integers is not implemented")
+        raise NatrixNotImplementedError(src1Loc.getPosition(), f"multiplication of {t.getSize() * 8}-bit integers is not implemented")
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     if l1 == 0 and l2 == 0:

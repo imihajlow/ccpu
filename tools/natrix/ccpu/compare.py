@@ -493,11 +493,11 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
     if t.getSize() > 2:
-        raise NotImplementedError("signed over s16 comparison isn't implemented")
+        raise NatrixNotImplementedError(src1Loc.getPosition(), "signed over s16 comparison isn't implemented")
     isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const and const
-        raise NotImplementedError("signed const comparison")
+        raise NatrixNotImplementedError(src1Loc.getPosition(), "signed const comparison")
     else:
         if not isWord:
             return _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider)

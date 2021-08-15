@@ -527,7 +527,56 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 st a
             '''.format(rs)
     else:
-        raise NatrixNotImplementedError(Position.fromAny(resultLoc), "SAR large numbers")
+        assert(not s.isRegister())
+        byteShift = n // 8
+        bitShift = n % 8
+        if byteShift >= 1:
+            # fill high bytes with sign
+            result += f'''
+                ldi pl, lo({s} + {size - 1})
+                ldi ph, hi({s} + {size - 1})
+                ld a
+                shl a
+                exp a
+            '''
+            result += f'''
+                ldi pl, lo({rs} + {size - 1})
+                ldi ph, hi({rs} + {size - 1})
+            '''
+
+            for i in range(byteShift):
+                if i != 0:
+                    result += 'dec pl\n'
+                    if not resultLoc.isAligned():
+                        result += f'ldi ph, hi({rs} + {size - 1 - i})\n'
+                result += 'st a\n'
+        for i in range(size - byteShift):
+            result += f'''
+                ldi pl, lo({s} + {i + byteShift})
+                ldi ph, hi({s} + {i + byteShift})
+                ld a
+            '''
+            if bitShift != 0:
+                if i + byteShift != size - 1:
+                    # usual byte
+                    result += 'inc pl\n'
+                    if not srcLoc.isAligned():
+                        result += f'ldi ph, hi({s} + {i + byteShift + 1})\n'
+                    result += 'ld b\n'
+                    for bit in range(bitShift):
+                        result += 'shr a\n'
+                    for bit in range(8 - bitShift):
+                        result += 'shl b\n'
+                    result += 'or a, b\n'
+                else:
+                    # hi byte
+                    for bit in range(bitShift):
+                        result += 'sar a\n'
+            result += f'''
+                ldi pl, lo({rs} + {i})
+                ldi ph, hi({rs} + {i})
+                st a
+            '''
     return resultLoc, result
 
 def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
