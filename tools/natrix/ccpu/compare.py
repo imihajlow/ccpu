@@ -3,7 +3,7 @@ from type import BoolType
 import operator
 import labelname
 from .common import *
-from exceptions import SemanticError
+from exceptions import SemanticError, NatrixNotImplementedError
 
 def _genEqNeCmp(src1Loc, src2Loc):
     '''
@@ -485,6 +485,101 @@ def _genCmpSignedWord(resultLoc, src1Loc, src2Loc, op, labelProvider):
     result += '{}:\n'.format(labelEnd)
     return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), BoolType()), result
 
+def _genCmpSignedLong(resultLoc, src1Loc, src2Loc, op, labelProvider):
+    s1 = src1Loc.getSource()
+    s2 = src2Loc.getSource()
+    rs = resultLoc.getSource()
+    l1 = src1Loc.getIndirLevel()
+    l2 = src2Loc.getIndirLevel()
+    size = src1Loc.getType().getSize()
+    assert(not s1.isRegister())
+    assert(not s2.isRegister())
+    result = '; compare signed {} and {} ({})\n'.format(src1Loc, src2Loc, op)
+    result += loadByte('a', src1Loc, size - 1)
+    result += loadByte('b', src2Loc, size - 1)
+    result += 'sub a, b\n'
+    labelEnd = labelProvider.allocLabel("cmp_end")
+    labelCmpLo = labelProvider.allocLabel("cmp_lo")
+    result += f'''
+        ldi pl, lo({labelCmpLo})
+        ldi ph, hi({labelCmpLo})
+        jz
+    '''
+    # hi1 != hi2
+    labelO = labelProvider.allocLabel("cmp_no")
+    result += f'''
+        ldi pl, lo({labelO})
+        ldi ph, hi({labelO})
+        jno
+    '''
+    # O is set
+    result += 'shl a\n' # S -> C
+    if op == 'lt' or op == 'le':
+        # return !C
+        result += 'ldi a, 1\n'
+        result += 'sbb a, 0'
+    else:
+        # return C
+        result += 'mov a, 0\n'
+        result += 'adc a, 0\n'
+    result += f'''
+        ldi pl, lo({labelEnd})
+        ldi ph, hi({labelEnd})
+        jmp
+    '''
+    result += f'''
+    {labelO}:
+        shl a
+    '''
+    # O is clear
+    if op == 'gt' or op == 'ge':
+        # return !C
+        result += 'ldi a, 1\n'
+        result += 'sbb a, 0\n'
+    else:
+        # return C
+        result += 'mov a, 0\n'
+        result += 'adc a, 0\n'
+    result += f'''
+        ldi pl, lo({labelEnd})
+        ldi ph, hi({labelEnd})
+        jmp
+    '''
+    # hi1 == hi2
+    result += f'{labelCmpLo}:\n'
+    for offset in reversed(range(size - 1)):
+        labelNext = labelProvider.allocLabel(f"cmp_{offset}")
+        result += loadByte('a', src1Loc, offset)
+        result += loadByte('b', src2Loc, offset)
+        result += 'sub a, b\n'
+        result += f'''
+            ldi pl, lo({labelNext})
+            ldi ph, hi({labelNext})
+            jz
+        '''
+        if op[0] == 'l':
+            # less, return C
+            result += 'mov a, 0\n'
+            result += 'adc a, 0\n'
+        else:
+            # greater, return !C
+            result += 'ldi a, 1\n'
+            result += 'sbb a, 0\n'
+        result += f'''
+            ldi pl, lo({labelEnd})
+            ldi ph, hi({labelEnd})
+            jmp
+        '''
+        result += f'{labelNext}:\n'
+    if op == 'le' or op == 'ge':
+        # if equal, return 1
+        result += 'ldi a, 1\n'
+    else:
+        # if equal, return 0
+        result += 'mov a, 0\n'
+    result += f'{labelEnd}:\n'
+    return Value.register(src1Loc.getPosition() - src2Loc.getPosition(), BoolType()), result
+
 def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     s1 = src1Loc.getSource()
     s2 = src2Loc.getSource()
@@ -492,17 +587,16 @@ def _genCmpSigned(resultLoc, src1Loc, src2Loc, op, labelProvider):
     l1 = src1Loc.getIndirLevel()
     l2 = src2Loc.getIndirLevel()
     t = src1Loc.getType()
-    if t.getSize() > 2:
-        raise NatrixNotImplementedError(src1Loc.getPosition(), "signed over s16 comparison isn't implemented")
-    isWord = t.getSize() == 2
     if l1 == 0 and l2 == 0:
         # const and const
         raise NatrixNotImplementedError(src1Loc.getPosition(), "signed const comparison")
     else:
-        if not isWord:
+        if t.getSize() == 1:
             return _genCmpSignedByte(resultLoc, src1Loc, src2Loc, op, labelProvider)
-        else:
+        elif t.getSize() == 2:
             return _genCmpSignedWord(resultLoc, src1Loc, src2Loc, op, labelProvider)
+        else:
+            return _genCmpSignedLong(resultLoc, src1Loc, src2Loc, op, labelProvider)
 
 def genCmp(resultLoc, src1Loc, src2Loc, op, labelProvider):
     assert(op in {"gt", "ge", "lt", "le"})

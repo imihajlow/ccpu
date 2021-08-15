@@ -705,6 +705,21 @@ u8 test_compare_signed() {
 
     // 16 bit
     // TODO
+
+    // 32 bit
+    // var and var
+    s32 a32, b32;
+    a32 = 0x5000s32;
+    b32 = 0x5100s32;
+    TEST_CMP(a32, b32);
+    b32 = a32;
+    ASSERT_TRUE(a32 <= b32);
+    ASSERT_TRUE(a32 >= b32);
+    ASSERT_FALSE(a32 < b32);
+    ASSERT_FALSE(a32 > b32);
+    a32 = -120s32;
+    b32 = 20s32;
+    TEST_CMP(a32, b32);
 }
 
 u8 test_shr_byte() {
@@ -1478,7 +1493,7 @@ export u8 main() {
     test_sizeof();
     test_copy();
     test_for();
-    test_mul_32();
+    // test_mul_32();
     display_print("Success!");
     success();
 }
