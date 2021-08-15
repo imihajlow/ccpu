@@ -1,0 +1,114 @@
+#include <vga.h>
+#include <qp/quasipixel.h>
+#include <bcdf.h>
+#include <string.h>
+
+#define FG_COLOR COLOR_RED
+#define BG_COLOR COLOR_BLACK
+
+#define MAX_ITER 30u8
+
+struct Bcdf left; // real part of the top-left corner
+struct Bcdf top; // img part of the top-left corner
+struct Bcdf scale; // increment (re or img) of a pixel
+
+u8 copy_add(struct Bcdf *to, struct Bcdf *what) {
+    BCDF_SET_A(to);
+    BCDF_SET_B(what);
+    bcdf_add();
+    BCDF_GET_R(to);
+}
+
+u8 copy_sub(struct Bcdf *to, struct Bcdf *what) {
+    memcpy((u8*)&bcdf_op_a, (u8*)to, sizeof(struct Bcdf));
+    memcpy((u8*)&bcdf_op_b, (u8*)what, sizeof(struct Bcdf));
+    bcdf_sub();
+    memcpy((u8*)to, (u8*)&bcdf_op_r, sizeof(struct Bcdf));
+}
+
+u8 plot() {
+    struct Bcdf x0, y0;
+    memcpy((u8*)&y0, (u8*)&top, sizeof(struct Bcdf));
+    for (u8 r = 0u8; r != QP_HEIGHT; r += 1u8) {
+        memcpy((u8*)&x0, (u8*)&left, sizeof(struct Bcdf));
+        for (u8 c = 0u8; c != QP_WIDTH; c += 1u8) {
+            struct Bcdf x, y, x2, y2;
+            BCDF_SET_ZERO(&x);
+            BCDF_SET_ZERO(&y);
+            BCDF_SET_ZERO(&x2);
+            BCDF_SET_ZERO(&y2);
+            for (u8 iter = 0u8; iter != MAX_ITER; iter += 1u8) {
+                // y := 2 * x * y + y0
+                BCDF_SET_A(&x);
+                BCDF_SET_B(&y);
+                bcdf_mul();
+                BCDF_SET_A(&bcdf_op_r);
+                BCDF_SET_ZERO(&bcdf_op_b);
+                bcdf_op_b.man[0] = 2u8;
+                bcdf_mul();
+                BCDF_SET_A(&bcdf_op_r);
+                BCDF_SET_B(&y0);
+                bcdf_add();
+                BCDF_GET_R(&y);
+
+                // x := x2 - y2 + x0
+                BCDF_SET_A(&x2);
+                BCDF_SET_B(&y2);
+                bcdf_sub();
+                BCDF_SET_A(&bcdf_op_r);
+                BCDF_SET_B(&x0);
+                bcdf_add();
+                BCDF_GET_R(&x);
+
+                // x2 := x * x
+                BCDF_SET_A(&x);
+                BCDF_SET_B(&x);
+                bcdf_mul();
+                BCDF_GET_R(&x2);
+
+                // y2 := y * y
+                BCDF_SET_A(&y);
+                BCDF_SET_B(&y);
+                bcdf_mul();
+                BCDF_GET_R(&y2);
+
+                // x2 + y2 - 4.0
+                BCDF_SET_A(&x2);
+                BCDF_SET_B(&y2);
+                bcdf_add();
+                BCDF_SET_A(&bcdf_op_r);
+                BCDF_SET_ZERO(&bcdf_op_b);
+                bcdf_op_b.man[0] = 4u8;
+                bcdf_sub();
+
+                if (bcdf_op_r.sign == 0u8) {
+                    // x2 + y2 > 4
+                    break;
+                }
+            }
+            qp_set_and_render(c, r, iter == MAX_ITER);
+            copy_add(&x0, &scale);
+        }
+        copy_sub(&y0, &scale);
+    }
+}
+
+export u8 main() {
+    qp_init(FG_COLOR, BG_COLOR);
+
+    // left = -2.0
+    BCDF_SET_ZERO(&left);
+    left.sign = 0xffu8;
+    left.man[0] = 2u8;
+
+    // top = 1.0
+    BCDF_SET_ZERO(&top);
+    top.man[0] = 1u8;
+
+    // scale = 4/80 = 0.05
+    BCDF_SET_ZERO(&scale);
+    scale.exp = -2s8;
+    scale.man[0] = 5u8;
+
+    plot();
+}

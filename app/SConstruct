@@ -156,6 +156,8 @@ env.App('edit', Split('''
 
 env.App('tetris', Split('tetris/main.na') + app_startup + natrix + lib + quasipixel)
 
+env.Bin('mandelbrot', Split('mandelbrot/main.na') + rom_startup + natrix + lib + quasipixel)
+
 env.Image('image', Split('''
     main.app
     maze.app
