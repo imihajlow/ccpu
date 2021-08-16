@@ -1051,6 +1051,32 @@ u8 test_shr_dword() {
     ASSERT_TRUE(as32 >> 5u8 == (s32)C2_32 >> 5u8);
     ASSERT_TRUE(as32 >> 9u8 == (s32)C2_32 >> 9u8);
     ASSERT_TRUE(as32 >> 22u8 == (s32)C2_32 >> 22u8);
+    // inplace
+    as32 >>= 0u8;
+    ASSERT_TRUE(as32 == (s32)C2_32);
+    as32 >>= 8u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 8u8);
+    as32 = (s32)C2_32;
+    as32 >>= 16u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 16u8);
+    as32 = (s32)C2_32;
+    as32 >>= 24u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 24u8);
+    as32 = (s32)C2_32;
+    as32 >>= 32u8;
+    ASSERT_TRUE(as32 == -1s32);
+    as32 = (s32)C2_32;
+    as32 >>= 1u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 1u8);
+    as32 = (s32)C2_32;
+    as32 >>= 5u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 5u8);
+    as32 = (s32)C2_32;
+    as32 >>= 12u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 12u8);
+    as32 = (s32)C2_32;
+    as32 >>= 23u8;
+    ASSERT_TRUE(as32 == (s32)C2_32 >> 23u8);
 
     as32 = (s32)C4_32;
     ASSERT_TRUE(as32 >> 0u8 == (s32)C4_32);

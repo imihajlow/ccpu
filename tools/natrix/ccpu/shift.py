@@ -442,6 +442,61 @@ def _genSHRVarByConst(resultLoc, srcLoc, n):
 
     return resultLoc, result
 
+def _genSARVarByConstLarge(resultLoc, srcLoc, n):
+    s = srcLoc.getSource()
+    rs = resultLoc.getSource()
+    size = srcLoc.getType().getSize()
+    result = f'; {resultLoc} = sar {srcLoc}, {n}\n'
+    bitShift = n % 8
+    byteShift = n // 8
+    p = None
+    if byteShift >= size:
+        pCode, p = _adjustP(srcLoc, size - 1, p)
+        result += pCode
+        result += '''
+            ld a
+            shl a
+            exp a
+        '''
+        for offset in reversed(range(size)):
+            pCode, p = _adjustP(resultLoc, offset, p)
+            result += pCode
+            result += 'st a\n'
+        return resultLoc, result
+    for offset in range(size - byteShift):
+        pCode, p = _adjustP(srcLoc, offset + byteShift, p)
+        result += pCode
+        result += 'ld b\n'
+        lastByte = offset + 1 + byteShift >= size
+        if bitShift != 0:
+            if not lastByte:
+                pCode, p = _adjustP(srcLoc, offset + 1 + byteShift, p)
+                result += pCode
+                result += 'ld a\n'
+            for bit in range(8):
+                if bit < bitShift:
+                    if not lastByte:
+                        result += 'shr b\n'
+                    else:
+                        result += 'sar b\n'
+                elif not lastByte:
+                    result += 'shl a\n'
+            if not lastByte:
+                result += 'or b, a\n'
+        pCode, p = _adjustP(resultLoc, offset, p)
+        result += pCode
+        result += 'st b\n'
+    if byteShift > 0:
+        result += '''
+            shl b
+            exp a
+        '''
+        for offset in range(size - byteShift, size):
+            pCode, p = _adjustP(resultLoc, offset, p)
+            result += pCode
+            result += 'st a\n'
+    return resultLoc, result
+
 def _genSARVarByConst(resultLoc, srcLoc, n):
     rs = resultLoc.getSource()
     s = srcLoc.getSource()
@@ -526,58 +581,10 @@ def _genSARVarByConst(resultLoc, srcLoc, n):
                 inc pl
                 st a
             '''.format(rs)
+        return resultLoc, result
     else:
         assert(not s.isRegister())
-        byteShift = n // 8
-        bitShift = n % 8
-        if byteShift >= 1:
-            # fill high bytes with sign
-            result += f'''
-                ldi pl, lo({s} + {size - 1})
-                ldi ph, hi({s} + {size - 1})
-                ld a
-                shl a
-                exp a
-            '''
-            result += f'''
-                ldi pl, lo({rs} + {size - 1})
-                ldi ph, hi({rs} + {size - 1})
-            '''
-
-            for i in range(byteShift):
-                if i != 0:
-                    result += 'dec pl\n'
-                    if not resultLoc.isAligned():
-                        result += f'ldi ph, hi({rs} + {size - 1 - i})\n'
-                result += 'st a\n'
-        for i in range(size - byteShift):
-            result += f'''
-                ldi pl, lo({s} + {i + byteShift})
-                ldi ph, hi({s} + {i + byteShift})
-                ld a
-            '''
-            if bitShift != 0:
-                if i + byteShift != size - 1:
-                    # usual byte
-                    result += 'inc pl\n'
-                    if not srcLoc.isAligned():
-                        result += f'ldi ph, hi({s} + {i + byteShift + 1})\n'
-                    result += 'ld b\n'
-                    for bit in range(bitShift):
-                        result += 'shr a\n'
-                    for bit in range(8 - bitShift):
-                        result += 'shl b\n'
-                    result += 'or a, b\n'
-                else:
-                    # hi byte
-                    for bit in range(bitShift):
-                        result += 'sar a\n'
-            result += f'''
-                ldi pl, lo({rs} + {i})
-                ldi ph, hi({rs} + {i})
-                st a
-            '''
-    return resultLoc, result
+        return _genSARVarByConstLarge(resultLoc, srcLoc, n)
 
 def _genShByteByVar(resultLoc, src1Loc, src2Loc, labelProvider, op):
     if src2Loc.getType().getSize() > 1:
