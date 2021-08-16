@@ -1,114 +1,134 @@
 #include <vga.h>
 #include <qp/quasipixel.h>
-#include <bcdf.h>
 #include <string.h>
+#include <ps2keyboard.h>
 
 #define FG_COLOR COLOR_RED
 #define BG_COLOR COLOR_BLACK
 
-#define MAX_ITER 30u8
+#define DEFAULT_ITER 8u16
 
-struct Bcdf left; // real part of the top-left corner
-struct Bcdf top; // img part of the top-left corner
-struct Bcdf scale; // increment (re or img) of a pixel
+#define FP_SHIFT 14u8
 
-u8 copy_add(struct Bcdf *to, struct Bcdf *what) {
-    BCDF_SET_A(to);
-    BCDF_SET_B(what);
-    bcdf_add();
-    BCDF_GET_R(to);
-}
-
-u8 copy_sub(struct Bcdf *to, struct Bcdf *what) {
-    memcpy((u8*)&bcdf_op_a, (u8*)to, sizeof(struct Bcdf));
-    memcpy((u8*)&bcdf_op_b, (u8*)what, sizeof(struct Bcdf));
-    bcdf_sub();
-    memcpy((u8*)to, (u8*)&bcdf_op_r, sizeof(struct Bcdf));
-}
+s32 left; // real part of the top-left corner
+s32 top; // img part of the top-left corner
+s32 scale; // increment (re or img) of a pixel
+u16 max_iter;
 
 u8 plot() {
-    struct Bcdf x0, y0;
-    memcpy((u8*)&y0, (u8*)&top, sizeof(struct Bcdf));
-    for (u8 r = 0u8; r != QP_HEIGHT; r += 1u8) {
-        memcpy((u8*)&x0, (u8*)&left, sizeof(struct Bcdf));
+    s32 x0, y0;
+    y0 = top;
+    for (u8 r = 0u8; r != QP_HEIGHT - 2u8; r += 1u8) {
+        x0 = left;
         for (u8 c = 0u8; c != QP_WIDTH; c += 1u8) {
-            struct Bcdf x, y, x2, y2;
-            BCDF_SET_ZERO(&x);
-            BCDF_SET_ZERO(&y);
-            BCDF_SET_ZERO(&x2);
-            BCDF_SET_ZERO(&y2);
-            for (u8 iter = 0u8; iter != MAX_ITER; iter += 1u8) {
+            s32 x, y, x2, y2;
+            x = 0s32;
+            y = 0s32;
+            x2 = 0s32;
+            y2 = 0s32;
+            for (u16 iter = 0u16; iter != max_iter; iter += 1u16) {
                 // y := 2 * x * y + y0
-                BCDF_SET_A(&x);
-                BCDF_SET_B(&y);
-                bcdf_mul();
-                BCDF_SET_A(&bcdf_op_r);
-                BCDF_SET_ZERO(&bcdf_op_b);
-                bcdf_op_b.man[0] = 2u8;
-                bcdf_mul();
-                BCDF_SET_A(&bcdf_op_r);
-                BCDF_SET_B(&y0);
-                bcdf_add();
-                BCDF_GET_R(&y);
+                // y = (x * y >> (FP_SHIFT - 1u8)) + y0;
+                y = x * y;
+                y = y >> (FP_SHIFT - 1u8);
+                y += y0;
+
+                if (y >= 2s32 << FP_SHIFT) {
+                    break;
+                }
+
+                if (y <= -2s32 << FP_SHIFT) {
+                    break;
+                }
 
                 // x := x2 - y2 + x0
-                BCDF_SET_A(&x2);
-                BCDF_SET_B(&y2);
-                bcdf_sub();
-                BCDF_SET_A(&bcdf_op_r);
-                BCDF_SET_B(&x0);
-                bcdf_add();
-                BCDF_GET_R(&x);
+                x = x2 - y2 + x0;
+
+                if (x >= 2s32 << FP_SHIFT) {
+                    break;
+                }
+
+                if (x <= -2s32 << FP_SHIFT) {
+                    break;
+                }
 
                 // x2 := x * x
-                BCDF_SET_A(&x);
-                BCDF_SET_B(&x);
-                bcdf_mul();
-                BCDF_GET_R(&x2);
+                x2 = (x * x) >> FP_SHIFT;
 
                 // y2 := y * y
-                BCDF_SET_A(&y);
-                BCDF_SET_B(&y);
-                bcdf_mul();
-                BCDF_GET_R(&y2);
+                y2 = (y * y) >> FP_SHIFT;
 
-                // x2 + y2 - 4.0
-                BCDF_SET_A(&x2);
-                BCDF_SET_B(&y2);
-                bcdf_add();
-                BCDF_SET_A(&bcdf_op_r);
-                BCDF_SET_ZERO(&bcdf_op_b);
-                bcdf_op_b.man[0] = 4u8;
-                bcdf_sub();
-
-                if (bcdf_op_r.sign == 0u8) {
-                    // x2 + y2 > 4
+                if (x2 + y2 > (4s32 << FP_SHIFT)) {
                     break;
                 }
             }
-            qp_set_and_render(c, r, iter == MAX_ITER);
-            copy_add(&x0, &scale);
+            qp_set_and_render(c, r, iter == max_iter);
+            x0 += scale;
         }
-        copy_sub(&y0, &scale);
+        y0 -= scale;
     }
 }
 
+u8 show_status() {
+    memset((u8*)vga_color_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), COLOR(COLOR_BLUE, COLOR_GRAY), (u16)VGA_COLS);
+    memset((u8*)vga_char_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), 0u8, (u16)VGA_COLS);
+    vga_put_text(1u8, VGA_ROWS - 1u8, "Enter - zoom in, Backspace - zoom out, +/- - change iter count. IC = ");
+    vga_put_decimal_u16(70u8, VGA_ROWS - 1u8, max_iter);
+}
+
 export u8 main() {
+    ps2_init();
     qp_init(FG_COLOR, BG_COLOR);
 
-    // left = -2.0
-    BCDF_SET_ZERO(&left);
-    left.sign = 0xffu8;
-    left.man[0] = 2u8;
+    max_iter = DEFAULT_ITER;
 
-    // top = 1.0
-    BCDF_SET_ZERO(&top);
-    top.man[0] = 1u8;
+    // left = -2.0
+    left = -(2s32 << FP_SHIFT);
+
+    // top = 1.5
+    top = (1s32 << FP_SHIFT) + (1s32 << (FP_SHIFT - 1u8));
 
     // scale = 4/80 = 0.05
-    BCDF_SET_ZERO(&scale);
-    scale.exp = -2s8;
-    scale.man[0] = 5u8;
+    scale = (4s32 << FP_SHIFT) / 80s32;
 
-    plot();
+    while (1u8) {
+        plot();
+        qp_set_cursor_enabled(1u8);
+        qp_set_cursor_pos(QP_WIDTH / 2u8, QP_HEIGHT / 2u8);
+        show_status();
+        while (1u8) {
+            u8 key = ps2_wait_key_pressed();
+            if (key == PS2_KEY_ESCAPE) {
+                return;
+            } else if (key == PS2_KEY_RIGHT) {
+                qp_move_cursor(1s8, 0s8);
+            } else if (key == PS2_KEY_LEFT) {
+                qp_move_cursor(-1s8, 0s8);
+            } else if (key == PS2_KEY_UP) {
+                qp_move_cursor(0s8, -1s8);
+            } else if (key == PS2_KEY_DOWN) {
+                qp_move_cursor(0s8, 1s8);
+            } else if (key == PS2_KEY_ENTER) {
+                left += (s32)((s8)qp_cursor_x - (s8)QP_WIDTH / 8s8) * scale;
+                top -= (s32)((s8)qp_cursor_y - (s8)QP_HEIGHT / 8s8) * scale;
+                scale >>= 2u8;
+                break;
+            } else if (key == PS2_KEY_BACKSPACE) {
+                scale <<= 2u8;
+                left -= scale * (s32)(QP_WIDTH / 4u8);
+                top += scale * (s32)(QP_HEIGHT / 4u8);
+                break;
+            } else if (key == PS2_KEY_EQUALS || key == PS2_KEY_NUM_ADD) {
+                max_iter <<= 1u8;
+                break;
+            } else if (key == PS2_KEY_DASH || key == PS2_KEY_NUM_SUB) {
+                if (max_iter > 1u16) {
+                    max_iter >>= 1u8;
+                    break;
+                }
+            }
+        }
+        qp_init(FG_COLOR, BG_COLOR);
+        qp_set_cursor_enabled(0u8);
+    }
 }
