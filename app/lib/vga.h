@@ -38,3 +38,8 @@ import u8 vga_clear(u8 color);
     Display a null-terminated string. Colors are not modified.
  */
 import u8 vga_put_text(u8 col, u8 row, u8 *text);
+
+/*
+    Display a decimal number.
+ */
+import u8 vga_put_decimal_u16(u8 col, u8 row, u16 val);

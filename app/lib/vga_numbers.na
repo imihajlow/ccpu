@@ -1,0 +1,23 @@
+#include "vga.h"
+
+export u8 vga_put_decimal_u16(u8 col, u8 row, u16 val) {
+	u8 *p = (u8*)vga_char_seg + VGA_OFFSET(col, row);
+	if (val == 0u16) {
+		*p = '0';
+		return;
+	} else if (val > 9999u16) {
+		p += 4u8;
+	} else if (val > 999u16) {
+		p += 3u8;
+	} else if (val > 99u16) {
+		p += 2u8;
+	} else if (val > 9u16) {
+		p += 1u8;
+	}
+	while (val != 0u16) {
+		u16 mod = val % 10u16;
+		val = val / 10u16;
+		*p = (u8)mod + '0';
+		p -= 1u8;
+	}
+}

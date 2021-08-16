@@ -65,6 +65,7 @@ ps2 = Split('lib/ps2.na lib/ps2keyboard.na lib/keymap.s')
 vga = Split('''
     lib/vga.asm
     lib/vga_console.na
+    lib/vga_numbers.na
     ''')
 
 keyboard = ['lib/keyboard.asm']
