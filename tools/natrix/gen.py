@@ -261,14 +261,14 @@ class Generator:
         if len(args) != len(f.args):
             raise SemanticError(position, "Incorrect argument count for {}".format(name))
         result = ""
-        for n, expr in enumerate(args):
-            result += self.generateAssignment(
-                Value.variable(Position.fromAny(expr), labelname.getArgumentName(name, n), f.args[n]), expr, curFn)
         isRecursive = self.callgraph.isRecursive(curFn, name)
         if isRecursive:
             sys.stderr.write("Warning: {}: recursion\n".format(position)) # TODO warning function in a different module
         if isRecursive:
             result += self.backend.genPushLocals(curFn)
+        for n, expr in enumerate(args):
+            result += self.generateAssignment(
+                Value.variable(Position.fromAny(expr), labelname.getArgumentName(name, n), f.args[n]), expr, curFn)
         result += self.backend.genCall(name)
         if isRecursive:
             result += self.backend.genPopLocals(curFn)
