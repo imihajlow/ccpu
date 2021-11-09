@@ -176,7 +176,12 @@ class Generator:
             rvPtr, codePtr = self.generateExpression(ptr, 0,
                 Value.variable(Position.fromAny(ptr), labelname.getTempName(0)), curFn)
             assert(not rvPtr.getSource().isRegister())
-            offset, type = structure.getField(rvPtr.getType().deref(), fields)
+            try:
+                offset, type = structure.getField(rvPtr.getType().deref(), fields)
+            except LookupError as e:
+                raise SemanticError(Position.fromAny(r), str(e))
+            except ValueError as e:
+                raise SemanticError(Position.fromAny(r), str(e))
             if type.getIndirectionOffset() < 0:
                 raise SemanticError(Position.fromAny(l), "Cannot assign to an r-value")
             rvR, codeR = self.generateExpression(r, 1,
