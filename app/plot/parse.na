@@ -3,155 +3,151 @@
 #include <string.h>
 #include <vga_console.h>
 
+#define MAX_NODES 32u8
+#define MAX_OPERATORS 32u8
+
 #define NODE_NUMBER 0u8
 #define NODE_VAR 1u8
 #define NODE_OP 2u8
 
+#define PRIO_LBRACE 0u8
+
 struct Node {
     u8 type;
-    u8 _align;
-    u8 data[30u8];
+    u8 data[31u8];
 };
 
 struct Op {
-    struct Node *left;
-    struct Node *right;
+    u8 type;
     u8 op;
+    u8 prio;
+    u8 _align;
 };
 
-struct Node *parse_root;
+struct Number {
+    u8 type;
+    u8 _align;
+    struct Bcdf value;
+};
+
+struct Var {
+    u8 type;
+    u8 index;
+};
+
+
+struct Node rpn[MAX_NODES];
+struct Op op_stack[MAX_OPERATORS];
+
+u8 rpn_index;
+u8 op_stack_index;
 
 #define STATE_LEFT 0u8
 #define STATE_RIGHT 1u8
 #define STATE_OP 2u8
 
+#define IS_OP(tok) ((tok) == '+' || (tok) == '-' || (tok) == '*' || (tok) == '/' || (tok) == '(')
+
+u8 get_prio(u8 op) {
+    if (op == '(') {
+        return PRIO_LBRACE;
+    } else if (op == '+' || op == '-') {
+        return 1u8;
+    } else {
+        return 2u8;
+    }
+}
+
+// Dijkstras shunting-yard algorithm
 export u8 parse(u8 *str) {
-    u8 *chunk;
-    u8 state = STATE_LEFT;
-
-    struct Node *left = (struct Node *)0;
-    struct Node *right;
-    struct Op *op;
-    u8 sign = 0u8;
-
+    rpn_index = 0u8;
+    op_stack_index = 0u8;
     while (1u8) {
-        u8 tok = tok_next(&str);
-
-        if (tok == TOK_NUMBER) {
-            vga_console_print("number");
-            bcdf_normalize_arg.sign = sign;
-            sign = 0u8;
+        u8 token = tok_next(&str);
+        if (token == TOK_END) {
+            break;
+        } else if (token == TOK_NUMBER) {
             bcdf_normalize();
-            if (state == STATE_LEFT) {
-                chunk = pool_alloc();
-                if ((u16)chunk == 0u16) {
-                    vga_console_print(" out of chunks");
-                    return 0u8;
-                }
-                left = (struct Node *)chunk;
-                left->type = NODE_NUMBER;
-                memcpy((u8*)left->data, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
-                state = STATE_OP;
-            } else if (state == STATE_RIGHT) {
-                chunk = pool_alloc();
-                if ((u16)chunk == 0u16) {
-                    vga_console_print(" out of chunks");
-                    return 0u8;
-                }
-                right = (struct Node *)chunk;
-                right->type = NODE_NUMBER;
-                memcpy((u8*)right->data, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
-                state = STATE_OP;
-                op->right = right;
-            } else {
+            struct Number *num = (struct Number *)(rpn + rpn_index);
+            num->type = NODE_NUMBER;
+            memcpy((u8*)&num->value, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
+            rpn_index += 1u8;
+            if (rpn_index == MAX_NODES) {
                 return 0u8;
             }
-        } else if (tok == TOK_END) {
-            vga_console_print("end");
-            if (state == STATE_OP) {
-                parse_root = left;
-                return 1u8;
-            } else {
+        } else if (token == 'x' || token == 'y') {
+            struct Var *v = (struct Var *)(rpn + rpn_index);
+            v->type = NODE_VAR;
+            v->index = token - 'x';
+            rpn_index += 1u8;
+            if (rpn_index == MAX_NODES) {
                 return 0u8;
             }
-        } else if (tok == TOK_ERROR) {
-            return 0u8;
-        } else if (tok == '+' || tok == '-' || tok == '*' || tok == '/') {
-            vga_console_print("op");
-            if (state == STATE_OP) {
-                chunk = pool_alloc();
-                if ((u16)chunk == 0u16) {
-                    vga_console_print(" out of chunks");
-                    return 0u8;
+        } else if (IS_OP(token)) {
+            u8 new_prio = get_prio(token);
+            if (new_prio != PRIO_LBRACE) {
+                while (op_stack_index) {
+                    u8 prio = op_stack[op_stack_index - 1u8].prio;
+                    if (prio < new_prio) {
+                        break;
+                    }
+                    op_stack_index -= 1u8;
+                    *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
+                    rpn_index += 1u8;
+                    if (rpn_index == MAX_NODES) {
+                        return 0u8;
+                    }
                 }
-                op = (struct Op *)((struct Node *)chunk)->data;
-                op->left = left;
-                op->op = tok;
-                left = (struct Node *)chunk;
-                left->type = NODE_OP;
-                state = STATE_RIGHT;
-            } else if (tok == '+') {
-                // sign stays
-            } else if (tok == '-') {
-                sign = ~sign;
-            } else {
+            }
+            op_stack[op_stack_index].type = NODE_OP;
+            op_stack[op_stack_index].op = token;
+            op_stack[op_stack_index].prio = get_prio(token);
+            op_stack_index += 1u8;
+            if (op_stack_index == MAX_OPERATORS) {
                 return 0u8;
             }
-        } else if (tok == 'x' || tok == 'y') {
-            vga_console_print("var");
-            if (sign) {
-                return 0u8;
-            }
-            if (state == STATE_LEFT) {
-                chunk = pool_alloc();
-                if ((u16)chunk == 0u16) {
-                    vga_console_print(" out of chunks");
+        } else if (token == ')') {
+            while (1u8) {
+                if (op_stack_index == 0u8) {
                     return 0u8;
                 }
-                left = (struct Node *)chunk;
-                left->type = NODE_VAR;
-                left->data[0] = tok - 'x';
-                state = STATE_OP;
-            } else if (state == STATE_RIGHT) {
-                chunk = pool_alloc();
-                if ((u16)chunk == 0u16) {
-                    vga_console_print(" out of chunks");
+                op_stack_index -= 1u8;
+                if (op_stack[op_stack_index].op == '(') {
+                    break;
+                }
+                *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
+                rpn_index += 1u8;
+                if (rpn_index == MAX_NODES) {
                     return 0u8;
                 }
-                right = (struct Node *)chunk;
-                right->type = NODE_VAR;
-                right->data[0] = tok - 'x';
-                state = STATE_OP;
-                op->right = right;
-            } else {
-                return 0u8;
             }
         }
-        vga_console_newline();
     }
+    while (op_stack_index) {
+        op_stack_index -= 1u8;
+        if (op_stack[op_stack_index].op == '(') {
+            return 0u8;
+        }
+        *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
+        rpn_index += 1u8;
+        if (rpn_index == MAX_NODES) {
+            return 0u8;
+        }
+    }
+    return 1u8;
 }
 
-u8 print(struct Node *root, u8 level) {
-    u8 t = root->type;
-    for (u8 i = 0u8; i != level; i += 1u8) {
-        vga_console_putchar(' ');
-    }
-    if (t == NODE_NUMBER) {
-        vga_console_print_bcdf(*(struct Bcdf *)root->data, 16u8);
-    } else if (t == NODE_VAR) {
-        vga_console_putchar('x' + root->data[0]);
-    } else if (t == NODE_OP) {
-        struct Op *op = (struct Op *)root->data;
-        vga_console_putchar(op->op);
-        vga_console_newline();
-        print(op->left, level + 1u8);
-        print(op->right, level + 1u8);
-    } else {
-        vga_console_print("WTF");
-    }
-    vga_console_newline();
-}
 
 export u8 print_tree() {
-    print(parse_root, 0u8);
+    for (u8 i = 0u8; i != rpn_index; i += 1u8) {
+        u8 t = rpn[i].type;
+        if (t == NODE_OP) {
+            vga_console_putchar(((struct Op *)(rpn + i))->op);
+        } else if (t == NODE_VAR) {
+            vga_console_putchar(((struct Var *)(rpn + i))->index + 'x');
+        } else if (t == NODE_NUMBER) {
+            vga_console_print_bcdf(((struct Number *)(rpn + i))->value, 5u8);
+        }
+        vga_console_putchar(' ');
+    }
 }

@@ -175,5 +175,4 @@ env.Image('image', Split('''
     edit.app
     tetris.app
     mndlbrt.app
-    plot.app
     '''))
