@@ -1,0 +1,30 @@
+#include "pool.h"
+
+
+u8 pool[POOL_CAPACITY * POOL_CHUNK_SIZE];
+u8 *head;
+
+export u8 pool_init() {
+    u8 *p = (u8*)pool;
+    for (u16 i = 0u16; i != POOL_CAPACITY - 1u16; i += 1u16) {
+        *(u8**)p = p + POOL_CHUNK_SIZE;
+        p += POOL_CHUNK_SIZE;
+    }
+    *(u16*)p = 0u16;
+    head = (u8*)pool;
+}
+
+export u8* pool_alloc() {
+    if (head == (u8*)0) {
+        return (u8*)0;
+    } else {
+        u8 *r = head;
+        head = *(u8**)head;
+        return r;
+    }
+}
+
+export u8 pool_free(u8* chunk) {
+    *(u8**)chunk = head;
+    head = chunk;
+}

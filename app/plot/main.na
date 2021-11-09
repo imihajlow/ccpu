@@ -1,0 +1,33 @@
+#include <vga.h>
+#include <line_edit.h>
+#include <ps2keyboard.h>
+#include <vga_console.h>
+#include "tokenizer.h"
+#include "pool.h"
+#include "parse.h"
+
+#define CALC_COLOR COLOR(COLOR_GRAY, COLOR_BLACK)
+
+u8 line_buf[64];
+
+export u8 main() {
+    ps2_init();
+    vga_console_init(CALC_COLOR);
+    while (1u8) {
+        pool_init();
+        vga_console_print("> ");
+        line_buf[0] = 0u8;
+        u8 r = vga_console_line_edit((u8*)line_buf, (u8)sizeof(line_buf));
+        if (!r) {
+            return;
+        }
+        r = parse((u8*)line_buf);
+        if (!r) {
+            vga_console_print("ERROR parsing");
+            vga_console_newline();
+            continue;
+        }
+        vga_console_newline();
+        print_tree();
+    }
+}

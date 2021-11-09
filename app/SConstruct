@@ -160,6 +160,13 @@ env.App('tetris', Split('tetris/main.na') + app_startup + natrix + lib + quasipi
 env.Bin('mandelbrot', Split('mandelbrot/main.na') + rom_startup + natrix + lib + quasipixel)
 env.App('mndlbrt', Split('mandelbrot/main.na') + app_startup + natrix + lib + quasipixel)
 
+env.Bin('plot', Split('''
+    plot/main.na
+    plot/tokenizer.na
+    plot/pool.na
+    plot/parse.na
+    ''') + lib + natrix + rom_startup)
+
 env.Image('image', Split('''
     main.app
     maze.app
@@ -168,4 +175,5 @@ env.Image('image', Split('''
     edit.app
     tetris.app
     mndlbrt.app
+    plot.app
     '''))

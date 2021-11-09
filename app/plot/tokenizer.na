@@ -1,0 +1,86 @@
+#include "tokenizer.h"
+#include <string.h>
+#define STATE_START 0u8
+#define STATE_SIGN 1u8
+#define STATE_LEADING_ZEROES 2u8
+#define STATE_BEFORE_DOT 3u8
+#define STATE_AFTER_DOT 4u8
+#define STATE_AFTER_DOT_ZERO 5u8
+
+export struct Bcdf tok_bcdf;
+
+export u8 tok_next(u8 **str) {
+    u8 state = STATE_START;
+
+    bcdf_normalize_arg.sign = 0u8;
+    bcdf_normalize_arg.exp = -1s8;
+    memset((u8*)bcdf_normalize_arg.man, 0u8, sizeof(bcdf_normalize_arg.man));
+    u8 man_index = 0u8;
+
+    for (; ; *str += 1u8) {
+        u8 c = **str;
+        if (!c) {
+            if (state == STATE_START) {
+                return TOK_END;
+            } else if (state == STATE_AFTER_DOT || state == STATE_BEFORE_DOT) {
+                return TOK_NUMBER;
+            } else {
+                return TOK_ERROR;
+            }
+        }
+
+        if (state == STATE_START) {
+            if (c == ' ') {
+            } else if (c == '+' || c == '-' || c == '/' || c == '*' || c == '(' || c == ')' || c == 'x' || c == 'y') {
+                *str += 1u8;
+                return c;
+            } else if (c == '0') {
+                state = STATE_LEADING_ZEROES;
+            } else if (c >= '1' && c <= '9') {
+                *str -= 1u8;
+                state = STATE_BEFORE_DOT;
+            } else {
+                return TOK_ERROR;
+            }
+        } else if (state == STATE_LEADING_ZEROES) {
+            if (c >= '1' && c <= '9') {
+                *str -= 1u8;
+                state = STATE_BEFORE_DOT;
+            } else if (c == '.') {
+                state = STATE_AFTER_DOT_ZERO;
+            } else if (c != '0') {
+                return TOK_ERROR;
+            }
+        } else if (state == STATE_BEFORE_DOT) {
+            if (c >= '0' && c <= '9') {
+                if (man_index != (u8)sizeof(bcdf_normalize_arg.man)) {
+                    bcdf_normalize_arg.man[man_index] = c - '0';
+                    man_index += 1u8;
+                }
+                bcdf_normalize_arg.exp += 1s8;
+            } else if (c == '.') {
+                state = STATE_AFTER_DOT;
+            } else {
+                return TOK_NUMBER;
+            }
+        } else if (state == STATE_AFTER_DOT) {
+            if (c >= '0' && c <= '9') {
+                if (man_index != (u8)sizeof(bcdf_normalize_arg.man)) {
+                    bcdf_normalize_arg.man[man_index] = c - '0';
+                    man_index += 1u8;
+                }
+            } else {
+                return TOK_NUMBER;
+            }
+        } else if (state == STATE_AFTER_DOT_ZERO) {
+            if (c == '0') {
+                bcdf_normalize_arg.exp -= 1s8;
+            } else if (c > '0' && c <= '9') {
+                state = STATE_AFTER_DOT;
+                *str -= 1u8;
+            } else {
+                return TOK_NUMBER;
+            }
+        }
+    }
+}
