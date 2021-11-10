@@ -17,42 +17,43 @@ u8 error(u8 *text) {
     ps2_wait_key_pressed();   
 }
 
-u8 screen_to_plot(u8 x, u8 center, u8 invert, struct Bcdf *out) {
-    u8 negative = (x < center) != invert;
-    if (negative) {
-        out->sign = 0xffu8;
-    } else {
-        out->sign = 0u8;
-    }
-    u8 abs;
-    if (x < center) {
-        abs = center - x;
-    } else {
-        abs = x - center;
-    }
-    u8 tens = abs / 10u8;
-    u8 ones = abs % 10u8;
-    if (tens != 0u8) {
-        out->man[0] = tens;
-        out->man[1] = ones;
-        out->exp = 0s8;
-    } else {
-        out->man[0] = ones;
-        out->exp = -1s8;
-    }
-}
-
 u8 plot() {
     struct Bcdf vars[2];
+    struct Bcdf delta;
+    struct Bcdf left;
+    struct Bcdf top;
+    BCDF_SET_ZERO(&delta);
+    BCDF_SET_ZERO(&left);
+    BCDF_SET_ZERO(&top);
     BCDF_SET_ZERO(vars + 0u8);
     BCDF_SET_ZERO(vars + 1u8);
+
+    // left = -4.0
+    left.man[0] = 4u8;
+    left.sign = 0xffu8;
+    // top = 2.9
+    top.man[0] = 2u8;
+    top.man[1] = 9u8;
+
+    // delta = 0.1
+    delta.man[0] = 1u8;
+    delta.exp = -1s8;
+
+    memcpy((u8*)((struct Bcdf *)vars + 1u8), (u8*)&top, sizeof(struct Bcdf));
     for (u8 y = 0u8; y != QP_HEIGHT - 2u8; y += 1u8) {
-        screen_to_plot(y, QP_HEIGHT / 2u8 - 1u8, 1u8, (struct Bcdf *)vars + 1u8);
+        memcpy((u8*)((struct Bcdf *)vars + 0u8), (u8*)&left, sizeof(struct Bcdf));
         for (u8 x = 0u8; x != QP_WIDTH; x += 1u8) {
-            screen_to_plot(x, QP_WIDTH / 2u8, 0u8, (struct Bcdf *)vars + 0u8);
             struct Bcdf *result = evaluate((struct Bcdf *)vars);
             qp_set_and_render(x, y, result->sign);
+            BCDF_SET_A((struct Bcdf *)vars + 0u8);
+            BCDF_SET_B(&delta);
+            bcdf_add();
+            BCDF_GET_R((struct Bcdf *)vars + 0u8);
         }
+        BCDF_SET_A((struct Bcdf *)vars + 1u8);
+        BCDF_SET_B(&delta);
+        bcdf_sub();
+        BCDF_GET_R((struct Bcdf *)vars + 1u8);
     }
 }
 
