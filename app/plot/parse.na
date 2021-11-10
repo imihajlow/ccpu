@@ -1,5 +1,4 @@
 #include "parse.h"
-#include "pool.h"
 #include <string.h>
 #include <vga_console.h>
 
@@ -73,7 +72,7 @@ export u8 parse(u8 *str) {
             memcpy((u8*)&num->value, (u8*)&bcdf_normalize_arg, sizeof(struct Bcdf));
             rpn_index += 1u8;
             if (rpn_index == MAX_NODES) {
-                return 0u8;
+                return PARSE_ERR_OUT_OF_NODES;
             }
         } else if (token == 'x' || token == 'y') {
             struct Var *v = (struct Var *)(rpn + rpn_index);
@@ -81,7 +80,7 @@ export u8 parse(u8 *str) {
             v->index = token - 'x';
             rpn_index += 1u8;
             if (rpn_index == MAX_NODES) {
-                return 0u8;
+                return PARSE_ERR_OUT_OF_NODES;
             }
         } else if (IS_OP(token)) {
             u8 new_prio = get_prio(token);
@@ -95,7 +94,7 @@ export u8 parse(u8 *str) {
                     *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
                     rpn_index += 1u8;
                     if (rpn_index == MAX_NODES) {
-                        return 0u8;
+                        return PARSE_ERR_OUT_OF_NODES;
                     }
                 }
             }
@@ -104,12 +103,12 @@ export u8 parse(u8 *str) {
             op_stack[op_stack_index].prio = get_prio(token);
             op_stack_index += 1u8;
             if (op_stack_index == MAX_OPERATORS) {
-                return 0u8;
+                return PARSE_ERR_OUT_OF_OPERATORS;
             }
         } else if (token == ')') {
             while (1u8) {
                 if (op_stack_index == 0u8) {
-                    return 0u8;
+                    return PARSE_ERR_BRACKETS;
                 }
                 op_stack_index -= 1u8;
                 if (op_stack[op_stack_index].op == '(') {
@@ -118,7 +117,7 @@ export u8 parse(u8 *str) {
                 *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
                 rpn_index += 1u8;
                 if (rpn_index == MAX_NODES) {
-                    return 0u8;
+                    return PARSE_ERR_OUT_OF_NODES;
                 }
             }
         }
@@ -126,15 +125,34 @@ export u8 parse(u8 *str) {
     while (op_stack_index) {
         op_stack_index -= 1u8;
         if (op_stack[op_stack_index].op == '(') {
-            return 0u8;
+            return PARSE_ERR_BRACKETS;
         }
         *(struct Op *)(rpn + rpn_index) = op_stack[op_stack_index];
         rpn_index += 1u8;
         if (rpn_index == MAX_NODES) {
-            return 0u8;
+            return PARSE_ERR_OUT_OF_NODES;
         }
     }
-    return 1u8;
+    // check RPN
+    u8 result_counter = 0u8;
+    for (u8 i = 0u8; i != rpn_index; i += 1u8) {
+        u8 t = rpn[i].type;
+        if (t == NODE_NUMBER || t == NODE_VAR) {
+            result_counter += 1u8;
+        } else if (t == NODE_OP) {
+            if (result_counter < 2u8) {
+                return PARSE_ERR_TOO_FEW_OPERANDS;
+            }
+            result_counter -= 1u8;
+        } else {
+            return PARSE_ERR_UNKNOWN;
+        }
+    }
+    if (result_counter == 1u8) {
+        return PARSE_SUCCESS;
+    } else {
+        return PARSE_ERR_TOO_MANY_OPERANDS;
+    }
 }
 
 export struct Bcdf *evaluate(struct Bcdf *vars) {
@@ -150,9 +168,6 @@ export struct Bcdf *evaluate(struct Bcdf *vars) {
             memcpy((u8*)(eval_stack + eval_index), (u8*)(vars + var_index), sizeof(struct Bcdf));
             eval_index += 1u8;
         } else {
-            if (eval_index <= 1u8) {
-                return (struct Bcdf *)0;
-            }
             eval_index -= 1u8;
             BCDF_SET_B(eval_stack + eval_index);
             eval_index -= 1u8;
@@ -166,18 +181,12 @@ export struct Bcdf *evaluate(struct Bcdf *vars) {
                 bcdf_mul();
             } else if (op == '/') {
                 bcdf_div();
-            } else {
-                return (struct Bcdf *)0;
             }
             BCDF_GET_R(eval_stack + eval_index);
             eval_index += 1u8;
         }
     }
-    if (eval_index == 1u8) {
-        return (struct Bcdf *)eval_stack;
-    } else {        
-        return (struct Bcdf *)0;
-    }
+    return (struct Bcdf *)eval_stack;
 }
 
 export u8 print_tree() {

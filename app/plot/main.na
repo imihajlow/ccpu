@@ -1,48 +1,79 @@
 #include <vga.h>
 #include <line_edit.h>
 #include <ps2keyboard.h>
-#include <vga_console.h>
+#include <qp/quasipixel.h>
 #include <string.h>
 #include "tokenizer.h"
-#include "pool.h"
 #include "parse.h"
 
-#define CALC_COLOR COLOR(COLOR_GRAY, COLOR_BLACK)
+#define EXPR_COLOR COLOR(COLOR_GRAY, COLOR_BLACK)
+#define ERROR_COLOR COLOR(COLOR_RED, COLOR_BLACK)
 
 u8 line_buf[64];
 
-export u8 main() {
-    ps2_init();
-    vga_console_init(CALC_COLOR);
+u8 error(u8 *text) {
+    memset((u8*)vga_color_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), ERROR_COLOR, (u16)VGA_COLS);
+    vga_put_text(0u8, VGA_ROWS - 1u8, text);
+    ps2_wait_key_pressed();   
+}
+
+u8 screen_to_plot(u8 x, u8 center, u8 invert, struct Bcdf *out) {
+    u8 negative = (x < center) != invert;
+    if (negative) {
+        out->sign = 0xffu8;
+    } else {
+        out->sign = 0u8;
+    }
+    u8 abs;
+    if (x < center) {
+        abs = center - x;
+    } else {
+        abs = x - center;
+    }
+    u8 tens = abs / 10u8;
+    u8 ones = abs % 10u8;
+    if (tens != 0u8) {
+        out->man[0] = tens;
+        out->man[1] = ones;
+        out->exp = 0s8;
+    } else {
+        out->man[0] = ones;
+        out->exp = -1s8;
+    }
+}
+
+u8 plot() {
     struct Bcdf vars[2];
     BCDF_SET_ZERO(vars + 0u8);
     BCDF_SET_ZERO(vars + 1u8);
-    vars->man[0] = 1u8;
-    vars[1].man[0] = 2u8;
-    vars[1].man[2] = 5u8;
+    for (u8 y = 0u8; y != QP_HEIGHT - 2u8; y += 1u8) {
+        screen_to_plot(y, QP_HEIGHT / 2u8 - 1u8, 1u8, (struct Bcdf *)vars + 1u8);
+        for (u8 x = 0u8; x != QP_WIDTH; x += 1u8) {
+            screen_to_plot(x, QP_WIDTH / 2u8, 0u8, (struct Bcdf *)vars + 0u8);
+            struct Bcdf *result = evaluate((struct Bcdf *)vars);
+            qp_set_and_render(x, y, result->sign);
+        }
+    }
+}
+
+export u8 main() {
+    ps2_init();
+    qp_init(COLOR_GREEN, COLOR_RED);
+
     while (1u8) {
-        pool_init();
-        vga_console_print("> ");
+        memset((u8*)vga_color_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), EXPR_COLOR, (u16)VGA_COLS);
+        memset((u8*)vga_char_seg + VGA_OFFSET(0u8, VGA_ROWS - 1u8), 0u8, (u16)VGA_COLS);
+        vga_put_text(0u8, VGA_ROWS - 1u8, "0 = ");
         line_buf[0] = 0u8;
-        u8 r = vga_console_line_edit((u8*)line_buf, (u8)sizeof(line_buf));
+        u8 r = line_edit((u8*)line_buf, (u8)sizeof(line_buf) - 1u8, 4u8, VGA_ROWS - 1u8, EXPR_COLOR);
         if (!r) {
             return;
         }
         r = parse((u8*)line_buf);
-        if (!r) {
-            vga_console_print("ERROR parsing");
-            vga_console_newline();
+        if (r != PARSE_SUCCESS) {
+            error("Error parsing");
             continue;
         }
-        vga_console_newline();
-        print_tree();
-        vga_console_newline();
-        struct Bcdf *eval_result = evaluate((struct Bcdf *)vars);
-        if (eval_result == (struct Bcdf *)0) {
-            vga_console_print("ERROR evaluating");
-        } else {
-            vga_console_print_bcdf(*eval_result, 5u8);
-        }
-        vga_console_newline();
+        plot();
     }
 }

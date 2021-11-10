@@ -165,7 +165,7 @@ env.Bin('plot', Split('''
     plot/tokenizer.na
     plot/pool.na
     plot/parse.na
-    ''') + lib + natrix + rom_startup)
+    ''') + lib + natrix + quasipixel + rom_startup)
 
 env.Image('image', Split('''
     main.app
