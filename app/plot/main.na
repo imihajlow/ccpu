@@ -2,6 +2,7 @@
 #include <line_edit.h>
 #include <ps2keyboard.h>
 #include <vga_console.h>
+#include <string.h>
 #include "tokenizer.h"
 #include "pool.h"
 #include "parse.h"
@@ -13,6 +14,12 @@ u8 line_buf[64];
 export u8 main() {
     ps2_init();
     vga_console_init(CALC_COLOR);
+    struct Bcdf vars[2];
+    BCDF_SET_ZERO(vars + 0u8);
+    BCDF_SET_ZERO(vars + 1u8);
+    vars->man[0] = 1u8;
+    vars[1].man[0] = 2u8;
+    vars[1].man[2] = 5u8;
     while (1u8) {
         pool_init();
         vga_console_print("> ");
@@ -29,5 +36,13 @@ export u8 main() {
         }
         vga_console_newline();
         print_tree();
+        vga_console_newline();
+        struct Bcdf *eval_result = evaluate((struct Bcdf *)vars);
+        if (eval_result == (struct Bcdf *)0) {
+            vga_console_print("ERROR evaluating");
+        } else {
+            vga_console_print_bcdf(*eval_result, 5u8);
+        }
+        vga_console_newline();
     }
 }

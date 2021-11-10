@@ -137,6 +137,48 @@ export u8 parse(u8 *str) {
     return 1u8;
 }
 
+export struct Bcdf *evaluate(struct Bcdf *vars) {
+    struct Bcdf eval_stack[MAX_NODES];
+    u8 eval_index = 0u8;
+    for (u8 i = 0u8; i != rpn_index; i += 1u8) {
+        u8 t = rpn[i].type;
+        if (t == NODE_NUMBER) {
+            memcpy((u8*)(eval_stack + eval_index), (u8*)&((struct Number *)(rpn + i))->value, sizeof(struct Bcdf));
+            eval_index += 1u8;
+        } else if (t == NODE_VAR) {
+            u8 var_index = ((struct Var *)(rpn + i))->index;
+            memcpy((u8*)(eval_stack + eval_index), (u8*)(vars + var_index), sizeof(struct Bcdf));
+            eval_index += 1u8;
+        } else {
+            if (eval_index <= 1u8) {
+                return (struct Bcdf *)0;
+            }
+            eval_index -= 1u8;
+            BCDF_SET_B(eval_stack + eval_index);
+            eval_index -= 1u8;
+            BCDF_SET_A(eval_stack + eval_index);
+            u8 op = ((struct Op *)(rpn + i))->op;
+            if (op == '+') {
+                bcdf_add();
+            } else if (op == '-') {
+                bcdf_sub();
+            } else if (op == '*') {
+                bcdf_mul();
+            } else if (op == '/') {
+                bcdf_div();
+            } else {
+                return (struct Bcdf *)0;
+            }
+            BCDF_GET_R(eval_stack + eval_index);
+            eval_index += 1u8;
+        }
+    }
+    if (eval_index == 1u8) {
+        return (struct Bcdf *)eval_stack;
+    } else {        
+        return (struct Bcdf *)0;
+    }
+}
 
 export u8 print_tree() {
     for (u8 i = 0u8; i != rpn_index; i += 1u8) {
