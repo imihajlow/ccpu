@@ -78,3 +78,17 @@ class MemberAccessTransformer(Transformer):
             return Tree("p_arrow", [obj.children[0]] + fields, t.meta)
         else:
             raise RuntimeError("Unhandled member_access case")
+
+    def arrow(self, t):
+        obj = t.children[0]
+        fields = t.children[1:]
+        if isinstance(obj, Value) and obj.getType().isPointer() and obj.getIndirLevel() == 0:
+            try:
+                offset, type = getField(obj.getType().deref(), fields)
+            except ValueError as e:
+                raise SemanticError(Position.fromAny(t), str(e))
+            except AttributeError as e:
+                raise SemanticError(Position.fromAny(t), f"{obj} is not a struct")
+            return Value.withOffset(Position.fromAny(t), type, 1 + type.getIndirectionOffset(), obj.getSource(), False, offset)
+        else:
+            return t

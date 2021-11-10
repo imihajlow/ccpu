@@ -92,11 +92,13 @@ if __name__ == '__main__':
         ni.visit(t)
         t = VarTransformerStageTwo(backend).transform(t)
         t = CompoundTransformer().transform(t)
-        t = CastTransformer().transform(t)
-        t = SubscriptTransformer().transform(t)
-        t = MemberAccessTransformer().transform(t)
-        t = SizeofExprTransformer().transform(t)
-        t = ConstTransformer(True).transform(t)
+        for _ in range(6): # TODO add a flag to check if tree was modified
+            t = CastTransformer().transform(t)
+            t = SubscriptTransformer().transform(t)
+            t = MemberAccessTransformer().transform(t)
+            t = SizeofExprTransformer().transform(t)
+            t = ConstTransformer(True).transform(t)
+        
         lt = LiteralTransformer(ni)
         t = lt.transform(t)
         if args.tree:
