@@ -4,7 +4,7 @@
 #include <qp/quasipixel.h>
 #include <string.h>
 #include "tokenizer.h"
-#include "parse.h"
+#include "expr.h"
 
 #define EXPR_COLOR COLOR(COLOR_GRAY, COLOR_BLACK)
 #define ERROR_COLOR COLOR(COLOR_RED, COLOR_BLACK)
