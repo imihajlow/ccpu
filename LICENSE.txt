@@ -1,4 +1,4 @@
-Copyright 2020 Ivan Mikhailov
+Copyright 2020-2021 Ivan Mikhailov
 
 Unless otherwise stated:
 
