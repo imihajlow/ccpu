@@ -17,8 +17,7 @@ module test_stack_control();
     wire n_oe_d_1;
     wire n_oe_ia_0;
     wire n_oe_ia_1;
-    wire n_oe_bank;
-    wire n_we_bank;
+    wire n_ce_bank;
 
     stack_control inst(
         .n_we(n_we),
@@ -36,8 +35,7 @@ module test_stack_control();
         .n_oe_d_1(n_oe_d_1),
         .n_oe_ia_0(n_oe_ia_0),
         .n_oe_ia_1(n_oe_ia_1),
-        .n_oe_bank(n_oe_bank),
-        .n_we_bank(n_we_bank)
+        .n_ce_bank(n_ce_bank)
     );
 
     task assert;
@@ -69,8 +67,7 @@ module test_stack_control();
         assert(n_oe_d_1 === 1'b1);
         assert(n_oe_ia_0 === a[12]);
         assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b1);
-        assert(n_we_bank === 1'b1);
+        assert(n_ce_bank === 1'b1);
 
         n_rst = 1'b1;
         #1
@@ -84,8 +81,7 @@ module test_stack_control();
         assert(n_oe_d_1 === 1'b1);
         assert(n_oe_ia_0 === a[12]);
         assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b1);
-        assert(n_we_bank === 1'b1);
+        assert(n_ce_bank === 1'b1);
 
         // by default stack is disabled, check that
         a = 16'hC000;
@@ -100,8 +96,7 @@ module test_stack_control();
         assert(n_oe_d_1 === 1'b1);
         assert(n_oe_ia_0 === a[12]);
         assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b1);
-        assert(n_we_bank === 1'b1);
+        assert(n_ce_bank === 1'b1);
 
         for (i = 0; i != 2; i = i + 1) begin
             // counters read 
@@ -117,8 +112,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             n_oe = 1'b0;
             #1
@@ -132,8 +126,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             n_oe = 1'b1;
             n_we = 1'b0;
@@ -148,8 +141,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             a = 16'hFC01;
             n_we = 1'b1;
@@ -165,8 +157,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             n_oe = 1'b0;
             #1
@@ -180,8 +171,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b0);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             n_oe = 1'b1;
             n_we = 1'b0;
@@ -196,8 +186,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             // increment/decrement
             for (j = 0; j != 4; j = j + 1) begin
@@ -216,8 +205,7 @@ module test_stack_control();
                 assert(n_oe_d_1 === 1'b1);
                 assert(n_oe_ia_0 === a[12]);
                 assert(n_oe_ia_1 === ~a[12]);
-                assert(n_oe_bank === 1'b1);
-                assert(n_we_bank === 1'b1);
+                assert(n_ce_bank === 1'b1);
 
                 n_we = 1'b0;
                 #1
@@ -231,8 +219,7 @@ module test_stack_control();
                 assert(n_oe_d_1 === 1'b1);
                 assert(n_oe_ia_0 === a[12]);
                 assert(n_oe_ia_1 === ~a[12]);
-                assert(n_oe_bank === 1'b1);
-                assert(n_we_bank === 1'b1);
+                assert(n_ce_bank === 1'b1);
 
                 n_we = 1'b1;
                 #1;
@@ -254,8 +241,7 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
 
             n_we = 1'b1;
             #1
@@ -269,11 +255,10 @@ module test_stack_control();
             assert(n_oe_d_1 === 1'b1);
             assert(n_oe_ia_0 === a[12]);
             assert(n_oe_ia_1 === ~a[12]);
-            assert(n_oe_bank === 1'b1);
-            assert(n_we_bank === 1'b1);
+            assert(n_ce_bank === 1'b1);
         end
 
-        // enabled: check bank oe/we
+        // enabled: check bank ce
         a = 16'hC000;
         n_oe = 1'b1;
         n_we = 1'b1;
@@ -288,39 +273,6 @@ module test_stack_control();
         assert(n_oe_d_1 === 1'b1);
         assert(n_oe_ia_0 === a[12]);
         assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b1);
-        assert(n_we_bank === 1'b1);
-
-        n_oe = 1'b0;
-        n_we = 1'b1;
-        #1
-        assert(n_load_0 === 1'b1);
-        assert(n_load_1 === 1'b1);
-        assert(up_0 === 1'b1);
-        assert(up_1 === 1'b1);
-        assert(down_0 === 1'b1);
-        assert(down_1 === 1'b1);
-        assert(n_oe_d_0 === 1'b1);
-        assert(n_oe_d_1 === 1'b1);
-        assert(n_oe_ia_0 === a[12]);
-        assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b0);
-        assert(n_we_bank === 1'b1);
-
-        n_oe = 1'b1;
-        n_we = 1'b0;
-        #1
-        assert(n_load_0 === 1'b1);
-        assert(n_load_1 === 1'b1);
-        assert(up_0 === 1'b1);
-        assert(up_1 === 1'b1);
-        assert(down_0 === 1'b1);
-        assert(down_1 === 1'b1);
-        assert(n_oe_d_0 === 1'b1);
-        assert(n_oe_d_1 === 1'b1);
-        assert(n_oe_ia_0 === a[12]);
-        assert(n_oe_ia_1 === ~a[12]);
-        assert(n_oe_bank === 1'b1);
-        assert(n_we_bank === 1'b0);
+        assert(n_ce_bank === 1'b0);
     end
 endmodule

@@ -15,8 +15,7 @@ module stack_control(
     n_oe_d_1,
     n_oe_ia_0,
     n_oe_ia_1,
-    n_oe_bank,
-    n_we_bank
+    n_ce_bank,
 );
 input wire n_we;
 input wire n_oe;
@@ -34,8 +33,7 @@ output wire n_oe_d_0;
 output wire n_oe_d_1;
 output wire n_oe_ia_0;
 output wire n_oe_ia_1;
-output wire n_oe_bank;
-output wire n_we_bank;
+output wire n_ce_bank;
 
 // 0xFC00 - SP0 value
 // 0xFC01 - SP1 value
@@ -44,9 +42,20 @@ output wire n_we_bank;
 //          bit 1 - increment SP1
 //          bit 2 - decrement SP0
 //          bit 3 - decrement SP1
-// 0xFC03 - enabel: write bit 0 to enable/disable stack controller
+// 0xFC03 - enable: write bit 0 to enable/disable stack controller
 
-wire #10 nand_a_10_15 = ~&a[15:10];
+wire #10 n_a11 = ~a[11]; // 74HC00
+wire #10 n_a12 = ~a[12]; // 74HC00
+wire #10 nand_a_14_15 = ~&a[15:14]; // 74HC00
+wire #10 nand_a_10_11 = ~&a[11:10]; // 74HC00
+wire #10 xor_a_12_13 = ^a[13:12]; // 74x1G86
+
+wire #10 nandxor = nand_a_14_15 | xor_a_12_13; // 74HC32
+wire #10 nand_a_10_12 = nand_a_10_11 | n_a12; // 74HC32
+wire #10 nand_a_10_15 = nandxor | nand_a_10_12; // 74HC32
+// n_sf_sel = a[15:12] != 4'hC
+wire #10 n_sf_sel = nandxor | a[12]; // 74HC32
+
 wire [3:0] dec_hi_o;
 decoder_74139 dec_hi(
     .n_o(dec_hi_o),
@@ -64,7 +73,7 @@ decoder_74139 dec_lo(
 
 wire ena;
 wire n_ena;
-wire #10 ff_ena_cp = n_sel[3] | n_we;
+wire #10 ff_ena_cp = n_sel[3] | n_we; // 74HC32
 d_ff_7474 ff_ena(
     .q(ena),
     .n_q(n_ena),
@@ -75,21 +84,19 @@ d_ff_7474 ff_ena(
     .n_sd(1'b1)
 );
 
-assign #10 n_load_0 = n_sel[0] | n_we;
-assign #10 n_load_1 = n_sel[1] | n_we;
-assign #10 n_oe_d_0 = n_sel[0] | n_oe;
-assign #10 n_oe_d_1 = n_sel[1] | n_oe;
+assign #10 n_load_0 = n_sel[0] | n_we; // 74HC32
+assign #10 n_load_1 = n_sel[1] | n_we; // 74HC32
+assign #10 n_oe_d_0 = n_sel[0] | n_oe; // 74HC32
+assign #10 n_oe_d_1 = n_sel[1] | n_oe; // 74HC32
 
-assign #10 up_0 = n_sel[2] | n_we | d[0];
-assign #10 up_1 = n_sel[2] | n_we | d[1];
-assign #10 down_0 = n_sel[2] | n_we | d[2];
-assign #10 down_1 = n_sel[2] | n_we | d[3];
+wire #10 n_incdec_we = n_sel[2] | n_we; // 74HC32
+assign #10 up_0 = n_incdec_we | d[0]; // 74HC32
+assign #10 up_1 = n_incdec_we | d[1]; // 74HC32
+assign #10 down_0 = n_incdec_we | d[2]; // 74HC32
+assign #10 down_1 = n_incdec_we | d[3]; // 74HC32
 
-assign #10 n_oe_ia_0 = a[11];
-assign #10 n_oe_ia_1 = ~a[11];
+assign n_oe_ia_0 = a[11];
+assign #10 n_oe_ia_1 = n_a11;
 
-wire n_sf_sel = a[15:12] != 4'b1100;
-
-assign #10 n_oe_bank = n_ena | n_sf_sel | n_oe;
-assign #10 n_we_bank = n_ena | n_sf_sel | n_we;
+assign #10 n_ce_bank = n_sf_sel | n_ena;
 endmodule
