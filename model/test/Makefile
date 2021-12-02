@@ -1,10 +1,10 @@
 .PHONY: all clean
 
 
-all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga test_io test_spi test_ps2
+all: test_pointer_reg test_pointer_pair test_control_unit test_cpu test_74153 test_gp_reg_a test_gp_reg_b test_7474 test_74151 test_vga_ctrl test_vga test_io test_spi test_ps2 test_74193 test_stack_control
 
 clean:
-	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu ./test_vga ./test_vga_ctrl
+	rm -f ./test_adder ./test_7474 ./test_74153 ./test_gp_reg_a ./test_gp_reg_b ./test_pointer_reg ./test_pointer_pair ./test_control_unit ./test_cpu ./test_vga ./test_vga_ctrl ./test_74193 ./test_stack_control
 	rm -f test_alu
 	rm -f test_spi
 	rm -f test_ps2
@@ -45,6 +45,10 @@ test_7474: test_7474.v ../74xx/d_ff_7474.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_7474
 
+test_74193: test_74193.v ../74xx/counter_74193.v
+	iverilog -o $@ $^
+	./verilog-verify.sh ./test_74193
+
 test_gp_reg_a: test_gp_reg_a.v ../gp_reg_a.v ../74xx/buffer_74244.v ../74xx/register_74273.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_gp_reg_a
@@ -72,6 +76,10 @@ test_spi: test_spi.v ../spi.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74
 test_ps2: test_ps2.v ../ps2.v ../74xx/register_74273.v ../74xx/mux_74151.v ../74xx/counter_74161.v ../74xx/buffer_74244.v ../74xx/d_ff_7474.v ../74xx/parity_74280.v
 	iverilog -o $@ $^
 	./verilog-verify.sh ./test_ps2
+
+test_stack_control: test_stack_control.v ../stack_control.v ../74xx/d_ff_7474.v ../74xx/decoder_74139.v
+	iverilog -o $@ $^
+	./verilog-verify.sh ./test_stack_control
 
 cg.hex: ../../app/font/font.txt
 	../../tools/fontgen.py --mode hex $^ $@
