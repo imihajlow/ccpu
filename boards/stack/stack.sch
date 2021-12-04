@@ -616,22 +616,6 @@ Wire Bus Line
 Wire Bus Line
 	8900 2350 10000 2350
 Connection ~ 10000 2350
-Entry Wire Line
-	12900 5500 13000 5600
-Entry Wire Line
-	12900 5400 13000 5500
-Entry Wire Line
-	12900 5600 13000 5700
-Entry Wire Line
-	12900 5700 13000 5800
-Entry Wire Line
-	12900 5800 13000 5900
-Entry Wire Line
-	12900 5900 13000 6000
-Entry Wire Line
-	12900 6000 13000 6100
-Entry Wire Line
-	12900 6100 13000 6200
 Wire Wire Line
 	13150 6200 13000 6200
 Wire Wire Line
@@ -648,51 +632,22 @@ Wire Wire Line
 	13150 5600 13000 5600
 Wire Wire Line
 	13000 5500 13150 5500
-Text Label 13000 5500 0    50   ~ 0
+Text Label 13000 4800 0    50   ~ 0
 f0
 Text Label 13000 5600 0    50   ~ 0
 f1
-Text Label 13000 5700 0    50   ~ 0
+Text Label 13000 4900 0    50   ~ 0
 f2
 Text Label 13000 5800 0    50   ~ 0
 f3
-Text Label 13000 5900 0    50   ~ 0
+Text Label 13000 5100 0    50   ~ 0
 f4
 Text Label 13000 6000 0    50   ~ 0
 f5
 Text Label 13000 6100 0    50   ~ 0
 f6
-Text Label 13000 6200 0    50   ~ 0
+Text Label 13000 5000 0    50   ~ 0
 f7
-Wire Bus Line
-	12900 5350 9000 5350
-Wire Bus Line
-	9000 5350 9000 6900
-Wire Bus Line
-	9000 4700 9000 5350
-Connection ~ 9000 5350
-Entry Wire Line
-	12900 5300 13000 5400
-Entry Wire Line
-	12900 5200 13000 5300
-Entry Wire Line
-	12900 5100 13000 5200
-Entry Wire Line
-	12900 5000 13000 5100
-Entry Wire Line
-	12900 4900 13000 5000
-Entry Wire Line
-	12900 4800 13000 4900
-Entry Wire Line
-	12900 4700 13000 4800
-Entry Wire Line
-	12900 4600 13000 4700
-Entry Wire Line
-	12900 4500 13000 4600
-Entry Wire Line
-	12900 4400 13000 4500
-Entry Wire Line
-	12900 4300 13000 4400
 Wire Wire Line
 	13000 4400 13150 4400
 Wire Wire Line
@@ -721,13 +676,13 @@ Text Label 13000 5300 0    50   ~ 0
 a9
 Text Label 13000 5200 0    50   ~ 0
 a8
-Text Label 13000 5100 0    50   ~ 0
+Text Label 13000 5900 0    50   ~ 0
 a7
-Text Label 13000 5000 0    50   ~ 0
+Text Label 13000 6200 0    50   ~ 0
 a6
-Text Label 13000 4900 0    50   ~ 0
+Text Label 13000 5700 0    50   ~ 0
 a5
-Text Label 13000 4800 0    50   ~ 0
+Text Label 13000 5500 0    50   ~ 0
 a4
 Text Label 13000 4700 0    50   ~ 0
 a3
@@ -803,7 +758,6 @@ Wire Wire Line
 	11800 1550 11800 1300
 Wire Bus Line
 	12900 1200 12900 2350
-Connection ~ 12900 2350
 Text Label 14350 4400 0    50   ~ 0
 d0
 Text Label 14350 4500 0    50   ~ 0
@@ -2078,11 +2032,11 @@ F 3 "" H 20150 1450 50  0001 C CNN
 	1    20150 1450
 	1    0    0    -1  
 $EndComp
-Text Label 12900 2500 3    50   ~ 0
+Text Label 12900 2350 3    50   ~ 0
 a[0..15]
 Text Label 10850 1200 2    50   ~ 0
 d[0..7]
-Text Label 11050 5350 2    50   ~ 0
+Text Label 9000 5300 3    50   ~ 0
 f[0..7]
 Wire Bus Line
 	8550 6900 9000 6900
@@ -2159,6 +2113,45 @@ F 3 "" H 13700 14600 50  0001 C CNN
 	1    13700 14600
 	1    0    0    -1  
 $EndComp
+Text Notes 7400 11150 2    50   ~ 0
+access
+Text Notes 11450 12850 2    50   ~ 0
+enabled
+Wire Bus Line
+	9000 4700 9000 6900
+$Comp
+L Device:C C18
+U 1 1 61FBFFD0
+P 14800 5950
+F 0 "C18" H 14915 5996 50  0000 L CNN
+F 1 "0.1" H 14915 5905 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 14838 5800 50  0001 C CNN
+F 3 "~" H 14800 5950 50  0001 C CNN
+	1    14800 5950
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0105
+U 1 1 61FBFFD6
+P 14800 6100
+F 0 "#PWR0105" H 14800 5850 50  0001 C CNN
+F 1 "GND" H 14805 5927 50  0000 C CNN
+F 2 "" H 14800 6100 50  0001 C CNN
+F 3 "" H 14800 6100 50  0001 C CNN
+	1    14800 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0104
+U 1 1 61FBFFDC
+P 14800 5800
+F 0 "#PWR0104" H 14800 5650 50  0001 C CNN
+F 1 "VCC" H 14815 5973 50  0000 C CNN
+F 2 "" H 14800 5800 50  0001 C CNN
+F 3 "" H 14800 5800 50  0001 C CNN
+	1    14800 5800
+	1    0    0    -1  
+$EndComp
 Wire Bus Line
 	10000 1200 11400 1200
 Wire Bus Line
@@ -2166,15 +2159,7 @@ Wire Bus Line
 Wire Bus Line
 	11900 2350 12900 2350
 Wire Bus Line
-	12900 5350 12900 6100
-Wire Bus Line
 	11700 1200 12900 1200
 Wire Bus Line
 	14650 3050 14650 5200
-Wire Bus Line
-	12900 2350 12900 5300
-Text Notes 7400 11150 2    50   ~ 0
-access
-Text Notes 11450 12850 2    50   ~ 0
-enabled
 $EndSCHEMATC

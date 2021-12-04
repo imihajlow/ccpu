@@ -991,12 +991,6 @@ Text Label 8700 700  2    50   ~ 0
 d[0..7]
 Text Label 9100 3350 2    50   ~ 0
 f[0..7]
-Wire Bus Line
-	3800 1200 3800 4100
-Wire Bus Line
-	8850 700  8850 2150
-Wire Bus Line
-	8850 3350 8850 4500
 $Comp
 L Device:R R1
 U 1 1 61B35FAA
@@ -1010,4 +1004,10 @@ F 3 "~" H 5700 6100 50  0001 C CNN
 	1    5700 6100
 	0    1    1    0   
 $EndComp
+Wire Bus Line
+	3800 1200 3800 4100
+Wire Bus Line
+	8850 700  8850 2150
+Wire Bus Line
+	8850 3350 8850 4500
 $EndSCHEMATC
