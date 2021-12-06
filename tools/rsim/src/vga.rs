@@ -1,3 +1,5 @@
+use crate::config::VgaConfig;
+use crate::font::Font;
 use rand::{thread_rng, RngCore};
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 use std::io;
@@ -10,17 +12,12 @@ const COLOR_SEG_ADDR: u16 = 0xD000;
 pub struct Vga {
     char_seg: [u8; 0x1000],
     color_seg: [u8; 0x1000],
-    font: Option<Font>
-}
-
-struct Font {
-    glyphs: [[u8; 16]; 0x100]
+    font: Font
 }
 
 #[derive(Debug)]
 pub enum RenderError {
     EncodingError(png::EncodingError),
-    NoFont
 }
 
 impl From<png::EncodingError> for RenderError {
@@ -29,53 +26,25 @@ impl From<png::EncodingError> for RenderError {
     }
 }
 
-impl Font {
-    fn load<T>(reader: &mut T) -> io::Result<Font>
-    where T: io::Read {
-        let mut r = Font { glyphs: [[0;16]; 0x100] };
-        for i in 0..0x100 {
-            reader.read_exact(&mut r.glyphs[i])?;
-        }
-        Ok(r)
-    }
-
-    fn render(&self, buf: &mut Vec<u8>, ch: u8, color: u8, c: u8, r: u8) {
-        let glyph = &self.glyphs[ch as usize];
-        let fg = color & 0xf;
-        let bg = color >> 4;
-        for y in 0..16 {
-            let mask = glyph[y];
-            for x in 0..4 {
-                let offset = ((r as usize) * 16 + y) * 320 + (c as usize) * 4 + x;
-                buf[offset] =
-                    if mask & (1 << (2 * x + 1)) != 0 { fg } else { bg } |
-                    ((if mask & (1 << (2 * x)) != 0 { fg } else { bg }) << 4);
-            }
-        }
-    }
-}
-
 impl Vga {
-    pub fn new<T>(font_file: &mut Option<T>) -> io::Result<Self>
-    where T: io::Read {
-        let mut r = Vga {
-            char_seg: [0; 0x1000],
-            color_seg: [0; 0x1000],
-            font: match font_file {
-                None => None,
-                Some(ref mut r) => Some(Font::load(r)?)
+    pub fn new(config: &VgaConfig) -> std::io::Result<Option<Self>> {
+        match config {
+            VgaConfig::Absent => Ok(None),
+            VgaConfig::PresentWithFontPath(path) => {
+                let mut reader = std::fs::File::open(path)?;
+                let mut r = Vga {
+                    char_seg: [0; 0x1000],
+                    color_seg: [0; 0x1000],
+                    font: Font::load(&mut reader)?
+                };
+                thread_rng().fill_bytes(&mut r.char_seg);
+                thread_rng().fill_bytes(&mut r.color_seg);
+                Ok(Some(r))
             }
-        };
-        thread_rng().fill_bytes(&mut r.char_seg);
-        thread_rng().fill_bytes(&mut r.color_seg);
-        Ok(r)
+        }
     }
 
     pub fn create_image<W: io::Write>(&self, w: W) -> Result<(), RenderError> {
-        let font = match self.font {
-            None => return Err(RenderError::NoFont),
-            Some(ref f) => f
-        };
         let mut encoder = png::Encoder::new(w, 640, 480);
         encoder.set_color(png::ColorType::Indexed);
         encoder.set_depth(png::BitDepth::Four);
@@ -96,7 +65,7 @@ impl Vga {
             for c in 0..80 {
                 let ch = self.char_seg[(r << 7) + c];
                 let color = self.color_seg[(r << 7) + c];
-                font.render(&mut img_data, ch, color, c as u8, r as u8);
+                self.font.render(&mut img_data, ch, color, c as u8, r as u8);
             }
         }
 

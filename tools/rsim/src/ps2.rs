@@ -1,3 +1,4 @@
+use crate::config::Ps2Config;
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 use std::collections::VecDeque;
 
@@ -10,10 +11,13 @@ pub struct Ps2 {
 }
 
 impl Ps2 {
-    pub fn new() -> Ps2 {
-        Ps2 {
-            queue: VecDeque::new(),
-            last_data: 0
+    pub fn new(config: &Ps2Config) -> Option<Self> {
+        match config {
+            Ps2Config::Absent => None,
+            Ps2Config::Present => Some(Self {
+                queue: VecDeque::new(),
+                last_data: 0
+            })
         }
     }
 

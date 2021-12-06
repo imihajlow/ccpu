@@ -38,6 +38,14 @@ impl fmt::Display for MemoryWriteError {
 
 pub trait ErrorChainable {
     fn chain_error(self, other: Self) -> Self;
+
+    fn chain_some_error(self, other: Option<Self>) -> Self
+    where Self: Sized {
+        match other {
+            None => self,
+            Some(x) => self.chain_error(x)
+        }
+    }
 }
 
 impl ErrorChainable for Result<u8, MemoryReadError> {

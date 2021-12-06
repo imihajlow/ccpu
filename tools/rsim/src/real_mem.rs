@@ -1,11 +1,21 @@
 use crate::memory::MemoryReadError;
 use crate::memory::MemoryWriteError;
 use crate::memory::Memory;
+use crate::config::MemConfig;
 use std::io;
 
 const CR_ADDR: u16 = 0xFF02;
 
-pub struct Mem {
+pub enum Mem {
+    Plain(PlainMem),
+    IoRev3(IoRev3Mem),
+}
+
+pub struct PlainMem {
+    ram: [u8; 0x10000]
+}
+
+pub struct IoRev3Mem {
     rom: [u8; 0x8000],
     hi_ram: [u8; 0x7000],
     lo_ram: [u8; 0x8000],
@@ -73,25 +83,64 @@ impl From<io::Error> for LoadError {
 }
 
 impl Mem {
-    pub fn load<T>(reader: &mut T) -> Result<Mem, LoadError>
+    pub fn new<T>(config: &MemConfig, reader: &mut T) -> Result<Mem, LoadError>
     where T: io::Read + io::Seek {
+        let desired_size = match config {
+            MemConfig::Plain => 0x10000,
+            MemConfig::IoRev3 => 0x8000,
+        };
         let size = reader.seek(io::SeekFrom::End(0))?;
-        if size != 0x8000 {
+        if size != desired_size {
             return Err(LoadError::WrongFileSize);
         }
         reader.seek(io::SeekFrom::Start(0))?;
-        let mut ram = Mem{
-            rom: [0xff; 0x8000],
-            hi_ram: [0x00; 0x7000],
-            lo_ram: [0x00; 0x8000],
-            cr: Cr::from(0)
+        let mut r : Self = match config {
+            MemConfig::Plain => Self::Plain(PlainMem {
+                ram: [0x00; 0x10000]
+            }),
+            MemConfig::IoRev3 => Self::IoRev3(IoRev3Mem {
+                rom: [0xff; 0x8000],
+                hi_ram: [0x00; 0x7000],
+                lo_ram: [0x00; 0x8000],
+                cr: Cr::from(0)
+            }),
         };
-        reader.read_exact(&mut ram.rom)?;
-        Ok(ram)
+        match r {
+            Self::Plain(PlainMem { ref mut ram }) => reader.read_exact(ram)?,
+            Self::IoRev3(IoRev3Mem { ref mut rom, .. }) => reader.read_exact(rom)?,
+        }
+        Ok(r)
     }
 }
 
 impl Memory for Mem {
+    fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
+        match self {
+            Self::Plain(m) => m.get(addr),
+            Self::IoRev3(m) => m.get(addr)
+        }
+    }
+
+    fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
+        match self {
+            Self::Plain(ref mut m) => m.set(addr, value),
+            Self::IoRev3(ref mut m) => m.set(addr, value)
+        }
+    }
+}
+
+impl Memory for PlainMem {
+    fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
+        Ok(self.ram[addr as usize])
+    }
+
+    fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
+        self.ram[addr as usize] = value;
+        Ok(())
+    }
+}
+
+impl Memory for IoRev3Mem {
     fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
         match addr {
             x if x < 0x8000 => {

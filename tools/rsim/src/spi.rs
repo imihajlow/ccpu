@@ -1,3 +1,4 @@
+use crate::config::SpiConfig;
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 use crate::card::Card;
 
@@ -12,12 +13,15 @@ pub struct Spi {
 }
 
 impl Spi {
-    pub fn new() -> Self {
-        Spi {
-            spi_buf: 0,
-            power: false,
-            cs: true,
-            card: None
+    pub fn new(config: &SpiConfig) -> Option<Self> {
+        match config {
+            SpiConfig::Absent => None,
+            SpiConfig::Present => Some(Self {
+                spi_buf: 0,
+                power: false,
+                cs: true,
+                card: None
+            })
         }
     }
 

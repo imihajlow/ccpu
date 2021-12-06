@@ -1,24 +1,21 @@
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError, ErrorChainable};
 use crate::real_mem;
-use crate::plain_ram;
 use crate::keyboard;
-use crate::vga;
-use crate::server;
-use crate::ps2;
-use crate::spi;
+use crate::vga::Vga;
+use crate::server::Server;
+use crate::ps2::Ps2;
+use crate::spi::Spi;
+use crate::config::Config;
 use std::io;
 use std::sync::{Arc, Mutex};
 
-pub enum System {
-    Plain(crate::plain_ram::PlainRam),
-    Real {
-        mem: real_mem::Mem,
-        kbd: keyboard::Keyboard,
-        vga: Arc<Mutex<vga::Vga>>,
-        server: server::Server,
-        ps2: Arc<Mutex<ps2::Ps2>>,
-        spi: spi::Spi,
-    }
+pub struct System {
+    mem: real_mem::Mem,
+    kbd: Option<keyboard::Keyboard>,
+    vga: Option<Arc<Mutex<Vga>>>,
+    server: Option<Server>,
+    ps2: Option<Arc<Mutex<Ps2>>>,
+    spi: Option<Spi>,
 }
 
 #[derive(Debug)]
@@ -41,86 +38,59 @@ impl From<io::Error> for LoadError {
 
 impl std::ops::Drop for System {
     fn drop(&mut self) {
-        match self {
-            System::Real { server, .. } => {
-                server.shutdown_and_join();
-            }
-            _ => ()
-        };
+        self.server.as_mut().map(|s| s.shutdown_and_join());
         println!("Bye");
     }
 }
 
 impl System {
-    pub fn new<T>(plain: bool, prog_reader: &mut T, font_reader: &mut Option<T>, server_port: u16) -> Result<System, LoadError>
+    pub fn new<T>(config: &Config, prog_reader: &mut T) -> Result<System, LoadError>
     where T: io::Read + io::Seek {
-        if plain {
-            let mem = plain_ram::PlainRam::load(prog_reader)?;
-            Ok(System::Plain(mem))
-        } else {
-            let mem = real_mem::Mem::load(prog_reader)?;
-            let vga = Arc::new(Mutex::new(vga::Vga::new(font_reader)?));
-            let vga2 = Arc::clone(&vga);
-            let ps2 = Arc::new(Mutex::new(ps2::Ps2::new()));
-            let ps22 = Arc::clone(&ps2);
-            let spi = spi::Spi::new();
-            Ok(System::Real {
-                mem,
-                kbd: keyboard::Keyboard::new(),
-                vga: vga,
-                ps2: ps2,
-                spi: spi,
-                server: server::Server::start(server_port, vga2, ps22)
-            })
-        }
+        let mem = real_mem::Mem::new(config.get_mem_config(), prog_reader)?;
+        let vga = Vga::new(config.get_vga_config())?
+            .map(|vga| Arc::new(Mutex::new(vga)));
+        let vga2 = vga.as_ref().map(|ref vga| Arc::clone(vga));
+        let ps2 = Ps2::new(config.get_ps2_config())
+            .map(|ps2| Arc::new(Mutex::new(ps2)));
+        let ps22 = ps2.as_ref().map(|ref ps2| Arc::clone(ps2));
+        let spi = Spi::new(config.get_spi_config());
+        Ok(System {
+            mem,
+            kbd: keyboard::Keyboard::new(&config.get_kb_config()),
+            vga: vga,
+            ps2: ps2,
+            spi: spi,
+            server: Server::start(config.get_server_config(), vga2, ps22)
+        })
     }
 
     pub fn get_keyboard_mut(&mut self) -> Option<&mut keyboard::Keyboard> {
-        match self {
-            System::Plain(_) => None,
-            System::Real{ ref mut kbd, .. } => Some(kbd)
-        }
+        self.kbd.as_mut() //.map(|k| k)
     }
 
-    pub fn get_vga(&self) -> Option<Arc<Mutex<vga::Vga>>> {
-        match self {
-            System::Plain(_) => None,
-            System::Real{ ref vga, ..} => Some(Arc::clone(vga))
-        }
+    pub fn get_vga(&self) -> Option<Arc<Mutex<Vga>>> {
+        self.vga.as_ref().map(|v| Arc::clone(v))
     }
 
-    pub fn get_spi_mut(&mut self) -> Option<&mut spi::Spi> {
-        match self {
-            System::Plain(_) => None,
-            System::Real{ ref mut spi, .. } => Some(spi)
-        }
+    pub fn get_spi_mut(&mut self) -> Option<&mut Spi> {
+        self.spi.as_mut()
     }
 }
 
 impl Memory for System {
     fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
-        match self {
-            System::Plain(m) => m.get(addr),
-            System::Real { mem, kbd, vga, ps2, spi, .. } => {
-                mem.get(addr)
-                    .chain_error(kbd.get(addr))
-                    .chain_error(spi.get(addr))
-                    .chain_error(vga.lock().unwrap().get(addr))
-                    .chain_error(ps2.lock().unwrap().get(addr))
-            }
-        }
+        self.mem.get(addr)
+            .chain_some_error(self.kbd.as_ref().map(|kbd| kbd.get(addr)))
+            .chain_some_error(self.spi.as_ref().map(|spi| spi.get(addr)))
+            .chain_some_error(self.vga.as_ref().map(|vga| vga.lock().unwrap().get(addr)))
+            .chain_some_error(self.ps2.as_ref().map(|ps2| ps2.lock().unwrap().get(addr)))
     }
 
     fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
-        match self {
-            System::Plain(m) => m.set(addr, value),
-            System::Real { mem, kbd, vga, ps2, spi, .. } => {
-                mem.set(addr, value)
-                    .chain_error(kbd.set(addr, value))
-                    .chain_error(spi.set(addr, value))
-                    .chain_error(vga.lock().unwrap().set(addr, value))
-                    .chain_error(ps2.lock().unwrap().set(addr, value))
-            }
-        }
+        self.mem.set(addr, value)
+            .chain_some_error(self.kbd.as_mut().map(|kbd| kbd.set(addr, value)))
+            .chain_some_error(self.spi.as_mut().map(|spi| spi.set(addr, value)))
+            .chain_some_error(self.vga.as_mut().map(|vga| vga.lock().unwrap().set(addr, value)))
+            .chain_some_error(self.ps2.as_mut().map(|ps2| ps2.lock().unwrap().set(addr, value)))
     }
 }

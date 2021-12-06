@@ -1,3 +1,4 @@
+use crate::config::ServerConfig;
 use std::thread::JoinHandle;
 use std::sync::mpsc;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
@@ -20,16 +21,22 @@ pub struct Server {
 }
 
 impl Server {
-    pub fn start(port: u16, vga: Arc<Mutex<Vga>>, ps2: Arc<Mutex<Ps2>>) -> Self {
+    pub fn start(config: &ServerConfig, vga: Option<Arc<Mutex<Vga>>>, ps2: Option<Arc<Mutex<Ps2>>>) -> Option<Self> {
+        let port = match config {
+            ServerConfig::Disabled => return None,
+            ServerConfig::EnabledOnPort(p) => *p
+        };
+        let vga = vga?;
+        let ps2 = ps2?;
         let (tx,rx) = mpsc::channel();
-        Server {
+        Some(Server {
             tx: tx,
             handle: Some(std::thread::spawn(move || {
                 if let Err(e) = serve(port, rx, vga, ps2) {
                     eprintln!("Server died: {:?}", e);
                 }
             }))
-        }
+        })
     }
 
     pub fn shutdown_and_join(&mut self) {

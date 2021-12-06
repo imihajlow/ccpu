@@ -1,3 +1,4 @@
+use crate::config::KbConfig;
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
 
 const KEYBOARD_ADDR: u16 = 0xFF00;
@@ -33,10 +34,13 @@ pub struct Keyboard {
 }
 
 impl Keyboard {
-    pub fn new() -> Self {
-        Keyboard {
-            pressed: None,
-            row_mask: 0xFF
+    pub fn new(config: &KbConfig) -> Option<Self> {
+        match config {
+            KbConfig::Absent => None,
+            KbConfig::Present => Some(Keyboard {
+                pressed: None,
+                row_mask: 0xFF
+            })
         }
     }
 
