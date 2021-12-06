@@ -12,6 +12,7 @@ mod spi;
 mod card;
 mod config;
 mod font;
+mod stack;
 
 use crate::config::Config;
 use std::fs::{File,OpenOptions};

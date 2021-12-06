@@ -3,4 +3,5 @@ vga: absent
 keyboard: absent
 ps2: absent
 spi: absent
+stack: absent
 server: disabled

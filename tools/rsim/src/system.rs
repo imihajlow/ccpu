@@ -5,6 +5,7 @@ use crate::vga::Vga;
 use crate::server::Server;
 use crate::ps2::Ps2;
 use crate::spi::Spi;
+use crate::stack::Stack;
 use crate::config::Config;
 use std::io;
 use std::sync::{Arc, Mutex};
@@ -16,6 +17,7 @@ pub struct System {
     server: Option<Server>,
     ps2: Option<Arc<Mutex<Ps2>>>,
     spi: Option<Spi>,
+    stack: Option<Stack>,
 }
 
 #[derive(Debug)]
@@ -54,12 +56,14 @@ impl System {
             .map(|ps2| Arc::new(Mutex::new(ps2)));
         let ps22 = ps2.as_ref().map(|ref ps2| Arc::clone(ps2));
         let spi = Spi::new(config.get_spi_config());
+        let stack = Stack::new(config.get_stack_config());
         Ok(System {
             mem,
             kbd: keyboard::Keyboard::new(&config.get_kb_config()),
             vga: vga,
             ps2: ps2,
             spi: spi,
+            stack: stack,
             server: Server::start(config.get_server_config(), vga2, ps22)
         })
     }
@@ -84,6 +88,7 @@ impl Memory for System {
             .chain_some_error(self.spi.as_ref().map(|spi| spi.get(addr)))
             .chain_some_error(self.vga.as_ref().map(|vga| vga.lock().unwrap().get(addr)))
             .chain_some_error(self.ps2.as_ref().map(|ps2| ps2.lock().unwrap().get(addr)))
+            .chain_some_error(self.stack.as_ref().map(|stack| stack.get(addr)))
     }
 
     fn set(&mut self, addr: u16, value: u8) -> Result<(), MemoryWriteError> {
@@ -92,5 +97,6 @@ impl Memory for System {
             .chain_some_error(self.spi.as_mut().map(|spi| spi.set(addr, value)))
             .chain_some_error(self.vga.as_mut().map(|vga| vga.lock().unwrap().set(addr, value)))
             .chain_some_error(self.ps2.as_mut().map(|ps2| ps2.lock().unwrap().set(addr, value)))
+            .chain_some_error(self.stack.as_mut().map(|stack| stack.set(addr, value)))
     }
 }

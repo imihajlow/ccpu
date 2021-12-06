@@ -15,6 +15,8 @@ pub struct Config {
     ps2_config: Ps2Config,
     #[serde(rename = "spi")]
     spi_config: SpiConfig,
+    #[serde(rename = "stack")]
+    stack_config: StackConfig,
     #[serde(rename = "server")]
     server_config: ServerConfig,
 }
@@ -53,6 +55,13 @@ pub enum Ps2Config {
 pub enum SpiConfig {
     Absent,
     Present,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum StackConfig {
+    Absent,
+    Present
 }
 
 #[derive(Debug, Deserialize)]
@@ -117,5 +126,9 @@ impl Config {
 
     pub fn get_server_config(&self) -> &ServerConfig {
         &self.server_config
+    }
+
+    pub fn get_stack_config(&self) -> &StackConfig {
+        &self.stack_config
     }
 }
