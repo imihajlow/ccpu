@@ -1,7 +1,7 @@
 mod instruction;
 mod memory;
 mod machine;
-mod real_mem;
+mod mem;
 mod symmap;
 mod system;
 mod keyboard;

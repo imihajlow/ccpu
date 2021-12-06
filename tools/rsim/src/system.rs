@@ -1,5 +1,5 @@
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError, ErrorChainable};
-use crate::real_mem;
+use crate::mem;
 use crate::keyboard;
 use crate::vga::Vga;
 use crate::server::Server;
@@ -10,7 +10,7 @@ use std::io;
 use std::sync::{Arc, Mutex};
 
 pub struct System {
-    mem: real_mem::Mem,
+    mem: mem::Mem,
     kbd: Option<keyboard::Keyboard>,
     vga: Option<Arc<Mutex<Vga>>>,
     server: Option<Server>,
@@ -20,18 +20,18 @@ pub struct System {
 
 #[derive(Debug)]
 pub enum LoadError {
-    ProgLoadError(real_mem::LoadError)
+    ProgLoadError(mem::LoadError)
 }
 
-impl From<real_mem::LoadError> for LoadError {
-    fn from(error: real_mem::LoadError) -> Self {
+impl From<mem::LoadError> for LoadError {
+    fn from(error: mem::LoadError) -> Self {
         LoadError::ProgLoadError(error)
     }
 }
 
 impl From<io::Error> for LoadError {
     fn from(error: io::Error) -> Self {
-        LoadError::from(real_mem::LoadError::from(error))
+        LoadError::from(mem::LoadError::from(error))
     }
 }
 
@@ -46,7 +46,7 @@ impl std::ops::Drop for System {
 impl System {
     pub fn new<T>(config: &Config, prog_reader: &mut T) -> Result<System, LoadError>
     where T: io::Read + io::Seek {
-        let mem = real_mem::Mem::new(config.get_mem_config(), prog_reader)?;
+        let mem = mem::Mem::new(config.get_mem_config(), prog_reader)?;
         let vga = Vga::new(config.get_vga_config())?
             .map(|vga| Arc::new(Mutex::new(vga)));
         let vga2 = vga.as_ref().map(|ref vga| Arc::clone(vga));
