@@ -65,3 +65,22 @@ Write data:
 	else:
 		fail
 ```
+
+## Stack board
+
+Stack is a mapping of 256 2kB pages onto 0xC000 and 0xC800. Those mappings are controlled by two stack pointers SP0 and SP1. Stack pointers can be incremented or decremented using the control register or set to arbitrary values. The whole stack subsystem can be enabled or disabled by writing to the control register.
+
+0xFC00 - SP0
+
+0xFC01 - SP1
+
+0xFC02 - increment/decrement control:
+
+	* bit 0 - increment SP0
+	* bit 1 - increment SP1
+	* bit 2 - decrement SP0
+	* bit 3 - decrement SP1
+
+0xFC03 - control register:
+
+	* bit 0 - enabled/disable stack
