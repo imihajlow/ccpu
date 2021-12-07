@@ -13,7 +13,7 @@ def randomString(n):
     return "".join(chr(x) for x in random.choices(range(ord('A'), ord('Z') + 1), k=n))
 
 class Generator:
-    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections, lineInfo, use_stack):
+    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections, lineInfo, useStack):
         self.maxTempVarIndex = -1
         self.labelIndex = 0
         self.breakLabel = [] # stack
@@ -25,7 +25,7 @@ class Generator:
         self.createSubsections = createSubsections
         self.uniqueId = randomString(10)
         self.lineInfo = lineInfo
-        self.use_stack = use_stack
+        self.useStack = useStack
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -53,7 +53,7 @@ class Generator:
                     else:
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                         rv, argCode = self.generateExpression(ch[0], minTempVarIndex,
-                            Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex)), curFn)
+                            Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex, curFn)), curFn)
                     resultLoc, myCode = self.backend.genUnary(t.data, resultLoc, rv)
                     return resultLoc, argCode + myCode
                 elif t.data == "type_cast":
@@ -63,7 +63,7 @@ class Generator:
                     else:
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                         rv, argCode = self.generateExpression(ch[1], minTempVarIndex,
-                            Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex)), curFn)
+                            Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex, curFn)), curFn)
                     resultLoc, myCode = self.backend.genCast(resultLoc, ch[0], rv)
                     return resultLoc, argCode + myCode
                 elif t.data == "arrow":
@@ -71,7 +71,7 @@ class Generator:
                     fields = ch[1:]
                     self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
                     rv, argCode = self.generateExpression(ptr, minTempVarIndex,
-                        Value.variable(Position.fromAny(ptr), labelname.getTempName(minTempVarIndex)), curFn)
+                        Value.variable(Position.fromAny(ptr), labelname.getTempName(minTempVarIndex, curFn)), curFn)
                     offset, type = structure.getField(rv.getType().deref(), fields)
                     if type.getIndirectionOffset() == 0:
                         resultLoc, derefCode = self.backend.genDeref(resultLoc.withType(type), rv, offset)
@@ -98,7 +98,7 @@ class Generator:
                         argCode1 = ""
                     else:
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex)
-                        tmp0 = Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex))
+                        tmp0 = Value.variable(Position.fromAny(ch[0]), labelname.getTempName(minTempVarIndex, curFn))
                         rv1, argCode1 = self.generateExpression(ch[0], minTempVarIndex, tmp0, curFn)
                         hasFirstArg = True
 
@@ -108,7 +108,7 @@ class Generator:
                     else:
                         indexIncrement = 1 if hasFirstArg else 0
                         self.maxTempVarIndex = max(self.maxTempVarIndex, minTempVarIndex + indexIncrement)
-                        tmp1 = Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement))
+                        tmp1 = Value.variable(Position.fromAny(ch[1]), labelname.getTempName(minTempVarIndex + indexIncrement, curFn))
                         rv2, argCode2 = self.generateExpression(ch[1], minTempVarIndex + indexIncrement, tmp1, curFn)
                         if rv1.getSource().isRegister():
                             rv1, moveCode = self.backend.genMove(tmp0, rv1, False)
@@ -163,10 +163,10 @@ class Generator:
             ptr = l.children[0]
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
-                        Value.variable(Position.fromAny(ptr), labelname.getTempName(0)), curFn)
+                        Value.variable(Position.fromAny(ptr), labelname.getTempName(0, curFn)), curFn)
             assert(not rvPtr.getSource().isRegister())
             rvR, codeR = self.generateExpression(r, 1,
-                        Value.variable(Position.fromAny(r), labelname.getTempName(1)), curFn)
+                        Value.variable(Position.fromAny(r), labelname.getTempName(1, curFn)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr, rvR)
             return codePtr + codeR + codePutIndirect
         elif l.data == 'arrow':
@@ -175,7 +175,7 @@ class Generator:
             fields = l.children[1:]
             self.maxTempVarIndex = max(self.maxTempVarIndex, 1)
             rvPtr, codePtr = self.generateExpression(ptr, 0,
-                Value.variable(Position.fromAny(ptr), labelname.getTempName(0)), curFn)
+                Value.variable(Position.fromAny(ptr), labelname.getTempName(0, curFn)), curFn)
             assert(not rvPtr.getSource().isRegister())
             try:
                 offset, type = structure.getField(rvPtr.getType().deref(), fields)
@@ -186,7 +186,7 @@ class Generator:
             if type.getIndirectionOffset() < 0:
                 raise SemanticError(Position.fromAny(l), "Cannot assign to an r-value")
             rvR, codeR = self.generateExpression(r, 1,
-                                    Value.variable(Position.fromAny(r), labelname.getTempName(1)), curFn)
+                                    Value.variable(Position.fromAny(r), labelname.getTempName(1, curFn)), curFn)
             codePutIndirect = self.backend.genPutIndirect(rvPtr.withType(PtrType(type)), rvR, offset)
             return codePtr + codeR + codePutIndirect
         else:
@@ -198,7 +198,7 @@ class Generator:
             labelElse = self.allocLabel("if_else")
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
         rvCond, codeCond = self.generateExpression(cond, 0,
-            Value.variable(Position.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
+            Value.variable(Position.fromAny(cond), labelname.getTempName(0, curFn), BoolType()), curFn)
         codeIf = self.generateStatement(ifBody, curFn)
         if elseBody is not None:
             codeElse = self.generateStatement(elseBody, curFn)
@@ -214,7 +214,7 @@ class Generator:
 
         self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
         rvCond, codeCond = self.generateExpression(cond, 0,
-            Value.variable(Position.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
+            Value.variable(Position.fromAny(cond), labelname.getTempName(0, curFn), BoolType()), curFn)
         self.breakLabel = [labelEnd] + self.breakLabel
         self.continueLabel = [labelBegin] + self.continueLabel
         codeBody = self.generateStatement(body, curFn)
@@ -241,7 +241,7 @@ class Generator:
         if isinstance(cond, Value) or cond.data != 'for_condition':
             self.maxTempVarIndex = max(self.maxTempVarIndex, 0)
             rvCond, codeCond = self.generateExpression(cond, 0,
-                Value.variable(Position.fromAny(cond), labelname.getTempName(0), BoolType()), curFn)
+                Value.variable(Position.fromAny(cond), labelname.getTempName(0, curFn), BoolType()), curFn)
             codeCond += self.backend.genInvCondJump(rvCond, labelEnd)
         else:
             codeCond = ""
@@ -320,19 +320,21 @@ class Generator:
                 t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
             dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn, False), self.nameInfo.functions[curFn].retType)
-            result += self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
+            result += self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn, self.useStack)
         elif t.data == 'empty_return_statement':
-            result += self.backend.genReturn(curFn)
+            result += self.backend.genReturn(curFn, self.useStack)
         elif t.data == 'return_fc_statement':
             call = t.children[0]
             dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn, False), self.nameInfo.functions[curFn].retType)
             callCode = self.generateFunctionAssignment(Position.fromAny(t), Position.fromAny(call),
                 dest, str(call.children[0]), call.children[1:], curFn)
-            retCode = self.backend.genReturn(curFn)
+            retCode = self.backend.genReturn(curFn, self.useStack)
             result += callCode + retCode
         return result
 
     def generateFunctionDefinition(self, decl, body):
+        savedMaxTempVarIndex = self.maxTempVarIndex
+        self.maxTempVarIndex = -1
         name = str(decl.children[2])
         section = self.nameInfo.functions[name].section
         result = f"; ====== function {name} =======\n"
@@ -340,10 +342,20 @@ class Generator:
             result += self.backend.startSection(f"{section}.{self.uniqueId}_{name}")
         else:
             result += self.backend.startSection(section)
-        result += self.backend.genFunctionPrologue(name)
+        result += self.backend.genFunctionPrologue(name, self.useStack)
         result += "".join(self.generateStatement(child, name) for child in body.children)
-        result += self.backend.genReturn(name)
+        needsReturn = True
+        if len(body.children) != 0:
+            lastStatement = body.children[-1].data
+            if lastStatement == 'return_statement' or \
+                    lastStatement == 'empty_return_statement' or \
+                    lastStatement == 'return_fc_statement':
+                needsReturn = False
+        if needsReturn:
+            result += self.backend.genReturn(name, self.useStack)
         result += f"; ====== end function {name} ===\n"
+        self.nameInfo.functions[name].maxTempVarIndex = self.maxTempVarIndex
+        self.maxTempVarIndex = max(savedMaxTempVarIndex, self.maxTempVarIndex)
         return result
 
     def generateToplevel(self, t):
@@ -399,10 +411,39 @@ class Generator:
             "bss", self.uniqueId, self.createSubsections)
         return result
 
+    def generateFunctionStackFrame(self, fn):
+        if fn.isImported:
+            return ""
+        outside = []
+        inside = []
+        inside += [(labelname.getReturnAddressLabel(fn.name), 2)]
+        outside += [(None, 2)]
+
+        inside += [(labelname.getArgumentName(fn.name, i, False),
+            fn.args[i].getReserveSize()) for i in range(len(fn.args))]
+        outside += [(labelname.getArgumentName(fn.name, i, True),
+            fn.args[i].getReserveSize()) for i in range(len(fn.args))]
+
+        inside += [(labelname.getReturnName(fn.name, False), fn.retType.getReserveSize())]
+        outside += [(labelname.getReturnName(fn.name, True), fn.retType.getReserveSize())]
+
+        inside += [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars]
+
+        inside += [(labelname.getTempName(i, fn.name), self.backend.MAX_INT_SIZE) for i in range(fn.maxTempVarIndex)]
+        try:
+            return self.backend.reserveStackFrames(inside, outside)
+        except ValueError as e:
+            raise ValueError(f"{fn.name}: {str(e)}")
+
     def generateReserve(self):
-        return self.backend.reserveTempVars(self.maxTempVarIndex, self.uniqueId, self.createSubsections) +\
-            "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
-            + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports, self.uniqueId, self.createSubsections)
+        if self.useStack:
+            return "".join(self.generateFunctionStackFrame(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
+                + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports, self.uniqueId, self.createSubsections)
+        else:
+            maxTempVarIndices = [(n, self.nameInfo.functions[n].maxTempVarIndex) for n in self.nameInfo.functions]
+            return self.backend.reserveTempVars(maxTempVarIndices, self.uniqueId, self.createSubsections) +\
+                "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
+                + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports, self.uniqueId, self.createSubsections)
 
     def generate(self, t):
         execCode = self.generateStart(t)

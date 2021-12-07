@@ -60,6 +60,7 @@ class Function:
         self.paramVars = {Location(str(a.children[1])): (a.children[0], i) for i,a in enumerate(args)}
         self.retType = retType
         self.localVars = {}
+        self.maxTempVarIndex = -1
         self.section = getSection(attrs, DEFAULT_CODE_SECTION)
         if self.isExported and self.isImported:
             raise ValueError("A function can't be exported and imported at the same time")

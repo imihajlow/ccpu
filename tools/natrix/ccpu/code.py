@@ -12,6 +12,16 @@ from exceptions import SemanticError
 
 MAX_INT_SIZE = 4
 
+STACK_FRAME_SIZE = 0x800
+STACK_FRAME_INNER_BASE = 0xC000
+STACK_FRAME_OUTER_BASE = 0xC800
+
+STACK_INCDEC = 0xFC02
+STACK_INCDEC_INC0 = 0x01
+STACK_INCDEC_INC1 = 0x02
+STACK_INCDEC_DEC0 = 0x04
+STACK_INCDEC_DEC1 = 0x08
+
 def startCodeSection():
     return startSection("text")
 
@@ -139,11 +149,36 @@ def reserveGlobalVars(vs, imports, uniqueId, subsections):
             result += reserve(v, t.getReserveSize(), section, uniqueId, subsections)
     return result
 
-def reserveTempVars(maxIndex, uniqueId, subsections):
-    return "".join(reserve(labelname.getTempName(i), MAX_INT_SIZE, "bss", uniqueId, subsections) for i in range(maxIndex + 1))
+def reserveTempVars(maxIndices, uniqueId, subsections):
+    maxIndex = max(m for _, m in maxIndices)
+    result = ""
+    for i in range(maxIndex + 1):
+        labels = [labelname.getTempName(i,n) for n,m in maxIndices if i <= m]
+        result += reserve(labels, MAX_INT_SIZE, "bss", uniqueId, subsections)
+    return result
 
 def reserveVar(label, type):
     return reserve(label, type.getReserveSize())
+
+def reserveStackFrames(inside, outside):
+    return reserveStackFrame(inside, STACK_FRAME_INNER_BASE) + reserveStackFrame(outside, STACK_FRAME_OUTER_BASE)
+
+def _phOverflow(p, s):
+    return (p & 0xff00) != ((p + s) & 0xff00)
+
+def reserveStackFrame(vars, base):
+    p = 0
+    result = ""
+    for name, size in vars:
+        if size < 256:
+            while _phOverflow(p, size):
+                p += 1
+        if name is not None:
+            result += f".const {name} = 0x{base + p:04X}\n"
+        p += size
+        if p > STACK_FRAME_SIZE:
+            raise ValueError("stack frame overflow")
+    return result
 
 def lineNumber(n):
     return f".line {n}\n"
@@ -151,8 +186,8 @@ def lineNumber(n):
 def sourceFilename(n):
     return f".source {n}\n"
 
-def genFunctionPrologue(fn):
-    return genLabel(fn) + '''
+def genFunctionPrologue(fn, useStack):
+    result = genLabel(fn) + '''
         mov a, pl
         mov b, a
         mov a, ph
@@ -162,9 +197,25 @@ def genFunctionPrologue(fn):
         inc pl
         st a
         '''.format(labelname.getReturnAddressLabel(fn))
+    if useStack:
+        result += f'''
+            ldi pl, lo(0x{STACK_INCDEC:04X})
+            ldi ph, hi(0x{STACK_INCDEC:04X})
+            ldi a, {STACK_INCDEC_INC0 | STACK_INCDEC_INC1}
+            st a
+        '''
+    return result
 
-def genReturn(fn):
-    return '''
+def genReturn(fn, useStack):
+    result = ''
+    if useStack:
+        result += f'''
+            ldi pl, lo(0x{STACK_INCDEC:04X})
+            ldi ph, hi(0x{STACK_INCDEC:04X})
+            ldi a, {STACK_INCDEC_DEC0 | STACK_INCDEC_DEC1}
+            st a
+        '''
+    result += '''
         ldi pl, lo({0})
         ldi ph, hi({0})
         ld a
@@ -173,6 +224,7 @@ def genReturn(fn):
         mov pl, a
         jmp
         '''.format(labelname.getReturnAddressLabel(fn))
+    return result
 
 def genCall(fn):
     return '''

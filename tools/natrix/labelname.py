@@ -1,5 +1,5 @@
-def getTempName(n):
-    return "__cc_tmp_{}".format(n)
+def getTempName(n, fn):
+    return f"__cc_{fn}_tmp_{n}"
 
 def getLocalName(fn, name):
     return "__cc_loc_{}_{}".format(fn, name)
