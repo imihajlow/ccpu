@@ -1,0 +1,186 @@
+#include <vga.h>
+#include <string.h>
+
+#define CR *((u8*)0xFF02)
+#define SP0 *((u8*)0xFC00)
+#define SP1 *((u8*)0xFC01)
+#define SP_INCDEC *((u8*)0xFC02)
+#define SP_CR *((u8*)0xFC03)
+
+#define SP_CR_ENA 0x01u8
+
+#define SP_INCDEC_INC0 0x01u8
+#define SP_INCDEC_INC1 0x02u8
+#define SP_INCDEC_DEC0 0x04u8
+#define SP_INCDEC_DEC1 0x08u8
+
+#define PAINT_ROW(row, fg_color) \
+    memset((u8*)vga_color_seg + VGA_OFFSET(0u8, row), COLOR(fg_color, COLOR_BLACK), (u16)VGA_COLS);
+
+u8 fail_incdec(u8 n) {
+    vga_put_text(0u8, 2u8, "Increment/decrement test failed for CR");
+    vga_char_seg[VGA_OFFSET(38u8, 2u8)] = n + '0';
+    PAINT_ROW(2u8, COLOR_RED);
+    while (1u8) ;
+}
+
+export u8 main() {
+    vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+    vga_put_text(0u8, 0u8, "Stack test program");
+
+    CR = 0x1Eu8; // both boards, ROM, segments A and B
+    SP_CR = SP_CR_ENA; // enable stack
+    vga_put_text(0u8, 1u8, "Stack enabled");
+
+    SP0 = 0u8;
+    SP1 = 13u8;
+    for (u16 i = 0u16; i != 256u16; i += 1u16) {
+        if (SP0 != (u8)i) {
+            fail_incdec(0u8);
+        }
+        if (SP1 != (u8)(13u16 - i)) {
+            fail_incdec(1u8);
+        }
+        SP_INCDEC = SP_INCDEC_INC0 | SP_INCDEC_DEC1;
+    }
+
+    SP0 = 51u8;
+    SP1 = 16u8;
+    for (i = 0u16; i != 256u16; i += 1u16) {
+        if (SP0 != (u8)(51u16 - i)) {
+            fail_incdec(0u8);
+        }
+        if (SP1 != (u8)(16u16 + i)) {
+            fail_incdec(1u8);
+        }
+        SP_INCDEC = SP_INCDEC_INC1 | SP_INCDEC_DEC0;
+    }
+    vga_put_text(0u8, 2u8, "Increment/decrement OK");
+    PAINT_ROW(2u8, COLOR_GREEN);
+
+    vga_put_text(0u8, 3u8, "      W0R0             W0R1             W1R0             W1R1       ");
+    for (u8 r = 0u8; r != 16u8; r += 1u8) {
+        for (u8 c = 0u8; c != 16u8; c += 1u8) {
+            vga_color_seg[VGA_OFFSET(c, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GRAY);
+            vga_color_seg[VGA_OFFSET(c + 17u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GRAY);
+            vga_color_seg[VGA_OFFSET(c + 34u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GRAY);
+            vga_color_seg[VGA_OFFSET(c + 51u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GRAY);
+        }
+    }
+
+    u8 fail;
+    // W0R0
+    for (r = 0u8; r != 16u8; r += 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP0 = (r << 4u8) | c;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                *((u8*)(0xC000u16 + i)) = r + c + (u8)i;
+            }
+            vga_color_seg[VGA_OFFSET(c, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_LIGHT_BLUE);
+        }
+    }
+    for (r = 15u8; r != 255u8; r -= 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP0 = (r << 4u8) | c;
+            fail = 0u8;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                if (*((u8*)(0xC000u16 + i)) != r + c + (u8)i) {
+                    fail = 1u8;
+                    break;
+                }
+            }
+            if (fail) {
+                vga_color_seg[VGA_OFFSET(c, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_RED);
+            } else {
+                vga_color_seg[VGA_OFFSET(c, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GREEN);
+            }
+        }
+    }
+
+    // W0R1
+    for (r = 0u8; r != 16u8; r += 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP0 = (r << 4u8) | c;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                *((u8*)(0xC000u16 + i)) = r + c + (u8)i + 3u8;
+            }
+            vga_color_seg[VGA_OFFSET(c + 17u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_LIGHT_BLUE);
+        }
+    }
+    for (r = 15u8; r != 255u8; r -= 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP1 = (r << 4u8) | c;
+            fail = 0u8;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                if (*((u8*)(0xC800u16 + i)) != r + c + (u8)i + 3u8) {
+                    fail = 1u8;
+                    break;
+                }
+            }
+            if (fail) {
+                vga_color_seg[VGA_OFFSET(c + 17u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_RED);
+            } else {
+                vga_color_seg[VGA_OFFSET(c + 17u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GREEN);
+            }
+        }
+    }
+
+    // W1R0
+    for (r = 0u8; r != 16u8; r += 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP1 = (r << 4u8) | c;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                *((u8*)(0xC800u16 + i)) = r + c + (u8)i + 77u8;
+            }
+            vga_color_seg[VGA_OFFSET(c + 34u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_LIGHT_BLUE);
+        }
+    }
+    for (r = 15u8; r != 255u8; r -= 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP0 = (r << 4u8) | c;
+            fail = 0u8;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                if (*((u8*)(0xC000u16 + i)) != r + c + (u8)i + 77u8) {
+                    fail = 1u8;
+                    break;
+                }
+            }
+            if (fail) {
+                vga_color_seg[VGA_OFFSET(c + 34u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_RED);
+            } else {
+                vga_color_seg[VGA_OFFSET(c + 34u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GREEN);
+            }
+        }
+    }
+
+    // W1R1
+    for (r = 0u8; r != 16u8; r += 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP1 = (r << 4u8) | c;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                *((u8*)(0xC800u16 + i)) = r + c + (u8)i + 155u8;
+            }
+            vga_color_seg[VGA_OFFSET(c + 51u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_LIGHT_BLUE);
+        }
+    }
+    for (r = 15u8; r != 255u8; r -= 1u8) {
+        for (c = 0u8; c != 16u8; c += 1u8) {
+            SP1 = (r << 4u8) | c;
+            fail = 0u8;
+            for (i = 0u16; i != 0x800u16; i += 1u16) {
+                if (*((u8*)(0xC800u16 + i)) != r + c + (u8)i + 155u8) {
+                    fail = 1u8;
+                    break;
+                }
+            }
+            if (fail) {
+                vga_color_seg[VGA_OFFSET(c + 51u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_RED);
+            } else {
+                vga_color_seg[VGA_OFFSET(c + 51u8, r + 4u8)] = COLOR(COLOR_BLACK, COLOR_GREEN);
+            }
+        }
+    }
+
+    vga_put_text(0u8, VGA_ROWS - 1u8, "All tests complete!");
+    PAINT_ROW(VGA_ROWS - 1u8, COLOR_YELLOW);
+}

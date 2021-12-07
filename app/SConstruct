@@ -169,6 +169,10 @@ plot_sources = Split('''
 env.App('plot', plot_sources + app_startup)
 env.Bin('plot_rom', plot_sources + rom_startup)
 
+env.Bin('stacktest', Split('''
+    stacktest/main.na
+    ''') + lib + natrix + rom_startup)
+
 env.Image('image', Split('''
     main.app
     maze.app
