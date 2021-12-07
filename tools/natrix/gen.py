@@ -13,7 +13,7 @@ def randomString(n):
     return "".join(chr(x) for x in random.choices(range(ord('A'), ord('Z') + 1), k=n))
 
 class Generator:
-    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections, lineInfo):
+    def __init__(self, callgraph, literalPool, nameInfo, backend, createSubsections, lineInfo, use_stack):
         self.maxTempVarIndex = -1
         self.labelIndex = 0
         self.breakLabel = [] # stack
@@ -25,6 +25,7 @@ class Generator:
         self.createSubsections = createSubsections
         self.uniqueId = randomString(10)
         self.lineInfo = lineInfo
+        self.use_stack = use_stack
 
     def allocLabel(self, comment):
         i = self.labelIndex
@@ -273,7 +274,7 @@ class Generator:
             result += self.backend.genPushLocals(curFn)
         for n, expr in enumerate(args):
             result += self.generateAssignment(
-                Value.variable(Position.fromAny(expr), labelname.getArgumentName(name, n), f.args[n]), expr, curFn)
+                Value.variable(Position.fromAny(expr), labelname.getArgumentName(name, n, True), f.args[n]), expr, curFn)
         result += self.backend.genCall(name)
         if isRecursive:
             result += self.backend.genPopLocals(curFn)
@@ -282,7 +283,7 @@ class Generator:
     def generateFunctionAssignment(self, lloc, rloc, dest, name, args, curFn):
         codeCall = self.generateFunctionCall(rloc, name, args, curFn)
         f = self.nameInfo.functions[name]
-        resultLoc = Value.variable(rloc, labelname.getReturnName(name), f.retType)
+        resultLoc = Value.variable(rloc, labelname.getReturnName(name, True), f.retType)
         return codeCall + self.generateAssignment(dest, resultLoc, curFn)
 
     def generateStatement(self, t, curFn):
@@ -318,13 +319,13 @@ class Generator:
             result += self.generateFunctionAssignment(Position.fromAny(t.children[0]), Position.fromAny(call),
                 t.children[0], str(call.children[0]), call.children[1:], curFn)
         elif t.data == 'return_statement':
-            dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
+            dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn, False), self.nameInfo.functions[curFn].retType)
             result += self.generateAssignment(dest, t.children[0], curFn) + self.backend.genReturn(curFn)
         elif t.data == 'empty_return_statement':
             result += self.backend.genReturn(curFn)
         elif t.data == 'return_fc_statement':
             call = t.children[0]
-            dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn), self.nameInfo.functions[curFn].retType)
+            dest = Value.variable(Position.fromAny(t), labelname.getReturnName(curFn, False), self.nameInfo.functions[curFn].retType)
             callCode = self.generateFunctionAssignment(Position.fromAny(t), Position.fromAny(call),
                 dest, str(call.children[0]), call.children[1:], curFn)
             retCode = self.backend.genReturn(curFn)
@@ -363,9 +364,9 @@ class Generator:
             f = self.nameInfo.functions[name]
             if f.isImported:
                 yield name
-                yield labelname.getReturnName(name)
+                yield labelname.getReturnName(name, True)
                 for n in range(len(f.args)):
-                    yield labelname.getArgumentName(name, n)
+                    yield labelname.getArgumentName(name, n, True)
         for name in self.nameInfo.varImports:
             yield name
 
@@ -374,9 +375,9 @@ class Generator:
             f = self.nameInfo.functions[name]
             if f.isExported:
                 yield name
-                yield labelname.getReturnName(name)
+                yield labelname.getReturnName(name, True)
                 for n in range(len(f.args)):
-                    yield labelname.getArgumentName(name, n)
+                    yield labelname.getArgumentName(name, n, True)
         for name in self.nameInfo.varExports:
             yield name
 
@@ -385,11 +386,16 @@ class Generator:
             return ""
         result = self.backend.reserveBlock(labelname.getReserveBeginLabel(fn.name),
             [(labelname.getReturnAddressLabel(fn.name), 2)] +
-            [(labelname.getArgumentName(fn.name, i), fn.args[i].getReserveSize()) for i in range(len(fn.args))] +
+            [([
+                labelname.getArgumentName(fn.name, i, True),
+                labelname.getArgumentName(fn.name, i, False),
+                ], fn.args[i].getReserveSize()) for i in range(len(fn.args))] +
             [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars],
             self.uniqueId, f"{fn.name}_frame", self.createSubsections)
         result += self.backend.genLabel(labelname.getReserveEndLabel(fn.name))
-        result += self.backend.reserve(labelname.getReturnName(fn.name), fn.retType.getReserveSize(),
+        result += self.backend.reserve(
+            [labelname.getReturnName(fn.name, True), labelname.getReturnName(fn.name, False)],
+            fn.retType.getReserveSize(),
             "bss", self.uniqueId, self.createSubsections)
         return result
 

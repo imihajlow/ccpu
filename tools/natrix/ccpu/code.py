@@ -81,17 +81,24 @@ def dumpLiterals(lp, fileId, separateSections):
 
 def reserve(label, size, baseSecion, uniqueId, subsections):
     if subsections:
-        section = f"{baseSecion}.{uniqueId}_{label}"
+        l = label[0] if isinstance(label, list) else label
+        section = f"{baseSecion}.{uniqueId}_{l}"
     else:
         section = baseSecion
     alignment = min(size, MAX_INT_SIZE)
     while not isPowerOfTwo(alignment):
         alignment += 1
-    return f"""
+    result = f"""
         .section {section}
         .align {alignment}
-        {label}: res {size}
     """
+    if isinstance(label, list):
+        for l in label:
+            result += f"{l}:\n"
+    else:
+        result += f"{label}: "
+    result += f"res {size}\n"
+    return result
 
 def reserveBlock(label, vs, uniqueId, ssName, subsections):
     """
@@ -115,7 +122,12 @@ def reserveBlock(label, vs, uniqueId, ssName, subsections):
         if mod != 0:
             result += f'res {alignSize - mod}\n'
             offset += alignSize - mod
-        result += f'{label}: res {size}\n'
+        if isinstance(label, list):
+            for l in label:
+                result += f'{l}:\n'
+        else:
+            result += f'{label}: '
+        result += f'res {size}\n'
         offset = (offset + size) % maxSize
     return result
 

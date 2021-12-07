@@ -48,6 +48,7 @@ if __name__ == '__main__':
     argparser.add_argument('--tree', default=False, action='store_true', help='print syntax tree')
     argparser.add_argument('--no-subsections', action='store_true', default=False,
         help='do not put each function and literal in a named section')
+    argparser.add_argument('--stack', default=False, action='store_true', help='use hardware stack')
     args = argparser.parse_args()
 
     parser = None
@@ -107,7 +108,7 @@ if __name__ == '__main__':
             print(t.pretty())
         cg = CallGraph()
         cg.visit(t)
-        g = Generator(cg, lt, ni, backend, not args.no_subsections, lit)
+        g = Generator(cg, lt, ni, backend, not args.no_subsections, lit, args.stack)
         args.o.write(format(g.generate(t)))
         args.o.write("\n")
     except NatrixError as e:
