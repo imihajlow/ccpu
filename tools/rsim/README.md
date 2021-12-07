@@ -6,15 +6,32 @@ An emulator with a gdb-like interface. Supports peripheral devices emulation: VG
 Usage
 =====
 
-Compile with `cargo build --release`.
+Install with `cargo install --path .`.
 
-`./target/release/rsim --help` to see command line help.
+`rsim --help` to see command line help.
 
-Plain mode means no IO, just the CPU and 64k bytes of flat memory. Web server is not started in this mode (nothing to show there).
+Configuration
+=============
 
-To see the VGA output, it's necessary to supply the font file with the `--font` option.
+Configuration is in YAML format. Required entries:
 
-Interactive mode commands:
+* `mem: [plain|io-rev3]` - memory layout. Plain means 64kB of RAM (to use with unit tests). 
+
+* `vga: [absent|font:<font path>]` - font file should be specified for a video card emulation to function.
+
+* `keyboard: [absent|present]` - matrix keyboard.
+
+* `ps2: [absent|present]`
+
+* `spi: [absent|present]`
+
+* `stack: [absent|present]`
+
+* `server: [disabled|port:<port>]` - runs a webserver on the given port.
+
+
+Interactive mode commands
+=========================
 
 * `r[un]` - run until Ctrl-C is pressed or a breakpoint is reached.
 
