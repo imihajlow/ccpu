@@ -1499,7 +1499,7 @@ u8 test_mul_32() {
     sc = sa * sb;
     ASSERT_TRUE(sc == -400s32);
 }
-#define SLIM
+
 export u8 main() {
     // display_init();
     test_type_cast();
