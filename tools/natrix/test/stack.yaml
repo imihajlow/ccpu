@@ -1,0 +1,7 @@
+mem: io-rev3
+vga: absent
+keyboard: absent
+ps2: absent
+spi: absent
+stack: present
+server: disabled

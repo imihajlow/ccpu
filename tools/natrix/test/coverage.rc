@@ -1,0 +1,5 @@
+[run]
+data_file=.coverage
+
+[html]
+directory=htmlcov

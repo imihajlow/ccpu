@@ -1,10 +1,10 @@
 #include "../../../app/lib/display.h"
 
 export u8 fail(s16 line) {
-    display_print("Fail at line:");
-    display_set_address(DISPLAY_LINE_2);
-    display_print_byte((u8)(line >> (u8)8));
-    display_print_byte((u8)line);
+    // display_print("Fail at line:");
+    // display_set_address(DISPLAY_LINE_2);
+    // display_print_byte((u8)(line >> (u8)8));
+    // display_print_byte((u8)line);
     while ((u8)1) {}
 }
 
@@ -1499,9 +1499,9 @@ u8 test_mul_32() {
     sc = sa * sb;
     ASSERT_TRUE(sc == -400s32);
 }
-
+#define SLIM
 export u8 main() {
-    display_init();
+    // display_init();
     test_type_cast();
     test_indirect();
     test_jump();
@@ -1512,6 +1512,8 @@ export u8 main() {
     test_compare_unsigned();
     test_compare_signed();
     test_shr_byte();
+    test_stack();
+#ifndef SLIM
     test_shr_word();
     test_shr_dword();
     test_shl();
@@ -1519,7 +1521,8 @@ export u8 main() {
     test_sizeof();
     test_copy();
     test_for();
+#endif
     // test_mul_32();
-    display_print("Success!");
+    // display_print("Success!");
     success();
 }

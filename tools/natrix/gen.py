@@ -431,7 +431,7 @@ class Generator:
 
         inside += [(labelname.getLocalName(fn.name, v), fn.localVars[v].getReserveSize()) for v in fn.localVars]
 
-        inside += [(labelname.getTempName(i, fn.name), self.backend.MAX_INT_SIZE) for i in range(fn.maxTempVarIndex)]
+        inside += [(labelname.getTempName(i, fn.name), self.backend.MAX_INT_SIZE) for i in range(fn.maxTempVarIndex + 1)]
         try:
             return self.backend.reserveStackFrames(inside, outside)
         except ValueError as e:
