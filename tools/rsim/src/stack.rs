@@ -33,8 +33,8 @@ impl Stack {
             StackConfig::Present => Some(Self {
                 enabled: false,
                 sp0: 0,
-                sp1: 1,
-                ram: [0; 256 * 2048]
+                sp1: 0,
+                ram: [0; 256 * (FRAME_SIZE as usize)]
             })
         }
     }
@@ -46,7 +46,7 @@ impl Stack {
             false => self.sp0,
             true => self.sp1
         };
-        ((sp as usize) << 11) | (offset as usize)
+        (sp as usize) * (FRAME_SIZE as usize) + (offset as usize)
     }
 }
 

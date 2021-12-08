@@ -170,9 +170,15 @@ def reserveStackFrame(vars, base):
     p = 0
     result = ""
     for name, size in vars:
-        if size < 256:
+        if size <= MAX_INT_SIZE:
+            # small sizes: make sure they don't cross the border
             while _phOverflow(p, size):
                 p += 1
+        else:
+            # big size: align by max possible int
+            mod = p % MAX_INT_SIZE
+            if mod != 0:
+                p += MAX_INT_SIZE - mod
         if name is not None:
             result += f".const {name} = 0x{base + p:04X}\n"
         p += size
