@@ -447,11 +447,18 @@ class Generator:
                 "".join(self.generateFunctionReserve(self.nameInfo.functions[name]) for name in self.nameInfo.functions) \
                 + self.backend.reserveGlobalVars(self.nameInfo.globalVars, self.nameInfo.varImports, self.uniqueId, self.createSubsections)
 
+    def generateFlags(self):
+        if self.useStack:
+            return self.backend.genFlags("HW_STACK")
+        else:
+            return self.backend.genFlags("NO_STACK")
+
     def generate(self, t):
+        flagsCode = self.generateFlags()
         execCode = self.generateStart(t)
         importCode = self.backend.dumpImports(self.getImports())
         exportCode = self.backend.dumpExports(self.getExports())
         reserveCode = self.generateReserve()
         literalsCode = self.backend.dumpLiterals(self.literalPool, self.uniqueId, self.createSubsections)
 
-        return exportCode + importCode + execCode + literalsCode + reserveCode
+        return flagsCode + exportCode + importCode + execCode + literalsCode + reserveCode

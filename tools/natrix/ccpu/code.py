@@ -616,3 +616,6 @@ def genJump(label):
 
 def genLabel(label):
     return "{}:\n".format(label)
+
+def genFlags(flags):
+    return f".flags {flags}\n"

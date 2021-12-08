@@ -348,6 +348,18 @@ def loadLayout(name):
     else:
         return Layout(os.path.join(os.path.dirname(os.path.realpath(__file__)), "layouts", f"{name}.yaml"))
 
+def checkFlagsCompatibility(objects):
+    flags = None
+    root = None
+    for o in objects:
+        if flags is None:
+            if not o.flags.isDefault():
+                flags = o.flags
+                root = o
+        else:
+            if not flags.isCompatible(o.flags):
+                raise LinkerError(f"Flags are incompatible with {root.name}", o)
+
 if __name__ == '__main__':
     layouts = list(findLayouts())
     parser = argparse.ArgumentParser(description='Linker')
@@ -368,6 +380,7 @@ if __name__ == '__main__':
     try:
         apiIn = loadApi(args.api_in)
         objects = [load(filename) for filename in args.file]
+        checkFlagsCompatibility(objects)
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
         sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections, apiIn)
         symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)

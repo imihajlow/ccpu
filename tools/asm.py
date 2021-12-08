@@ -3,7 +3,7 @@ import argparse
 import re
 import sys
 import json
-from object import Object
+from object import Object, Flags
 from expression import evaluate
 
 class AssemblyError(Exception):
@@ -267,6 +267,8 @@ def assemble(lines, aluRevision):
                 result.setSource(args)
             elif op == '.line':
                 result.setLineNumber(int(args, 0))
+            elif op == '.flags':
+                result.flags = Flags.fromString(args)
             else:
                 result.advance(updateIp(op, args))
         except ValueError as e:

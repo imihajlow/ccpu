@@ -46,9 +46,47 @@ class Section:
         if n not in self.lineInfo[f]:
             self.lineInfo[f][n] = self.__ip
 
+class Flags:
+    NO_STACK = 1
+    HW_STACK = 2
+
+    def __init__(self, f):
+        self._f = f
+
+    def __eq__(self, other):
+        return self._f == other._f
+
+    def __str__(self):
+        result = []
+        if bool(self._f & Flags.NO_STACK):
+            result += ["NO_STACK"]
+        if bool(self._f & Flags.HW_STACK):
+            result += ["HW_STACK"]
+        return ",".join(result)
+
+    def isDefault(self):
+        return self._f == 0
+
+    def isCompatible(self, other):
+        return bool(self._f & other._f) or self.isDefault() or other.isDefault()
+
+    @staticmethod
+    def fromString(s):
+        fls = s.split(',')
+        result = 0
+        for f in fls:
+            if f == "NO_STACK":
+                result |= Flags.NO_STACK
+            elif f == "HW_STACK":
+                result |= Flags.HW_STACK
+            elif len(f) > 0:
+                raise ValueError(f"Unrecognized object flag: {f}")
+        return Flags(result)
+
 class Object:
     def __init__(self):
         self.name = ""
+        self.flags = Flags(0)
         self.globalSymbols = []
         self.exportSymbols = []
         self.sections = []
@@ -63,6 +101,7 @@ class Object:
             "exportSymbols": self.exportSymbols,
             "sections": [s.toDict() for s in self.sections],
             "consts": self.consts,
+            "flags": str(self.flags),
         }
 
     @staticmethod
@@ -73,6 +112,7 @@ class Object:
         o.exportSymbols = d["exportSymbols"]
         o.sections = [Section.fromDict(s) for s in d["sections"]]
         o.consts = d["consts"]
+        o.flags = Flags.fromString(d["flags"])
         return o
 
     def beginSection(self, name, alignment):
