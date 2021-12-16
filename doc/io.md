@@ -74,7 +74,7 @@ Stack is a mapping of 256 2kB pages onto 0xC000 and 0xC800. Those mappings are c
 
 0xFC01 - SP1
 
-0xFC02 - increment/decrement control:
+0xFC02 - increment/decrement control, write 0 to following bits:
 
 	* bit 0 - increment SP0
 	* bit 1 - increment SP1

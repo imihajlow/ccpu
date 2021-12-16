@@ -77,14 +77,10 @@ impl Memory for Stack {
                 Ok(())
             }
             INCDEC_ADDR => {
-                let inc_0 = (val & INC_0) != 0;
-                let inc_1 = (val & INC_1) != 0;
-                let dec_0 = (val & DEC_0) != 0;
-                let dec_1 = (val & DEC_1) != 0;
-                let other_bits = (val & !(INC_0 | INC_1 | DEC_0 | DEC_1)) != 0;
-                if other_bits {
-                    return Err(MemoryWriteError::InvalidValue);
-                }
+                let inc_0 = (val & INC_0) == 0;
+                let inc_1 = (val & INC_1) == 0;
+                let dec_0 = (val & DEC_0) == 0;
+                let dec_1 = (val & DEC_1) == 0;
                 if inc_0 && dec_0 {
                     return Err(MemoryWriteError::InvalidValue);
                 }

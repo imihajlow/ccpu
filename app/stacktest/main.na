@@ -9,16 +9,16 @@
 
 #define SP_CR_ENA 0x01u8
 
-#define SP_INCDEC_INC0 0x01u8
-#define SP_INCDEC_INC1 0x02u8
-#define SP_INCDEC_DEC0 0x04u8
-#define SP_INCDEC_DEC1 0x08u8
+#define SP_INCDEC_INC0 0xFEu8
+#define SP_INCDEC_INC1 0xFDu8
+#define SP_INCDEC_DEC0 0xFBu8
+#define SP_INCDEC_DEC1 0xF7u8
 
 #define PAINT_ROW(row, fg_color) \
     memset((u8*)vga_color_seg + VGA_OFFSET(0u8, row), COLOR(fg_color, COLOR_BLACK), (u16)VGA_COLS);
 
 u8 fail_incdec(u8 n) {
-    vga_put_text(0u8, 2u8, "Increment/decrement test failed for CR");
+    vga_put_text(0u8, 2u8, "Increment/decrement test failed for SP");
     vga_char_seg[VGA_OFFSET(38u8, 2u8)] = n + '0';
     PAINT_ROW(2u8, COLOR_RED);
     while (1u8) ;
@@ -41,7 +41,7 @@ export u8 main() {
         if (SP1 != (u8)(13u16 - i)) {
             fail_incdec(1u8);
         }
-        SP_INCDEC = SP_INCDEC_INC0 | SP_INCDEC_DEC1;
+        SP_INCDEC = SP_INCDEC_INC0 & SP_INCDEC_DEC1;
     }
 
     SP0 = 51u8;
@@ -53,7 +53,7 @@ export u8 main() {
         if (SP1 != (u8)(16u16 + i)) {
             fail_incdec(1u8);
         }
-        SP_INCDEC = SP_INCDEC_INC1 | SP_INCDEC_DEC0;
+        SP_INCDEC = SP_INCDEC_INC1 & SP_INCDEC_DEC0;
     }
     vga_put_text(0u8, 2u8, "Increment/decrement OK");
     PAINT_ROW(2u8, COLOR_GREEN);
