@@ -124,8 +124,6 @@ env.Loader('fileshell', Split('''
     fileshell/exec.na
     ''') + os_startup + natrix + lib + fat)
 
-env.Extension('matrix', Split('fileshell.api extension_base.asm matrix.na matrix_ext.na') + lib)
-
 env.Extension('lo', Split('fileshell.api extension_base.asm test/lotest_ext.na lib/vga.asm'))
 
 env.App('main', Split('''
@@ -173,6 +171,8 @@ env.Bin('stacktest', Split('''
     stacktest/main.na
     ''') + lib + natrix + rom_startup)
 
+env.App('matrix', Split('matrix.na matrix_app.na') + lib + natrix + app_startup)
+
 env.Image('image', Split('''
     main.app
     maze.app
@@ -182,4 +182,5 @@ env.Image('image', Split('''
     tetris.app
     mndlbrt.app
     plot.app
+    matrix.app
     '''))
