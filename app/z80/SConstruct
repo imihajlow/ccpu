@@ -1,0 +1,60 @@
+import os.path
+
+# Build tools
+asmBuilder = Builder(action = 'asm.py -o $TARGET $SOURCE', suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
+natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
+def linkGenerator(source, target, env, for_signature):
+    return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def loaderLinkGenerator(source, target, env, for_signature):
+    return f"link.py --layout=loader.yaml --api-out={target[2]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def extensionLinkGenerator(source, target, env, for_signature):
+    return f"link.py --slim --layout=extension.yaml --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
+
+def appLinkGenerator(source, target, env, for_signature):
+    return f"link.py --slim --layout=app.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def emuLinkGenerator(source, target, env, for_signature):
+    return f"link.py --slim --layout=z80emu.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
+def linkEmitter(target, source, env):
+    t = target[0]
+    base,ext = os.path.splitext(str(t))
+    target.append(f"{base}.map")
+    return target, source
+
+def loaderLinkEmitter(target, source, env):
+    t = target[0]
+    base,ext = os.path.splitext(str(t))
+    target.append(f"{base}.map")
+    target.append(f"{base}.api")
+    return target, source
+
+linkBuilder = Builder(generator=linkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+emuLinkBuilder = Builder(generator=emuLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+loaderLinkBuilder = Builder(generator=loaderLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=loaderLinkEmitter)
+extensionLinkBuilder = Builder(generator=extensionLinkGenerator, suffix=".ext", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+appLinkBuilder = Builder(generator=appLinkGenerator, suffix=".app", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+
+env = Environment(BUILDERS = {
+    'Asm' : asmBuilder,
+    'Natrix': natrixBuilder,
+    'Bin': linkBuilder,
+    'Emu': emuLinkBuilder,
+    'Loader': loaderLinkBuilder,
+    'Extension': extensionLinkBuilder,
+    'App': appLinkBuilder})
+
+env.PrependENVPath("PATH", "../../tools")
+env.PrependENVPath("PATH", "../../tools/natrix")
+env["NATRIX_DIR"] = "../../tools/natrix"
+env["CPPPATH"] = "../lib" # needed for scanner
+
+# Libraries
+rom_startup = ['$NATRIX_DIR/runtime/rom_startup.asm']
+app_startup = ['$NATRIX_DIR/runtime/app_startup.asm']
+
+env.Emu('z80emu', Split('''
+    z80regs.asm
+    z80main.asm'''))
