@@ -1,0 +1,125 @@
+#include <vga.h>
+#include "z80run.h"
+
+#define PASS_COLOR COLOR(COLOR_WHITE, COLOR_GREEN)
+#define FAIL_COLOR COLOR(COLOR_WHITE, COLOR_RED)
+
+#define TEST_COUNT 10u8
+
+u8 test_number;
+
+
+u8 get_test_number_row(u8 n) {
+    return 0u8;
+}
+
+u8 get_test_number_col(u8 n) {
+    return n * 4u8;
+}
+
+u8 ok() {
+    u8 r = get_test_number_row(test_number);
+    u8 c = get_test_number_col(test_number);
+    u8 *p = (u8*)vga_color_seg + VGA_OFFSET(c, r);
+    *p = PASS_COLOR;
+    p += 1u8;
+    *p = PASS_COLOR;
+    p += 1u8;
+    *p = PASS_COLOR;
+    p += 1u8;
+    *p = PASS_COLOR;
+    p += 1u8;
+}
+
+u8 fail() {
+    u8 r = get_test_number_row(test_number);
+    u8 c = get_test_number_col(test_number);
+    u8 *p = (u8*)vga_color_seg + VGA_OFFSET(c, r);
+    *p = FAIL_COLOR;
+    p += 1u8;
+    *p = FAIL_COLOR;
+    p += 1u8;
+    *p = FAIL_COLOR;
+    p += 1u8;
+    *p = FAIL_COLOR;
+    p += 1u8;
+}
+
+u8 draw_test_numbers() {
+    u8 i = 0u8;
+    for (; i != TEST_COUNT; i += 1u8) {
+        u8 r = get_test_number_row(i);
+        u8 c = get_test_number_col(i);
+        vga_put_decimal_u16(c, r, (u16)i);
+    }
+}
+
+#define HALT 0x76u8
+import u16 z80_hl;
+import u16 z80_de;
+import u16 z80_bc;
+import u16 z80_ix;
+import u16 z80_iy;
+
+import u8 z80_f;
+import u8 z80_a;
+import u8 z80_c;
+import u8 z80_b;
+import u8 z80_e;
+import u8 z80_d;
+import u8 z80_l;
+import u8 z80_h;
+
+#define ASSERT(b) if (!(b)) { fail(); return; }
+
+u8 test_copy_reg() {
+    test_number = 0u8;
+    z80_a = 0xccu8;
+    z80_b = 0xddu8;
+    z80run({0x47u8, HALT}); // ld b, a
+    ASSERT(z80_b == 0xccu8);
+
+    z80_h = 0x5au8;
+    z80run({0x7cu8, HALT}); // ld a, h
+    ASSERT(z80_a == 0x5au8);
+    ok();
+}
+
+u8 test_copy_r_indir() {
+    test_number = 1u8;
+    u8 var = 0x89u8;
+    z80_hl = (u16)&var;
+    z80_e = 0x00u8;
+    z80run({0x5eu8, HALT}); // ld e, (hl)
+    ASSERT(z80_e == 0x89u8);
+
+    u32 var32 = 0x12345678u32;
+    z80_c = 0x00u8;
+    z80_d = 0x00u8;
+    z80_ix = (u16)&var32 - 50u16;
+    z80_iy = (u16)&var32 + 15u16;
+    z80run({
+        // ld c, (ix + 50)
+        0xddu8, 0x4eu8, 50u8,
+        // ld e, c
+        0x59u8,
+        // ld d, (iy - 14)
+        0xfdu8, 0x56u8, (u8)-14s8,
+        HALT
+    });
+    ASSERT(z80_c == 0x78u8);
+    ASSERT(z80_e == 0x78u8);
+    ASSERT(z80_d == 0x56u8);
+    ok();
+}
+
+
+
+export u8 main() {
+    vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
+    test_number = 0u8;
+    z80_a = 5u8;
+    draw_test_numbers();
+    test_copy_reg();
+    test_copy_r_indir();
+}

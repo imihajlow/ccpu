@@ -32,22 +32,13 @@
     .global z80_prefix_dd
     .global z80_prefix_fd
 
-    .global __seg_z80_code_begin
-
     .export z80_reset_prefix
 
-    .section init
-    ldi pl, lo(z80_pc)
-    ldi ph, hi(z80_pc)
-    ldi a, lo(__seg_z80_code_begin)
-    st a
-    ldi a, hi(__seg_z80_code_begin)
-    inc pl
-    st a
+    .global opcode_ld_rr
+    .global opcode_ld_r_indir
+    .global opcode_ld_indir_r
 
-    ldi pl, lo(z80_reset_prefix)
-    ldi ph, hi(z80_reset_prefix)
-    jmp
+    .global z80_halt_handler
 
     .section text.fetch
 z80_reset_prefix:
@@ -250,7 +241,7 @@ jump_table:
     dw opcode_ld_indir_r        ; 73
     dw opcode_ld_indir_r        ; 74
     dw opcode_ld_indir_r        ; 75
-    dw not_implemented      ; 76
+    dw z80_halt_handler         ; 76
     dw opcode_ld_indir_r        ; 77
     dw opcode_ld_rr             ; 78
     dw opcode_ld_rr             ; 79

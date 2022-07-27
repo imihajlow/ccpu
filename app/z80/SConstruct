@@ -2,7 +2,7 @@ import os.path
 
 # Build tools
 asmBuilder = Builder(action = 'asm.py -o $TARGET $SOURCE', suffix=".o", src_suffix=[".s", ".asm"], single_source=True, src_builder="Natrix")
-natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-Ilib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
+natrixBuilder = Builder(action = 'natrix.py --cpp-arg=-I../lib -o $TARGET $SOURCE', suffix=".s", src_suffix=".na", single_source=True, source_scanner=CScanner)
 def linkGenerator(source, target, env, for_signature):
     return f"link.py -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
@@ -55,6 +55,21 @@ env["CPPPATH"] = "../lib" # needed for scanner
 rom_startup = ['$NATRIX_DIR/runtime/rom_startup.asm']
 app_startup = ['$NATRIX_DIR/runtime/app_startup.asm']
 
-env.Emu('z80emu', Split('''
+natrix = ['$NATRIX_DIR/runtime/natrix_runtime.asm']
+vga = Split('''
+    ../lib/vga.asm
+    ../lib/vga_numbers.na
+    ''')
+
+
+# env.Emu('z80emu', Split('''
+#     z80regs.asm
+#     z80main.asm'''))
+
+env.Bin('z80test', Split('''
+    test.na
     z80regs.asm
-    z80main.asm'''))
+    z80main.asm
+    z80ld.asm
+    z80run.asm
+    ''') + rom_startup + vga + natrix)

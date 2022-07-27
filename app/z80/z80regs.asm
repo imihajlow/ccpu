@@ -42,11 +42,15 @@
     .export z80_zf
     .export z80_sf
 
+    .export z80_indir_src
+    .export z80_offset
 
     .section bss
     .align 32
-z80_a: res 1
 z80_f: res 1
+
+z80_a: res 1
+z80_indir_src: res 1 ; located here because indirect operand is encoded by index 6
 z80_hl:
 z80_l: res 1
 z80_h: res 1
@@ -81,9 +85,11 @@ z80_pc: res 2
 
 z80_current_opcode: res 1
 
-.const z80_prefix_dd = 0x80 
+z80_offset: res 1
+
+.const z80_prefix_dd = 0x20
 .const z80_prefix_ed = 0x40
-.const z80_prefix_fd = 0x20
+.const z80_prefix_fd = 0x80
 z80_prefix: res 1
 
 
