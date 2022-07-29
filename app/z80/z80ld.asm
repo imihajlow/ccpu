@@ -178,7 +178,19 @@ opcode_ld_r_indir_hl:
     ; ================================
     ; 70-75, 77
     ; ld (hl), r
+    ; ld (ix+o), r
+    ; ld (iy+o), r
 opcode_ld_indir_r:
+    ; jump by prefix
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi pl, lo(opcode_ld_indir_hl_r)
+    ldi ph, hi(opcode_ld_indir_hl_r)
+    jz  ; no prefix
+
+    ; save source register into fixed location
     ldi pl, lo(z80_current_opcode)
     ldi ph, hi(z80_current_opcode)
     ld  a
@@ -187,24 +199,61 @@ opcode_ld_indir_r:
     ldi pl, lo(z80_regs_origin)
     sub pl, a
     ld  b
+    ldi pl, lo(z80_imm1) ; using imm1 as temp variable (located at the same PH)
+    st  b
 
     ldi pl, lo(z80_prefix)
     ld  a
-    add a, 0
-    ldi ph, hi(opcode_ld_indir_hl_r)
-    ldi pl, lo(opcode_ld_indir_hl_r)
-    jz ; no prefix
+
+    ; indexed LD
     shl a
     ldi pl, lo(opcode_ld_indir_iy_r)
     ldi ph, hi(opcode_ld_indir_iy_r)
-    jc ; FD
-    ; otherwise DD - ED is undocumented
+    jc ; prefix FD
+    ; otherwise prefix DD
+
 opcode_ld_indir_ix_r:
+    ; compute destination address
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    ldi pl, lo(z80_ix)
+    ld  b
+    mov pl, a
+    shl pl
+    exp pl
+    add b, a
+    mov a, pl
+    ldi pl, lo(z80_ix + 1)
+    ld  pl
+    adc a, pl
+    ; a:b - dest addr
+    
+    ; load source value
+    ldi pl, lo(z80_imm1)
+    ld  pl
+    mov ph, a
+    mov a, b
+    xor a, pl
+    xor pl, a
+    xor a, pl
+    st  a
+
     ldi pl, lo(z80_reset_prefix)
     ldi ph, hi(z80_reset_prefix)
     jmp
 
 opcode_ld_indir_hl_r:
+    ; load source register into b
+    ldi pl, lo(z80_current_opcode)
+    ldi ph, hi(z80_current_opcode)
+    ld  a
+    ldi b, 0x07
+    and a, b
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    ld  b
+    ldi ph, hi(z80_hl)
     ldi pl, lo(z80_hl)
     ld  a
     inc pl
@@ -217,6 +266,32 @@ opcode_ld_indir_hl_r:
     jmp
 
 opcode_ld_indir_iy_r:
+    ; compute destination address
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    ldi pl, lo(z80_iy)
+    ld  b
+    mov pl, a
+    shl pl
+    exp pl
+    add b, a
+    mov a, pl
+    ldi pl, lo(z80_iy + 1)
+    ld  pl
+    adc a, pl
+    ; a:b - dest addr
+    
+    ; load source value
+    ldi pl, lo(z80_imm1)
+    ld  pl
+    mov ph, a
+    mov a, b
+    xor a, pl
+    xor pl, a
+    xor a, pl
+    st  a
+
     ldi pl, lo(z80_reset_prefix)
     ldi ph, hi(z80_reset_prefix)
     jmp
