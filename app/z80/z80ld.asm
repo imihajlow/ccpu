@@ -32,12 +32,16 @@
     .global z80_indir_src
 
     .global z80_reset_prefix
-    .global z80_offset
+    .global z80_imm0
+    .global z80_imm1
 
     .export opcode_ld_rr
     .export opcode_ld_r_indir
     .export opcode_ld_indir_r
+    .export opcode_ld_indir_bc_a
+    .export opcode_ld_indir_de_a
 
+    ; 8-Bit Load Group LD, page 42 of the manual
     .section text.ld
     ; ================================
     ; 40-6F, 78-7F
@@ -81,34 +85,14 @@ opcode_ld_r_indir:
     ldi ph, hi(opcode_ld_r_indir_hl)
     jz  ; no prefix
 
-    ; indexed LD, load offset and increment pc
-    ldi pl, lo(z80_pc + 1)
-    ldi ph, hi(z80_pc)
-    ld  a
-    dec pl
-    ld  pl
-    mov ph, a
-    ld  b
-    ldi pl, lo(z80_offset)
-    ldi ph, hi(z80_offset)
-    st  b
-    ldi pl, lo(z80_pc)
-    ld  b
-    inc b
-    adc a, 0
-    st  b
-    inc pl
-    st  a
-
-    ldi pl, lo(z80_prefix)
-    ld  a
+    ; indexed LD
     shl a
     ldi pl, lo(opcode_ld_r_indir_iy)
     ldi ph, hi(opcode_ld_r_indir_iy)
     jc ; prefix FD
     ; otherwise prefix DD
-    ldi pl, lo(z80_offset)
-    ldi ph, hi(z80_offset)
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
     ld  a
     shl a
     exp b
@@ -139,8 +123,8 @@ opcode_ld_r_indir:
     jmp
 
 opcode_ld_r_indir_iy:
-    ldi pl, lo(z80_offset)
-    ldi ph, hi(z80_offset)
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
     ld  a
     shl a
     exp b
@@ -191,7 +175,82 @@ opcode_ld_r_indir_hl:
     ldi ph, hi(z80_reset_prefix)
     jmp
 
+    ; ================================
+    ; 70-75, 77
+    ; ld (hl), r
 opcode_ld_indir_r:
+    ldi pl, lo(z80_current_opcode)
+    ldi ph, hi(z80_current_opcode)
+    ld  a
+    ldi b, 0x07
+    and a, b
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    ld  b
+
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(opcode_ld_indir_hl_r)
+    ldi pl, lo(opcode_ld_indir_hl_r)
+    jz ; no prefix
+    shl a
+    ldi pl, lo(opcode_ld_indir_iy_r)
+    ldi ph, hi(opcode_ld_indir_iy_r)
+    jc ; FD
+    ; otherwise DD - ED is undocumented
+opcode_ld_indir_ix_r:
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+opcode_ld_indir_hl_r:
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    st  b
+
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+opcode_ld_indir_iy_r:
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    ; ================================
+    ; 02
+    ; ld (bc), a
+opcode_ld_indir_bc_a:
+    ldi ph, hi(z80_a)
+    ldi pl, lo(z80_a)
+    ld  b
+    ldi pl, lo(z80_bc)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    st b
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    ; ================================
+    ; 12
+    ; ld (de), a
+opcode_ld_indir_de_a:
+    ldi ph, hi(z80_a)
+    ldi pl, lo(z80_a)
+    ld  b
+    ldi pl, lo(z80_de)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    st b
     ldi pl, lo(z80_reset_prefix)
     ldi ph, hi(z80_reset_prefix)
     jmp

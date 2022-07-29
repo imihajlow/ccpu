@@ -31,12 +31,16 @@
     .global z80_prefix_ed
     .global z80_prefix_dd
     .global z80_prefix_fd
+    .global z80_imm0
+    .global z80_imm1
 
     .export z80_reset_prefix
 
     .global opcode_ld_rr
     .global opcode_ld_r_indir
     .global opcode_ld_indir_r
+    .global opcode_ld_indir_bc_a
+    .global opcode_ld_indir_de_a
 
     .global z80_halt_handler
 
@@ -61,18 +65,91 @@ fetch:
     st b
     ; increment PC
     ldi pl, lo(z80_pc)
-    ldi ph, hi(z80_pc)
     ld b
     inc b
-    adc a, 0
+    adc a, 0 ; a is still hi(PC)
     st b
     inc pl
     st a
     ; load stored opcode
     ldi pl, lo(z80_current_opcode)
-    ld pl
+    ld  pl
+    ; check instruction format
+    ldi ph, hi(instr_fmt)
+    ld  b
 
-    ; jump according to the table
+    ; b = adjusted instruction format code
+check_instr_fmt:
+    ldi a, 0x3
+    and b, a
+    ldi pl, lo(tablejump)
+    ldi ph, hi(tablejump)
+    jz  ; instruction with no immediate
+    dec b
+    ldi pl, lo(fetch_imm_1)
+    ldi ph, hi(fetch_imm_1)
+    jz  ; one byte immediate
+    ; else two bytes immediate
+
+    ; load 2 imm bytes
+    ldi pl, lo(z80_pc + 1)
+    ldi ph, hi(z80_pc)
+    ld  a
+    inc pl
+    ld  pl
+    mov ph, a
+    ld  b
+    inc pl
+    adc a, 0
+    mov ph, a
+    ld  a
+    ; store them
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    st  b
+    inc pl
+    st  a
+    ; PC += 2
+    ldi pl, lo(z80_pc)
+    ld  b
+    ldi a, 2
+    add b, a
+    st  b
+    ldi pl, (z80_pc + 1)
+    ld  a
+    adc a, 0
+    st  a
+    ldi pl, lo(tablejump)
+    ldi ph, hi(tablejump)
+    jmp
+
+fetch_imm_1:
+    ; load 1 imm byte
+    ldi pl, lo(z80_pc + 1)
+    ldi ph, hi(z80_pc)
+    ld  a
+    dec pl
+    ld  pl
+    mov ph, a
+    ld  b
+    ; store it
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    st  b
+    ; increment PC
+    ldi pl, lo(z80_pc)
+    ld  b
+    inc b
+    adc a, 0 ; a is already hi(PC)
+    st  b
+    inc pl
+    st  a
+
+    ; jump to the callback according to the table
+tablejump:
+    ldi pl, lo(z80_current_opcode)
+    ldi ph, hi(z80_current_opcode)
+    ld  pl
     shl pl
     ldi a, hi(jump_table)
     adc a, 0
@@ -89,15 +166,41 @@ not_implemented:
     ldi ph, hi(not_implemented)
     jmp
 
-    ; prefixes ED, DD and FD can't be combined
     .section text.opcode_ed
 opcode_ed:
     ldi pl, lo(z80_prefix)
     ldi ph, hi(z80_prefix)
     ldi a, z80_prefix_ed
     st a
-    ldi pl, lo(fetch)
-    ldi ph, hi(fetch)
+    ; load opcode and store it
+    ldi pl, lo(z80_pc + 1)
+    ldi ph, hi(z80_pc)
+    ld a
+    dec pl
+    ld pl
+    mov ph, a
+    ld b
+    ldi pl, lo(z80_current_opcode)
+    ldi ph, hi(z80_current_opcode)
+    st b
+    ; increment PC
+    ldi pl, lo(z80_pc)
+    ld b
+    inc b
+    adc a, 0 ; a is still hi(PC)
+    st b
+    inc pl
+    st a
+    ; load stored opcode
+    ldi pl, lo(z80_current_opcode)
+    ld  pl
+    ; check instruction format
+    ldi ph, hi(instr_fmt)
+    ld  b
+    shr b
+    shr b
+    ldi pl, lo(check_instr_fmt)
+    ldi ph, hi(check_instr_fmt)
     jmp
 
     .section text.opcode_dd
@@ -106,8 +209,38 @@ opcode_dd:
     ldi ph, hi(z80_prefix)
     ldi a, z80_prefix_dd
     st a
-    ldi pl, lo(fetch)
-    ldi ph, hi(fetch)
+fetch_dd:
+    ; load opcode and store it
+    ldi pl, lo(z80_pc + 1)
+    ldi ph, hi(z80_pc)
+    ld a
+    dec pl
+    ld pl
+    mov ph, a
+    ld b
+    ldi pl, lo(z80_current_opcode)
+    ldi ph, hi(z80_current_opcode)
+    st b
+    ; increment PC
+    ldi pl, lo(z80_pc)
+    ld b
+    inc b
+    adc a, 0 ; a is still hi(PC)
+    st b
+    inc pl
+    st a
+    ; load stored opcode
+    ldi pl, lo(z80_current_opcode)
+    ld  pl
+    ; check instruction format
+    ldi ph, hi(instr_fmt)
+    ld  b
+    shr b
+    shr b
+    shr b
+    shr b
+    ldi pl, lo(check_instr_fmt)
+    ldi ph, hi(check_instr_fmt)
     jmp
 
     .section text.opcode_fd
@@ -116,8 +249,8 @@ opcode_fd:
     ldi ph, hi(z80_prefix)
     ldi a, z80_prefix_fd
     st a
-    ldi pl, lo(fetch)
-    ldi ph, hi(fetch)
+    ldi pl, lo(fetch_dd)
+    ldi ph, hi(fetch_dd)
     jmp
     
     .section text.jump_table
@@ -125,7 +258,7 @@ opcode_fd:
 jump_table:
     dw fetch                ; 00 - NOP
     dw not_implemented      ; 01
-    dw not_implemented      ; 02
+    dw opcode_ld_indir_bc_a ; 02
     dw not_implemented      ; 03
     dw not_implemented      ; 04
     dw not_implemented      ; 05
@@ -141,7 +274,7 @@ jump_table:
     dw not_implemented      ; 0F
     dw not_implemented      ; 10
     dw not_implemented      ; 11
-    dw not_implemented      ; 12
+    dw opcode_ld_indir_de_a ; 12
     dw not_implemented      ; 13
     dw not_implemented      ; 14
     dw not_implemented      ; 15
@@ -381,3 +514,283 @@ jump_table:
     dw not_implemented      ; FF
 
 
+    ; Instruction format table
+    ; Possible instruction formats:
+    ; - no immediate value
+    ; - 1 byte immediate value
+    ; - 2 byte immediate value (or 2 single byte immediates)
+    ; - DDCB/FDCB format: DD CB imm8 op
+    ;
+    ; DD- and FD-prefixed instructions follow the same format
+    ; ED is special
+    ; CB has only simple instructions without an immediate - no table needed
+    
+    .const instr_fmt_no_imm = 0
+    .const instr_fmt_imm_1 = 1
+    .const instr_fmt_imm_2 = 2
+    .const instr_fmt_ed_no_imm = 0 << 2
+    .const instr_fmt_ed_imm_2 = 2 << 2
+    .const instr_fmt_dd_no_imm = 0 << 4
+    .const instr_fmt_dd_imm_1 = 1 << 4
+    .const instr_fmt_dd_imm_2 = 2 << 4
+    .const instr_fmt_ddcb = 3 << 4
+
+    .section text.instr_fmt
+    .align 256
+instr_fmt:
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 00
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 01
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 02
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 03
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 04
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 05
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 06
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 07
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 08
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 09
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0D
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 0F
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 10
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 11
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 12
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 13
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 14
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 15
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 16
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 17
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 18
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 19
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1D
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1F
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 20
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 21
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 22
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 23
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 24
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 25
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 26
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 27
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 28
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 29
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 2A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2D
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 2E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 30
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 31
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 32
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 33
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 34
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 35
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 36
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 37
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 38
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 39
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3D
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 40
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 41
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 42
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_no_imm    ; 43
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 44
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 45
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 46
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 47
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 48
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 49
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 4A
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_no_imm    ; 4B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 4C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 4D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 4E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 4F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 50
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 51
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 52
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_no_imm    ; 53
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 54
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 55
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 56
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 57
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 58
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 59
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 5A
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_no_imm    ; 5B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 5C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 5D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 5E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 5F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 60
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 61
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 62
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 63
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 64
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 65
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 66
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 67
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 68
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 69
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 6A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 6B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 6C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 6D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 6E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 6F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 70
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 71
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 72
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_imm_1    ; 73
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 74
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 75
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 76
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 77
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 78
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 79
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 7A
+    db instr_fmt_no_imm | instr_fmt_ed_imm_2 | instr_fmt_dd_no_imm    ; 7B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 7C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 7D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 7E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 7F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 80
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 81
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 82
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 83
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 84
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 85
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 86
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 87
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 88
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 89
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 8A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 8B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 8C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 8D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 8E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 8F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 90
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 91
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 92
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 93
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 94
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 95
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 96
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 97
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 98
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 99
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 9A
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 9B
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 9C
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 9D
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 9E
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 9F
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A1
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A2
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A3
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A5
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; A6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; A9
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; AA
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; AB
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; AC
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; AD
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; AE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; AF
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B1
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B2
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B3
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B5
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; B6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; B9
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; BA
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; BB
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; BC
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; BD
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; BE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; BF
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C1
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C2
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C3
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C5
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; C9
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; CA
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_ddcb    ; CB - fake imm1, in fact it's a prefix
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; CC
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; CD
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; CE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; CF
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D1
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D2
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D3
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D5
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; D9
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DA
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DB
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DC
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DD
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; DF
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E1
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E2
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E3
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E5
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; E9
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; EA
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; EB
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; EC
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; ED
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; EE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; EF
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F0
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F1
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F2
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F3
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F4
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F5
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F6
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F7
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F8
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; F9
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FA
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FB
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FC
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FD
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FE
+    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; FF

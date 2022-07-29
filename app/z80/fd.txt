@@ -1,0 +1,66 @@
+FD 04+8*q
+FD 05+8*q
+FD 09
+FD 19
+FD 23
+FD 29
+FD 2B
+FD 39
+FD 40+q
+FD 48+q
+FD 50+q
+FD 58+q
+FD 60+q
+FD 68+q
+FD 78+q
+FD 80+q
+FD 88+q
+FD 90+q
+FD 98+q
+FD A0+q
+FD A8+q
+FD B0+q
+FD B8+q
+FD E1
+FD E3
+FD E5
+FD E9
+FD F9
+
+FD 21 nn nn
+FD 22 nn nn
+FD 2A nn nn
+FD 36 o n
+
+FD 26 n
+FD 2E n
+
+FD 34 o
+FD 35 o
+FD 46 o
+FD 4E o
+FD 56 o
+FD 5E o
+FD 66 o
+FD 6E o
+FD 70+r o
+FD 7E o
+FD 86 o
+FD 8E o
+FD 96 o
+FD 9E o
+FD A6 o
+FD AE o
+FD B6 o
+FD BE o
+
+FD CB o 06
+FD CB o 0E
+FD CB o 16
+FD CB o 1E
+FD CB o 26
+FD CB o 2E
+FD CB o 3E
+FD CB o 46+8*b
+FD CB o 86+8*b
+FD CB o C6+8*b

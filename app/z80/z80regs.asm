@@ -43,7 +43,8 @@
     .export z80_sf
 
     .export z80_indir_src
-    .export z80_offset
+    .export z80_imm0
+    .export z80_imm1
 
     .section bss
     .align 32
@@ -85,7 +86,8 @@ z80_pc: res 2
 
 z80_current_opcode: res 1
 
-z80_offset: res 1
+z80_imm0: res 1
+z80_imm1: res 1
 
 .const z80_prefix_dd = 0x20
 .const z80_prefix_ed = 0x40

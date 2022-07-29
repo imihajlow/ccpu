@@ -1,0 +1,66 @@
+DD 04+8*p
+DD 05+8*p
+DD 09
+DD 19
+DD 23
+DD 29
+DD 2B
+DD 39
+DD 40+p
+DD 48+p
+DD 50+p
+DD 58+p
+DD 60+p
+DD 68+p
+DD 78+p
+DD 80+p
+DD 88+p
+DD 90+p
+DD 98+p
+DD A0+p
+DD A8+p
+DD B0+p
+DD B8+p
+DD E1
+DD E3
+DD E5
+DD E9
+DD F9
+
+DD 21 nn nn
+DD 22 nn nn
+DD 2A nn nn
+DD 36 o n
+
+DD 26 n
+DD 2E n
+
+DD 34 o
+DD 35 o
+DD 46 o
+DD 4E o
+DD 56 o
+DD 5E o
+DD 66 o
+DD 6E o
+DD 70+r o
+DD 7E o
+DD 86 o
+DD 8E o
+DD 96 o
+DD 9E o
+DD A6 o
+DD AE o
+DD B6 o
+DD BE o
+
+DD CB o 06
+DD CB o 0E
+DD CB o 16
+DD CB o 1E
+DD CB o 26
+DD CB o 2E
+DD CB o 3E
+DD CB o 46+8*b
+DD CB o 86+8*b
+DD CB o C6+8*b
