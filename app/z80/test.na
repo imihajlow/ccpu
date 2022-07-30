@@ -221,11 +221,16 @@ u8 test_ld_a_indir_imm16() {
     u8 src = 0x67u8;
     z80_a = 0u8;
     struct LdAIndir code;
-    code.opcode = 0x3au8;
+    code.opcode = 0x3au8; // ld a, (imm16)
     code.src = &src;
     code.halt = HALT;
     z80run((u8*)&code);
     ASSERT(z80_a == 0x67u8);
+
+    z80_a = 0x12u8;
+    code.opcode = 0x32u8; // ld (imm16), a
+    z80run((u8*)&code);
+    ASSERT(src == 0x12u8);
     ok();
 }
 

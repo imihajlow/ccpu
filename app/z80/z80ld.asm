@@ -45,6 +45,7 @@
     .export opcode_ld_a_imm_indir
     .export opcode_ld_a_imm_bc
     .export opcode_ld_a_imm_de
+    .export opcode_ld_indir_imm_a
 
     ; 8-Bit Load Group LD, page 42 of the manual
 
@@ -512,6 +513,25 @@ opcode_ld_a_imm_de:
     ld  b
     ldi ph, hi(z80_a)
     ldi pl, lo(z80_a)
+    st  b
+
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    ; ================================
+    ; 32
+    ; ld (imm16), a
+    .section text.opcode_ld_indir_imm_a
+opcode_ld_indir_imm_a:
+    ldi ph, hi(z80_a)
+    ldi pl, lo(z80_a)
+    ld  b
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
     st  b
 
     ldi pl, lo(z80_reset_prefix)

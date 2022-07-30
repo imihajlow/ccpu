@@ -47,6 +47,7 @@
     .global opcode_ld_a_imm_indir
     .global opcode_ld_a_imm_bc
     .global opcode_ld_a_imm_de
+    .global opcode_ld_indir_imm_a
 
     .global z80_halt_handler
 
@@ -312,7 +313,7 @@ jump_table:
     dw not_implemented      ; 2F
     dw not_implemented      ; 30
     dw not_implemented      ; 31
-    dw not_implemented      ; 32
+    dw opcode_ld_indir_imm_a      ; 32
     dw not_implemented      ; 33
     dw not_implemented      ; 34
     dw not_implemented      ; 35
