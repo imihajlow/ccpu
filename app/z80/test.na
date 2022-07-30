@@ -461,6 +461,43 @@ u8 test_incdec() {
     });
     ASSERT(z80_c == 0x7fu8);
     ASSERT(z80_f == (FLAG_N | FLAG_P));
+
+
+    z80_ix = 0x0102u16;
+    z80run({
+        // dec IXh
+        0xddu8, 0x25u8,
+        HALT
+    });
+    ASSERT(z80_ix == 0x0002u16);
+    ASSERT(z80_f == (FLAG_N | FLAG_Z));
+
+    z80_iy = 0x0005u16;
+    z80run({
+        // dec IYh
+        0xfdu8, 0x25u8,
+        HALT
+    });
+    ASSERT(z80_iy == 0xFF05u16);
+    ASSERT(z80_f == (FLAG_N | FLAG_S | FLAG_C));
+
+    z80_ix = 0x0102u16;
+    z80run({
+        // inc IXl
+        0xddu8, 0x2Cu8,
+        HALT
+    });
+    ASSERT(z80_ix == 0x0103u16);
+    ASSERT(z80_f == 0u8);
+
+    z80_iy = 0x007fu16;
+    z80run({
+        // inc IYl
+        0xfdu8, 0x2Cu8,
+        HALT
+    });
+    ASSERT(z80_iy == 0x0080u16);
+    ASSERT(z80_f == (FLAG_S | FLAG_P));
     ok();
 }
 

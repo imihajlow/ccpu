@@ -47,15 +47,70 @@
     .export opcode_arithm8_indir
     .export opcode_arithm8_imm
     .export opcode_inc_r
+    .export opcode_inc_r_common
     .export opcode_dec_r
+    .export opcode_dec_r_common
 
     ; The half-carry flag H is not supported!
     ; Parity with XOR is not supported!
 
     .section text.opcode_inc_r
+    ; 24, 2C, DD 24, DD 2C, FD 24, FD 2C
+opcode_inc_r:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(opcode_inc_r_common)
+    ldi pl, lo(opcode_inc_r_common)
+    jz
+    ldi ph, hi(inc_iyp)
+    ldi pl, lo(inc_iyp)
+    js ; FD
+    ; else DD
+
+    ; DD 24, FD 2C
+inc_ixp:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ; a = 4 for IXh, a = 5 for IXl
+    ldi pl, lo(z80_ix + 5)
+    sub pl, a
+    ld  a
+    inc a
+    st  a
+    ldi b, 0
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
+    ; FD 24, FD 2C
+inc_iyp:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ; a = 4 for IYh, a = 5 for IYl
+    ldi pl, lo(z80_iy + 5)
+    sub pl, a
+    ld  a
+    inc a
+    st  a
+    ldi b, 0
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
+    .section text.opcode_inc_r_common
     ; 04, 0C, 14, 1C, 24, 2C, 3C
     ; simple register increment, no prefix
-opcode_inc_r:
+opcode_inc_r_common:
     ldi ph, hi(z80_current_opcode)
     ldi pl, lo(z80_current_opcode)
     ld  a
@@ -73,9 +128,62 @@ opcode_inc_r:
     jmp
 
     .section text.opcode_dec_r
+    ; 25, 2D, DD 25, DD 2D, FD 25, FD 2D
+opcode_dec_r:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(opcode_dec_r_common)
+    ldi pl, lo(opcode_dec_r_common)
+    jz
+    ldi ph, hi(dec_iyp)
+    ldi pl, lo(dec_iyp)
+    js ; FD
+    ; else DD
+
+    ; DD 24, FD 2C
+dec_ixp:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ; a = 4 for IXh, a = 5 for IXl
+    ldi pl, lo(z80_ix + 5)
+    sub pl, a
+    ld  a
+    dec a
+    st  a
+    ldi b, z80_nf
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
+    ; FD 04, FD 0C
+dec_iyp:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ; a = 4 for IYh, a = 5 for IYl
+    ldi pl, lo(z80_iy + 5)
+    sub pl, a
+    ld  a
+    dec a
+    st  a
+    ldi b, z80_nf
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
+    .section text.opcode_dec_r_common
     ; 05, 0D, 15, 1D, 25, 2D, 3D
     ; simple register decrement, no prefix
-opcode_dec_r:
+opcode_dec_r_common:
     ldi ph, hi(z80_current_opcode)
     ldi pl, lo(z80_current_opcode)
     ld  a

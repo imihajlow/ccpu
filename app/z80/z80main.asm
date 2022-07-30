@@ -54,7 +54,9 @@
     .global opcode_arithm8_imm
     .global opcode_arithm8_indir
     .global opcode_inc_r
+    .global opcode_inc_r_common
     .global opcode_dec_r
+    .global opcode_dec_r_common
 
     .global z80_halt_handler
 
@@ -274,32 +276,32 @@ jump_table:
     dw not_implemented      ; 01
     dw opcode_ld_indir_bc_a ; 02
     dw not_implemented      ; 03
-    dw opcode_inc_r      ; 04
-    dw opcode_dec_r      ; 05
+    dw opcode_inc_r_common      ; 04
+    dw opcode_dec_r_common      ; 05
     dw opcode_ld_r_imm      ; 06
     dw not_implemented      ; 07
     dw not_implemented      ; 08
     dw not_implemented      ; 09
     dw opcode_ld_a_imm_bc      ; 0A
     dw not_implemented      ; 0B
-    dw opcode_inc_r      ; 0C
-    dw opcode_dec_r      ; 0D
+    dw opcode_inc_r_common      ; 0C
+    dw opcode_dec_r_common      ; 0D
     dw opcode_ld_r_imm      ; 0E
     dw not_implemented      ; 0F
     dw not_implemented      ; 10
     dw not_implemented      ; 11
     dw opcode_ld_indir_de_a ; 12
     dw not_implemented      ; 13
-    dw opcode_inc_r      ; 14
-    dw opcode_dec_r      ; 15
+    dw opcode_inc_r_common      ; 14
+    dw opcode_dec_r_common      ; 15
     dw opcode_ld_r_imm      ; 16
     dw not_implemented      ; 17
     dw not_implemented      ; 18
     dw not_implemented      ; 19
     dw opcode_ld_a_imm_de      ; 1A
     dw not_implemented      ; 1B
-    dw opcode_inc_r      ; 1C
-    dw opcode_dec_r      ; 1D
+    dw opcode_inc_r_common      ; 1C
+    dw opcode_dec_r_common      ; 1D
     dw opcode_ld_r_imm      ; 1E
     dw not_implemented      ; 1F
     dw not_implemented      ; 20
@@ -330,8 +332,8 @@ jump_table:
     dw not_implemented      ; 39
     dw opcode_ld_a_imm_indir      ; 3A
     dw not_implemented      ; 3B
-    dw opcode_inc_r      ; 3C
-    dw opcode_dec_r      ; 3D
+    dw opcode_inc_r_common      ; 3C
+    dw opcode_dec_r_common      ; 3D
     dw opcode_ld_r_imm      ; 3E
     dw not_implemented      ; 3F
     dw opcode_ld_rr             ; 40
