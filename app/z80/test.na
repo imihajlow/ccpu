@@ -433,6 +433,37 @@ u8 test_arithm8_imm_and_indir() {
     ok();
 }
 
+u8 test_incdec() {
+    test_number = 10u8;
+    z80_a = 50u8;
+    z80_b = 0xffu8;
+    z80_c = 0x80u8;
+    z80run({
+        // inc a
+        0x3cu8,
+        HALT
+    });
+    ASSERT(z80_a == 51u8);
+    ASSERT(z80_f == 0u8);
+
+    z80run({
+        // inc b
+        0x04u8,
+        HALT
+    });
+    ASSERT(z80_b == 00u8);
+    ASSERT(z80_f == (FLAG_Z | FLAG_C));
+
+    z80run({
+        // dec c
+        0x0du8,
+        HALT
+    });
+    ASSERT(z80_c == 0x7fu8);
+    ASSERT(z80_f == (FLAG_N | FLAG_P));
+    ok();
+}
+
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
     test_number = 0u8;
@@ -448,4 +479,5 @@ export u8 main() {
     test_arithm8_add();
     test_arithm8_ops();
     test_arithm8_imm_and_indir();
+    test_incdec();
 }

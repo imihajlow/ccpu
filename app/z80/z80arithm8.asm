@@ -46,9 +46,52 @@
     .export opcode_arithm8_common
     .export opcode_arithm8_indir
     .export opcode_arithm8_imm
+    .export opcode_inc_r
+    .export opcode_dec_r
 
     ; The half-carry flag H is not supported!
     ; Parity with XOR is not supported!
+
+    .section text.opcode_inc_r
+    ; 04, 0C, 14, 1C, 24, 2C, 3C
+    ; simple register increment, no prefix
+opcode_inc_r:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    ld  a
+    inc a
+    st  a
+    ldi b, 0
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
+    .section text.opcode_dec_r
+    ; 05, 0D, 15, 1D, 25, 2D, 3D
+    ; simple register decrement, no prefix
+opcode_dec_r:
+    ldi ph, hi(z80_current_opcode)
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    ld  a
+    dec a
+    st  a
+    ldi b, z80_nf
+    ldi pl, lo(set_flags)
+    ldi ph, hi(set_flags)
+    jmp
+
 
     .section text.opcode_arithm8_indir
 opcode_arithm8_indir:
