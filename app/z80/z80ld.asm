@@ -40,11 +40,14 @@
     .export opcode_ld_indir_r
     .export opcode_ld_indir_bc_a
     .export opcode_ld_indir_de_a
+    .export opcode_ld_r_imm
+    .export opcode_ld_indir_imm
 
     ; 8-Bit Load Group LD, page 42 of the manual
-    .section text.ld
+
     ; ================================
     ; 40-6F, 78-7F
+    .section text.opcode_ld_rr
 opcode_ld_rr:
     ; ED 57, ED 5F, ED 47, ED 4F aren't supported
     ; same PH through the whole function
@@ -76,6 +79,7 @@ opcode_ld_rr:
 
     ; ================================
     ; 46, 4E, 56, 5E, 66, 6E
+    .section text.opcode_ld_r_indir
 opcode_ld_r_indir:
     ldi ph, hi(z80_prefix)
     ldi pl, lo(z80_prefix)
@@ -122,6 +126,7 @@ opcode_ld_r_indir:
     ldi ph, hi(z80_reset_prefix)
     jmp
 
+    .section text.opcode_ld_r_indir_iy
 opcode_ld_r_indir_iy:
     ldi pl, lo(z80_imm0)
     ldi ph, hi(z80_imm0)
@@ -153,6 +158,7 @@ opcode_ld_r_indir_iy:
     ldi ph, hi(z80_reset_prefix)
     jmp
 
+    .section text.opcode_ld_r_indir_hl
 opcode_ld_r_indir_hl:
     ldi pl, lo(z80_hl)
     ldi ph, hi(z80_hl)
@@ -180,6 +186,7 @@ opcode_ld_r_indir_hl:
     ; ld (hl), r
     ; ld (ix+o), r
     ; ld (iy+o), r
+    .section text.opcode_ld_indir_r
 opcode_ld_indir_r:
     ; jump by prefix
     ldi ph, hi(z80_prefix)
@@ -243,6 +250,7 @@ opcode_ld_indir_ix_r:
     ldi ph, hi(z80_reset_prefix)
     jmp
 
+    .section text.opcode_ld_indir_hl_r
 opcode_ld_indir_hl_r:
     ; load source register into b
     ldi pl, lo(z80_current_opcode)
@@ -265,6 +273,7 @@ opcode_ld_indir_hl_r:
     ldi ph, hi(z80_reset_prefix)
     jmp
 
+    .section text.opcode_ld_indir_iy_r
 opcode_ld_indir_iy_r:
     ; compute destination address
     ldi ph, hi(z80_imm0)
@@ -299,6 +308,7 @@ opcode_ld_indir_iy_r:
     ; ================================
     ; 02
     ; ld (bc), a
+    .section text.opcode_ld_indir_bc_a
 opcode_ld_indir_bc_a:
     ldi ph, hi(z80_a)
     ldi pl, lo(z80_a)
@@ -316,6 +326,7 @@ opcode_ld_indir_bc_a:
     ; ================================
     ; 12
     ; ld (de), a
+    .section text.opcode_ld_indir_de_a
 opcode_ld_indir_de_a:
     ldi ph, hi(z80_a)
     ldi pl, lo(z80_a)
@@ -326,6 +337,120 @@ opcode_ld_indir_de_a:
     ld  ph
     mov pl, a
     st b
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    ; ================================
+    ; 06, 0E, 16, 1E, 26, 2E
+    ; ld r, n
+    .section text.opcode_ld_r_imm
+opcode_ld_r_imm:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi pl, lo(opcode_ld_gr_imm)
+    ldi ph, hi(opcode_ld_gr_imm)
+    jz ; no prefix
+    shl a
+    ldi pl, lo(opcode_ld_iylh_imm)
+    ldi ph, hi(opcode_ld_iylh_imm)
+    jc ; FD
+    ; otherwise DD
+
+opcode_ld_ixlh_imm:
+    ; DD 26 - ld IXh, n
+    ; DD 2E - ld IXl, n
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ldi pl, 1
+    and a, pl
+    ldi pl, lo(z80_ix + 1)
+    sub pl, a
+    st  b
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_iylh_imm
+opcode_ld_iylh_imm:
+    ; FD 26 - ld IYh, n
+    ; FD 2E - ld IYl, n
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ldi pl, 1
+    and a, pl
+    ldi pl, lo(z80_iy + 1)
+    sub pl, a
+    st  b
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_gr_imm
+opcode_ld_gr_imm:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi pl, lo(z80_current_opcode)
+    ld  a
+    shr a
+    shr a
+    shr a
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    st  b
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_indir_imm
+    ; ================================
+    ; 36, DD 36, FD 36
+    ; ld (hl), n
+opcode_ld_indir_imm:
+    ; reusing same code from before: immediate value is in imm1
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi pl, lo(opcode_ld_indir_hl_imm)
+    ldi ph, hi(opcode_ld_indir_hl_imm)
+    jz ; no prefix
+    shl a
+    ldi pl, lo(opcode_ld_indir_iy_r)
+    ldi ph, hi(opcode_ld_indir_iy_r)
+    jc ; FD
+    ; otherwise DD
+    ldi pl, lo(opcode_ld_indir_ix_r)
+    ldi ph, hi(opcode_ld_indir_ix_r)
+    jmp 
+
+    .section text.opcode_ld_indir_hl_imm
+opcode_ld_indir_hl_imm:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    st  b
+
     ldi pl, lo(z80_reset_prefix)
     ldi ph, hi(z80_reset_prefix)
     jmp

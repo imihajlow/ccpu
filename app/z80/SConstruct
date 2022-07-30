@@ -66,10 +66,15 @@ vga = Split('''
 #     z80regs.asm
 #     z80main.asm'''))
 
-env.Bin('z80test', Split('''
-    test.na
+z80 = Split('''
     z80regs.asm
     z80main.asm
     z80ld.asm
     z80run.asm
-    ''') + rom_startup + vga + natrix)
+    ''')
+
+env.Bin('z80test', Split('''
+    test.na
+    ''') + z80 + rom_startup + vga + natrix)
+
+env.Bin('z80dummy', ['dummy.asm'] + z80)

@@ -36,11 +36,14 @@
 
     .export z80_reset_prefix
 
+    ; in z80ld.asm
     .global opcode_ld_rr
     .global opcode_ld_r_indir
     .global opcode_ld_indir_r
     .global opcode_ld_indir_bc_a
     .global opcode_ld_indir_de_a
+    .global opcode_ld_r_imm
+    .global opcode_ld_indir_imm
 
     .global z80_halt_handler
 
@@ -95,7 +98,7 @@ check_instr_fmt:
     ldi pl, lo(z80_pc + 1)
     ldi ph, hi(z80_pc)
     ld  a
-    inc pl
+    dec pl
     ld  pl
     mov ph, a
     ld  b
@@ -262,7 +265,7 @@ jump_table:
     dw not_implemented      ; 03
     dw not_implemented      ; 04
     dw not_implemented      ; 05
-    dw not_implemented      ; 06
+    dw opcode_ld_r_imm      ; 06
     dw not_implemented      ; 07
     dw not_implemented      ; 08
     dw not_implemented      ; 09
@@ -270,7 +273,7 @@ jump_table:
     dw not_implemented      ; 0B
     dw not_implemented      ; 0C
     dw not_implemented      ; 0D
-    dw not_implemented      ; 0E
+    dw opcode_ld_r_imm      ; 0E
     dw not_implemented      ; 0F
     dw not_implemented      ; 10
     dw not_implemented      ; 11
@@ -278,7 +281,7 @@ jump_table:
     dw not_implemented      ; 13
     dw not_implemented      ; 14
     dw not_implemented      ; 15
-    dw not_implemented      ; 16
+    dw opcode_ld_r_imm      ; 16
     dw not_implemented      ; 17
     dw not_implemented      ; 18
     dw not_implemented      ; 19
@@ -286,7 +289,7 @@ jump_table:
     dw not_implemented      ; 1B
     dw not_implemented      ; 1C
     dw not_implemented      ; 1D
-    dw not_implemented      ; 1E
+    dw opcode_ld_r_imm      ; 1E
     dw not_implemented      ; 1F
     dw not_implemented      ; 20
     dw not_implemented      ; 21
@@ -294,7 +297,7 @@ jump_table:
     dw not_implemented      ; 23
     dw not_implemented      ; 24
     dw not_implemented      ; 25
-    dw not_implemented      ; 26
+    dw opcode_ld_r_imm      ; 26
     dw not_implemented      ; 27
     dw not_implemented      ; 28
     dw not_implemented      ; 29
@@ -302,7 +305,7 @@ jump_table:
     dw not_implemented      ; 2B
     dw not_implemented      ; 2C
     dw not_implemented      ; 2D
-    dw not_implemented      ; 2E
+    dw opcode_ld_r_imm      ; 2E
     dw not_implemented      ; 2F
     dw not_implemented      ; 30
     dw not_implemented      ; 31
@@ -310,7 +313,7 @@ jump_table:
     dw not_implemented      ; 33
     dw not_implemented      ; 34
     dw not_implemented      ; 35
-    dw not_implemented      ; 36
+    dw opcode_ld_indir_imm  ; 36
     dw not_implemented      ; 37
     dw not_implemented      ; 38
     dw not_implemented      ; 39
@@ -318,7 +321,7 @@ jump_table:
     dw not_implemented      ; 3B
     dw not_implemented      ; 3C
     dw not_implemented      ; 3D
-    dw not_implemented      ; 3E
+    dw opcode_ld_r_imm      ; 3E
     dw not_implemented      ; 3F
     dw opcode_ld_rr             ; 40
     dw opcode_ld_rr             ; 41
@@ -592,7 +595,7 @@ instr_fmt:
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 33
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 34
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 35
-    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 36
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_2    ; 36
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 37
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 38
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 39

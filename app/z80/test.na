@@ -153,6 +153,63 @@ u8 test_store_indir_r() {
     ok();
 }
 
+u8 test_store_indir_imm() {
+    test_number = 3u8;
+    u8 dest1 = 0u8;
+    u16 dest2 = 0u16;
+    z80_hl = (u16)&dest1;
+    z80_ix = (u16)&dest2 + 18u16;
+    z80_iy = (u16)&dest2 - 100u16;
+    z80run({
+        // ld (hl), 0x33
+        0x36u8, 0x33u8,
+        // ld (ix - 18), 0x44
+        0xddu8, 0x36u8, (u8)-18s8, 0x44u8,
+        // ld (iy + 101), 0x55
+        0xfdu8, 0x36u8, 101u8, 0x55u8,
+        HALT
+    });
+    ASSERT(dest1 == 0x33u8);
+    ASSERT(dest2 == 0x5544u16);
+    ok();
+}
+
+u8 test_store_reg_imm() {
+    test_number = 4u8;
+    z80_a = 0u8;
+    z80_b = 0u8;
+    z80_c = 0u8;
+    z80_d = 0u8;
+    z80_e = 0u8;
+    z80_h = 0u8;
+    z80_l = 0u8;
+    z80run({
+        // ld a, 0x11
+        0x3eu8, 0x11u8,
+        // ld b, 0x22
+        0x06u8, 0x22u8,
+        // ld c, 0x33
+        0x0eu8, 0x33u8,
+        // ld d, 0x44
+        0x16u8, 0x44u8,
+        // ld e, 0x55
+        0x1eu8, 0x55u8,
+        // ld h, 0x66
+        0x26u8, 0x66u8,
+        // ld l, 0x77
+        0x2eu8, 0x77u8,
+        HALT
+    });
+    ASSERT(z80_a == 0x11u8);
+    ASSERT(z80_b == 0x22u8);
+    ASSERT(z80_c == 0x33u8);
+    ASSERT(z80_d == 0x44u8);
+    ASSERT(z80_e == 0x55u8);
+    ASSERT(z80_h == 0x66u8);
+    ASSERT(z80_l == 0x77u8);
+    ok();
+}
+
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
     test_number = 0u8;
@@ -161,4 +218,6 @@ export u8 main() {
     test_copy_reg();
     test_copy_r_indir();
     test_store_indir_r();
+    test_store_indir_imm();
+    test_store_reg_imm();
 }
