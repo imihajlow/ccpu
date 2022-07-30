@@ -57,6 +57,8 @@
     .global opcode_inc_r_common
     .global opcode_dec_r
     .global opcode_dec_r_common
+    .global opcode_inc_indirect
+    .global opcode_dec_indirect
 
     .global z80_halt_handler
 
@@ -324,8 +326,8 @@ jump_table:
     dw not_implemented      ; 31
     dw opcode_ld_indir_imm_a      ; 32
     dw not_implemented      ; 33
-    dw not_implemented      ; 34
-    dw not_implemented      ; 35
+    dw opcode_inc_indirect      ; 34
+    dw opcode_dec_indirect      ; 35
     dw opcode_ld_indir_imm  ; 36
     dw not_implemented      ; 37
     dw not_implemented      ; 38

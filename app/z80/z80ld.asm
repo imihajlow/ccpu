@@ -94,10 +94,9 @@ opcode_ld_r_indir:
     jz  ; no prefix
 
     ; indexed LD
-    shl a
     ldi pl, lo(opcode_ld_r_indir_iy)
     ldi ph, hi(opcode_ld_r_indir_iy)
-    jc ; prefix FD
+    js ; prefix FD
     ; otherwise prefix DD
     ldi pl, lo(z80_imm0)
     ldi ph, hi(z80_imm0)
@@ -357,10 +356,9 @@ opcode_ld_r_imm:
     ldi pl, lo(opcode_ld_gr_imm)
     ldi ph, hi(opcode_ld_gr_imm)
     jz ; no prefix
-    shl a
     ldi pl, lo(opcode_ld_iylh_imm)
     ldi ph, hi(opcode_ld_iylh_imm)
-    jc ; FD
+    js ; FD
     ; otherwise DD
 
 opcode_ld_ixlh_imm:
@@ -434,10 +432,9 @@ opcode_ld_indir_imm:
     ldi pl, lo(opcode_ld_indir_hl_imm)
     ldi ph, hi(opcode_ld_indir_hl_imm)
     jz ; no prefix
-    shl a
     ldi pl, lo(opcode_ld_indir_iy_r)
     ldi ph, hi(opcode_ld_indir_iy_r)
-    jc ; FD
+    js ; FD
     ; otherwise DD
     ldi pl, lo(opcode_ld_indir_ix_r)
     ldi ph, hi(opcode_ld_indir_ix_r)

@@ -50,9 +50,166 @@
     .export opcode_inc_r_common
     .export opcode_dec_r
     .export opcode_dec_r_common
+    .export opcode_inc_indirect
+    .export opcode_dec_indirect
 
     ; The half-carry flag H is not supported!
     ; Parity with XOR is not supported!
+
+    .section text.opcode_inc_indirect
+    ; 34, DD 34, FD 34
+opcode_inc_indirect:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(inc_indirect_hl)
+    ldi pl, lo(inc_indirect_hl)
+    jz ; no prefix
+    ldi ph, hi(inc_indirect_iy)
+    ldi pl, lo(inc_indirect_iy)
+    js ; FD
+    ; othrewise DD
+inc_indirect_ix:
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_ix)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_ix + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc ph, a
+    ld  b
+    inc b
+    st  b
+    ldi b, 0
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
+
+    .section text.inc_indirect_iy
+inc_indirect_iy:
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_iy)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_iy + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc ph, a
+    ld  b
+    inc b
+    st  b
+    ldi b, 0
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
+
+    .section text.inc_indirect_hl
+inc_indirect_hl:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    inc a
+    st  a
+    ldi b, 0
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
+
+
+    .section text.opcode_dec_indirect
+    ; 35, DD 35, FD 35
+opcode_dec_indirect:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(dec_indirect_hl)
+    ldi pl, lo(dec_indirect_hl)
+    jz ; no prefix
+    ldi ph, hi(dec_indirect_iy)
+    ldi pl, lo(dec_indirect_iy)
+    js ; FD
+    ; othrewise DD
+dec_indirect_ix:
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_ix)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_ix + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc ph, a
+    ld  b
+    dec b
+    st  b
+    ldi b, z80_nf
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
+
+    .section text.dec_indirect_iy
+dec_indirect_iy:
+    ldi pl, lo(z80_imm0)
+    ldi ph, hi(z80_imm0)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_iy)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_iy + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc ph, a
+    ld  b
+    dec b
+    st  b
+    ldi b, z80_nf
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
+
+    .section text.dec_indirect_hl
+dec_indirect_hl:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    dec a
+    st  a
+    ldi b, z80_nf
+    ldi ph, hi(set_flags_preserve_c)
+    ldi pl, lo(set_flags_preserve_c)
+    jmp
 
     .section text.opcode_inc_r
     ; 24, 2C, DD 24, DD 2C, FD 24, FD 2C
@@ -84,8 +241,8 @@ inc_ixp:
     inc a
     st  a
     ldi b, 0
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
     ; FD 24, FD 2C
@@ -103,8 +260,8 @@ inc_iyp:
     inc a
     st  a
     ldi b, 0
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
     .section text.opcode_inc_r_common
@@ -123,8 +280,8 @@ opcode_inc_r_common:
     inc a
     st  a
     ldi b, 0
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
     .section text.opcode_dec_r
@@ -157,8 +314,8 @@ dec_ixp:
     dec a
     st  a
     ldi b, z80_nf
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
     ; FD 04, FD 0C
@@ -176,8 +333,8 @@ dec_iyp:
     dec a
     st  a
     ldi b, z80_nf
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
     .section text.opcode_dec_r_common
@@ -196,8 +353,8 @@ opcode_dec_r_common:
     dec a
     st  a
     ldi b, z80_nf
-    ldi pl, lo(set_flags)
-    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags_preserve_c)
+    ldi ph, hi(set_flags_preserve_c)
     jmp
 
 
@@ -210,10 +367,9 @@ opcode_arithm8_indir:
     ldi pl, lo(arithm_indir_hl)
     ldi ph, hi(arithm_indir_hl)
     jz ; no prefix
-    shl a
     ldi pl, lo(arithm_indir_iy)
     ldi ph, hi(arithm_indir_iy)
-    jc ; FD
+    js ; FD
     ; else DD
 arithm_indir_ix:
     ldi pl, lo(z80_imm0)
@@ -551,4 +707,88 @@ set_flags_finish:
     ldi pl, lo(z80_reset_prefix)
     ldi ph, hi(z80_reset_prefix)
     jmp
+
+
+    ; transfer CCPU z,o,s flags to Z80 flags
+    ; b is or'ed with the result (to set flag N, for example)
+    ; Z80 flag C is preserved
+    .section text.set_flags_preserve_c
+set_flags_preserve_c:
+    ldi pl, lo(set_flags_preserve_c_z)
+    ldi ph, hi(set_flags_preserve_c_z)
+    jz
+set_flags_preserve_c_nz:
+    ldi pl, lo(set_flags_preserve_c_nz_o)
+    ldi ph, hi(set_flags_preserve_c_nz_o)
+    jo
+set_flags_preserve_c_nz_no:
+    ldi pl, lo(set_flags_preserve_c_nz_no_s)
+    ldi ph, hi(set_flags_preserve_c_nz_no_s)
+    js
+set_flags_preserve_c_nz_no_ns:
+    mov a, 0
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_nz_no_s:
+    ldi a, z80_sf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_nz_o:
+    ldi pl, lo(set_flags_preserve_c_nz_o_s)
+    ldi ph, hi(set_flags_preserve_c_nz_o_s)
+    js
+set_flags_preserve_c_nz_o_ns:
+    ldi a, z80_pf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_nz_o_s:
+    ldi a, z80_pf | z80_sf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_z:
+    ldi pl, lo(set_flags_preserve_c_z_o)
+    ldi ph, hi(set_flags_preserve_c_z_o)
+    jo
+set_flags_preserve_c_z_no:
+    ldi pl, lo(set_flags_preserve_c_z_no_s)
+    ldi ph, hi(set_flags_preserve_c_z_no_s)
+    js
+set_flags_preserve_c_z_no_ns:
+    ldi a, z80_zf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_z_no_s:
+    ldi a, z80_zf | z80_sf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_z_o:
+    ldi pl, lo(set_flags_preserve_c_z_o_s)
+    ldi ph, hi(set_flags_preserve_c_z_o_s)
+    js
+set_flags_preserve_c_z_o_ns:
+    ldi a, z80_zf | z80_pf
+    ldi pl, lo(set_flags_preserve_c_finish)
+    ldi ph, hi(set_flags_preserve_c_finish)
+    jmp
+set_flags_preserve_c_z_o_s:
+    ldi a, z80_zf | z80_pf | z80_sf
+
+set_flags_preserve_c_finish:
+    or  a, b
+    ldi pl, lo(z80_f)
+    ldi ph, hi(z80_f)
+    ld  b
+    shr b
+    adc a, 0
+    st  a
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
+    jmp
+
 
