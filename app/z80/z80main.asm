@@ -60,6 +60,12 @@
     .global opcode_inc_indirect
     .global opcode_dec_indirect
 
+    ; in z80ld16.asm
+    .global opcode_ld_bc_imm16
+    .global opcode_ld_de_imm16
+    .global opcode_ld_hl_imm16
+    .global opcode_ld_sp_imm16
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -275,7 +281,7 @@ opcode_fd:
     .align 256
 jump_table:
     dw fetch                ; 00 - NOP
-    dw not_implemented      ; 01
+    dw opcode_ld_bc_imm16      ; 01
     dw opcode_ld_indir_bc_a ; 02
     dw not_implemented      ; 03
     dw opcode_inc_r_common      ; 04
@@ -291,7 +297,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 0E
     dw not_implemented      ; 0F
     dw not_implemented      ; 10
-    dw not_implemented      ; 11
+    dw opcode_ld_de_imm16      ; 11
     dw opcode_ld_indir_de_a ; 12
     dw not_implemented      ; 13
     dw opcode_inc_r_common      ; 14
@@ -307,7 +313,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 1E
     dw not_implemented      ; 1F
     dw not_implemented      ; 20
-    dw not_implemented      ; 21
+    dw opcode_ld_hl_imm16      ; 21
     dw not_implemented      ; 22
     dw not_implemented      ; 23
     dw opcode_inc_r      ; 24
@@ -323,7 +329,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 2E
     dw not_implemented      ; 2F
     dw not_implemented      ; 30
-    dw not_implemented      ; 31
+    dw opcode_ld_sp_imm16      ; 31
     dw opcode_ld_indir_imm_a      ; 32
     dw not_implemented      ; 33
     dw opcode_inc_indirect      ; 34
@@ -589,7 +595,7 @@ instr_fmt:
     db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1E
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 1F
     db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 20
-    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 21
+    db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_2    ; 21
     db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 22
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 23
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 24
