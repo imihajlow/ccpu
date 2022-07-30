@@ -36,9 +36,7 @@
     .export z80_cf
     .export z80_nf
     .export z80_pf
-    .export z80_xf
     .export z80_hf
-    .export z80_yf
     .export z80_zf
     .export z80_sf
 
@@ -98,9 +96,7 @@ z80_prefix: res 1
 .const z80_cf = 1
 .const z80_nf = 2
 .const z80_pf = 4
-.const z80_xf = 8
 .const z80_hf = 0x10
-.const z80_yf = 0x20
 .const z80_zf = 0x40
 .const z80_sf = 0x80
 

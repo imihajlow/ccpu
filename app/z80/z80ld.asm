@@ -101,10 +101,10 @@ opcode_ld_r_indir:
     ; otherwise prefix DD
     ldi pl, lo(z80_imm0)
     ldi ph, hi(z80_imm0)
-    ld  a
-    shl a
+    ld  b
+    mov a, b
+    shl b
     exp b
-    ld  a
     ldi pl, lo(z80_ix)
     ld  pl
     add a, pl
@@ -239,7 +239,7 @@ opcode_ld_indir_ix_r:
     ld  pl
     adc a, pl
     ; a:b - dest addr
-    
+
     ; load source value
     ldi pl, lo(z80_imm1)
     ld  pl
@@ -294,7 +294,7 @@ opcode_ld_indir_iy_r:
     ld  pl
     adc a, pl
     ; a:b - dest addr
-    
+
     ; load source value
     ldi pl, lo(z80_imm1)
     ld  pl
@@ -441,7 +441,7 @@ opcode_ld_indir_imm:
     ; otherwise DD
     ldi pl, lo(opcode_ld_indir_ix_r)
     ldi ph, hi(opcode_ld_indir_ix_r)
-    jmp 
+    jmp
 
     .section text.opcode_ld_indir_hl_imm
 opcode_ld_indir_hl_imm:

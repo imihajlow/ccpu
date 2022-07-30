@@ -49,6 +49,11 @@
     .global opcode_ld_a_imm_de
     .global opcode_ld_indir_imm_a
 
+    ; in z80arithm8.asm
+    .global opcode_arithm8_common
+    .global opcode_arithm8_imm
+    .global opcode_arithm8_indir
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -391,77 +396,77 @@ jump_table:
     dw opcode_ld_rr             ; 7D
     dw opcode_ld_rr             ; 7E
     dw opcode_ld_rr             ; 7F
-    dw not_implemented      ; 80
-    dw not_implemented      ; 81
-    dw not_implemented      ; 82
-    dw not_implemented      ; 83
-    dw not_implemented      ; 84
-    dw not_implemented      ; 85
-    dw not_implemented      ; 86
-    dw not_implemented      ; 87
-    dw not_implemented      ; 88
-    dw not_implemented      ; 89
-    dw not_implemented      ; 8A
-    dw not_implemented      ; 8B
-    dw not_implemented      ; 8C
-    dw not_implemented      ; 8D
-    dw not_implemented      ; 8E
-    dw not_implemented      ; 8F
-    dw not_implemented      ; 90
-    dw not_implemented      ; 91
-    dw not_implemented      ; 92
-    dw not_implemented      ; 93
-    dw not_implemented      ; 94
-    dw not_implemented      ; 95
-    dw not_implemented      ; 96
-    dw not_implemented      ; 97
-    dw not_implemented      ; 98
-    dw not_implemented      ; 99
-    dw not_implemented      ; 9A
-    dw not_implemented      ; 9B
-    dw not_implemented      ; 9C
-    dw not_implemented      ; 9D
-    dw not_implemented      ; 9E
-    dw not_implemented      ; 9F
-    dw not_implemented      ; A0
-    dw not_implemented      ; A1
-    dw not_implemented      ; A2
-    dw not_implemented      ; A3
-    dw not_implemented      ; A4
-    dw not_implemented      ; A5
-    dw not_implemented      ; A6
-    dw not_implemented      ; A7
-    dw not_implemented      ; A8
-    dw not_implemented      ; A9
-    dw not_implemented      ; AA
-    dw not_implemented      ; AB
-    dw not_implemented      ; AC
-    dw not_implemented      ; AD
-    dw not_implemented      ; AE
-    dw not_implemented      ; AF
-    dw not_implemented      ; B0
-    dw not_implemented      ; B1
-    dw not_implemented      ; B2
-    dw not_implemented      ; B3
-    dw not_implemented      ; B4
-    dw not_implemented      ; B5
-    dw not_implemented      ; B6
-    dw not_implemented      ; B7
-    dw not_implemented      ; B8
-    dw not_implemented      ; B9
-    dw not_implemented      ; BA
-    dw not_implemented      ; BB
-    dw not_implemented      ; BC
-    dw not_implemented      ; BD
-    dw not_implemented      ; BE
-    dw not_implemented      ; BF
+    dw opcode_arithm8_common      ; 80
+    dw opcode_arithm8_common      ; 81
+    dw opcode_arithm8_common      ; 82
+    dw opcode_arithm8_common      ; 83
+    dw opcode_arithm8_common      ; 84
+    dw opcode_arithm8_common      ; 85
+    dw opcode_arithm8_indir      ; 86
+    dw opcode_arithm8_common      ; 87
+    dw opcode_arithm8_common      ; 88
+    dw opcode_arithm8_common      ; 89
+    dw opcode_arithm8_common      ; 8A
+    dw opcode_arithm8_common      ; 8B
+    dw opcode_arithm8_common      ; 8C
+    dw opcode_arithm8_common      ; 8D
+    dw opcode_arithm8_indir      ; 8E
+    dw opcode_arithm8_common      ; 8F
+    dw opcode_arithm8_common      ; 90
+    dw opcode_arithm8_common      ; 91
+    dw opcode_arithm8_common      ; 92
+    dw opcode_arithm8_common      ; 93
+    dw opcode_arithm8_common      ; 94
+    dw opcode_arithm8_common      ; 95
+    dw opcode_arithm8_indir      ; 96
+    dw opcode_arithm8_common      ; 97
+    dw opcode_arithm8_common      ; 98
+    dw opcode_arithm8_common      ; 99
+    dw opcode_arithm8_common      ; 9A
+    dw opcode_arithm8_common      ; 9B
+    dw opcode_arithm8_common      ; 9C
+    dw opcode_arithm8_common      ; 9D
+    dw opcode_arithm8_indir      ; 9E
+    dw opcode_arithm8_common      ; 9F
+    dw opcode_arithm8_common      ; A0
+    dw opcode_arithm8_common      ; A1
+    dw opcode_arithm8_common      ; A2
+    dw opcode_arithm8_common      ; A3
+    dw opcode_arithm8_common      ; A4
+    dw opcode_arithm8_common      ; A5
+    dw opcode_arithm8_indir      ; A6
+    dw opcode_arithm8_common      ; A7
+    dw opcode_arithm8_common      ; A8
+    dw opcode_arithm8_common      ; A9
+    dw opcode_arithm8_common      ; AA
+    dw opcode_arithm8_common      ; AB
+    dw opcode_arithm8_common      ; AC
+    dw opcode_arithm8_common      ; AD
+    dw opcode_arithm8_indir      ; AE
+    dw opcode_arithm8_common      ; AF
+    dw opcode_arithm8_common      ; B0
+    dw opcode_arithm8_common      ; B1
+    dw opcode_arithm8_common      ; B2
+    dw opcode_arithm8_common      ; B3
+    dw opcode_arithm8_common      ; B4
+    dw opcode_arithm8_common      ; B5
+    dw opcode_arithm8_indir      ; B6
+    dw opcode_arithm8_common      ; B7
+    dw opcode_arithm8_common      ; B8
+    dw opcode_arithm8_common      ; B9
+    dw opcode_arithm8_common      ; BA
+    dw opcode_arithm8_common      ; BB
+    dw opcode_arithm8_common      ; BC
+    dw opcode_arithm8_common      ; BD
+    dw opcode_arithm8_indir      ; BE
+    dw opcode_arithm8_common      ; BF
     dw not_implemented      ; C0
     dw not_implemented      ; C1
     dw not_implemented      ; C2
     dw not_implemented      ; C3
     dw not_implemented      ; C4
     dw not_implemented      ; C5
-    dw not_implemented      ; C6
+    dw opcode_arithm8_imm      ; C6
     dw not_implemented      ; C7
     dw not_implemented      ; C8
     dw not_implemented      ; C9
@@ -469,7 +474,7 @@ jump_table:
     dw not_implemented      ; CB
     dw not_implemented      ; CC
     dw not_implemented      ; CD
-    dw not_implemented      ; CE
+    dw opcode_arithm8_imm      ; CE
     dw not_implemented      ; CF
     dw not_implemented      ; D0
     dw not_implemented      ; D1
@@ -477,7 +482,7 @@ jump_table:
     dw not_implemented      ; D3
     dw not_implemented      ; D4
     dw not_implemented      ; D5
-    dw not_implemented      ; D6
+    dw opcode_arithm8_imm      ; D6
     dw not_implemented      ; D7
     dw not_implemented      ; D8
     dw not_implemented      ; D9
@@ -485,7 +490,7 @@ jump_table:
     dw not_implemented      ; DB
     dw not_implemented      ; DC
     dw opcode_dd            ; DD
-    dw not_implemented      ; DE
+    dw opcode_arithm8_imm      ; DE
     dw not_implemented      ; DF
     dw not_implemented      ; E0
     dw not_implemented      ; E1
@@ -493,7 +498,7 @@ jump_table:
     dw not_implemented      ; E3
     dw not_implemented      ; E4
     dw not_implemented      ; E5
-    dw not_implemented      ; E6
+    dw opcode_arithm8_imm      ; E6
     dw not_implemented      ; E7
     dw not_implemented      ; E8
     dw not_implemented      ; E9
@@ -501,7 +506,7 @@ jump_table:
     dw not_implemented      ; EB
     dw not_implemented      ; EC
     dw opcode_ed            ; ED
-    dw not_implemented      ; EE
+    dw opcode_arithm8_imm      ; EE
     dw not_implemented      ; EF
     dw not_implemented      ; F0
     dw not_implemented      ; F1
@@ -509,7 +514,7 @@ jump_table:
     dw not_implemented      ; F3
     dw not_implemented      ; F4
     dw not_implemented      ; F5
-    dw not_implemented      ; F6
+    dw opcode_arithm8_imm      ; F6
     dw not_implemented      ; F7
     dw not_implemented      ; F8
     dw not_implemented      ; F9
@@ -517,7 +522,7 @@ jump_table:
     dw not_implemented      ; FB
     dw not_implemented      ; FC
     dw opcode_fd            ; FD
-    dw not_implemented      ; FE
+    dw opcode_arithm8_imm      ; FE
     dw not_implemented      ; FF
 
 

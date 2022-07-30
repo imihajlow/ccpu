@@ -70,6 +70,7 @@ z80 = Split('''
     z80regs.asm
     z80main.asm
     z80ld.asm
+    z80arithm8.asm
     z80run.asm
     ''')
 

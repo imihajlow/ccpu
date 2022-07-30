@@ -4,17 +4,17 @@
 #define PASS_COLOR COLOR(COLOR_WHITE, COLOR_GREEN)
 #define FAIL_COLOR COLOR(COLOR_WHITE, COLOR_RED)
 
-#define TEST_COUNT 10u8
+#define TEST_COUNT 20u8
 
 u8 test_number;
 
 
 u8 get_test_number_row(u8 n) {
-    return 0u8;
+    return n >> 4u8;
 }
 
 u8 get_test_number_col(u8 n) {
-    return n * 4u8;
+    return (n & 0xfu8) * 4u8;
 }
 
 u8 ok() {
@@ -53,6 +53,12 @@ u8 draw_test_numbers() {
         vga_put_decimal_u16(c, r, (u16)i);
     }
 }
+#define FLAG_C  1u8
+#define FLAG_N  2u8
+#define FLAG_P  4u8
+#define FLAG_H  0x10u8
+#define FLAG_Z  0x40u8
+#define FLAG_S  0x80u8
 
 #define HALT 0x76u8
 import u16 z80_hl;
@@ -255,6 +261,178 @@ u8 test_ld_a_indir_bcde() {
     ok();
 }
 
+u8 test_arithm8_add() {
+    test_number = 7u8;
+    z80_f = 0u8;
+    z80_a = 25u8;
+    z80_c = 78u8;
+    z80run({
+        // add a, c
+        0x81u8,
+        HALT
+    });
+    ASSERT(z80_a == 25u8 + 78u8);
+    ASSERT(z80_f == 0u8);
+    z80_a = 127u8;
+    z80_d = 1u8;
+    z80run({
+        // add a, d
+        0x82u8,
+        HALT
+    });
+    ASSERT(z80_a == 128u8);
+    ASSERT(z80_f == (FLAG_S | FLAG_P));
+    z80_a = 255u8;
+    z80_e = 1u8;
+    z80run({
+        // add a, e
+        0x83u8,
+        HALT
+    });
+    ASSERT(z80_a == 0u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_Z));
+    z80_a = 253u8;
+    z80_h = 255u8;
+    z80run({
+        // add a, h
+        0x84u8,
+        HALT
+    });
+    ASSERT(z80_a == 252u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_S));
+    z80_a = 129u8;
+    z80_l = 130u8;
+    z80run({
+        // add a, l
+        0x85u8,
+        HALT
+    });
+    ASSERT(z80_a == 3u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_P));
+    ok();
+}
+
+u8 test_arithm8_ops() {
+    test_number = 8u8;
+    z80_f = FLAG_C;
+    z80_a = 5u8;
+    z80_b = 10u8;
+    z80run({
+        // adc a, b
+        0x88u8,
+        HALT
+    });
+    ASSERT(z80_a == 16u8);
+    ASSERT(z80_f == 0u8);
+
+    z80_a = 5u8;
+    z80_c = 10u8;
+    z80run({
+        // sub a, c
+        0x91u8,
+        HALT
+    });
+    ASSERT(z80_a == (u8)-5s8);
+    ASSERT(z80_f == (FLAG_C | FLAG_S | FLAG_N));
+
+    z80_a = 60u8;
+    z80_d = 20u8;
+    z80run({
+        // sbc a, d
+        0x9au8,
+        HALT
+    });
+    ASSERT(z80_a == 39u8);
+    ASSERT(z80_f == (FLAG_N));
+
+    z80_a = 0xf0u8;
+    z80_e = 0xa5u8;
+    z80run({
+        // and a, e
+        0xa3u8,
+        HALT
+    });
+    ASSERT(z80_a == 0xa0u8);
+    ASSERT(z80_f == (FLAG_S | FLAG_H));
+
+    z80_a = 0xa0u8;
+    z80_h = 0x03u8;
+    z80run({
+        // or a, h
+        0xb4u8,
+        HALT
+    });
+    ASSERT(z80_a == 0xa3u8);
+    ASSERT(z80_f == FLAG_S);
+
+    z80_a = 0x0fu8;
+    z80_l = 0xa5u8;
+    z80run({
+        // xor a, l
+        0xadu8,
+        HALT
+    });
+    ASSERT(z80_a == 0xaau8);
+    ASSERT(z80_f == (FLAG_S));
+
+    z80_a = 5u8;
+    z80_c = 10u8;
+    z80run({
+        // cp a, c
+        0xb9u8,
+        HALT
+    });
+    ASSERT(z80_a == 5u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_S | FLAG_N));
+    ok();
+}
+
+u8 test_arithm8_imm_and_indir() {
+    test_number = 9u8;
+    z80_a = 140u8;
+    z80_f = 0u8;
+    z80run({
+        // sbc a, 20
+        0xdeu8, 20u8,
+        HALT
+    });
+    ASSERT(z80_a == 120u8);
+    ASSERT(z80_f == (FLAG_P | FLAG_N));
+
+    u32 src = 0x12345678u32;
+    z80_a = 0xd0u8;
+    z80_hl = (u16)&src;
+    z80run({
+        // and a, (hl)
+        0xa6u8,
+        HALT
+    });
+    ASSERT(z80_a == (0x78u8 & 0xd0u8));
+    ASSERT(z80_f == FLAG_H);
+
+    z80_a = 0x55u8;
+    z80_ix = (u16)&src + 77u16;
+    z80run({
+        // xor a, (ix - 76)
+        0xddu8, 0xaeu8, (u8)-76s8,
+        HALT
+    });
+    ASSERT(z80_a == (0x56u8 ^ 0x55u8));
+    ASSERT(z80_f == 0u8);
+
+    z80_a = 0xa0u8;
+    z80_iy = (u16)&src - 42u16;
+    z80run({
+        // add a, (iy + 44)
+        0xfdu8, 0x86u8, 44u8,
+        HALT
+    });
+    ASSERT(z80_a == (0x34u8 + 0xa0u8));
+    ASSERT(z80_f == (FLAG_S));
+
+    ok();
+}
+
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
     test_number = 0u8;
@@ -267,4 +445,7 @@ export u8 main() {
     test_store_reg_imm();
     test_ld_a_indir_imm16();
     test_ld_a_indir_bcde();
+    test_arithm8_add();
+    test_arithm8_ops();
+    test_arithm8_imm_and_indir();
 }
