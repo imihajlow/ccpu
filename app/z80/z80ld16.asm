@@ -411,13 +411,8 @@ ld_indir_hl:
     ldi pl, lo(z80_tmp)
     st  a
 
-    ldi ph, hi(ld_indir_from_tmp)
-    ldi pl, lo(ld_indir_from_tmp)
-    jmp
-
     ; [z80_imm0] <- b
     ; [z80_imm0 + 1] <- [z80_tmp]
-    .section text.opcode_ld_indir_from_tmp
 ld_indir_from_tmp:
     ldi ph, hi(z80_imm0)
     ldi pl, lo(z80_imm0)

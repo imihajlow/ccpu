@@ -74,6 +74,9 @@
     .global opcode_ld_indir_sp
     .global opcode_ld_indir_hl
 
+    ; in z80push.asm
+    .global opcode_push
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -540,7 +543,7 @@ jump_table:
     dw not_implemented      ; C2
     dw not_implemented      ; C3
     dw not_implemented      ; C4
-    dw not_implemented      ; C5
+    dw opcode_push      ; C5
     dw opcode_arithm8_imm      ; C6
     dw not_implemented      ; C7
     dw not_implemented      ; C8
@@ -556,7 +559,7 @@ jump_table:
     dw not_implemented      ; D2
     dw not_implemented      ; D3
     dw not_implemented      ; D4
-    dw not_implemented      ; D5
+    dw opcode_push      ; D5
     dw opcode_arithm8_imm      ; D6
     dw not_implemented      ; D7
     dw not_implemented      ; D8
@@ -572,7 +575,7 @@ jump_table:
     dw not_implemented      ; E2
     dw not_implemented      ; E3
     dw not_implemented      ; E4
-    dw not_implemented      ; E5
+    dw opcode_push      ; E5
     dw opcode_arithm8_imm      ; E6
     dw not_implemented      ; E7
     dw not_implemented      ; E8
@@ -588,7 +591,7 @@ jump_table:
     dw not_implemented      ; F2
     dw not_implemented      ; F3
     dw not_implemented      ; F4
-    dw not_implemented      ; F5
+    dw opcode_push      ; F5
     dw opcode_arithm8_imm      ; F6
     dw not_implemented      ; F7
     dw not_implemented      ; F8
