@@ -76,6 +76,10 @@
 
     ; in z80push.asm
     .global opcode_push
+    .global opcode_pop_af
+    .global opcode_pop_bc
+    .global opcode_pop_de
+    .global opcode_pop_hl_common
 
     .global z80_halt_handler
 
@@ -539,7 +543,7 @@ jump_table:
     dw opcode_arithm8_indir      ; BE
     dw opcode_arithm8_common      ; BF
     dw not_implemented      ; C0
-    dw not_implemented      ; C1
+    dw opcode_pop_bc      ; C1
     dw not_implemented      ; C2
     dw not_implemented      ; C3
     dw not_implemented      ; C4
@@ -555,7 +559,7 @@ jump_table:
     dw opcode_arithm8_imm      ; CE
     dw not_implemented      ; CF
     dw not_implemented      ; D0
-    dw not_implemented      ; D1
+    dw opcode_pop_de      ; D1
     dw not_implemented      ; D2
     dw not_implemented      ; D3
     dw not_implemented      ; D4
@@ -571,7 +575,7 @@ jump_table:
     dw opcode_arithm8_imm      ; DE
     dw not_implemented      ; DF
     dw not_implemented      ; E0
-    dw not_implemented      ; E1
+    dw opcode_pop_hl_common      ; E1
     dw not_implemented      ; E2
     dw not_implemented      ; E3
     dw not_implemented      ; E4
@@ -587,7 +591,7 @@ jump_table:
     dw opcode_arithm8_imm      ; EE
     dw not_implemented      ; EF
     dw not_implemented      ; F0
-    dw not_implemented      ; F1
+    dw opcode_pop_af      ; F1
     dw not_implemented      ; F2
     dw not_implemented      ; F3
     dw not_implemented      ; F4

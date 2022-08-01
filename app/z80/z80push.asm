@@ -38,7 +38,13 @@
 
     .export opcode_push
 
+    .export opcode_pop_af
+    .export opcode_pop_bc
+    .export opcode_pop_de
+    .export opcode_pop_hl_common
+
     ; PUSH and POP instructions
+
     .section text.opcode_push
     ; F5, C5, D5, E5, DD E5, FD E5
 opcode_push:
@@ -188,4 +194,160 @@ st_on_stack:
     st  b
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_pop_bc
+opcode_pop_bc:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_bc)
+    ldi pl, lo(z80_bc)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    .section text.opcode_pop_de
+opcode_pop_de:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_de)
+    ldi pl, lo(z80_de)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    .section text.opcode_pop_af
+opcode_pop_af:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    st  b
+    ldi pl, lo(z80_a)
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    .section text.opcode_pop_hl_common
+opcode_pop_hl_common:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(pop_hl)
+    ldi pl, lo(pop_hl)
+    jz
+    ldi ph, hi(pop_iy)
+    ldi pl, lo(pop_iy)
+    js
+
+pop_ix:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    .section text.pop_iy
+pop_iy:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    .section text.pop_hl
+pop_hl:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    st  b
+    inc pl
+    st  a
+
+inc_sp:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  b
+    ldi a, 2
+    add b, a
+    st  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    adc a, 0
+    st  a
+    ldi pl, lo(z80_reset_prefix)
+    ldi ph, hi(z80_reset_prefix)
     jmp
