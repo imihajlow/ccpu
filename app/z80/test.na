@@ -653,6 +653,61 @@ u8 test_ld16() {
     ok();
 }
 
+u8 test_st16() {
+    test_number = 13u8;
+    z80_bc = 0x4321u16;
+    z80_de = 0x5432u16;
+    z80_hl = 0x6543u16;
+    z80_sp = 0x7633u16;
+    z80_iy = 0x8665u16;
+    z80_ix = 0x9378u16;
+
+    u32 dst = 0u32;
+    struct Opcode16WithAddress op;
+    // ld (nn), bc
+    op.prefix = 0xedu8;
+    op.opcode = 0x43u8;
+    op.src = (u8*)&dst;
+    op.halt = HALT;
+    z80run((u8*)&op);
+    ASSERT(dst == 0x4321u32);
+
+    // ld (nn), de
+    op.opcode = 0x53u8;
+    op.src = (u8*)&dst + 1;
+    z80run((u8*)&op);
+    ASSERT(dst == 0x543221u32);
+
+    // ld (nn), sp
+    op.opcode = 0x73u8;
+    op.src = (u8*)&dst + 2;
+    z80run((u8*)&op);
+    ASSERT(dst == 0x76333221u32);
+
+    // ld (nn), ix
+    op.prefix = 0xddu8;
+    op.opcode = 0x22u8;
+    op.src = (u8*)&dst + 1;
+    z80run((u8*)&op);
+    ASSERT(dst == 0x76937821u32);
+
+    // ld (nn), iy
+    op.prefix = 0xfdu8;
+    op.src = (u8*)&dst;
+    z80run((u8*)&op);
+    ASSERT(dst == 0x76938665u32);
+
+    // ld (nn), hl
+    struct Opcode8WithAddress op8;
+    op8.opcode = 0x22u8;
+    op8.src = (u8*)&dst + 1;
+    op8.halt = HALT;
+    z80run((u8*)&op8);
+    ASSERT(dst == 0x76654365u32);
+
+    ok();
+}
+
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
     test_number = 0u8;
@@ -671,4 +726,5 @@ export u8 main() {
     test_incdec();
     test_incdec_indir();
     test_ld16();
+    test_st16();
 }

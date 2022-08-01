@@ -69,6 +69,10 @@
     .global opcode_ld_de_indir_imm16
     .global opcode_ld_sp_indir_imm16
     .global opcode_ld_hl_indir_imm16
+    .global opcode_ld_indir_bc
+    .global opcode_ld_indir_de
+    .global opcode_ld_indir_sp
+    .global opcode_ld_indir_hl
 
     .global z80_halt_handler
 
@@ -373,7 +377,7 @@ jump_table:
     dw not_implemented      ; 1F
     dw not_implemented      ; 20
     dw opcode_ld_hl_imm16      ; 21
-    dw not_implemented      ; 22
+    dw opcode_ld_indir_hl      ; 22
     dw not_implemented      ; 23
     dw opcode_inc_r      ; 24
     dw opcode_dec_r      ; 25
@@ -665,7 +669,7 @@ jump_table_ed:
     dw not_implemented  ; 40
     dw not_implemented  ; 41
     dw not_implemented  ; 42
-    dw not_implemented  ; 43
+    dw opcode_ld_indir_bc  ; 43
     dw not_implemented  ; 44
     dw not_implemented  ; 45
     dw not_implemented  ; 46
@@ -681,7 +685,7 @@ jump_table_ed:
     dw not_implemented  ; 50
     dw not_implemented  ; 51
     dw not_implemented  ; 52
-    dw not_implemented  ; 53
+    dw opcode_ld_indir_de  ; 53
     dw not_implemented  ; 54
     dw not_implemented  ; 55
     dw not_implemented  ; 56
@@ -713,7 +717,7 @@ jump_table_ed:
     dw not_implemented  ; 70
     dw not_implemented  ; 71
     dw not_implemented  ; 72
-    dw not_implemented  ; 73
+    dw opcode_ld_indir_sp  ; 73
     dw not_implemented  ; 74
     dw not_implemented  ; 75
     dw not_implemented  ; 76
