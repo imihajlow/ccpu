@@ -40,6 +40,11 @@
     .export opcode_ld_hl_imm16
     .export opcode_ld_sp_imm16
 
+    .export opcode_ld_bc_indir_imm16
+    .export opcode_ld_de_indir_imm16
+    .export opcode_ld_sp_indir_imm16
+    .export opcode_ld_hl_indir_imm16
+
     ; 16-bit load group
 
     ; 01
@@ -154,3 +159,156 @@ ld_hl:
     ldi pl, lo(z80_reset_prefix)
     jmp
 
+    .section text.opcode_ld_bc_indir_imm16
+    ; ED 4B
+    ; ld bc, (nn)
+opcode_ld_bc_indir_imm16:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_bc)
+    ldi pl, lo(z80_bc)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_de_indir_imm16
+    ; ED 5B
+    ; ld de, (nn)
+opcode_ld_de_indir_imm16:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_de)
+    ldi pl, lo(z80_de)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_sp_indir_imm16
+    ; ED 7B
+    ; ld sp, (nn)
+opcode_ld_sp_indir_imm16:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ld_hl_indir_imm16
+    ; 2A, DD 2A, FD 2a
+    ; ld hl, (nn)
+    ; ld ix, (nn)
+    ; ld iy, (nn)
+opcode_ld_hl_indir_imm16:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(ld_hl_indir)
+    ldi pl, lo(ld_hl_indir)
+    jz ; no prefix
+    ldi ph, hi(ld_iy_indir)
+    ldi pl, lo(ld_iy_indir)
+    js ; FD
+
+ld_ix_indir:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.ld_iy_indir
+ld_iy_indir:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.ld_hl_indir
+ld_hl_indir:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  b
+    mov a, 0
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp

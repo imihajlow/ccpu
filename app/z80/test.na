@@ -217,7 +217,14 @@ u8 test_store_reg_imm() {
     ok();
 }
 
-struct LdAIndir {
+struct Opcode8WithAddress {
+    u8 opcode;
+    u8 *src;
+    u8 halt;
+};
+
+struct Opcode16WithAddress {
+    u8 prefix;
     u8 opcode;
     u8 *src;
     u8 halt;
@@ -227,7 +234,7 @@ u8 test_ld_a_indir_imm16() {
     test_number = 5u8;
     u8 src = 0x67u8;
     z80_a = 0u8;
-    struct LdAIndir code;
+    struct Opcode8WithAddress code;
     code.opcode = 0x3au8; // ld a, (imm16)
     code.src = &src;
     code.halt = HALT;
@@ -598,6 +605,50 @@ u8 test_ld16() {
     ASSERT(z80_sp == 0xdef0u16);
     ASSERT(z80_ix == 0x0246u16);
     ASSERT(z80_iy == 0x8aceu16);
+
+    u32 src = 0x23456789u32;
+    struct Opcode16WithAddress op;
+    // ld bc, (nn)
+    op.prefix = 0xedu8;
+    op.opcode = 0x4bu8;
+    op.src = (u8*)&src;
+    op.halt = HALT;
+    z80run((u8*)&op);
+    ASSERT(z80_bc == 0x6789u16);
+
+    // ld de, (nn)
+    op.opcode = 0x5bu8;
+    op.src = (u8*)&src + 1;
+    z80run((u8*)&op);
+    ASSERT(z80_de == 0x4567u16);
+
+    // ld sp, (nn)
+    op.opcode = 0x7bu8;
+    op.src = (u8*)&src + 2;
+    z80run((u8*)&op);
+    ASSERT(z80_sp == 0x2345u16);
+
+    // ld ix, (nn)
+    op.prefix = 0xddu8;
+    op.opcode = 0x2au8;
+    op.src = (u8*)&src;
+    z80run((u8*)&op);
+    ASSERT(z80_ix == 0x6789u16);
+
+    // ld iy, (nn)
+    op.prefix = 0xfdu8;
+    op.src = (u8*)&src + 1;
+    z80run((u8*)&op);
+    ASSERT(z80_iy == 0x4567u16);
+
+    struct Opcode8WithAddress op8;
+
+    // ld hl, (nn)
+    op8.opcode = 0x2au8;
+    op8.src = (u8*)&src + 2;
+    op8.halt = HALT;
+    z80run((u8*)&op8);
+    ASSERT(z80_hl == 0x2345u16);
 
     ok();
 }
