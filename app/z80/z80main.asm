@@ -73,6 +73,7 @@
     .global opcode_ld_indir_de
     .global opcode_ld_indir_sp
     .global opcode_ld_indir_hl
+    .global opcode_ld_sp_r
 
     ; in z80push.asm
     .global opcode_push
@@ -599,7 +600,7 @@ jump_table:
     dw opcode_arithm8_imm      ; F6
     dw not_implemented      ; F7
     dw not_implemented      ; F8
-    dw not_implemented      ; F9
+    dw opcode_ld_sp_r      ; F9
     dw not_implemented      ; FA
     dw not_implemented      ; FB
     dw not_implemented      ; FC

@@ -51,6 +51,8 @@
     .export opcode_ld_indir_sp
     .export opcode_ld_indir_hl
 
+    .export opcode_ld_sp_r
+
     ; 16-bit load group
 
     ; 01
@@ -435,3 +437,57 @@ ld_indir_from_tmp:
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
+
+    .section text.opcode_ld_sp_r
+    ; F9, DD F9, ED F9
+opcode_ld_sp_r:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(ld_sp_hl)
+    ldi pl, lo(ld_sp_hl)
+    jz
+    ldi ph, hi(ld_sp_iy)
+    ldi pl, lo(ld_sp_iy)
+    js
+ld_sp_ix:
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    ld  b
+    inc pl
+    ld  a
+    ldi pl, lo(z80_sp)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+ld_sp_iy:
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    ld  b
+    inc pl
+    ld  a
+    ldi pl, lo(z80_sp)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+ld_sp_hl:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  b
+    inc pl
+    ld  a
+    ldi pl, lo(z80_sp)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
