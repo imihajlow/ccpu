@@ -82,6 +82,12 @@
     .global opcode_pop_de
     .global opcode_pop_hl_common
 
+    ; in z80arithm16.asm
+    .global opcode_add_bc_16
+    .global opcode_add_de_16
+    .global opcode_add_sp_16
+    .global opcode_add_hl_hl_16
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -360,7 +366,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 06
     dw not_implemented      ; 07
     dw not_implemented      ; 08
-    dw not_implemented      ; 09
+    dw opcode_add_bc_16      ; 09
     dw opcode_ld_a_imm_bc      ; 0A
     dw not_implemented      ; 0B
     dw opcode_inc_r_common      ; 0C
@@ -376,7 +382,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 16
     dw not_implemented      ; 17
     dw not_implemented      ; 18
-    dw not_implemented      ; 19
+    dw opcode_add_de_16      ; 19
     dw opcode_ld_a_imm_de      ; 1A
     dw not_implemented      ; 1B
     dw opcode_inc_r_common      ; 1C
@@ -392,7 +398,7 @@ jump_table:
     dw opcode_ld_r_imm      ; 26
     dw not_implemented      ; 27
     dw not_implemented      ; 28
-    dw not_implemented      ; 29
+    dw opcode_add_hl_hl_16      ; 29
     dw opcode_ld_hl_indir_imm16      ; 2A
     dw not_implemented      ; 2B
     dw opcode_inc_r      ; 2C
@@ -408,7 +414,7 @@ jump_table:
     dw opcode_ld_indir_imm  ; 36
     dw not_implemented      ; 37
     dw not_implemented      ; 38
-    dw not_implemented      ; 39
+    dw opcode_add_sp_16      ; 39
     dw opcode_ld_a_imm_indir      ; 3A
     dw not_implemented      ; 3B
     dw opcode_inc_r_common      ; 3C
