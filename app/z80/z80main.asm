@@ -104,6 +104,11 @@
     .global opcode_dec_hl
     .global opcode_dec_sp
 
+    ; in z80ex.asm
+    .global opcode_ex_de_hl
+    .global opcode_exx
+    .global opcode_ex_af
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -381,7 +386,7 @@ jump_table:
     dw opcode_dec_r_common      ; 05
     dw opcode_ld_r_imm      ; 06
     dw not_implemented      ; 07
-    dw not_implemented      ; 08
+    dw opcode_ex_af      ; 08
     dw opcode_add_bc_16      ; 09
     dw opcode_ld_a_imm_bc      ; 0A
     dw opcode_dec_bc      ; 0B
@@ -590,7 +595,7 @@ jump_table:
     dw opcode_arithm8_imm      ; D6
     dw not_implemented      ; D7
     dw not_implemented      ; D8
-    dw not_implemented      ; D9
+    dw opcode_exx      ; D9
     dw not_implemented      ; DA
     dw not_implemented      ; DB
     dw not_implemented      ; DC
@@ -608,7 +613,7 @@ jump_table:
     dw not_implemented      ; E8
     dw not_implemented      ; E9
     dw not_implemented      ; EA
-    dw not_implemented      ; EB
+    dw opcode_ex_de_hl      ; EB
     dw not_implemented      ; EC
     dw opcode_ed            ; ED
     dw opcode_arithm8_imm      ; EE
