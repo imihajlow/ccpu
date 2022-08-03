@@ -87,6 +87,10 @@
     .global opcode_add_de_16
     .global opcode_add_sp_16
     .global opcode_add_hl_hl_16
+    .global opcode_adc_hl_bc
+    .global opcode_adc_hl_sp
+    .global opcode_adc_hl_de
+    .global opcode_adc_hl_hl
 
     .global z80_halt_handler
 
@@ -690,7 +694,7 @@ jump_table_ed:
     dw not_implemented  ; 47
     dw not_implemented  ; 48
     dw not_implemented  ; 49
-    dw not_implemented  ; 4A
+    dw opcode_adc_hl_bc  ; 4A
     dw opcode_ld_bc_indir_imm16  ; 4B
     dw not_implemented  ; 4C
     dw not_implemented  ; 4D
@@ -706,7 +710,7 @@ jump_table_ed:
     dw not_implemented  ; 57
     dw not_implemented  ; 58
     dw not_implemented  ; 59
-    dw not_implemented  ; 5A
+    dw opcode_adc_hl_de  ; 5A
     dw opcode_ld_de_indir_imm16  ; 5B
     dw not_implemented  ; 5C
     dw not_implemented  ; 5D
@@ -722,7 +726,7 @@ jump_table_ed:
     dw not_implemented  ; 67
     dw not_implemented  ; 68
     dw not_implemented  ; 69
-    dw not_implemented  ; 6A
+    dw opcode_adc_hl_hl  ; 6A
     dw not_implemented  ; 6B
     dw not_implemented  ; 6C
     dw not_implemented  ; 6D
@@ -738,7 +742,7 @@ jump_table_ed:
     dw not_implemented  ; 77
     dw not_implemented  ; 78
     dw not_implemented  ; 79
-    dw not_implemented  ; 7A
+    dw opcode_adc_hl_sp  ; 7A
     dw opcode_ld_sp_indir_imm16  ; 7B
     dw not_implemented  ; 7C
     dw not_implemented  ; 7D

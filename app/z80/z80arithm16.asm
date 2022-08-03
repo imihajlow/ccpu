@@ -48,6 +48,11 @@
     .export opcode_add_sp_16
     .export opcode_add_hl_hl_16
 
+    .export opcode_adc_hl_bc
+    .export opcode_adc_hl_de
+    .export opcode_adc_hl_sp
+    .export opcode_adc_hl_hl
+
     ; 16-bit arithmetics
     .section text.opcode_add_bc_16
     ; 09
@@ -386,4 +391,156 @@ add_hl_hl:
     jmp
 
 
+    .section text.opcode_adc_hl_bc
+opcode_adc_hl_bc:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_bc)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    adc b, a
+    st  b
+    ldi pl, lo(z80_bc + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    adc b, a
+    st  b
+    mov a, 0
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
 
+    .section text.opcode_adc_hl_de
+opcode_adc_hl_de:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_de)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    adc b, a
+    st  b
+    ldi pl, lo(z80_de + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    adc b, a
+    st  b
+    mov a, 0
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
+
+    .section text.opcode_adc_hl_sp
+opcode_adc_hl_sp:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_sp)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    adc b, a
+    st  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    adc b, a
+    st  b
+    mov a, 0
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
+
+    .section text.opcode_adc_hl_hl
+opcode_adc_hl_hl:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_hl)
+    ld  a
+    mov b, a
+    adc b, a
+    st  b
+    ldi pl, lo(z80_hl + 1)
+    ld  a
+    ld  b
+    adc b, a
+    st  b
+    mov a, 0
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
+
+    ; s = HL is negative
+    ; z = HL is zero
+    ; h = carry from bit 11 - not implemented!
+    ; p = overflow
+    ; c = carry
+    ; n = 0 if adc, 1 if sbc
+    ;
+    ; register A should contain the value for n
+set_adc_flags:
+    ldi ph, hi(set_adc_flags_s)
+    ldi pl, lo(set_adc_flags_s)
+    js
+set_adc_flags_ns:
+    ldi ph, hi(set_adc_flags_ns_o)
+    ldi pl, lo(set_adc_flags_ns_o)
+    jo
+set_adc_flags_ns_no:
+    adc a, 0
+    mov b, a
+    ldi ph, hi(set_adc_flags_z)
+    ldi pl, lo(set_adc_flags_z)
+    jmp
+set_adc_flags_ns_o:
+    ldi b, z80_pf
+    adc a, 0
+    or  b, a
+    ldi ph, hi(set_adc_flags_z)
+    ldi pl, lo(set_adc_flags_z)
+    jmp
+set_adc_flags_s:
+    ldi ph, hi(set_adc_flags_s_o)
+    ldi pl, lo(set_adc_flags_s_o)
+    jo
+set_adc_flags_s_no:
+    ldi b, z80_sf
+    adc a, 0
+    or  b, a
+    ldi ph, hi(set_adc_flags_z)
+    ldi pl, lo(set_adc_flags_z)
+    jmp
+set_adc_flags_s_o:
+    ldi b, z80_pf | z80_sf
+    adc a, 0
+    or  b, a
+set_adc_flags_z:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  pl
+    or  a, pl
+    ldi pl, lo(set_adc_flags_store)
+    ldi ph, hi(set_adc_flags_store)
+    jnz
+    ldi a, z80_zf
+    or  b, a
+set_adc_flags_store:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    st  b
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
