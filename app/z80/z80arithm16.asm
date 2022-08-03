@@ -53,6 +53,11 @@
     .export opcode_adc_hl_sp
     .export opcode_adc_hl_hl
 
+    .export opcode_sbc_hl_bc
+    .export opcode_sbc_hl_de
+    .export opcode_sbc_hl_sp
+    .export opcode_sbc_hl_hl
+
     ; 16-bit arithmetics
     .section text.opcode_add_bc_16
     ; 09
@@ -392,6 +397,7 @@ add_hl_hl:
 
 
     .section text.opcode_adc_hl_bc
+    ; ED 4A
 opcode_adc_hl_bc:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
@@ -415,6 +421,7 @@ opcode_adc_hl_bc:
     jmp
 
     .section text.opcode_adc_hl_de
+    ; ED 5A
 opcode_adc_hl_de:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
@@ -438,6 +445,7 @@ opcode_adc_hl_de:
     jmp
 
     .section text.opcode_adc_hl_sp
+    ; ED 7A
 opcode_adc_hl_sp:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
@@ -461,6 +469,7 @@ opcode_adc_hl_sp:
     jmp
 
     .section text.opcode_adc_hl_hl
+    ; ED 6A
 opcode_adc_hl_hl:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
@@ -480,6 +489,113 @@ opcode_adc_hl_hl:
     ldi pl, lo(set_adc_flags)
     ldi ph, hi(set_adc_flags)
     jmp
+
+    .section text.opcode_sbc_hl_bc
+    ; ED 42
+opcode_sbc_hl_bc:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_bc)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    sbb b, a
+    st  b
+    ldi pl, lo(z80_bc + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    sbb b, a
+    st  b
+    ldi a, z80_nf
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
+
+    .section text.opcode_sbc_hl_de
+    ; ED 52
+opcode_sbc_hl_de:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_de)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    sbb b, a
+    st  b
+    ldi pl, lo(z80_de + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    sbb b, a
+    st  b
+    ldi a, z80_nf
+    ldi pl, lo(set_adc_flags)
+    ldi ph, hi(set_adc_flags)
+    jmp
+
+    .section text.opcode_sbc_hl_hl
+    ; ED 62
+    ; if carry, hl := 0xffff
+    ; else, hl := 0
+opcode_sbc_hl_hl:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shr a
+    ldi ph, hi(sbc_hl_hl_c)
+    ldi pl, lo(sbc_hl_hl_c)
+    jc
+    mov a, 0
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    st  a
+    inc pl
+    st  a
+    ldi a, z80_nf | z80_zf
+    ldi pl, lo(z80_f)
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+sbc_hl_hl_c:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    exp a
+    st  a
+    inc pl
+    st  a
+    ldi a, z80_nf | z80_cf | z80_sf | z80_hf
+    ldi pl, lo(z80_f)
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_sbc_hl_sp
+    ; ED 72
+opcode_sbc_hl_sp:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    shr b
+    ldi pl, lo(z80_sp)
+    ld  a
+    ldi pl, lo(z80_hl)
+    ld  b
+    sbb b, a
+    st  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    ldi pl, lo(z80_hl + 1)
+    ld  b
+    sbb b, a
+    st  b
+    ldi a, z80_nf
 
     ; s = HL is negative
     ; z = HL is zero
