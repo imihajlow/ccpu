@@ -4,7 +4,7 @@
 #define PASS_COLOR COLOR(COLOR_WHITE, COLOR_GREEN)
 #define FAIL_COLOR COLOR(COLOR_WHITE, COLOR_RED)
 
-#define TEST_COUNT 20u8
+#define TEST_COUNT 32u8
 
 u8 test_number;
 
@@ -1075,6 +1075,103 @@ u8 test_sbc16() {
     ok();
 }
 
+u8 test_incdec16() {
+    test_number = 20u8;
+
+    z80_hl = 0x1234u16;
+    z80_ix = 0xdeadu16;
+    z80_iy = 0xbabeu16;
+    z80_bc = 0xffffu16;
+    z80_de = 0x66ffu16;
+    z80_sp = 0xff00u16;
+    z80run({
+        // inc hl
+        0x23u8,
+        HALT
+    });
+    ASSERT(z80_hl == 0x1235u16);
+
+    z80run({
+        // inc ix
+        0xddu8, 0x23u8,
+        HALT
+    });
+    ASSERT(z80_ix == 0xdeaeu16);
+
+    z80run({
+        // inc iy
+        0xfdu8, 0x23u8,
+        HALT
+    });
+    ASSERT(z80_iy == 0xbabfu16);
+
+    z80run({
+        // inc bc
+        0x03u8,
+        HALT
+    });
+    ASSERT(z80_bc == 0x0000u16);
+
+    z80run({
+        // inc de
+        0x13u8,
+        HALT
+    });
+    ASSERT(z80_de == 0x6700u16);
+
+    z80run({
+        // inc sp
+        0x33u8,
+        HALT
+    });
+    ASSERT(z80_sp == 0xff01u16);
+
+    // dec
+    z80run({
+        // dec hl
+        0x2bu8,
+        HALT
+    });
+    ASSERT(z80_hl == 0x1234u16);
+
+    z80run({
+        // dec ix
+        0xddu8, 0x2bu8,
+        HALT
+    });
+    ASSERT(z80_ix == 0xdeadu16);
+
+    z80run({
+        // dec iy
+        0xfdu8, 0x2bu8,
+        HALT
+    });
+    ASSERT(z80_iy == 0xbabeu16);
+
+    z80run({
+        // dec bc
+        0x0bu8,
+        HALT
+    });
+    ASSERT(z80_bc == 0xffffu16);
+
+    z80run({
+        // dec de
+        0x1bu8,
+        HALT
+    });
+    ASSERT(z80_de == 0x66ffu16);
+
+    z80run({
+        // dec sp
+        0x3bu8,
+        HALT
+    });
+    ASSERT(z80_sp == 0xff00u16);
+
+    ok();
+}
+
 
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
@@ -1101,4 +1198,5 @@ export u8 main() {
     test_add16();
     test_adc16();
     test_sbc16();
+    test_incdec16();
 }

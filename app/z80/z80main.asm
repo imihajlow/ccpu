@@ -95,6 +95,14 @@
     .global opcode_sbc_hl_de
     .global opcode_sbc_hl_sp
     .global opcode_sbc_hl_hl
+    .global opcode_inc_bc
+    .global opcode_inc_de
+    .global opcode_inc_hl
+    .global opcode_inc_sp
+    .global opcode_dec_bc
+    .global opcode_dec_de
+    .global opcode_dec_hl
+    .global opcode_dec_sp
 
     .global z80_halt_handler
 
@@ -368,7 +376,7 @@ jump_table:
     dw fetch                ; 00 - NOP
     dw opcode_ld_bc_imm16      ; 01
     dw opcode_ld_indir_bc_a ; 02
-    dw not_implemented      ; 03
+    dw opcode_inc_bc      ; 03
     dw opcode_inc_r_common      ; 04
     dw opcode_dec_r_common      ; 05
     dw opcode_ld_r_imm      ; 06
@@ -376,7 +384,7 @@ jump_table:
     dw not_implemented      ; 08
     dw opcode_add_bc_16      ; 09
     dw opcode_ld_a_imm_bc      ; 0A
-    dw not_implemented      ; 0B
+    dw opcode_dec_bc      ; 0B
     dw opcode_inc_r_common      ; 0C
     dw opcode_dec_r_common      ; 0D
     dw opcode_ld_r_imm      ; 0E
@@ -384,7 +392,7 @@ jump_table:
     dw not_implemented      ; 10
     dw opcode_ld_de_imm16      ; 11
     dw opcode_ld_indir_de_a ; 12
-    dw not_implemented      ; 13
+    dw opcode_inc_de      ; 13
     dw opcode_inc_r_common      ; 14
     dw opcode_dec_r_common      ; 15
     dw opcode_ld_r_imm      ; 16
@@ -392,7 +400,7 @@ jump_table:
     dw not_implemented      ; 18
     dw opcode_add_de_16      ; 19
     dw opcode_ld_a_imm_de      ; 1A
-    dw not_implemented      ; 1B
+    dw opcode_dec_de      ; 1B
     dw opcode_inc_r_common      ; 1C
     dw opcode_dec_r_common      ; 1D
     dw opcode_ld_r_imm      ; 1E
@@ -400,7 +408,7 @@ jump_table:
     dw not_implemented      ; 20
     dw opcode_ld_hl_imm16      ; 21
     dw opcode_ld_indir_hl      ; 22
-    dw not_implemented      ; 23
+    dw opcode_inc_hl      ; 23
     dw opcode_inc_r      ; 24
     dw opcode_dec_r      ; 25
     dw opcode_ld_r_imm      ; 26
@@ -408,7 +416,7 @@ jump_table:
     dw not_implemented      ; 28
     dw opcode_add_hl_hl_16      ; 29
     dw opcode_ld_hl_indir_imm16      ; 2A
-    dw not_implemented      ; 2B
+    dw opcode_dec_hl      ; 2B
     dw opcode_inc_r      ; 2C
     dw opcode_dec_r      ; 2D
     dw opcode_ld_r_imm      ; 2E
@@ -416,7 +424,7 @@ jump_table:
     dw not_implemented      ; 30
     dw opcode_ld_sp_imm16      ; 31
     dw opcode_ld_indir_imm_a      ; 32
-    dw not_implemented      ; 33
+    dw opcode_inc_sp      ; 33
     dw opcode_inc_indirect      ; 34
     dw opcode_dec_indirect      ; 35
     dw opcode_ld_indir_imm  ; 36
@@ -424,7 +432,7 @@ jump_table:
     dw not_implemented      ; 38
     dw opcode_add_sp_16      ; 39
     dw opcode_ld_a_imm_indir      ; 3A
-    dw not_implemented      ; 3B
+    dw opcode_dec_sp      ; 3B
     dw opcode_inc_r_common      ; 3C
     dw opcode_dec_r_common      ; 3D
     dw opcode_ld_r_imm      ; 3E
