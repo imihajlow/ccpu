@@ -108,6 +108,7 @@
     .global opcode_ex_de_hl
     .global opcode_exx
     .global opcode_ex_af
+    .global opcode_ex_hl_stack
 
     .global z80_halt_handler
 
@@ -605,7 +606,7 @@ jump_table:
     dw not_implemented      ; E0
     dw opcode_pop_hl_common      ; E1
     dw not_implemented      ; E2
-    dw not_implemented      ; E3
+    dw opcode_ex_hl_stack      ; E3
     dw not_implemented      ; E4
     dw opcode_push      ; E5
     dw opcode_arithm8_imm      ; E6

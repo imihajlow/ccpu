@@ -39,6 +39,7 @@
     .export opcode_ex_de_hl
     .export opcode_exx
     .export opcode_ex_af
+    .export opcode_ex_hl_stack
 
     ; exchange instructions
 
@@ -138,6 +139,113 @@ opcode_exx:
     ldi pl, lo(z80_hl_s + 1)
     st  b
 
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    .section text.opcode_ex_hl_stack
+    ; E3, DD E3, FD E3
+opcode_ex_hl_stack:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(ex_hl_stack)
+    ldi pl, lo(ex_hl_stack)
+    jz
+    ldi ph, hi(ex_iy_stack)
+    ldi pl, lo(ex_iy_stack)
+    js
+ex_ix_stack:
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    ld  b
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    st  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    dec pl
+    ld  pl
+    inc pl
+    adc a, 0
+    mov ph, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix + 1)
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+ex_iy_stack:
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    ld  b
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    st  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    dec pl
+    ld  pl
+    inc pl
+    adc a, 0
+    mov ph, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy + 1)
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+ex_hl_stack:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  b
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    st  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_sp + 1)
+    ld  a
+    dec pl
+    ld  pl
+    inc pl
+    adc a, 0
+    mov ph, a
+    ld  a
+    st  b
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl + 1)
+    st  a
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
