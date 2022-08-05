@@ -113,6 +113,17 @@
     ; in z80bit.asm
     .global opcode_cb
 
+    ; in z80jp.asm
+    .global opcode_jp
+    .global opcode_jp_c
+    .global opcode_jp_nc
+    .global opcode_jp_z
+    .global opcode_jp_nz
+    .global opcode_jp_pe
+    .global opcode_jp_po
+    .global opcode_jp_p
+    .global opcode_jp_m
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -576,15 +587,15 @@ jump_table:
     dw opcode_arithm8_common      ; BF
     dw not_implemented      ; C0
     dw opcode_pop_bc      ; C1
-    dw not_implemented      ; C2
-    dw not_implemented      ; C3
+    dw opcode_jp_nz      ; C2
+    dw opcode_jp      ; C3
     dw not_implemented      ; C4
     dw opcode_push      ; C5
     dw opcode_arithm8_imm      ; C6
     dw not_implemented      ; C7
     dw not_implemented      ; C8
     dw not_implemented      ; C9
-    dw not_implemented      ; CA
+    dw opcode_jp_z      ; CA
     dw opcode_cb      ; CB
     dw not_implemented      ; CC
     dw not_implemented      ; CD
@@ -592,7 +603,7 @@ jump_table:
     dw not_implemented      ; CF
     dw not_implemented      ; D0
     dw opcode_pop_de      ; D1
-    dw not_implemented      ; D2
+    dw opcode_jp_nc      ; D2
     dw not_implemented      ; D3
     dw not_implemented      ; D4
     dw opcode_push      ; D5
@@ -600,7 +611,7 @@ jump_table:
     dw not_implemented      ; D7
     dw not_implemented      ; D8
     dw opcode_exx      ; D9
-    dw not_implemented      ; DA
+    dw opcode_jp_c      ; DA
     dw not_implemented      ; DB
     dw not_implemented      ; DC
     dw opcode_dd            ; DD
@@ -608,7 +619,7 @@ jump_table:
     dw not_implemented      ; DF
     dw not_implemented      ; E0
     dw opcode_pop_hl_common      ; E1
-    dw not_implemented      ; E2
+    dw opcode_jp_po      ; E2
     dw opcode_ex_hl_stack      ; E3
     dw not_implemented      ; E4
     dw opcode_push      ; E5
@@ -616,7 +627,7 @@ jump_table:
     dw not_implemented      ; E7
     dw not_implemented      ; E8
     dw not_implemented      ; E9
-    dw not_implemented      ; EA
+    dw opcode_jp_pe      ; EA
     dw opcode_ex_de_hl      ; EB
     dw not_implemented      ; EC
     dw opcode_ed            ; ED
@@ -624,7 +635,7 @@ jump_table:
     dw not_implemented      ; EF
     dw not_implemented      ; F0
     dw opcode_pop_af      ; F1
-    dw not_implemented      ; F2
+    dw opcode_jp_p      ; F2
     dw not_implemented      ; F3
     dw not_implemented      ; F4
     dw opcode_push      ; F5
@@ -632,7 +643,7 @@ jump_table:
     dw not_implemented      ; F7
     dw not_implemented      ; F8
     dw opcode_ld_sp_r      ; F9
-    dw not_implemented      ; FA
+    dw opcode_jp_m      ; FA
     dw not_implemented      ; FB
     dw not_implemented      ; FC
     dw opcode_fd            ; FD

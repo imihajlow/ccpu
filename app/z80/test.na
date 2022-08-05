@@ -77,6 +77,8 @@ import u8 z80_d;
 import u8 z80_l;
 import u8 z80_h;
 
+import u16 z80_pc;
+
 import u8 z80_f_s;
 import u8 z80_a_s;
 import u16 z80_hl_s;
@@ -1385,6 +1387,49 @@ u8 test_res() {
 
     ok();
 }
+
+#define TEST_JP(flag, opc) z80_f = flag; \
+    op.opcode = opc; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&landing + 1u16); \
+    z80_f = 0u8; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&op + 4u16);
+
+#define TEST_JP_N(flag, opc) z80_f = flag; \
+    op.opcode = opc; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&op + 4u16); \
+    z80_f = 0u8; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&landing + 1u16);
+
+u8 test_jp() {
+    test_number = 26u8;
+    u8 landing = HALT;
+    struct Opcode8WithAddress op;
+    op.halt = HALT;
+
+    op.opcode = 0xc3u8; // jp
+    op.src = &landing;
+    z80run((u8*)&op);
+    ASSERT(z80_pc == (u16)&landing + 1u16);
+
+    TEST_JP(FLAG_C, 0xdau8);
+    TEST_JP(FLAG_Z, 0xcau8);
+    TEST_JP(FLAG_P, 0xeau8);
+    TEST_JP(FLAG_S, 0xfau8);
+
+    TEST_JP_N(FLAG_C, 0xd2u8);
+    TEST_JP_N(FLAG_Z, 0xc2u8);
+    TEST_JP_N(FLAG_P, 0xe2u8);
+    TEST_JP_N(FLAG_S, 0xf2u8);
+
+    ok();
+}
+
+#undef TEST_JP
+#undef TEST_JP_N
 
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
