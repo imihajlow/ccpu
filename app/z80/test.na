@@ -1259,6 +1259,54 @@ u8 text_ex_stack() {
     ok();
 }
 
+u8 test_bit() {
+    test_number = 23u8;
+
+    z80_d = 0x63u8;
+    z80_f = FLAG_C;
+    z80run({
+        // bit 6, d
+        0xcbu8, 0x72u8,
+        HALT
+    });
+    ASSERT(z80_f == FLAG_H | FLAG_C);
+
+    z80_a = 0xa8u8;
+    z80run({
+        // bit 5, a
+        0xcbu8, 0x7du8,
+        HALT
+    });
+    ASSERT(z80_f == FLAG_H | FLAG_Z | FLAG_C);
+
+    z80_f = 0u8;
+    u32 data = 0x1234ff00u32;
+    z80_hl = (u16)&data + 2u16;
+    z80_ix = (u16)&data + 25u16;
+    z80_iy = (u16)&data - 99u16;
+
+    z80run({
+        // bit 3, (hl)
+        0xcbu8, 0x5eu8,
+        HALT
+    });
+    ASSERT(z80_f == FLAG_H | FLAG_Z);
+
+    z80run({
+        // bit 3, (ix - 24)
+        0xddu8, 0xcbu8, (u8)-24s8, 0x5eu8,
+        HALT
+    });
+    ASSERT(z80_f == FLAG_H);
+
+    z80run({
+        // bit 3, (iy + 99)
+        0xfdu8, 0xcbu8, 99u8, 0x5eu8,
+        HALT
+    });
+    ASSERT(z80_f == FLAG_H | FLAG_Z);
+    ok();
+}
 
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
@@ -1288,4 +1336,5 @@ export u8 main() {
     test_incdec16();
     test_ex();
     text_ex_stack();
+    test_bit();
 }

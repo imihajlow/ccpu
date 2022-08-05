@@ -110,6 +110,9 @@
     .global opcode_ex_af
     .global opcode_ex_hl_stack
 
+    ; in z80bit.asm
+    .global opcode_cb
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -582,7 +585,7 @@ jump_table:
     dw not_implemented      ; C8
     dw not_implemented      ; C9
     dw not_implemented      ; CA
-    dw not_implemented      ; CB
+    dw opcode_cb      ; CB
     dw not_implemented      ; CC
     dw not_implemented      ; CD
     dw opcode_arithm8_imm      ; CE
