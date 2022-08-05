@@ -45,6 +45,7 @@
     .export z80_imm1
 
     .export z80_tmp
+    .export z80_tmp2
 
     .section bss
     .align 64
@@ -90,6 +91,7 @@ z80_imm0: res 1
 z80_imm1: res 1
 
 z80_tmp: res 2
+z80_tmp2: res 2
 
 .const z80_prefix_dd = 0x20
 .const z80_prefix_ed = 0x40
