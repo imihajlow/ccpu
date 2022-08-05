@@ -225,6 +225,112 @@ set_reg:
     jmp
 
 res:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    ldi b, 0x07
+    and a, b
+    ldi b, 0x06
+    sub b, a
+    ldi pl, lo(res_reg)
+    ldi ph, hi(res_reg)
+    jnz
+    ; register number 6 - indirect operation
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(res_hl)
+    ldi pl, lo(res_hl)
+    jz
+    ldi ph, hi(res_iy)
+    ldi pl, lo(res_iy)
+    js
+res_ix:
+    ldi pl, lo(z80_imm1)
+    ldi ph, hi(z80_imm1)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_ix)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_tmp2)
+    st  a
+    ldi pl, lo(z80_ix + 1)
+    ld  a
+    adc a, b
+    ldi pl, lo(z80_tmp)
+    ld  b
+    ldi pl, lo(z80_tmp2)
+    ld  pl
+    mov ph, a
+    ld  a
+    not b
+    and  a, b
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+res_iy:
+    ldi pl, lo(z80_imm1)
+    ldi ph, hi(z80_imm1)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_iy)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_tmp2)
+    st  a
+    ldi pl, lo(z80_iy + 1)
+    ld  a
+    adc a, b
+    ldi pl, lo(z80_tmp)
+    ld  b
+    ldi pl, lo(z80_tmp2)
+    ld  pl
+    mov ph, a
+    ld  a
+    not b
+    and a, b
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+res_hl:
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
+    ld  b
+    not b
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ld  a
+    and a, b
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+res_reg:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a ; opcode
+    ldi pl, lo(z80_tmp)
+    ld  b ; mask
+    not b
+    ldi pl, 0x07
+    and a, pl
+    ldi pl, lo(z80_regs_origin)
+    sub pl, a
+    ld  a
+    and a, b
+    st  a
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
