@@ -123,6 +123,11 @@
     .global opcode_jp_po
     .global opcode_jp_p
     .global opcode_jp_m
+    .global opcode_jr
+    .global opcode_jr_c
+    .global opcode_jr_nc
+    .global opcode_jr_z
+    .global opcode_jr_nz
 
     .global z80_halt_handler
 
@@ -417,7 +422,7 @@ jump_table:
     dw opcode_dec_r_common      ; 15
     dw opcode_ld_r_imm      ; 16
     dw not_implemented      ; 17
-    dw not_implemented      ; 18
+    dw opcode_jr      ; 18
     dw opcode_add_de_16      ; 19
     dw opcode_ld_a_imm_de      ; 1A
     dw opcode_dec_de      ; 1B
@@ -425,7 +430,7 @@ jump_table:
     dw opcode_dec_r_common      ; 1D
     dw opcode_ld_r_imm      ; 1E
     dw not_implemented      ; 1F
-    dw not_implemented      ; 20
+    dw opcode_jr_nz      ; 20
     dw opcode_ld_hl_imm16      ; 21
     dw opcode_ld_indir_hl      ; 22
     dw opcode_inc_hl      ; 23
@@ -433,7 +438,7 @@ jump_table:
     dw opcode_dec_r      ; 25
     dw opcode_ld_r_imm      ; 26
     dw not_implemented      ; 27
-    dw not_implemented      ; 28
+    dw opcode_jr_z      ; 28
     dw opcode_add_hl_hl_16      ; 29
     dw opcode_ld_hl_indir_imm16      ; 2A
     dw opcode_dec_hl      ; 2B
@@ -441,7 +446,7 @@ jump_table:
     dw opcode_dec_r      ; 2D
     dw opcode_ld_r_imm      ; 2E
     dw not_implemented      ; 2F
-    dw not_implemented      ; 30
+    dw opcode_jr_nc      ; 30
     dw opcode_ld_sp_imm16      ; 31
     dw opcode_ld_indir_imm_a      ; 32
     dw opcode_inc_sp      ; 33
@@ -449,7 +454,7 @@ jump_table:
     dw opcode_dec_indirect      ; 35
     dw opcode_ld_indir_imm  ; 36
     dw not_implemented      ; 37
-    dw not_implemented      ; 38
+    dw opcode_jr_c      ; 38
     dw opcode_add_sp_16      ; 39
     dw opcode_ld_a_imm_indir      ; 3A
     dw opcode_dec_sp      ; 3B
@@ -981,7 +986,7 @@ instr_fmt:
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2D
     db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 2E
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 2F
-    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 30
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 30
     db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 31
     db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 32
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 33
@@ -989,7 +994,7 @@ instr_fmt:
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_imm_1    ; 35
     db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_imm_2    ; 36
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 37
-    db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 38
+    db instr_fmt_imm_1 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 38
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 39
     db instr_fmt_imm_2 | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3A
     db instr_fmt_no_imm | instr_fmt_ed_no_imm | instr_fmt_dd_no_imm    ; 3B

@@ -1427,9 +1427,102 @@ u8 test_jp() {
 
     ok();
 }
-
 #undef TEST_JP
 #undef TEST_JP_N
+
+u8 test_jr() {
+    test_number = 27u8;
+
+    u8 *code = {
+        // jr +2
+        0x18u8, 2u8,
+        HALT,
+        HALT,
+        HALT,
+        HALT
+    };
+    z80run(code);
+    ASSERT(z80_pc == (u16)code + 5u16);
+
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // jr -5
+        0x18u8, (u8)-5s8,
+        HALT
+    };
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
+    z80_f = 0u8;
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // jr c, -5
+        0x38u8, (u8)-5s8,
+        HALT
+    };
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 7u16);
+
+    z80_f = FLAG_C;
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // jr nc, -5
+        0x30u8, (u8)-5s8,
+        HALT
+    };
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 7u16);
+
+    z80_f = 0u8;
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // jr z, -5
+        0x28u8, (u8)-5s8,
+        HALT
+    };
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 7u16);
+
+    z80_f = FLAG_Z;
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // jr nz, -5
+        0x20u8, (u8)-5s8,
+        HALT
+    };
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 7u16);
+
+    z80_f = 0u8;
+    z80run(code + 4u8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
+    ok();
+}
 
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
@@ -1462,4 +1555,6 @@ export u8 main() {
     test_bit();
     test_set();
     test_res();
+    test_jp();
+    test_jr();
 }

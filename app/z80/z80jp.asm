@@ -54,6 +54,12 @@
     .export opcode_jp_p
     .export opcode_jp_m
 
+    .export opcode_jr
+    .export opcode_jr_c
+    .export opcode_jr_nc
+    .export opcode_jr_z
+    .export opcode_jr_nz
+
     ; jump group
 
     .section text.opcode_jp
@@ -103,11 +109,11 @@ opcode_jp_z:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
     ld  a
-    ldi b, z80_zf
-    and a, b
+    shl a
+    shl a
     ldi ph, hi(opcode_jp)
     ldi pl, lo(opcode_jp)
-    jnz
+    jc
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
@@ -117,11 +123,11 @@ opcode_jp_nz:
     ldi ph, hi(z80_f)
     ldi pl, lo(z80_f)
     ld  a
-    ldi b, z80_zf
-    and a, b
+    shl a
+    shl a
     ldi ph, hi(opcode_jp)
     ldi pl, lo(opcode_jp)
-    jz
+    jnc
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
@@ -175,6 +181,79 @@ opcode_jp_p:
     shl a
     ldi ph, hi(opcode_jp)
     ldi pl, lo(opcode_jp)
+    jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 18
+opcode_jr:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi pl, lo(z80_pc)
+    ld  a
+    add a, b
+    st  a
+    ldi pl, lo(z80_pc + 1)
+    ld  a
+    adc a, 0
+    shl b
+    sbb a, 0
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 38
+opcode_jr_c:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shr a
+    ldi ph, hi(opcode_jr)
+    ldi pl, lo(opcode_jr)
+    jc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 30
+opcode_jr_nc:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shr a
+    ldi ph, hi(opcode_jr)
+    ldi pl, lo(opcode_jr)
+    jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 28
+opcode_jr_z:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    shl a
+    ldi ph, hi(opcode_jr)
+    ldi pl, lo(opcode_jr)
+    jc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 20
+opcode_jr_nz:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    shl a
+    ldi ph, hi(opcode_jr)
+    ldi pl, lo(opcode_jr)
     jnc
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
