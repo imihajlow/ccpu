@@ -13,7 +13,7 @@ def extensionLinkGenerator(source, target, env, for_signature):
     return f"link.py --slim --layout=extension.yaml --api-in={source[0]} -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source[1:])}"
 
 def appLinkGenerator(source, target, env, for_signature):
-    return f"link.py --slim --layout=app.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+    return f"link.py --slim --layout=../app.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
 def testLinkGenerator(source, target, env, for_signature):
     return f"link.py --full --layout=sim -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"

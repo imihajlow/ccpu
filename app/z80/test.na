@@ -1728,7 +1728,7 @@ u8 test_arithm_af() {
         HALT
     });
     ASSERT(z80_a == 0u8);
-    ASSERT(z80_f == (FLAG_N | FLAG_C | FLAG_Z));
+    ASSERT(z80_f == (FLAG_N | FLAG_Z));
 
     z80_a = 0x80u8;
     z80run({
@@ -1737,7 +1737,7 @@ u8 test_arithm_af() {
         HALT
     });
     ASSERT(z80_a == 0x80u8);
-    ASSERT(z80_f == (FLAG_S | FLAG_N | FLAG_P));
+    ASSERT(z80_f == (FLAG_S | FLAG_N | FLAG_P | FLAG_C));
 
     z80_a = 20u8;
     z80run({
@@ -1746,7 +1746,7 @@ u8 test_arithm_af() {
         HALT
     });
     ASSERT(z80_a == (u8)-20s8);
-    ASSERT(z80_f == (FLAG_N | FLAG_S));
+    ASSERT(z80_f == (FLAG_N | FLAG_S | FLAG_C));
 
     z80run({
         // neg
@@ -1754,7 +1754,7 @@ u8 test_arithm_af() {
         HALT
     });
     ASSERT(z80_a == 20u8);
-    ASSERT(z80_f == (FLAG_N));
+    ASSERT(z80_f == (FLAG_N | FLAG_C));
 
 
     z80_f = FLAG_Z | FLAG_N;
@@ -1975,4 +1975,6 @@ export u8 main() {
     test_ret();
     test_arithm_af();
     test_shift();
+
+    while (1u8) {}
 }

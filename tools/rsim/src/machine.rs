@@ -165,7 +165,7 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         },
         INC => arg1.overflowing_add(1),
         DEC => arg1.overflowing_sub(1),
-        NEG => ((!arg1).wrapping_add(1), arg1 == 0),
+        NEG => ((!arg1).wrapping_add(1), arg1 != 0),
         NOT => (!arg1, false),
         SHL => {
             let carry = arg1 & 0x80 != 0;
