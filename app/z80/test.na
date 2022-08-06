@@ -1415,6 +1415,32 @@ u8 test_jp() {
     z80run((u8*)&op);
     ASSERT(z80_pc == (u16)&landing + 1u16);
 
+    u8 landing2 = HALT;
+    u8 landing3 = HALT;
+    u8 landing4 = HALT;
+    z80_hl = (u16)&landing2;
+    z80_ix = (u16)&landing3;
+    z80_iy = (u16)&landing4;
+
+    z80run({
+        // jp (hl)
+        0xe9u8,
+        HALT
+    });
+    ASSERT(z80_pc == (u16)&landing2 + 1u16);
+    z80run({
+        // jp (ix)
+        0xddu8, 0xe9u8,
+        HALT
+    });
+    ASSERT(z80_pc == (u16)&landing3 + 1u16);
+    z80run({
+        // jp (iy)
+        0xfdu8, 0xe9u8,
+        HALT
+    });
+    ASSERT(z80_pc == (u16)&landing4 + 1u16);
+
     TEST_JP(FLAG_C, 0xdau8);
     TEST_JP(FLAG_Z, 0xcau8);
     TEST_JP(FLAG_P, 0xeau8);

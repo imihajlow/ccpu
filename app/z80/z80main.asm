@@ -128,6 +128,7 @@
     .global opcode_jr_nc
     .global opcode_jr_z
     .global opcode_jr_nz
+    .global opcode_jp_indir
 
     .global z80_halt_handler
 
@@ -631,7 +632,7 @@ jump_table:
     dw opcode_arithm8_imm      ; E6
     dw not_implemented      ; E7
     dw not_implemented      ; E8
-    dw not_implemented      ; E9
+    dw opcode_jp_indir      ; E9
     dw opcode_jp_pe      ; EA
     dw opcode_ex_de_hl      ; EB
     dw not_implemented      ; EC

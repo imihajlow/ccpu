@@ -59,6 +59,7 @@
     .export opcode_jr_nc
     .export opcode_jr_z
     .export opcode_jr_nz
+    .export opcode_jp_indir
 
     ; jump group
 
@@ -255,6 +256,60 @@ opcode_jr_nz:
     ldi ph, hi(opcode_jr)
     ldi pl, lo(opcode_jr)
     jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; E9, DD E9, FD E9
+opcode_jp_indir:
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    adc a, 0
+    ldi ph, hi(jp_indir_hl)
+    ldi pl, lo(jp_indir_hl)
+    jz
+    ldi ph, hi(jp_indir_iy)
+    ldi pl, lo(jp_indir_iy)
+    js
+jp_indir_ix:
+    ldi ph, hi(z80_ix)
+    ldi pl, lo(z80_ix)
+    ld  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_pc)
+    st  a
+    inc pl
+    st  b
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+jp_indir_iy:
+    ldi ph, hi(z80_iy)
+    ldi pl, lo(z80_iy)
+    ld  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_pc)
+    st  a
+    inc pl
+    st  b
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+jp_indir_hl:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_pc)
+    st  a
+    inc pl
+    st  b
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
