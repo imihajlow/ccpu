@@ -149,6 +149,22 @@
     .global opcode_ret_p
     .global opcode_ret_m
 
+    ; in z80rst.asm
+    .global opcode_rst_00
+    .global opcode_rst_08
+    .global opcode_rst_10
+    .global opcode_rst_18
+    .global opcode_rst_20
+    .global opcode_rst_28
+    .global opcode_rst_30
+    .global opcode_rst_38
+
+    ; in z80af.asm
+    .global opcode_cpl
+    .global opcode_neg
+    .global opcode_ccf
+    .global opcode_scf
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -465,7 +481,7 @@ jump_table:
     dw opcode_inc_r      ; 2C
     dw opcode_dec_r      ; 2D
     dw opcode_ld_r_imm      ; 2E
-    dw not_implemented      ; 2F
+    dw opcode_cpl      ; 2F
     dw opcode_jr_nc      ; 30
     dw opcode_ld_sp_imm16      ; 31
     dw opcode_ld_indir_imm_a      ; 32
@@ -473,7 +489,7 @@ jump_table:
     dw opcode_inc_indirect      ; 34
     dw opcode_dec_indirect      ; 35
     dw opcode_ld_indir_imm  ; 36
-    dw not_implemented      ; 37
+    dw opcode_scf      ; 37
     dw opcode_jr_c      ; 38
     dw opcode_add_sp_16      ; 39
     dw opcode_ld_a_imm_indir      ; 3A
@@ -481,7 +497,7 @@ jump_table:
     dw opcode_inc_r_common      ; 3C
     dw opcode_dec_r_common      ; 3D
     dw opcode_ld_r_imm      ; 3E
-    dw not_implemented      ; 3F
+    dw opcode_ccf      ; 3F
     dw opcode_ld_rr             ; 40
     dw opcode_ld_rr             ; 41
     dw opcode_ld_rr             ; 42
@@ -617,7 +633,7 @@ jump_table:
     dw opcode_call_nz      ; C4
     dw opcode_push      ; C5
     dw opcode_arithm8_imm      ; C6
-    dw not_implemented      ; C7
+    dw opcode_rst_00      ; C7
     dw opcode_ret_z      ; C8
     dw opcode_ret      ; C9
     dw opcode_jp_z      ; CA
@@ -625,7 +641,7 @@ jump_table:
     dw opcode_call_z      ; CC
     dw opcode_call      ; CD
     dw opcode_arithm8_imm      ; CE
-    dw not_implemented      ; CF
+    dw opcode_rst_08      ; CF
     dw opcode_ret_nc      ; D0
     dw opcode_pop_de      ; D1
     dw opcode_jp_nc      ; D2
@@ -633,7 +649,7 @@ jump_table:
     dw opcode_call_nc      ; D4
     dw opcode_push      ; D5
     dw opcode_arithm8_imm      ; D6
-    dw not_implemented      ; D7
+    dw opcode_rst_10      ; D7
     dw opcode_ret_c      ; D8
     dw opcode_exx      ; D9
     dw opcode_jp_c      ; DA
@@ -641,7 +657,7 @@ jump_table:
     dw opcode_call_c      ; DC
     dw opcode_dd            ; DD
     dw opcode_arithm8_imm      ; DE
-    dw not_implemented      ; DF
+    dw opcode_rst_18      ; DF
     dw opcode_ret_po      ; E0
     dw opcode_pop_hl_common      ; E1
     dw opcode_jp_po      ; E2
@@ -649,7 +665,7 @@ jump_table:
     dw opcode_call_po      ; E4
     dw opcode_push      ; E5
     dw opcode_arithm8_imm      ; E6
-    dw not_implemented      ; E7
+    dw opcode_rst_20      ; E7
     dw opcode_ret_pe      ; E8
     dw opcode_jp_indir      ; E9
     dw opcode_jp_pe      ; EA
@@ -657,23 +673,23 @@ jump_table:
     dw opcode_call_pe      ; EC
     dw opcode_ed            ; ED
     dw opcode_arithm8_imm      ; EE
-    dw not_implemented      ; EF
+    dw opcode_rst_28      ; EF
     dw opcode_ret_p      ; F0
     dw opcode_pop_af      ; F1
     dw opcode_jp_p      ; F2
-    dw not_implemented      ; F3
+    dw z80_reset_prefix      ; F3
     dw opcode_call_p      ; F4
     dw opcode_push      ; F5
     dw opcode_arithm8_imm      ; F6
-    dw not_implemented      ; F7
+    dw opcode_rst_30      ; F7
     dw opcode_ret_m      ; F8
     dw opcode_ld_sp_r      ; F9
     dw opcode_jp_m      ; FA
-    dw not_implemented      ; FB
+    dw z80_reset_prefix      ; FB
     dw opcode_call_m      ; FC
     dw opcode_fd            ; FD
     dw opcode_arithm8_imm      ; FE
-    dw not_implemented      ; FF
+    dw opcode_rst_38      ; FF
 
     ; jump table for instructions with the ED prefix
 jump_table_ed:
@@ -745,9 +761,9 @@ jump_table_ed:
     dw not_implemented  ; 41
     dw opcode_sbc_hl_bc  ; 42
     dw opcode_ld_indir_bc  ; 43
-    dw not_implemented  ; 44
+    dw opcode_neg  ; 44
     dw opcode_ret  ; 45
-    dw not_implemented  ; 46
+    dw z80_reset_prefix  ; 46
     dw not_implemented  ; 47
     dw not_implemented  ; 48
     dw not_implemented  ; 49
@@ -763,7 +779,7 @@ jump_table_ed:
     dw opcode_ld_indir_de  ; 53
     dw not_implemented  ; 54
     dw not_implemented  ; 55
-    dw not_implemented  ; 56
+    dw z80_reset_prefix  ; 56
     dw not_implemented  ; 57
     dw not_implemented  ; 58
     dw not_implemented  ; 59
@@ -771,7 +787,7 @@ jump_table_ed:
     dw opcode_ld_de_indir_imm16  ; 5B
     dw not_implemented  ; 5C
     dw not_implemented  ; 5D
-    dw not_implemented  ; 5E
+    dw z80_reset_prefix  ; 5E
     dw not_implemented  ; 5F
     dw not_implemented  ; 60
     dw not_implemented  ; 61

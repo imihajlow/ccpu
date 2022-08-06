@@ -1,6 +1,38 @@
 #include <vga.h>
 #include "z80run.h"
 
+export u8 rst_00_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_08_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_10_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_18_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_20_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_28_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_30_handler() {
+    while (1u8) {}
+}
+
+export u8 rst_38_handler() {
+    while (1u8) {}
+}
+
 #define PASS_COLOR COLOR(COLOR_WHITE, COLOR_GREEN)
 #define FAIL_COLOR COLOR(COLOR_WHITE, COLOR_RED)
 
@@ -1676,6 +1708,80 @@ u8 test_ret() {
 #undef TEST_RET
 #undef TEST_RET_N
 
+u8 test_arithm_af() {
+    test_number = 30u8;
+
+    z80_a = 0x5au8;
+    z80_f = FLAG_S | FLAG_Z;
+    z80run({
+        // cpl
+        0x2fu8,
+        HALT
+    });
+    ASSERT(z80_a == 0xa5u8);
+    ASSERT(z80_f == (FLAG_S | FLAG_Z | FLAG_H | FLAG_N));
+
+    z80_a = 0u8;
+    z80run({
+        // neg
+        0xedu8, 0x44u8,
+        HALT
+    });
+    ASSERT(z80_a == 0u8);
+    ASSERT(z80_f == (FLAG_N | FLAG_C | FLAG_Z));
+
+    z80_a = 0x80u8;
+    z80run({
+        // neg
+        0xedu8, 0x44u8,
+        HALT
+    });
+    ASSERT(z80_a == 0x80u8);
+    ASSERT(z80_f == (FLAG_S | FLAG_N | FLAG_P));
+
+    z80_a = 20u8;
+    z80run({
+        // neg
+        0xedu8, 0x44u8,
+        HALT
+    });
+    ASSERT(z80_a == (u8)-20s8);
+    ASSERT(z80_f == (FLAG_N | FLAG_S));
+
+    z80run({
+        // neg
+        0xedu8, 0x44u8,
+        HALT
+    });
+    ASSERT(z80_a == 20u8);
+    ASSERT(z80_f == (FLAG_N));
+
+
+    z80_f = FLAG_Z | FLAG_N;
+    z80run({
+        // ccf
+        0x3fu8,
+        HALT
+    });
+    ASSERT(z80_f == (FLAG_Z | FLAG_C));
+    z80run({
+        // ccf
+        0x3fu8,
+        HALT
+    });
+    ASSERT(z80_f == (FLAG_Z | FLAG_H));
+
+    z80_f = FLAG_S | FLAG_H | FLAG_N | FLAG_P;
+    z80run({
+        // scf
+        0x37u8,
+        HALT
+    });
+    ASSERT(z80_f == (FLAG_P | FLAG_S | FLAG_C));
+
+    ok();
+}
+
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
     test_number = 0u8;
@@ -1711,4 +1817,5 @@ export u8 main() {
     test_jr();
     test_call();
     test_ret();
+    test_arithm_af();
 }

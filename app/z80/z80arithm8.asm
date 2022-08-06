@@ -52,6 +52,7 @@
     .export opcode_dec_r_common
     .export opcode_inc_indirect
     .export opcode_dec_indirect
+    .export opcode_neg
 
     ; The half-carry flag H is not supported!
     ; Parity with XOR is not supported!
@@ -615,7 +616,18 @@ sbc_common:
     ldi ph, hi(set_flags)
     jmp
 
-
+    .section text.opcode_neg
+    ; ED 44
+opcode_neg:
+    ldi ph, hi(z80_a)
+    ldi pl, lo(z80_a)
+    ld  a
+    neg a
+    st  a
+    ldi b, z80_nf
+    ldi ph, hi(set_flags)
+    ldi pl, lo(set_flags)
+    jmp
 
     .section text.op_jump_table
     .align 256
