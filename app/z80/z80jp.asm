@@ -44,6 +44,8 @@
     .global z80_zf
     .global z80_sf
 
+    .global inc_sp
+
     .export opcode_jp
     .export opcode_jp_c
     .export opcode_jp_nc
@@ -72,6 +74,16 @@
     .export opcode_call_po
     .export opcode_call_p
     .export opcode_call_m
+
+    .export opcode_ret
+    .export opcode_ret_c
+    .export opcode_ret_nc
+    .export opcode_ret_z
+    .export opcode_ret_nz
+    .export opcode_ret_pe
+    .export opcode_ret_po
+    .export opcode_ret_p
+    .export opcode_ret_m
 
     ; jump group
 
@@ -474,6 +486,136 @@ opcode_call_p:
     shl a
     ldi ph, hi(opcode_call)
     ldi pl, lo(opcode_call)
+    jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; C9
+opcode_ret:
+    ldi ph, hi(z80_sp)
+    ldi pl, lo(z80_sp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    mov a, 0
+    ld  b
+    inc pl
+    adc ph, a
+    ld  a
+    ldi ph, hi(z80_pc)
+    ldi pl, lo(z80_pc)
+    st  b
+    inc pl
+    st  a
+    ldi ph, hi(inc_sp)
+    ldi pl, lo(inc_sp)
+    jmp
+
+    ; D8
+opcode_ret_c:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shr a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; D0
+opcode_ret_nc:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shr a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; C8
+opcode_ret_z:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    shl a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; C0
+opcode_ret_nz:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    shl a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jnc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; E8
+opcode_ret_pe:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    ldi b, z80_pf
+    and a, b
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jnz
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; E0
+opcode_ret_po:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    ldi b, z80_pf
+    and a, b
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jz
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; F8
+opcode_ret_m:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
+    jc
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; F0
+opcode_ret_p:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  a
+    shl a
+    ldi ph, hi(opcode_ret)
+    ldi pl, lo(opcode_ret)
     jnc
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)

@@ -43,6 +43,8 @@
     .export opcode_pop_de
     .export opcode_pop_hl_common
 
+    .export inc_sp
+
     ; PUSH and POP instructions
 
     .section text.opcode_push
