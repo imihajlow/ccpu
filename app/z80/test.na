@@ -1884,6 +1884,57 @@ u8 test_shift() {
     ASSERT(data8 == 0x86u8);
     ASSERT(z80_f == FLAG_S);
 
+
+    // SRA
+    z80_d = 0xc0u8;
+    z80run({
+        // sra d
+        0xcbu8, 0x2au8,
+        HALT
+    });
+    ASSERT(z80_d == 0xe0u8);
+    ASSERT(z80_f == FLAG_S);
+
+    z80_h = 0x41u8;
+    z80run({
+        // sra h
+        0xcbu8, 0x2cu8,
+        HALT
+    });
+    ASSERT(z80_h == 0x20u8);
+    ASSERT(z80_f == FLAG_C);
+
+    data8 = 0x01u8;
+    z80_hl = (u16)&data8;
+    z80run({
+        // sra (hl)
+        0xcbu8, 0x2eu8,
+        HALT
+    });
+    ASSERT(data8 == 0x00u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_Z));
+
+    data8 = 0x81u8;
+    z80_hl = 0u16;
+    z80_ix = (u16)&data8 + 40u16;
+    z80run({
+        // sra (ix - 40)
+        0xddu8, 0xcbu8, (u8)-40s8, 0x2eu8,
+        HALT
+    });
+    ASSERT(data8 == 0xc0u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_S));
+
+    data8 = 0x44u8;
+    z80_iy = (u16)&data8 - 40u16;
+    z80run({
+        // sra (iy + 40)
+        0xfdu8, 0xcbu8, 40u8, 0x2eu8,
+        HALT
+    });
+    ASSERT(data8 == 0x22u8);
+    ASSERT(z80_f == 0u8);
+
     ok();
 }
 
