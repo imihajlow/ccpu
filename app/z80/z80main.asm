@@ -35,6 +35,7 @@
     .global z80_imm1
 
     .export z80_reset_prefix
+    .export z80_not_implemented
 
     ; in z80ld.asm
     .global opcode_ld_rr
@@ -344,6 +345,7 @@ tablejump_ed:
 
     .section text.not_implemented
 not_implemented:
+z80_not_implemented:
     ldi pl, lo(not_implemented)
     ldi ph, hi(not_implemented)
     jmp

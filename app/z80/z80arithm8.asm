@@ -54,6 +54,8 @@
     .export opcode_dec_indirect
     .export opcode_neg
 
+    .export set_flags
+
     ; The half-carry flag H is not supported!
     ; Parity with XOR is not supported!
 
