@@ -15,6 +15,9 @@ def extensionLinkGenerator(source, target, env, for_signature):
 def appLinkGenerator(source, target, env, for_signature):
     return f"link.py --slim --layout=app.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
+def testLinkGenerator(source, target, env, for_signature):
+    return f"link.py --full --layout=sim -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
+
 def emuLinkGenerator(source, target, env, for_signature):
     return f"link.py --slim --layout=z80emu.yaml -m {target[1]} -o {target[0]} {' '.join(str(s) for s in source)}"
 
@@ -36,6 +39,7 @@ emuLinkBuilder = Builder(generator=emuLinkGenerator, suffix=".bin", src_suffix="
 loaderLinkBuilder = Builder(generator=loaderLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=loaderLinkEmitter)
 extensionLinkBuilder = Builder(generator=extensionLinkGenerator, suffix=".ext", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 appLinkBuilder = Builder(generator=appLinkGenerator, suffix=".app", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
+testLinkBuilder = Builder(generator=testLinkGenerator, suffix=".bin", src_suffix=".o", src_builder="Asm", emitter=linkEmitter)
 
 env = Environment(BUILDERS = {
     'Asm' : asmBuilder,
@@ -44,7 +48,8 @@ env = Environment(BUILDERS = {
     'Emu': emuLinkBuilder,
     'Loader': loaderLinkBuilder,
     'Extension': extensionLinkBuilder,
-    'App': appLinkBuilder})
+    'App': appLinkBuilder,
+    'TestApp': testLinkBuilder})
 
 env.PrependENVPath("PATH", "../../tools")
 env.PrependENVPath("PATH", "../../tools/natrix")
@@ -82,7 +87,7 @@ z80 = Split('''
     z80run.asm
     ''')
 
-env.Bin('z80test', Split('''
+env.TestApp('z80test', Split('''
     test.na
     ''') + z80 + rom_startup + vga + natrix)
 

@@ -1,0 +1,9 @@
+mem: plain
+vga:
+  font: "../font/font.bin"
+keyboard: absent
+ps2: present
+spi: absent
+stack: absent
+server:
+  port: 3000
