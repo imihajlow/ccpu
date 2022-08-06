@@ -165,7 +165,7 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         },
         INC => arg1.overflowing_add(1),
         DEC => arg1.overflowing_sub(1),
-        NEG => ((!arg1).wrapping_add(1), false),
+        NEG => ((!arg1).wrapping_add(1), arg1 != 0),
         NOT => (!arg1, false),
         SHL => {
             let carry = arg1 & 0x80 != 0;
@@ -196,6 +196,7 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         SUB | SBB => gen_ovf(arg1, arg2, r, false),
         INC => gen_ovf(arg1, 1, r, true),
         DEC => gen_ovf(arg1, 1, r, false),
+        NEG => gen_ovf(0, arg1, r, false),
         _ => false
     };
 
