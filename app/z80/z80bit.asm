@@ -45,6 +45,7 @@
     .global z80_sf
 
     .export opcode_cb
+    .global shift
 
     ; Bit manipulation
     .section text.opcode_cb
@@ -68,6 +69,14 @@ opcode_cb:
     dec pl
     st  b
 no_swap:
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  b
+    ldi a, 0xC0
+    and a, b
+    ldi ph, hi(shift)
+    ldi pl, lo(shift)
+    jz
     ; calculate bit mask to apply for all operations
     ldi ph, hi(z80_imm0)
     ldi pl, lo(z80_imm0)
@@ -94,23 +103,16 @@ mask_loop_end:
     st  a
 
     ; select operation
+    ; 00xxxxxx - shift, already handled
     ; 01xxxxxx - bit
     ; 11xxxxxx - set
     ; 10xxxxxx - res
     ldi pl, lo(z80_imm0)
     ld  a
     shl a
-    ldi ph, hi(set_res)
-    ldi pl, lo(set_res)
-    jc
-    shl a
     ldi pl, lo(bit)
     ldi ph, hi(bit)
-    jc
-cb_not_implemented:
-    ldi ph, hi(cb_not_implemented)
-    ldi pl, lo(cb_not_implemented)
-    jmp
+    jnc
 
 set_res:
     shl a
@@ -438,3 +440,5 @@ bit_nz:
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp
+
+
