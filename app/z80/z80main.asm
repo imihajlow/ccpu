@@ -166,6 +166,12 @@
     .global opcode_ccf
     .global opcode_scf
 
+    ; in z80block.asm
+    .global opcode_ldi
+    .global opcode_ldd
+    .global opcode_ldir
+    .global opcode_lddr
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -855,7 +861,7 @@ jump_table_ed:
     dw not_implemented  ; 9D
     dw not_implemented  ; 9E
     dw not_implemented  ; 9F
-    dw not_implemented  ; A0
+    dw opcode_ldi  ; A0
     dw not_implemented  ; A1
     dw not_implemented  ; A2
     dw not_implemented  ; A3
@@ -863,7 +869,7 @@ jump_table_ed:
     dw not_implemented  ; A5
     dw not_implemented  ; A6
     dw not_implemented  ; A7
-    dw not_implemented  ; A8
+    dw opcode_ldd  ; A8
     dw not_implemented  ; A9
     dw not_implemented  ; AA
     dw not_implemented  ; AB
@@ -871,7 +877,7 @@ jump_table_ed:
     dw not_implemented  ; AD
     dw not_implemented  ; AE
     dw not_implemented  ; AF
-    dw not_implemented  ; B0
+    dw opcode_ldir  ; B0
     dw not_implemented  ; B1
     dw not_implemented  ; B2
     dw not_implemented  ; B3
@@ -879,7 +885,7 @@ jump_table_ed:
     dw not_implemented  ; B5
     dw not_implemented  ; B6
     dw not_implemented  ; B7
-    dw not_implemented  ; B8
+    dw opcode_lddr  ; B8
     dw not_implemented  ; B9
     dw not_implemented  ; BA
     dw not_implemented  ; BB
