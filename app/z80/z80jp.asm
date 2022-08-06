@@ -61,6 +61,8 @@
     .export opcode_jr_nz
     .export opcode_jp_indir
 
+    .export opcode_djnz
+
     ; jump group
 
     .section text.opcode_jp
@@ -310,6 +312,20 @@ jp_indir_hl:
     st  a
     inc pl
     st  b
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+    ; 10
+opcode_djnz:
+    ldi ph, hi(z80_b)
+    ldi pl, lo(z80_b)
+    ld  a
+    dec a
+    st  a
+    ldi ph, hi(opcode_jr)
+    ldi pl, lo(opcode_jr)
+    jnz
     ldi ph, hi(z80_reset_prefix)
     ldi pl, lo(z80_reset_prefix)
     jmp

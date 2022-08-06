@@ -1451,6 +1451,19 @@ u8 test_jp() {
     TEST_JP_N(FLAG_P, 0xe2u8);
     TEST_JP_N(FLAG_S, 0xf2u8);
 
+    op.opcode = 0x10u8; // djnz
+    op.src = &landing2;
+    z80_b = 1u8;
+    z80run((u8*)&op);
+    ASSERT(z80_pc == (u16)&op + 4u16);
+    ASSERT(z80_b == 0u8);
+
+    op.src = &landing3;
+    z80_b = 10u8;
+    z80run((u8*)&op);
+    ASSERT(z80_pc == (u16)&landing3 + 1u16);
+    ASSERT(z80_b == 9u8);
+
     ok();
 }
 #undef TEST_JP

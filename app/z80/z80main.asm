@@ -129,6 +129,7 @@
     .global opcode_jr_z
     .global opcode_jr_nz
     .global opcode_jp_indir
+    .global opcode_djnz
 
     .global z80_halt_handler
 
@@ -415,7 +416,7 @@ jump_table:
     dw opcode_dec_r_common      ; 0D
     dw opcode_ld_r_imm      ; 0E
     dw not_implemented      ; 0F
-    dw not_implemented      ; 10
+    dw opcode_djnz      ; 10
     dw opcode_ld_de_imm16      ; 11
     dw opcode_ld_indir_de_a ; 12
     dw opcode_inc_de      ; 13
