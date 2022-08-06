@@ -1451,19 +1451,6 @@ u8 test_jp() {
     TEST_JP_N(FLAG_P, 0xe2u8);
     TEST_JP_N(FLAG_S, 0xf2u8);
 
-    op.opcode = 0x10u8; // djnz
-    op.src = &landing2;
-    z80_b = 1u8;
-    z80run((u8*)&op);
-    ASSERT(z80_pc == (u16)&op + 4u16);
-    ASSERT(z80_b == 0u8);
-
-    op.src = &landing3;
-    z80_b = 10u8;
-    z80run((u8*)&op);
-    ASSERT(z80_pc == (u16)&landing3 + 1u16);
-    ASSERT(z80_b == 9u8);
-
     ok();
 }
 #undef TEST_JP
@@ -1560,8 +1547,82 @@ u8 test_jr() {
     z80run(code + 4u8);
     ASSERT(z80_pc == (u16)code + 2u16);
 
+    code = {
+        HALT,
+        HALT,
+        HALT,
+        HALT,
+        // djnz -5
+        0x10u8, (u8)-5s8,
+        HALT
+    };
+    z80_b = 1u8;
+    z80run(code + 4u8);
+    ASSERT(z80_b == 0u8);
+    ASSERT(z80_pc == (u16)code + 7u16);
+
+    z80run(code + 4u8);
+    ASSERT(z80_b == 0xffu8);
+    ASSERT(z80_pc == (u16)code + 2u16);
+
     ok();
 }
+
+#define TEST_CALL(flag, opc) z80_f = 0u8; \
+    z80_sp = (u16)&stack + 2u16; \
+    stack = 0u16; \
+    op.opcode = opc; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&op + 4u16); \
+    ASSERT(z80_sp == (u16)&stack + 2u16); \
+    z80_f = flag; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&landing + 1u16); \
+    ASSERT(z80_sp == (u16)&stack); \
+    ASSERT(stack == (u16)&op + 3u16)
+
+#define TEST_CALL_N(flag, opc) z80_f = flag; \
+    z80_sp = (u16)&stack + 2u16; \
+    stack = 0u16; \
+    op.opcode = opc; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&op + 4u16); \
+    ASSERT(z80_sp == (u16)&stack + 2u16); \
+    z80_f = 0u8; \
+    z80run((u8*)&op); \
+    ASSERT(z80_pc == (u16)&landing + 1u16); \
+    ASSERT(z80_sp == (u16)&stack); \
+    ASSERT(stack == (u16)&op + 3u16)
+
+u8 test_call() {
+    test_number = 28u8;
+
+    u8 landing = HALT;
+    u16 stack = 0u16;
+    struct Opcode8WithAddress op;
+    op.halt = HALT;
+
+    op.opcode = 0xcdu8; // call
+    op.src = &landing;
+    z80_sp = (u16)&stack + 2u16;
+    z80run((u8*)&op);
+    ASSERT(z80_pc == (u16)&landing + 1u16);
+    ASSERT(z80_sp == (u16)&stack);
+    ASSERT(stack == (u16)&op + 3u16);
+
+    TEST_CALL(FLAG_C, 0xdcu8);
+    TEST_CALL(FLAG_Z, 0xccu8);
+    TEST_CALL(FLAG_P, 0xecu8);
+    TEST_CALL(FLAG_S, 0xfcu8);
+
+    TEST_CALL_N(FLAG_C, 0xd4u8);
+    TEST_CALL_N(FLAG_Z, 0xc4u8);
+    TEST_CALL_N(FLAG_P, 0xe4u8);
+    TEST_CALL_N(FLAG_S, 0xf4u8);
+    ok();
+}
+#undef TEST_CALL
+#undef TEST_CALL_N
 
 export u8 main() {
     vga_clear(COLOR(COLOR_GRAY, COLOR_BLACK));
@@ -1596,4 +1657,5 @@ export u8 main() {
     test_res();
     test_jp();
     test_jr();
+    test_call();
 }

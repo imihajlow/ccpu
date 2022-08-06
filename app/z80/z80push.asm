@@ -57,7 +57,7 @@ opcode_push:
     st  b
     ldi pl, lo(z80_sp + 1)
     ld  a
-    adc a, 0
+    sbb a, 0
     st  a
 
     ; jump to the corresponding function
