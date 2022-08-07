@@ -118,6 +118,13 @@ impl fmt::Display for State {
     }
 }
 
+impl State {
+    pub fn fancy_print(&self) {
+        print!("IP=\x1b[1m{:04X}\x1b[0m A=\x1b[1m{:02X}\x1b[0m B=\x1b[1m{:02X}\x1b[0m P=\x1b[1m{:04X}\x1b[0m F={}",
+            self.ip, self.a, self.b, self.p, self.flags);
+    }
+}
+
 pub fn disasm(mem: &dyn Memory, start: u16, end: u16) -> () {
     let mut ip = start;
     while ip <= end {
@@ -128,6 +135,14 @@ pub fn disasm(mem: &dyn Memory, start: u16, end: u16) -> () {
             println!("{:04X} error", ip);
             return;
         }
+    }
+}
+
+pub fn disasm_one(mem: &dyn Memory, ip: u16) -> String {
+    if let Ok((instr, _)) = Instruction::load(mem, ip) {
+        format!("{}", instr)
+    } else {
+        "error".to_string()
     }
 }
 
@@ -227,10 +242,13 @@ impl State {
 
     pub fn until<C>(&mut self, mem: &mut dyn Memory, until_addr: Option<u16>, ctrlc_pressed: &C) -> StepResult
     where C: Deref<Target = AtomicBool> {
-        while !ctrlc_pressed.load(Ordering::SeqCst) && until_addr != Some(self.ip) {
+        while !ctrlc_pressed.load(Ordering::SeqCst) {
             match self.step(mem) {
                 StepResult::Ok => {},
                 x => return x
+            }
+            if until_addr == Some(self.ip) {
+                break;
             }
         }
         StepResult::Ok

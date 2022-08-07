@@ -318,10 +318,11 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
     if count == 1 {
         let val = get_value(mem, addr, t);
         match val {
-            Some(x) => println!("0x{:04X} = {:X} ({})", addr, x, x),
-            None => println!("0x{:04X} = X", addr)
+            Some(x) => println!("[0x{:04X}] = \x1b[1m{:X}\x1b[0m ({})", addr, x, x),
+            None => println!("[0x{:04X}] = X", addr)
         };
     } else {
+        print!("\x1b[1m");
         for i in 0..count {
             let val = get_value(mem, addr + i * size, t);
             match val {
@@ -329,7 +330,7 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
                 None => print!("XX")
             }
         }
-        println!("");
+        println!("\x1b[0m");
     }
 
 }
@@ -376,12 +377,12 @@ fn main() {
             Some((filename, line)) => println!("{}:{}", filename, line),
             None => {}
         }
+        state.fancy_print();
+        print!("    {:14}", machine::disasm_one(&system, state.ip));
         match syms.associate_address(state.ip) {
-            Some((sym, offset)) => println!("{} + 0x{:X}:", sym, offset),
+            Some((sym, offset)) => println!("{} + 0x{:X}", sym, offset),
             None => {}
         }
-        machine::disasm(&system, state.ip, state.ip);
-        println!("{}", &state);
         let mut input = match startup_commands.pop() {
             Some(s) => {
                 println!("> {}", s);
