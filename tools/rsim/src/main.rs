@@ -380,7 +380,7 @@ fn main() {
             Some((sym, offset)) => println!("{} + 0x{:X}:", sym, offset),
             None => {}
         }
-        machine::disasm(&system, state.ip, state.ip).expect("Can't disasm");
+        machine::disasm(&system, state.ip, state.ip);
         println!("{}", &state);
         let mut input = match startup_commands.pop() {
             Some(s) => {

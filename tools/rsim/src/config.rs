@@ -1,6 +1,7 @@
 use std::fs::File;
 use serde::Deserialize;
 use serde_yaml;
+use crate::mem;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -25,7 +26,8 @@ pub struct Config {
 #[serde(rename_all = "kebab-case")]
 pub enum MemConfig {
     Plain,
-    IoRev3,
+    #[serde(rename = "io-rev3-with-cr")]
+    IoRev3(mem::Cr),
 }
 
 #[derive(Debug, Deserialize)]

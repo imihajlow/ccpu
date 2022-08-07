@@ -1,7 +1,6 @@
 use std::fmt;
 use std::ops::Deref;
 use std::sync::atomic::{AtomicBool, Ordering};
-use crate::memory;
 use crate::instruction::Instruction;
 use crate::instruction::AluOperation;
 use crate::instruction;
@@ -119,14 +118,17 @@ impl fmt::Display for State {
     }
 }
 
-pub fn disasm(mem: &dyn Memory, start: u16, end: u16) -> Result<(), memory::MemoryReadError> {
+pub fn disasm(mem: &dyn Memory, start: u16, end: u16) -> () {
     let mut ip = start;
     while ip <= end {
-        let (instr, new_ip) = Instruction::load(mem, ip)?;
-        println!("{:04X} {}", ip, instr);
-        ip = new_ip;
+        if let Ok((instr, new_ip)) = Instruction::load(mem, ip) {
+            println!("{:04X} {}", ip, instr);
+            ip = new_ip;
+        } else {
+            println!("{:04X} error", ip);
+            return;
+        }
     }
-    Ok(())
 }
 
 fn gen_ovf(a: u8, b: u8, r: u8, is_sum: bool) -> bool {

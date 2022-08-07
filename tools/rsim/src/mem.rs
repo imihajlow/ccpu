@@ -2,6 +2,7 @@ use crate::memory::MemoryReadError;
 use crate::memory::MemoryWriteError;
 use crate::memory::Memory;
 use crate::config::MemConfig;
+use serde::Deserialize;
 use std::io;
 
 const CR_ADDR: u16 = 0xFF02;
@@ -22,7 +23,8 @@ pub struct IoRev3Mem {
     cr: Cr
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Deserialize, Debug, Default)]
+#[serde(from = "u8")]
 pub struct Cr {
     raml_ena: bool,
     l_ena: bool,
@@ -70,6 +72,31 @@ impl From<Cr> for u8 {
     }
 }
 
+impl Cr {
+    fn get_max_program_size(&self) -> usize {
+        if !self.raml_ena {
+            0x8000
+        } else {
+            if !self.ram_a_ena {
+                return 0xA000;
+            }
+            if !self.ram_b_ena {
+                return 0xB000;
+            }
+            if !self.ram_c_ena {
+                return 0xC000;
+            }
+            if !self.ram_d_ena {
+                return 0xD000;
+            }
+            if !self.ram_e_ena {
+                return 0xE000;
+            }
+            return 0xF000;
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum LoadError {
     IoError(io::Error),
@@ -82,34 +109,54 @@ impl From<io::Error> for LoadError {
     }
 }
 
-impl Mem {
-    pub fn new<T>(config: &MemConfig, reader: &mut T) -> Result<Mem, LoadError>
+impl PlainMem {
+    fn new<T>(reader: &mut T) -> Result<Self, LoadError>
     where T: io::Read + io::Seek {
-        let desired_size = match config {
-            MemConfig::Plain => 0x10000,
-            MemConfig::IoRev3 => 0x8000,
-        };
-        let size = reader.seek(io::SeekFrom::End(0))?;
-        if size != desired_size {
+        let size = reader.seek(io::SeekFrom::End(0))? as usize;
+        if size > 0x10000 {
             return Err(LoadError::WrongFileSize);
         }
         reader.seek(io::SeekFrom::Start(0))?;
-        let mut r : Self = match config {
-            MemConfig::Plain => Self::Plain(PlainMem {
-                ram: [0x00; 0x10000]
-            }),
-            MemConfig::IoRev3 => Self::IoRev3(IoRev3Mem {
-                rom: [0xff; 0x8000],
-                hi_ram: [0x00; 0x7000],
-                lo_ram: [0x00; 0x8000],
-                cr: Cr::from(0)
-            }),
+        let mut r = Self {
+            ram: [0x00; 0x10000]
         };
-        match r {
-            Self::Plain(PlainMem { ref mut ram }) => reader.read_exact(ram)?,
-            Self::IoRev3(IoRev3Mem { ref mut rom, .. }) => reader.read_exact(rom)?,
-        }
+        let left = r.ram.split_at_mut(size).0;
+        reader.read_exact(left)?;
         Ok(r)
+    }
+}
+
+impl IoRev3Mem {
+    fn new<T>(cr: &Cr, reader: &mut T) -> Result<Self, LoadError>
+    where T: io::Read + io::Seek {
+        let size = reader.seek(io::SeekFrom::End(0))? as usize;
+        if size > cr.get_max_program_size() {
+            return Err(LoadError::WrongFileSize);
+        }
+        reader.seek(io::SeekFrom::Start(0))?;
+        let mut r = IoRev3Mem {
+            rom: [0xff; 0x8000],
+            hi_ram: [0x00; 0x7000],
+            lo_ram: [0x00; 0x8000],
+            cr: *cr
+        };
+        if r.cr.raml_ena {
+            reader.read(&mut r.lo_ram)?;
+        } else {
+            reader.read(&mut r.rom)?;
+        }
+        reader.read(&mut r.hi_ram)?;
+        Ok(r)
+    }
+}
+
+impl Mem {
+    pub fn new<T>(config: &MemConfig, reader: &mut T) -> Result<Mem, LoadError>
+    where T: io::Read + io::Seek {
+        match config {
+            MemConfig::Plain => Ok(Self::Plain(PlainMem::new(reader)?)),
+            MemConfig::IoRev3(cr) => Ok(Self::IoRev3(IoRev3Mem::new(cr, reader)?))
+        }
     }
 }
 
