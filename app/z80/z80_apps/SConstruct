@@ -1,0 +1,36 @@
+import os
+
+def getCodeOrigin(mapfile):
+    import re
+    r = re.compile(r"^\s*__seg_z80_code_begin:\s*(\d+)$")
+    with open(mapfile) as f:
+        for line in f:
+            m = r.match(line)
+            if m is not None:
+                return int(m.group(1))
+    raise ValueError("__seg_z80_code_begin isn't found")
+
+codeOrigin = getCodeOrigin("../z80emu.map")
+codeSegBegin = codeOrigin
+
+emuBuilder = Builder(action="./combine.py -o $TARGET $SOURCE", suffix='.app', src_suffix='.ihx', single_source=True)
+
+env = Environment(
+    ENV = os.environ,
+    OBJSUFFIX = ".rel",
+    PROGSUFFIX = ".ihx",
+    CC = "sdcc",
+    CCFLAGS = ["-mz80"],
+    LINKFLAGS = ["-mz80", "--no-std-crt0", "--code-loc", str(codeSegBegin)])
+env.Append(BUILDERS = {
+    'Emulated': emuBuilder
+    })
+# crt0s = env.Command("crt0.s", "crt0.s.in", f"sed 's/Z80_CODE_BEGIN/{codeOrigin}/' < $SOURCE > $TARGET")
+# Depends(crt0s, "../z80emu.map")
+crt0rel = env.Command("crt0.rel", "crt0.s", "sdasz80 -plosgff $SOURCE")
+
+env.Program("hello", [crt0rel, "hello.c"])
+
+env.Emulated("hello", "hello.ihx")
+
+env.Clean('foo', Glob("*.lst") + Glob("*.noi") + Glob('*.sym') + Glob("*.lk") + Glob("*.map") + Glob("*.rst") + Glob("*.mem") + Glob("*.asm"))
