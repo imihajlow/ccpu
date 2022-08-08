@@ -2176,6 +2176,26 @@ u8 test_rot() {
     ASSERT(z80_a == 0x98u8);
     ASSERT(z80_f == (FLAG_Z | FLAG_S | FLAG_P | FLAG_C));
 
+    // rla
+    z80_a = 0x33u8;
+    z80_f = FLAG_Z | FLAG_S | FLAG_P | FLAG_N | FLAG_H;
+    z80run({
+        // rla
+        0x1Fu8,
+        HALT
+    });
+    ASSERT(z80_a == 0x19u8);
+    ASSERT(z80_f == (FLAG_Z | FLAG_S | FLAG_P | FLAG_C));
+
+    z80_a = 0x02u8;
+    z80run({
+        // rla
+        0x1Fu8,
+        HALT
+    });
+    ASSERT(z80_a == 0x81u8);
+    ASSERT(z80_f == (FLAG_Z | FLAG_S | FLAG_P));
+
     ok();
 }
 
