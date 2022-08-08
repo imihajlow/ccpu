@@ -82,7 +82,7 @@ opcode_ld_rr:
     jmp
 
     ; ================================
-    ; 46, 4E, 56, 5E, 66, 6E
+    ; 46, 4E, 56, 5E, 66, 6E, 7E
     .section text.opcode_ld_r_indir
 opcode_ld_r_indir:
     ldi ph, hi(z80_prefix)

@@ -172,6 +172,9 @@
     .global opcode_ldir
     .global opcode_lddr
 
+    ; in z80shift.asm
+    .global opcode_rlca
+
     .global z80_halt_handler
 
     .section text.fetch
@@ -449,7 +452,7 @@ jump_table:
     dw opcode_inc_r_common      ; 04
     dw opcode_dec_r_common      ; 05
     dw opcode_ld_r_imm      ; 06
-    dw not_implemented      ; 07
+    dw opcode_rlca      ; 07
     dw opcode_ex_af      ; 08
     dw opcode_add_bc_16      ; 09
     dw opcode_ld_a_imm_bc      ; 0A
@@ -568,7 +571,7 @@ jump_table:
     dw opcode_ld_rr             ; 7B
     dw opcode_ld_rr             ; 7C
     dw opcode_ld_rr             ; 7D
-    dw opcode_ld_rr             ; 7E
+    dw opcode_ld_r_indir        ; 7E
     dw opcode_ld_rr             ; 7F
     dw opcode_arithm8_common      ; 80
     dw opcode_arithm8_common      ; 81

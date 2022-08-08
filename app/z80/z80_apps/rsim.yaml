@@ -1,5 +1,5 @@
 mem:
-  io-rev3-with-cr: 0x39
+  io-rev3-with-cr: 0xf9
 vga:
   font: "../../font/font.bin"
 keyboard:

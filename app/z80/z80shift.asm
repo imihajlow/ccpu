@@ -48,6 +48,7 @@
     .global set_flags
 
     .export shift
+    .export opcode_rlca
 
     .section text.shift
     ; parity is not implemented!
@@ -55,13 +56,113 @@ shift:
     ; 00100rrr - SLA
     ; 00101rrr - SRA
     ; 00111rrr - SRL
+    ; 00000rrr - RLC
+    ; 00010rrr - RL
+    ; 00001rrr - RRC
+    ; 00011rrr - RR
+
+    ; set tmp as destination address
+    ldi ph, hi(z80_imm0)
+    ldi pl, lo(z80_imm0)
+    ld  a
+    ldi b, 7
+    and a, b
+    ldi b, 6
+    sub b, a
+    ldi ph, hi(shift_reg)
+    ldi pl, lo(shift_reg)
+    jnz
+    ldi ph, hi(z80_prefix)
+    ldi pl, lo(z80_prefix)
+    ld  a
+    add a, 0
+    ldi ph, hi(shift_hl)
+    ldi pl, lo(shift_hl)
+    jz ; no prefix
+    ldi ph, hi(shift_iy)
+    ldi pl, lo(shift_iy)
+    js ; FD
+    ; othrewise DD
+shift_ix:
+    ldi pl, lo(z80_imm1)
+    ldi ph, hi(z80_imm1)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_ix)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_ix + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc a, ph
+    mov b, a
+    mov a, pl
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
+    st  a
+    inc pl
+    st  b
+    ldi ph, hi(shift_select)
+    ldi pl, lo(shift_select)
+    jmp
+shift_iy:
+    ldi pl, lo(z80_imm1)
+    ldi ph, hi(z80_imm1)
+    ld  b
+    mov a, b
+    shl b
+    exp b
+    ldi pl, lo(z80_iy)
+    ld  pl
+    add a, pl
+    ldi pl, lo(z80_iy + 1)
+    ld  ph
+    mov pl, a
+    mov a, b
+    adc a, ph
+    mov b, a
+    mov a, pl
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
+    st  a
+    inc pl
+    st  b
+    ldi ph, hi(shift_select)
+    ldi pl, lo(shift_select)
+    jmp
+shift_hl:
+    ldi ph, hi(z80_hl)
+    ldi pl, lo(z80_hl)
+    ld  a
+    inc pl
+    ld  b
+    ldi pl, lo(z80_tmp)
+    st  a
+    inc pl
+    st  b
+    ldi ph, hi(shift_select)
+    ldi pl, lo(shift_select)
+    jmp
+shift_reg:
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
+    ldi b, lo(z80_regs_origin)
+    sub b, a
+    st  b
+    inc pl
+    mov a, ph
+    st  a
+shift_select:
     ldi ph, hi(z80_imm0)
     ldi pl, lo(z80_imm0)
     ld  a
     ldi b, 0x20
     and b, a
-    ldi ph, hi(z80_not_implemented)
-    ldi pl, lo(z80_not_implemented)
+    ldi ph, hi(cb_rotate)
+    ldi pl, lo(cb_rotate)
     jz
     ldi b, 0x18
     and b, a
@@ -74,87 +175,12 @@ shift:
     ldi pl, lo(sra)
     jz
 srl:
-    ldi ph, hi(z80_imm0)
-    ldi pl, lo(z80_imm0)
-    ld  a
-    ldi b, 0x07
-    and a, b
-    ldi b, 6
-    sub b, a
-    ldi ph, hi(srl_reg)
-    ldi pl, lo(srl_reg)
-    jnz
-    ldi ph, hi(z80_prefix)
-    ldi pl, lo(z80_prefix)
-    ld  a
-    add a, 0
-    ldi ph, hi(srl_hl)
-    ldi pl, lo(srl_hl)
-    jz
-    ldi ph, hi(srl_iy)
-    ldi pl, lo(srl_iy)
-    js
-srl_ix:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_ix)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_ix + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    shr a
-    st  a
-    ldi ph, hi(srl_set_flags)
-    ldi pl, lo(srl_set_flags)
-    jmp
-
-srl_iy:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_iy)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_iy + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    shr a
-    st  a
-    ldi ph, hi(srl_set_flags)
-    ldi pl, lo(srl_set_flags)
-    jmp
-
-srl_hl:
-    ldi ph, hi(z80_hl)
-    ldi pl, lo(z80_hl)
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
     ld  a
     inc pl
     ld  ph
     mov pl, a
-    ld  a
-    shr a
-    st  a
-    ldi ph, hi(srl_set_flags)
-    ldi pl, lo(srl_set_flags)
-    jmp
-
-srl_reg:
-    ; a = reg number
-    ldi ph, hi(z80_regs_origin)
-    ldi pl, lo(z80_regs_origin)
-    sub pl, a
     ld  a
     shr a
     st  a
@@ -175,90 +201,12 @@ srl_reg_nz:
 
 
 sla:
-    ldi ph, hi(z80_imm0)
-    ldi pl, lo(z80_imm0)
-    ld  a
-    ldi b, 0x07
-    and a, b
-    ldi b, 6
-    sub b, a
-    ldi ph, hi(sla_reg)
-    ldi pl, lo(sla_reg)
-    jnz
-    ldi ph, hi(z80_prefix)
-    ldi pl, lo(z80_prefix)
-    ld  a
-    add a, 0
-    ldi ph, hi(sla_hl)
-    ldi pl, lo(sla_hl)
-    jz
-    ldi ph, hi(sla_iy)
-    ldi pl, lo(sla_iy)
-    js
-sla_ix:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_ix)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_ix + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    shl a
-    st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
-    jmp
-
-sla_iy:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_iy)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_iy + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    shl a
-    st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
-    jmp
-
-sla_hl:
-    ldi ph, hi(z80_hl)
-    ldi pl, lo(z80_hl)
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
     ld  a
     inc pl
     ld  ph
     mov pl, a
-    ld  a
-    shl a
-    st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
-    jmp
-
-sla_reg:
-    ; a = reg number
-    ldi ph, hi(z80_regs_origin)
-    ldi pl, lo(z80_regs_origin)
-    sub pl, a
     ld  a
     shl a
     st  a
@@ -268,73 +216,8 @@ sla_reg:
     jmp
 
 sra:
-    ldi ph, hi(z80_imm0)
-    ldi pl, lo(z80_imm0)
-    ld  a
-    ldi b, 0x07
-    and a, b
-    ldi b, 6
-    sub b, a
-    ldi ph, hi(sra_reg)
-    ldi pl, lo(sra_reg)
-    jnz
-    ldi ph, hi(z80_prefix)
-    ldi pl, lo(z80_prefix)
-    ld  a
-    add a, 0
-    ldi ph, hi(sra_hl)
-    ldi pl, lo(sra_hl)
-    jz
-    ldi ph, hi(sra_iy)
-    ldi pl, lo(sra_iy)
-    js
-sra_ix:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_ix)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_ix + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    sar a
-    st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
-    jmp
-
-sra_iy:
-    ldi ph, hi(z80_imm1)
-    ldi pl, lo(z80_imm1)
-    ld  b
-    ldi pl, lo(z80_iy)
-    ld  a
-    add a, b
-    ldi pl, lo(z80_iy + 1)
-    ld  ph
-    mov pl, a
-    mov a, 0
-    adc ph, a
-    shl b
-    sbb ph, a
-    ld  a
-    sar a
-    st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
-    jmp
-
-sra_hl:
-    ldi ph, hi(z80_hl)
-    ldi pl, lo(z80_hl)
+    ldi ph, hi(z80_tmp)
+    ldi pl, lo(z80_tmp)
     ld  a
     inc pl
     ld  ph
@@ -347,15 +230,124 @@ sra_hl:
     ldi pl, lo(set_flags)
     jmp
 
-sra_reg:
-    ; a = reg number
-    ldi ph, hi(z80_regs_origin)
-    ldi pl, lo(z80_regs_origin)
-    sub pl, a
+    ; 07
+opcode_rlca:
+    ldi ph, hi(z80_a)
+    ldi pl, lo(z80_a)
     ld  a
-    sar a
+    shl a
+    adc a, 0
     st  a
-    ldi b, 0
-    ldi ph, hi(set_flags)
-    ldi pl, lo(set_flags)
+    shr a
+    ldi pl, lo(z80_f)
+    ld  b
+    mov a, 0
+    adc a, 0
+    mov pl, a
+    ldi a, z80_sf | z80_zf | z80_pf
+    and a, b
+    or  a, pl
+    ldi pl, lo(z80_f)
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
     jmp
+
+    ; a - opcode
+    ; 00000rrr - RLC
+    ; 00010rrr - RL
+    ; 00001rrr - RRC
+    ; 00011rrr - RR
+cb_rotate:
+    shr a
+    shr a
+    shr a
+    shl a
+    ldi ph, hi(cb_rotate_table)
+    ldi pl, lo(cb_rotate_table)
+    add pl, a
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    jmp
+
+opcode_rlc:
+    ldi ph, hi(opcode_rlc)
+    ldi pl, lo(opcode_rlc)
+    jmp
+
+opcode_rrc:
+    ldi ph, hi(opcode_rrc)
+    ldi pl, lo(opcode_rrc)
+    jmp
+
+opcode_rl:
+    ; b := c'
+    ; P = x
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    ldi pl, lo(z80_tmp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ldi a, z80_cf
+    and b, a
+    ; a := [x]
+    ld  a
+    ; (c, a) := a << 1
+    shl a
+    ; [x] := a
+    st  a
+    ; a := c << 1
+    mov a, 0
+    adc a, 0
+    shl a
+    ; b := b | a
+    or  b, a
+    ; a := [x]
+    ld  a
+    ; (c, b) := b >> 1
+    shr b
+    ; a += c
+    adc a, 0
+    ; [x] := a
+    st  a
+    ldi ph, hi(rl_set_flags_s)
+    ldi pl, lo(rl_set_flags_s)
+    js
+    ldi ph, hi(rl_set_flags_store)
+    ldi pl, lo(rl_set_flags_store)
+    jnz
+rl_set_flags_z:
+    ; z implies no s
+    ldi a, z80_zf
+    or  b, a
+    jmp
+rl_set_flags_s:
+    ; s implies no z
+    ldi a, z80_sf
+    or  b, a
+rl_set_flags_store:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    st  b
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
+    jmp
+
+opcode_rr:
+    ldi ph, hi(opcode_rr)
+    ldi pl, lo(opcode_rr)
+    jmp
+
+    .section text.cb_rotate_table
+    .align 8
+cb_rotate_table:
+    dw opcode_rlc
+    dw opcode_rrc
+    dw opcode_rl
+    dw opcode_rr
+

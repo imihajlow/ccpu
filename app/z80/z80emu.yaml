@@ -5,15 +5,12 @@
 - name: text
   init: Yes
 
+- name: bss
+  init: No
+
 - name: z80_code
   init: Yes
-  end: 0x8000
 
 - name: z80_ram
-  init: No
-  begin: 0x8000
-  end: 0xC000
-
-- name: bss
   init: No
   end: 0xD000
