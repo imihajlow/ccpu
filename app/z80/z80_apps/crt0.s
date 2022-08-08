@@ -8,8 +8,8 @@
     jp  _exit
 
     ;; Ordering of segments for the linker.
-    ; .area   _HOME
     .area   _CODE
+    .area   _HOME
     .area   _INITIALIZER
     .area   _GSINIT
     .area   _GSFINAL
