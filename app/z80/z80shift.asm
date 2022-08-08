@@ -315,6 +315,7 @@ opcode_rl:
     adc a, 0
     ; [x] := a
     st  a
+rx_check_flags:
     ldi ph, hi(rl_set_flags_s)
     ldi pl, lo(rl_set_flags_s)
     js
@@ -339,8 +340,44 @@ rl_set_flags_store:
     jmp
 
 opcode_rr:
-    ldi ph, hi(opcode_rr)
-    ldi pl, lo(opcode_rr)
+    ; b := c ? 0x80 : 0x00
+    ; P = x
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    ldi pl, lo(z80_tmp)
+    ld  a
+    inc pl
+    ld  ph
+    mov pl, a
+    ldi a, 0x80
+    shr b
+    exp b
+    and b, a
+    ; a := [x]
+    ld  a
+    ; (a, c) = a >> 1
+    shr a
+    ; [x] := a
+    st  a
+    ; a := c
+    mov a, 0
+    adc a, 0
+    ; b |= a
+    or  b, a
+    ; a := [x]
+    ld  a
+    ; a ^= b
+    xor a, b
+    ; b := b & 1
+    shl b
+    shr b
+    ; a ^= b
+    xor a, b
+    ; [x] = a
+    st a
+    ldi ph, hi(rx_check_flags)
+    ldi pl, lo(rx_check_flags)
     jmp
 
     .section text.cb_rotate_table

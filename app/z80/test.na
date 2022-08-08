@@ -2128,6 +2128,27 @@ u8 test_rot() {
     ASSERT(data == 0x0eu8);
     ASSERT(z80_f == 0u8);
 
+
+    // rr
+    z80_l = 0x01u8;
+    z80_f = FLAG_C;
+    z80run({
+        // rr l
+        0xcbu8, 0x1du8,
+        HALT
+    });
+    ASSERT(z80_l == 0x80u8);
+    ASSERT(z80_f == (FLAG_C | FLAG_S));
+
+    z80_f = 0u8;
+    z80run({
+        // rr l
+        0xcbu8, 0x1du8,
+        HALT
+    });
+    ASSERT(z80_l == 0x40u8);
+    ASSERT(z80_f == 0u8);
+
     ok();
 }
 
