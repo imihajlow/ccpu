@@ -174,6 +174,7 @@
 
     ; in z80shift.asm
     .global opcode_rlca
+    .global opcode_rla
 
     .global z80_halt_handler
 
@@ -468,7 +469,7 @@ jump_table:
     dw opcode_inc_r_common      ; 14
     dw opcode_dec_r_common      ; 15
     dw opcode_ld_r_imm      ; 16
-    dw not_implemented      ; 17
+    dw opcode_rla      ; 17
     dw opcode_jr      ; 18
     dw opcode_add_de_16      ; 19
     dw opcode_ld_a_imm_de      ; 1A

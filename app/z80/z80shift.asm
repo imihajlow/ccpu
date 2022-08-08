@@ -49,6 +49,7 @@
 
     .export shift
     .export opcode_rlca
+    .export opcode_rla
 
     .section text.shift
     ; parity is not implemented!
@@ -378,6 +379,38 @@ opcode_rr:
     st a
     ldi ph, hi(rx_check_flags)
     ldi pl, lo(rx_check_flags)
+    jmp
+
+    ; 17
+opcode_rla:
+    ldi ph, hi(z80_f)
+    ldi pl, lo(z80_f)
+    ld  b
+    ldi pl, lo(z80_a)
+    ld  a
+    shl a
+    exp pl
+    shr b
+    adc a, 0
+    mov b, a
+    shr pl
+    mov a, 0
+    adc a, 0
+    ldi pl, lo(z80_a)
+    st  b
+    ldi pl, lo(z80_f)
+    ldi b, ~(z80_hf | z80_nf | z80_cf)
+    or  b, a
+    ld  a
+    and a, b
+    st  a
+    ldi a, z80_cf
+    and b, a
+    ld  a
+    or  a, b
+    st  a
+    ldi ph, hi(z80_reset_prefix)
+    ldi pl, lo(z80_reset_prefix)
     jmp
 
     .section text.cb_rotate_table
