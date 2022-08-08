@@ -31,6 +31,15 @@
     inc pl
     st a
 
+    ; enable all memory segments to let Z80 read from video RAM
+    ; enable both sides
+    ; enable lo RAM (because we are in the low ram)
+    ldi ph, 0xff
+    ldi pl, 0x02
+    ldi a, 0xff
+    st  a
+
+
     ; point SP to the end of stack segment
     ldi pl, lo(z80_sp)
     ldi ph, hi(z80_sp)
