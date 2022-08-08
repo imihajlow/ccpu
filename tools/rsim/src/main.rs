@@ -13,6 +13,7 @@ mod card;
 mod config;
 mod font;
 mod stack;
+mod z80;
 
 use crate::config::Config;
 use std::fs::{File,OpenOptions};
@@ -372,6 +373,7 @@ fn main() {
     let mut state = machine::State::new();
     let mut last_input = "\n".to_string();
     let mut rl = Editor::<()>::new();
+    let z80 = z80::Z80EmuState::new(&syms);
     loop {
         match syms.associate_line(state.ip) {
             Some((filename, line)) => println!("{}:{}", filename, line),
@@ -382,6 +384,9 @@ fn main() {
         match syms.associate_address(state.ip) {
             Some((sym, offset)) => println!("{} + 0x{:X}", sym, offset),
             None => {}
+        }
+        if let Some(ref s) = z80 {
+            s.fancy_print(&system);
         }
         let mut input = match startup_commands.pop() {
             Some(s) => {

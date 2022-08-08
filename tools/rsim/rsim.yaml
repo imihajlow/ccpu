@@ -1,0 +1,11 @@
+mem:
+  io-rev3-with-cr: 0
+vga:
+  font: "../../app/font/font.bin"
+keyboard:
+  present
+ps2: present
+spi: present
+stack: absent
+server:
+  port: 3000

@@ -19,6 +19,14 @@ pub enum MemoryWriteError {
     InvalidValue,
 }
 
+impl<'a> dyn Memory + 'a {
+    pub fn get_u16(&'a self, addr: u16) -> Result<u16, MemoryReadError> {
+        let lo = self.get(addr)?;
+        let hi = self.get(addr.wrapping_add(1))?;
+        return Ok(((hi as u16) << 8) | lo as u16);
+    }
+}
+
 impl fmt::Display for MemoryReadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {

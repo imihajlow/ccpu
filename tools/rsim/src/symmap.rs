@@ -103,6 +103,15 @@ impl SymMap {
             .collect()
     }
 
+    pub fn find_exact_global_symbol(&self, name: &str) -> Option<u16> {
+        self.labels.iter()
+            .find_map(|(sym, addr)|
+                match sym {
+                    Symbol::Global(n) if name == n => Some(*addr),
+                    _ => None
+                })
+    }
+
     pub fn find_line(&self, filename: &str, line: u32) -> Vec<&(LineInfo, u16)> {
         self.lines.iter()
             .filter(|(LineInfo{ filename: fname, line: ln }, _)|
