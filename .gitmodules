@@ -1,0 +1,3 @@
+[submodule "model/74xx-verilog"]
+	path = model/74xx
+	url = https://github.com/imihajlow/74xx-verilog.git

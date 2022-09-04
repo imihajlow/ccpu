@@ -1,6 +1,7 @@
 model/**/*
 !/**/
 !model/**/*.*
+!model/74xx-verilog
 .*
 *.hex
 *.vcd
