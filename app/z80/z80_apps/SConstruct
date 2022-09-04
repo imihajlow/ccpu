@@ -30,7 +30,13 @@ env.Append(BUILDERS = {
 crt0rel = env.Command("crt0.rel", "crt0.s", "sdasz80 -plosgff $SOURCE")
 
 env.Program("hello", [crt0rel, "hello.c"])
-
 env.Emulated("hello", "hello.ihx")
+
+
+env.Program("matrix", [crt0rel, "matrix.c"])
+env.Emulated("matrix", "matrix.ihx")
+
+env.Program("fathello", [crt0rel] + Split("fat/source/ff.c fat/source/card_diskio.c fat/source/fathello.c"))
+env.Emulated("fathello", "fathello.ihx")
 
 env.Clean('foo', Glob("*.lst") + Glob("*.noi") + Glob('*.sym') + Glob("*.lk") + Glob("*.map") + Glob("*.rst") + Glob("*.mem") + Glob("*.asm"))
