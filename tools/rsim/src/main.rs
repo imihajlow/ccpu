@@ -48,7 +48,8 @@ enum Command {
 pub enum Type {
     Byte,
     Word,
-    Dword
+    Dword,
+    Qword
 }
 
 
@@ -125,6 +126,10 @@ fn parse_command(syms: &symmap::SymMap, s: &String, rl: &mut Editor<()>) -> Comm
                     "d" |
                     "dword" |
                     "dwords" => Type::Dword,
+
+                    "q" |
+                    "qword" |
+                    "qwords" => Type::Qword,
 
                     _ => return Error
                 }
@@ -289,7 +294,7 @@ fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Opt
     None
 }
 
-fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u32> {
+fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u64> {
     match t {
         Type::Byte => {
             let b = mem.get(addr).ok()?;
@@ -307,6 +312,13 @@ fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u32> {
             let b3 = mem.get(addr + 3).ok()?;
             Some(u32::from_le_bytes([b0, b1, b2, b3]).into())
         }
+        Type::Qword => {
+            let mut buf = [0; 8];
+            for i in 0..8 {
+                buf[i] = mem.get(addr + i as u16).ok()?;
+            }
+            Some(u64::from_le_bytes(buf).into())
+        }
     }
 }
 
@@ -314,7 +326,8 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
     let size = match t {
         Type::Byte => 1,
         Type::Word => 2,
-        Type::Dword => 4
+        Type::Dword => 4,
+        Type::Qword => 8,
     };
     if count == 1 {
         let val = get_value(mem, addr, t);
