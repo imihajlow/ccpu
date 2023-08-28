@@ -1,35 +1,37 @@
-mod instruction;
-mod memory;
-mod machine;
-mod mem;
-mod symmap;
-mod system;
-mod keyboard;
-mod vga;
-mod server;
-mod ps2;
-mod spi;
 mod card;
 mod config;
 mod font;
+mod instruction;
+mod keyboard;
+mod machine;
+mod mem;
+mod memory;
+mod ps2;
+mod server;
+mod spi;
 mod stack;
+mod symmap;
+mod system;
+mod vga;
 mod z80;
 
 use crate::config::Config;
-use std::fs::{File,OpenOptions};
+use memory::MemoryWriteError;
+use regex::Regex;
+use std::fs::{File, OpenOptions};
+use std::println;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use regex::Regex;
-#[macro_use] extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
+use crate::machine::StepResult;
+use argparse::{ArgumentParser, Collect, Store, StoreOption};
 use ctrlc;
 use parse_int::parse;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
-use argparse::{ArgumentParser, StoreOption, Store, Collect};
-use crate::machine::StepResult;
 
 enum Command {
-    Error,
     Next,
     NextLine,
     Until(u16),
@@ -37,7 +39,9 @@ enum Command {
     Breakpoint(u16),
     Delete(u32),
     Print(u16, Type, u16),
-    Press(Option<(u8,u8)>),
+    Poke(u16, Type, u64),
+    Check(u16, Type, u64),
+    Press(Option<(u8, u8)>),
     Png(String),
     Insert(File),
     Eject,
@@ -45,94 +49,89 @@ enum Command {
 }
 
 #[derive(Copy, Clone)]
+enum ParseError {
+    BadCommand,
+    BadArgument,
+}
+
+#[derive(Copy, Clone)]
 pub enum Type {
     Byte,
     Word,
     Dword,
-    Qword
+    Qword,
 }
 
+impl Type {
+    fn new_from_string(s: &str) -> Result<Self, ParseError> {
+        match s {
+            "b" | "byte" | "bytes" => Ok(Type::Byte),
 
-fn parse_command(syms: &symmap::SymMap, s: &String, rl: &mut Editor<()>) -> Command {
+            "w" | "word" | "words" => Ok(Type::Word),
+
+            "d" | "dword" | "dwords" => Ok(Type::Dword),
+
+            "q" | "qword" | "qwords" => Ok(Type::Qword),
+
+            _ => Err(ParseError::BadArgument),
+        }
+    }
+}
+
+fn parse_command(
+    syms: &symmap::SymMap,
+    s: &String,
+    rl: &mut Editor<()>,
+) -> Result<Command, ParseError> {
     use Command::*;
     let mut iter = s.split_whitespace();
     match iter.next() {
-        None |
-        Some("n") |
-        Some("next") => Next,
+        None | Some("n") | Some("next") => Ok(Next),
 
-        Some("l") => NextLine,
+        Some("l") => Ok(NextLine),
 
-        Some("u") |
-        Some("until") => {
-            match select_address(syms, iter.next().unwrap_or(""), rl) {
-                Some(x) => Until(x),
-                _ => Error
-            }
+        Some("u") | Some("until") => match select_address(syms, iter.next().unwrap_or(""), rl) {
+            Some(x) => Ok(Until(x)),
+            _ => Err(ParseError::BadArgument),
         },
 
-        Some("r") |
-        Some("run") => Run,
+        Some("r") | Some("run") => Ok(Run),
 
-        Some("b") |
-        Some("break") |
-        Some("breakpoint") => {
+        Some("b") | Some("break") | Some("breakpoint") => {
             match select_address(syms, iter.next().unwrap_or(""), rl) {
-                Some(x) => Breakpoint(x),
-                _ => Error
+                Some(x) => Ok(Breakpoint(x)),
+                _ => Err(ParseError::BadArgument),
             }
         }
 
-        Some("del") |
-        Some("delete") => {
-            match iter.next() {
-                Some(s) => match parse::<u32>(s) {
-                    Ok(x) => Delete(x),
-                    _ => Error
-                }
-                None => Error
-            }
-        }
+        Some("del") | Some("delete") => match iter.next() {
+            Some(s) => match parse::<u32>(s) {
+                Ok(x) => Ok(Delete(x)),
+                _ => Err(ParseError::BadArgument),
+            },
+            None => Err(ParseError::BadArgument),
+        },
 
-        Some("p") |
-        Some("print") => {
+        Some("p") | Some("print") => {
             let args: Vec<&str> = iter.collect();
             let (i_addr, i_type, i_count) = match args.len() {
-                0 => return Error,
+                0 => return Err(ParseError::BadArgument),
                 1 => {
                     // p var
                     (0, None, None)
-                },
+                }
                 2 => {
                     // p w var
                     (1, Some(0), None)
-                },
+                }
                 3 => {
                     // p 100 b var
                     (2, Some(1), Some(0))
-                },
-                _ => return Error
+                }
+                _ => return Err(ParseError::BadArgument),
             };
             let t = if let Some(i) = i_type {
-                match args[i] {
-                    "b" |
-                    "byte" |
-                    "bytes" => Type::Byte,
-
-                    "w" |
-                    "word" |
-                    "words" => Type::Word,
-
-                    "d" |
-                    "dword" |
-                    "dwords" => Type::Dword,
-
-                    "q" |
-                    "qword" |
-                    "qwords" => Type::Qword,
-
-                    _ => return Error
-                }
+                Type::new_from_string(args[i])?
             } else {
                 Type::Byte
             };
@@ -140,7 +139,7 @@ fn parse_command(syms: &symmap::SymMap, s: &String, rl: &mut Editor<()>) -> Comm
             let count = if let Some(i) = i_count {
                 match parse::<u16>(args[i]) {
                     Ok(n) => n,
-                    _ => return Error
+                    _ => return Err(ParseError::BadArgument),
                 }
             } else {
                 1
@@ -148,80 +147,113 @@ fn parse_command(syms: &symmap::SymMap, s: &String, rl: &mut Editor<()>) -> Comm
 
             let addr = match select_address(syms, args[i_addr], rl) {
                 Some(x) => x,
-                None => return Error
+                None => return Err(ParseError::BadArgument),
             };
-            Print(addr, t, count)
+            Ok(Print(addr, t, count))
+        }
+
+        Some("poke") => {
+            let args: Vec<&str> = iter.collect();
+            if args.len() != 3 {
+                return Err(ParseError::BadArgument);
+            }
+
+            let t = Type::new_from_string(args[0])?;
+
+            let addr = match select_address(syms, args[1], rl) {
+                Some(x) => x,
+                None => return Err(ParseError::BadArgument),
+            };
+
+            let val = match parse::<u64>(&args[2]) {
+                Ok(x) => x,
+                Err(_) => return Err(ParseError::BadArgument),
+            };
+            Ok(Poke(addr, t, val))
+        }
+
+        Some("check") => {
+            let args: Vec<&str> = iter.collect();
+            if args.len() != 3 {
+                return Err(ParseError::BadArgument);
+            }
+
+            let t = Type::new_from_string(args[0])?;
+
+            let addr = match select_address(syms, args[1], rl) {
+                Some(x) => x,
+                None => return Err(ParseError::BadArgument),
+            };
+
+            let val = match parse::<u64>(&args[2]) {
+                Ok(x) => x,
+                Err(_) => return Err(ParseError::BadArgument),
+            };
+            Ok(Check(addr, t, val))
+        }
+
+        Some("press") => match iter.next() {
+            None => Ok(Press(None)),
+            Some(s) => Ok(match s.to_uppercase().as_str() {
+                "F1" => Press(Some(keyboard::KEY_F1)),
+                "F2" => Press(Some(keyboard::KEY_F2)),
+                "*" => Press(Some(keyboard::KEY_STAR)),
+                "#" => Press(Some(keyboard::KEY_HASH)),
+                "1" => Press(Some(keyboard::KEY_1)),
+                "2" => Press(Some(keyboard::KEY_2)),
+                "3" => Press(Some(keyboard::KEY_3)),
+                "UP" => Press(Some(keyboard::KEY_UP)),
+                "4" => Press(Some(keyboard::KEY_4)),
+                "5" => Press(Some(keyboard::KEY_5)),
+                "6" => Press(Some(keyboard::KEY_6)),
+                "DOWN" => Press(Some(keyboard::KEY_DOWN)),
+                "7" => Press(Some(keyboard::KEY_7)),
+                "8" => Press(Some(keyboard::KEY_8)),
+                "9" => Press(Some(keyboard::KEY_9)),
+                "ESCAPE" | "ESC" => Press(Some(keyboard::KEY_ESCAPE)),
+                "LEFT" => Press(Some(keyboard::KEY_LEFT)),
+                "0" => Press(Some(keyboard::KEY_0)),
+                "RIGHT" => Press(Some(keyboard::KEY_RIGHT)),
+                "ENTER" => Press(Some(keyboard::KEY_ENTER)),
+                _ => return Err(ParseError::BadArgument),
+            }),
         },
 
-        Some("press") => {
-            match iter.next() {
-                None => Press(None),
-                Some(s) => match s.to_uppercase().as_str() {
-                    "F1" => Press(Some(keyboard::KEY_F1)),
-                    "F2" => Press(Some(keyboard::KEY_F2)),
-                    "*" => Press(Some(keyboard::KEY_STAR)),
-                    "#" => Press(Some(keyboard::KEY_HASH)),
-                    "1" => Press(Some(keyboard::KEY_1)),
-                    "2" => Press(Some(keyboard::KEY_2)),
-                    "3" => Press(Some(keyboard::KEY_3)),
-                    "UP" => Press(Some(keyboard::KEY_UP)),
-                    "4" => Press(Some(keyboard::KEY_4)),
-                    "5" => Press(Some(keyboard::KEY_5)),
-                    "6" => Press(Some(keyboard::KEY_6)),
-                    "DOWN" => Press(Some(keyboard::KEY_DOWN)),
-                    "7" => Press(Some(keyboard::KEY_7)),
-                    "8" => Press(Some(keyboard::KEY_8)),
-                    "9" => Press(Some(keyboard::KEY_9)),
-                    "ESCAPE" | "ESC" => Press(Some(keyboard::KEY_ESCAPE)),
-                    "LEFT" => Press(Some(keyboard::KEY_LEFT)),
-                    "0" => Press(Some(keyboard::KEY_0)),
-                    "RIGHT" => Press(Some(keyboard::KEY_RIGHT)),
-                    "ENTER" => Press(Some(keyboard::KEY_ENTER)),
-                    _ => Error
+        Some("png") => match iter.next() {
+            Some(s) => Ok(Png(s.to_string())),
+            None => Err(ParseError::BadArgument),
+        },
+
+        Some("insert") => match iter.next() {
+            Some(s) => match OpenOptions::new().write(true).read(true).open(s) {
+                Ok(f) => Ok(Insert(f)),
+                Err(e) => {
+                    eprintln!("Can't open {}: {:?}", s, e);
+                    Err(ParseError::BadArgument)
                 }
-            }
-        }
+            },
+            None => Err(ParseError::BadArgument),
+        },
 
-        Some("png") => {
-            match iter.next() {
-                Some(s) => Png(s.to_string()),
-                None => Error,
-            }
-        }
+        Some("eject") => Ok(Eject),
 
-        Some("insert") => {
-            match iter.next() {
-                Some(s) => {
-                    match OpenOptions::new().write(true).read(true).open(s) {
-                        Ok(f) => Insert(f),
-                        Err(e) => {
-                            eprintln!("Can't open {}: {:?}", s, e);
-                            Error
-                        }
-                    }
-                }
-                None => Error
-            }
-        }
+        Some("quit") => Ok(Quit),
 
-        Some("eject") => Eject,
-
-        Some("quit") => Quit,
-
-        _ => Error
+        _ => Err(ParseError::BadCommand),
     }
 }
 
-fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>, rl: &mut Editor<()>) -> Option<u16> {
+fn select_symbol<N: std::fmt::Display>(
+    symbols: &Vec<&(N, u16)>,
+    rl: &mut Editor<()>,
+) -> Option<u16> {
     match symbols.len() {
-        0 => {
-            None
-        },
+        0 => None,
         1 => {
-            let (name,addr) = &symbols[0];
+            let (name, addr) = &symbols[0];
             println!("{} => 0x{:04X}", name, addr);
             Some(*addr)
-        },
+        }
         n if n < 10 => {
             println!("Choose wisely:");
             for (i, (name, addr)) in symbols.iter().enumerate() {
@@ -229,23 +261,20 @@ fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>, rl: &mut Editor
             }
             let input = match rl.readline("Which one? ") {
                 Ok(l) => l,
-                Err(ReadlineError::Eof) |
-                Err(ReadlineError::Interrupted) => return None,
+                Err(ReadlineError::Eof) | Err(ReadlineError::Interrupted) => return None,
                 Err(e) => {
                     println!("Error {:?}", e);
                     return None;
                 }
             };
             match parse::<usize>(&input) {
-                Ok(i) if i < n => {
-                    Some(symbols[i].1)
-                },
+                Ok(i) if i < n => Some(symbols[i].1),
                 _ => {
                     println!("As you wish.");
                     None
                 }
             }
-        },
+        }
         _ => {
             println!("Too many choises");
             None
@@ -255,7 +284,10 @@ fn select_symbol<N: std::fmt::Display>(symbols: &Vec<&(N, u16)>, rl: &mut Editor
 
 fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Option<u16> {
     lazy_static! {
-        static ref RE: Regex = Regex::new(r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|(0x[0-9a-f]+)$").unwrap();
+        static ref RE: Regex = Regex::new(
+            r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|(0x[0-9a-f]+)$"
+        )
+        .unwrap();
     }
 
     match RE.captures(name) {
@@ -266,7 +298,7 @@ fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Opt
         Some(cap) => {
             match cap.get(2) {
                 Some(line) => {
-                    let file  = &cap[1];
+                    let file = &cap[1];
                     let line = parse::<u32>(line.as_str()).unwrap();
                     let options = syms.find_line(file, line);
                     return select_symbol(&options, rl);
@@ -281,12 +313,10 @@ fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Opt
                 None => {}
             }
             match cap.get(4) {
-                Some(addr) => {
-                    match parse::<u16>(addr.as_str()) {
-                        Ok(addr) => return Some(addr),
-                        _ => {}
-                    }
-                }
+                Some(addr) => match parse::<u16>(addr.as_str()) {
+                    Ok(addr) => return Some(addr),
+                    _ => {}
+                },
                 None => {}
             }
         }
@@ -322,6 +352,40 @@ fn get_value(mem: &dyn memory::Memory, addr: u16, t: Type) -> Option<u64> {
     }
 }
 
+fn set_value(
+    mem: &mut dyn memory::Memory,
+    addr: u16,
+    t: Type,
+    val: u64,
+) -> Result<(), MemoryWriteError> {
+    let mut buf = [0; 8];
+    let bytes = match t {
+        Type::Byte => {
+            buf[0] = val as u8;
+            &buf[0..1]
+        }
+        Type::Word => {
+            let lsb = (val as u16).to_le_bytes();
+            buf[0..2].copy_from_slice(&lsb);
+            &buf[0..2]
+        }
+        Type::Dword => {
+            let lsb = (val as u32).to_le_bytes();
+            buf[0..4].copy_from_slice(&lsb);
+            &buf[0..4]
+        }
+        Type::Qword => {
+            let lsb = (val as u64).to_le_bytes();
+            buf[0..8].copy_from_slice(&lsb);
+            &buf[0..8]
+        }
+    };
+    for (offset, b) in bytes.iter().enumerate() {
+        mem.set(addr + (offset as u16), *b)?;
+    }
+    Ok(())
+}
+
 fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
     let size = match t {
         Type::Byte => 1,
@@ -333,34 +397,40 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
         let val = get_value(mem, addr, t);
         match val {
             Some(x) => println!("[0x{:04X}] = \x1b[1m{:X}\x1b[0m ({})", addr, x, x),
-            None => println!("[0x{:04X}] = X", addr)
+            None => println!("[0x{:04X}] = X", addr),
         };
     } else {
         print!("\x1b[1m");
         for i in 0..count {
             let val = get_value(mem, addr + i * size, t);
             match val {
-                Some(x) => print!("{:0width$X} ", x, width=(size * 2).into()),
-                None => print!("XX")
+                Some(x) => print!("{:0width$X} ", x, width = (size * 2).into()),
+                None => print!("XX"),
             }
         }
         println!("\x1b[0m");
     }
-
 }
 
 fn main() {
     let mut fname_bin = String::new();
     let mut fname_map = String::new();
-    let mut fname_config_param : Option<String> = None;
+    let mut fname_config_param: Option<String> = None;
     let mut startup_commands: Vec<String> = Vec::new();
     {
         let mut ap = ArgumentParser::new();
         ap.set_description("CCPU simulator");
-        ap.refer(&mut startup_commands).add_option(&["-c"], Collect, "Commands to run on startup");
-        ap.refer(&mut fname_config_param).add_option(&["--config"], StoreOption, "Config file (default: rsim.yaml in current directory)");
-        ap.refer(&mut fname_bin).add_argument("file", Store, "Program file");
-        ap.refer(&mut fname_map).add_argument("mapfile", Store, "Label map file");
+        ap.refer(&mut startup_commands)
+            .add_option(&["-c"], Collect, "Commands to run on startup");
+        ap.refer(&mut fname_config_param).add_option(
+            &["--config"],
+            StoreOption,
+            "Config file (default: rsim.yaml in current directory)",
+        );
+        ap.refer(&mut fname_bin)
+            .add_argument("file", Store, "Program file");
+        ap.refer(&mut fname_map)
+            .add_argument("mapfile", Store, "Label map file");
         ap.parse_args_or_exit();
     }
 
@@ -380,7 +450,8 @@ fn main() {
         let r = ctrlc_pressed.clone();
         ctrlc::set_handler(move || {
             r.store(true, Ordering::SeqCst);
-        }).expect("Error setting Ctrl-C handler");
+        })
+        .expect("Error setting Ctrl-C handler");
     }
 
     let mut state = machine::State::new();
@@ -414,7 +485,7 @@ fn main() {
                     println!("Error {:?}", e);
                     return;
                 }
-            }
+            },
         };
         if input == "" {
             input = last_input.clone();
@@ -423,12 +494,21 @@ fn main() {
         }
         ctrlc_pressed.store(false, Ordering::SeqCst);
         let cmd = parse_command(&syms, &input, &mut rl);
-        match cmd {
-            Command::Error => {},
-            _ => {
-                rl.add_history_entry(input.as_str());
+        let cmd = match cmd {
+            Err(ParseError::BadCommand) => {
+                println!("bad command");
+                continue;
             }
-        }
+            Err(ParseError::BadArgument) => {
+                println!("bad argument");
+                rl.add_history_entry(input.as_str());
+                continue;
+            }
+            Ok(cmd) => {
+                rl.add_history_entry(input.as_str());
+                cmd
+            }
+        };
         let result = match cmd {
             Command::Quit => break,
             Command::Next => state.step(&mut system),
@@ -448,17 +528,38 @@ fn main() {
                 dump_mem(&system, addr, t, count);
                 StepResult::Ok
             }
+            Command::Poke(addr, t, val) => {
+                if let Err(e) = set_value(&mut system, addr, t, val) {
+                    StepResult::WriteError(addr, e)
+                } else {
+                    StepResult::Ok
+                }
+            }
+            Command::Check(addr, t, val) => {
+                let got = get_value(&system, addr, t);
+                if got == Some(val) {
+                    StepResult::Ok
+                } else {
+                    println!(
+                        "Check failed: address 0x{:04X}, expected {}, got {:?}",
+                        addr, val, got
+                    );
+                    std::process::exit(1)
+                }
+            }
             Command::Press(v) => {
                 match system.get_keyboard_mut() {
                     Some(kbd) => {
                         kbd.press(v);
                         match v {
-                            Some((r,c)) => println!("Pressed {}, {}.", r, c),
-                            None => println!("Released.")
+                            Some((r, c)) => println!("Pressed {}, {}.", r, c),
+                            None => println!("Released."),
                         }
                     }
                     None => {
-                        println!("No keyboard in current configuration. Try running without --plain.");
+                        println!(
+                            "No keyboard in current configuration. Try running without --plain."
+                        );
                     }
                 }
                 StepResult::Ok
@@ -470,16 +571,14 @@ fn main() {
                             Err(x) => {
                                 println!("Can't open file {}: {}", s, x);
                             }
-                            Ok(mut f) => {
-                                match vga.lock().unwrap().create_image(&mut f) {
-                                    Ok(()) => {
-                                        println!("{} has been written", s);
-                                    }
-                                    Err(x) => match x {
-                                        _ => println!("Error saving {}: {:?}", s, x)
-                                    }
+                            Ok(mut f) => match vga.lock().unwrap().create_image(&mut f) {
+                                Ok(()) => {
+                                    println!("{} has been written", s);
                                 }
-                            }
+                                Err(x) => match x {
+                                    _ => println!("Error saving {}: {:?}", s, x),
+                                },
+                            },
                         };
                     }
                     None => {
@@ -509,24 +608,19 @@ fn main() {
                 }
                 StepResult::Ok
             }
-            Command::Error => {
-                println!("Bad command");
-                StepResult::Ok
-            }
         };
 
         match result {
-            StepResult::Ok => {
-            },
+            StepResult::Ok => {}
             StepResult::Breakpoint(id) => {
                 println!("Breakpoint {} reached", id);
-            },
+            }
             StepResult::Watchpoint(id) => {
                 println!("Watchpoint {} reached", id);
-            },
+            }
             StepResult::ReadError(addr, err) => {
                 println!("Read error at 0x{:04X}: {}", addr, err);
-            },
+            }
             StepResult::WriteError(addr, err) => {
                 println!("Write error at 0x{:04X}: {}", addr, err);
             }

@@ -43,7 +43,7 @@ Interactive mode commands
 
 * `d[elete] <number>` - delete a breakpoint.
 
-* `p[rint] [<number>] [b|w|d] <label>` - print bytes/words/dwords starting at label. Examples:
+* `p[rint] [<number>] [b|w|d|q] <label>` - print bytes/words/dwords/qwords starting at label. Examples:
 - `p b main_i` - print one byte at address with a label ending with `main_i`
 - `p 5 w 0x8322` - print five words starting at 0x8322.
 
@@ -58,5 +58,9 @@ Interactive mode commands
 * `eject` - detach the card image.
 
 * `q[uit]` - quit.
+
+* `poke b|w|d|q address value` - modify memory.
+
+* `check b|w|d|q address value` - check memory and die if not matching.
 
 Pressing Enter on a blank line repeats last command. Commands `until` and `break` take also `<filename>:<line>` as an argument.
