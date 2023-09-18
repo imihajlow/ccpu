@@ -5,6 +5,7 @@ import re
 import sys
 import yaml
 import os
+import unix_ar
 from layout import Layout
 from object import Object
 from expression import evaluate, extractVarNames
@@ -287,9 +288,33 @@ def createRom(objects, segments, sectionsFilter, layout):
                     rom[shadowBegin + offsetInsideSegment] = v
     return rom
 
-def load(filename):
+def loadObj(filename):
     with open(filename, "r") as f:
         return Object.fromDict(filename, json.load(f))
+
+def loadLib(libname):
+    r = []
+    with unix_ar.open(libname, "r") as ar:
+        for obj in ar.infolist():
+            filename = obj.name.decode()
+            if filename.endswith(".o"):
+                data = obj.tobuffer().decode()
+                r += [Object.fromDict(filename, json.loads(data))]
+            else:
+                raise LinkerError(f"Library {libname}: unknown file format: {filename}")
+    return r
+
+def load(filenames):
+    r = []
+    for filename in filenames:
+        if filename.endswith(".o"):
+            r += [loadObj(filename)]
+        elif filename.endswith(".a"):
+            r += loadLib(filename)
+        else:
+            raise LinkerError(f"Unknown file format: {filename}")
+    return r
+
 
 def save(data, filename, type, full, filler, slim):
     mode = "wb" if type == "bin" else "w"
@@ -379,8 +404,11 @@ if __name__ == '__main__':
     layout = loadLayout(args.layout)
     try:
         apiIn = loadApi(args.api_in)
-        objects = [load(filename) for filename in args.file]
+        objects = load(args.file)
         checkFlagsCompatibility(objects)
+        for o in objects:
+            if len(o.weakSymbols) != 0:
+                raise LinkerError("TODO: weak symbols are not supported yet", o)
         fitters = {"fill": fitSectionsFill, "simple": fitSectionsSimple}
         sectionsFilter = SectionsFilter(objects, layout.layout, not args.no_gc_sections, apiIn)
         symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)

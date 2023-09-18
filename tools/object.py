@@ -89,6 +89,7 @@ class Object:
         self.flags = Flags(0)
         self.globalSymbols = []
         self.exportSymbols = []
+        self.weakSymbols = []
         self.sections = []
         self.consts = {}
         self.__allocated = False
@@ -99,6 +100,7 @@ class Object:
         return {
             "globalSymbols": self.globalSymbols,
             "exportSymbols": self.exportSymbols,
+            "weakSymbols": self.weakSymbols,
             "sections": [s.toDict() for s in self.sections],
             "consts": self.consts,
             "flags": str(self.flags),
@@ -110,6 +112,7 @@ class Object:
         o.name = name
         o.globalSymbols = d["globalSymbols"]
         o.exportSymbols = d["exportSymbols"]
+        o.weakSymbols = d["weakSymbols"]
         o.sections = [Section.fromDict(s) for s in d["sections"]]
         o.consts = d["consts"]
         o.flags = Flags.fromString(d["flags"])
@@ -143,14 +146,12 @@ class Object:
         self.globalSymbols += [name]
 
     def declareExport(self, name):
-        for s in self.sections:
-            if name in s.labels:
-                self.exportSymbols += [name]
-                return
-        if name in self.consts:
-            self.exportSymbols += [name]
-            return
-        raise ValueError("Label is not defined: {}".format(name))
+        self.__checkDefined(name)
+        self.exportSymbols += [name]
+
+    def declareWeakExport(self, name):
+        self.__checkDefined(name)
+        self.weakSymbols += [name]
 
     def allocate(self):
         for s in self.sections:
@@ -187,3 +188,11 @@ class Object:
                 raise ValueError("Label redifinition: {}".format(name))
         if not isGlobal and name in self.globalSymbols:
             raise ValueError("Label redifinition: {}".format(name))
+
+    def __checkDefined(self, name):
+        for s in self.sections:
+            if name in s.labels:
+                return
+        if name in self.consts:
+            return
+        raise ValueError("Label is not defined: {}".format(name))

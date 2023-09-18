@@ -263,6 +263,8 @@ def assemble(lines, aluRevision):
                 result.declareGlobal(args)
             elif op == '.export':
                 pass
+            elif op == '.weak':
+                pass
             elif op == '.source':
                 result.setSource(args)
             elif op == '.line':
@@ -292,6 +294,8 @@ def assemble(lines, aluRevision):
                     result.align(int(args, 0))
                 elif op == '.export':
                     result.declareExport(args)
+                elif op == '.weak':
+                    result.declareWeakExport(args)
             else:
                 text, refs = encode(op, args, result, aluRevision)
                 result.placeValue(text)
