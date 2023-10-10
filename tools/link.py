@@ -294,14 +294,16 @@ def loadObj(filename):
 
 def loadLib(libname):
     r = []
-    with unix_ar.open(libname, "r") as ar:
-        for obj in ar.infolist():
-            filename = obj.name.decode()
-            if filename.endswith(".o"):
-                data = obj.tobuffer().decode()
-                r += [Object.fromDict(filename, json.loads(data))]
-            else:
-                raise LinkerError(f"Library {libname}: unknown file format: {filename}")
+    ar = unix_ar.open(libname, "r")
+    for obj in ar.infolist():
+        filename = obj.name.decode()
+        if filename.endswith(".o"):
+            file = ar.open(filename)
+            data = file.read().decode()
+            r += [Object.fromDict(filename, json.loads(data))]
+        else:
+            print(f"Library {libname}: unknown file format: {filename}")
+    ar.close()
     return r
 
 def load(filenames):
