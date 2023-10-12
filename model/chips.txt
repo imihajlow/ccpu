@@ -1,8 +1,11 @@
 8-bit register -273 (clear, no z, no we) MC74AC273DTR2G
 counter/register: -161(4 bit, load, carry, clear, no z) MC74ACT161DG
+12-bit counter: -4040
+SIPO shift register: -164
 
 z-buffer: -244 SN74ACT244PW
 RAM: 62c256
+RAM 2k: 6116SA
 d flip-flop: -74 SN74ACT74D
 
 AND: -08 SN74ACT08PW

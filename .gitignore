@@ -1,4 +1,5 @@
 model/**/*
+!Makefile
 !/**/
 !model/**/*.*
 !model/74xx-verilog
