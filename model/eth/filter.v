@@ -2,11 +2,11 @@
 module eth_mac_filter(
     input n_rst,
     input sck,
-    input sda,
+    input mosi,
     input n_ss,
     input [7:0] d,
     input [3:0] a,
-    input n_we,
+    input n_recv_buf_we,
     output n_inhibit
 );
     // MAC should be of form x2-xx-xx-xx-xx-xx
@@ -26,7 +26,7 @@ module eth_mac_filter(
     d_ff_7474 mac_accum(
         .q(last_mac_ok),
         .d(next_mac_ok),
-        .cp(n_we),
+        .cp(n_recv_buf_we),
         .n_sd(ss),
         .n_cd(1'b1)
     );
@@ -43,7 +43,6 @@ module eth_mac_filter(
 
     d_ff_7474 mac_ok_latch(
         .q(n_inhibit),
-        // .n_q(n_we),
         .d(last_mac_ok),
         .cp(mac_end),
         .n_sd(ss),

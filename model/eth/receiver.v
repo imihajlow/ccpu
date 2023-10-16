@@ -2,17 +2,17 @@
 module eth_receiver(
     input n_rst,
     input sck,
-    input sda,
-    output [7:0] d,
-    output [10:0] a,
-    output n_we,
-    output n_cs
+    input mosi,
+    input ena,
+    output [7:0] recv_d,
+    output [10:0] recv_a,
+    output n_recv_buf_we
 );
     wire [3:0] bit_count;
     counter_74161 bit_counter(
         .clk(sck),
         .clr_n(n_rst),
-        .enp(1'b1),
+        .enp(ena), // TODO enp goes down when clk is low (not allowed according to datasheet)
         .ent(1'b1),
         .load_n(1'b1),
         .P(4'b0000),
@@ -43,28 +43,27 @@ module eth_receiver(
           .q(data),
           .cp(sck),
           .n_mr(n_rst),
-          .dsa(sda),
-          .dsb(sda)
+          .dsa(mosi),
+          .dsb(mosi)
     );
     genvar i;
     generate
         for (i = 0; i != 8; i = i + 1) begin
-            assign d[i] = data[7 - i];
+            assign recv_d[i] = data[7 - i];
         end
     endgenerate
 
-    assign n_cs = 1'b0;
     assign #10 n_bit_count_2 = ~bit_count[2];
 
     wire we;
     d_ff_7474 we_latch(
         .q(we),
-        .n_q(n_we),
+        .n_q(n_recv_buf_we),
         .d(1'b1),
         .cp(n_bit_count_2),
         .n_sd(1'b1),
         .n_cd(sck)
     );
 
-    assign a = byte_count[10:0];
+    assign recv_a = byte_count[10:0];
 endmodule

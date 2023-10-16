@@ -12,23 +12,23 @@ module test_filter();
     end
 
     reg sck;
-    reg sda;
+    reg mosi;
     reg n_ss;
     reg n_rst;
+    reg recv_ena;
 
     wire [7:0] d;
     wire [10:0] a;
-    wire n_we;
-    wire n_cs;
+    wire n_recv_buf_we;
 
     eth_receiver recv_inst(
         .n_rst(n_rst),
         .sck(sck),
-        .sda(sda),
-        .d(d),
-        .a(a),
-        .n_we(n_we),
-        .n_cs(n_cs)
+        .mosi(mosi),
+        .ena(recv_ena),
+        .recv_d(d),
+        .recv_a(a),
+        .n_recv_buf_we(n_recv_buf_we)
     );
 
 
@@ -36,19 +36,20 @@ module test_filter();
     eth_mac_filter filter_inst(
         .n_rst(n_rst),
         .sck(sck),
-        .sda(sda),
+        .mosi(mosi),
         .n_ss(n_ss),
         .d(d),
         .a(a[3:0]),
-        .n_we(n_we),
+        .n_recv_buf_we(n_recv_buf_we),
         .n_inhibit(n_inhibit)
     );
 
     initial begin
         sck = 1'b0;
-        sda = 1'b0;
+        mosi = 1'b0;
         n_ss = 1'b1;
         n_rst = 1'b0;
+        recv_ena = 1'b1;
         #200
         n_rst = 1'b1;
     end
@@ -59,7 +60,7 @@ module test_filter();
         integer i;
         begin
             for (i = 0; i != 8; i = i + 1) begin
-                sda = val[i];
+                mosi = val[i];
                 #20
                 sck = 1'b0;
                 #30
