@@ -139,7 +139,7 @@ module eth_receiver_system(
     assign n_recv_d_oe = ~a_buf_sel | n_oe;
     assign n_recv_byte_cnt_lo_oe = ~a_cnt_lo_sel | n_oe;
     assign n_recv_byte_cnt_hi_oe = ~a_cnt_hi_sel | n_oe;
-    assign n_recv_buf_oe = n_oe | ~a_buf_sel;
+    assign n_recv_buf_oe = n_oe | ~a_buf_sel | recv_a_sel;
     assign n_recv_byte_oe = n_recv_ss;
 
     // Bus contention checks
@@ -162,6 +162,14 @@ module eth_receiver_system(
                 #10
                 $fatal;
             end
+        end
+    end
+
+    always @(n_recv_buf_oe or n_recv_buf_we) begin
+        if (~(n_recv_buf_oe | n_recv_buf_we)) begin
+            $display("both WE and OE asserted at once");
+            #10
+            $fatal;
         end
     end
 endmodule
