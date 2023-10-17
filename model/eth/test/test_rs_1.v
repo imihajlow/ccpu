@@ -1,5 +1,14 @@
 `timescale 1ns/1ns
-module test_rs_recv_frame();
+/*
+1. normal operation
+    process 1:
+        transmit frame with MAC ok
+    process 2:
+        read status until ready is read
+        read and check size
+        read frame, check contents
+*/
+module test_rs_1();
     localparam CR_ADDR = 16'hFB00;
     localparam RECV_LEN_LO_ADDR = 16'hFB02;
     localparam RECV_LEN_HI_ADDR = 16'hFB03;
@@ -13,7 +22,7 @@ module test_rs_recv_frame();
     endtask
 
     initial begin
-        $dumpfile("test_rs_recv_frame.vcd");
+        $dumpfile("test_rs_1.vcd");
         $dumpvars;
     end
 
@@ -84,7 +93,37 @@ module test_rs_recv_frame();
             n_oe = 1'b0;
             #500
             wait(~n_rdy);
-            assert((d & data_mask) === expected_data);
+            if ((d & data_mask) !== expected_data) begin
+                $display("read at addr %0h: expected %0h, got %0h", addr, expected_data, d);
+                #5
+                $fatal;
+            end
+            n_oe = 1'b1;
+            #500;
+        end
+    endtask
+
+    task read_and_wait;
+        input [15:0] addr;
+        input [7:0] data_mask;
+        input [7:0] expected_data;
+
+        reg f;
+        begin
+            f = 1'b1;
+            while (f) begin
+                a = addr;
+                d_ena = 1'b0;
+                #500
+                n_oe = 1'b0;
+                #500
+                wait(~n_rdy);
+                if ((d & data_mask) === expected_data) begin
+                    f = 1'b0;
+                end
+                n_oe = 1'b1;
+                #500;
+            end
             n_oe = 1'b1;
             #500;
         end
@@ -139,8 +178,14 @@ module test_rs_recv_frame();
         transmit_byte(8'h87);
         end_frame();
         #200;
+    end
 
-        read_and_check(CR_ADDR, CR_RECV_FULL_MASK, CR_RECV_FULL_VAL);
+    initial begin
+        wait(n_rst);
+        #200
+
+        read_and_wait(CR_ADDR, CR_RECV_FULL_MASK, CR_RECV_FULL_VAL);
+
         read_and_check(RECV_LEN_LO_ADDR, 8'hff, 8'd9);
         read_and_check(RECV_LEN_HI_ADDR, 8'hff, 8'd0);
         read_and_check(16'hF000 + 'd0, 8'hff, 8'b111_111_10);

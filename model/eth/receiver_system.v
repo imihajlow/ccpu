@@ -125,11 +125,12 @@ module eth_receiver_system(
         .n_cd(n_clr_frame_received),
         .n_sd(1'b1)
     );
+    wire n_oe_cr_to_d = n_oe | ~a_cr_sel;
     buffer_74244 buf_cr_to_d(
         .i({7'b0, buf_full}),
         .o(d),
-        .n_oe1(n_oe | ~a_cr_sel),
-        .n_oe2(n_oe | ~a_cr_sel)
+        .n_oe1(n_oe_cr_to_d),
+        .n_oe2(n_oe_cr_to_d)
     );
 
     assign recv_a_sel = recv_sck_ena & ~n_recv_ss;
@@ -140,4 +141,27 @@ module eth_receiver_system(
     assign n_recv_byte_cnt_hi_oe = ~a_cnt_hi_sel | n_oe;
     assign n_recv_buf_oe = n_oe | ~a_buf_sel;
     assign n_recv_byte_oe = n_recv_ss;
+
+    // Bus contention checks
+    wire [2:0] d_oe_count = n_recv_d_oe + n_oe_cr_to_d + n_recv_byte_cnt_lo_oe + n_recv_byte_cnt_hi_oe;
+    always @(d_oe_count or n_rst) begin
+        if (n_rst) begin
+            if (d_oe_count < 3) begin
+                $display("d bus contention");
+                #10
+                $fatal;
+            end
+        end
+    end
+
+    wire [1:0] recv_d_oe_count = n_recv_buf_oe + n_recv_byte_oe;
+    always @(recv_d_oe_count or n_rst) begin
+        if (n_rst) begin
+            if (recv_d_oe_count < 1) begin
+                $display("recv_d bus contention");
+                #10
+                $fatal;
+            end
+        end
+    end
 endmodule

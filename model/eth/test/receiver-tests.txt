@@ -1,0 +1,67 @@
+1. normal operation
+    process 1:
+        transmit frame with MAC ok
+    process 2:
+        read status until ready is read
+        read and check size
+        read frame, check contents
+
+2. discarded frame
+    process 1:
+        transmit frame with wrong MAC
+        read status, must not be ready
+
+3. buffer overrun
+    process 1:
+        transmit frame with MAC ok
+        transmit another frame with MAC ok
+    process 2:
+        read status until ready is read
+        read and check size
+        wait until second frame transmission is finished
+        read and check status
+        read and check size
+        read frame, check contents to be equal first frame
+
+4. re-arm
+    process 1:
+        transmit frame with MAC ok
+        wait for signal
+        transmit another frame with MAC ok
+    process 2:
+        read status until ready is read
+        read and check size
+        read frame, check contents
+        write status to re-arm the receiver
+        signal process 1 to resume transmission
+        read status until ready is read
+        read and check size
+        read frame, check contents
+
+5. read while receiving
+    process 1:
+        transmit frame with MAC ok
+    process 2:
+        check if none of the following leads to a bus contention:
+            set a to size register address, set n_oe
+            set a to buffer address, set n_oe
+
+6. reset while receiving
+    process 1:
+        transmit frame with MAC ok
+        wait for signal
+        transmit another frame with MAC ok
+        signal process 2 to check status
+        wait for signal
+        transmit another frame with MAC ok
+    process 2:
+        read status until ready is read
+        signal process 1 to resume transmission
+        delay for half of the frame
+        write status to re-arm the buffer
+        wait for signal
+        read status and check that ready is not set
+        signal process 1 to resume transmission
+        read status until ready is read
+        read and check size
+        read frame, check contents to be frame 3
