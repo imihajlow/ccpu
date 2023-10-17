@@ -106,7 +106,7 @@ module eth_receiver_system(
         .n_inhibit(n_inhibit)
     );
 
-    assign #10 n_recv_rst = n_rst & n_inhibit;
+    assign #10 n_recv_rst = n_clr_frame_received & n_inhibit;
 
 
     // =====
@@ -116,7 +116,7 @@ module eth_receiver_system(
     wire a_cnt_hi_sel = a == 16'hfb03;
 
     wire buf_full;
-    wire n_clr_frame_received = n_rst;
+    wire n_clr_frame_received = n_rst & ~(a_cr_sel & ~n_we & ~d[0]);
     d_ff_7474 latch_frame_received(
         .q(buf_full),
         .n_q(recv_sck_ena),
