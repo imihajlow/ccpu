@@ -8,11 +8,13 @@ module eth_receiver(
     output [10:0] recv_a,
     output n_recv_buf_we
 );
+    wire #10 sck_f = sck & ena;
+
     wire [3:0] bit_count;
     counter_74161 bit_counter(
-        .clk(sck),
+        .clk(sck_f),
         .clr_n(n_rst),
-        .enp(ena), // TODO enp goes down when clk is low (not allowed according to datasheet)
+        .enp(1'b1), // TODO enp goes down when clk is low (not allowed according to datasheet)
         .ent(1'b1),
         .load_n(1'b1),
         .P(4'b0000),
@@ -25,7 +27,7 @@ module eth_receiver(
         .q(byte_clk),
         .n_q(n_byte_clk),
         .d(bit_count[2]),
-        .cp(sck),
+        .cp(sck_f),
         .n_cd(n_rst),
         .n_sd(1'b1)
     );
@@ -41,7 +43,7 @@ module eth_receiver(
     wire [7:0] data;
     shift_74164 data_input(
           .q(data),
-          .cp(sck),
+          .cp(sck_f),
           .n_mr(n_rst),
           .dsa(mosi),
           .dsb(mosi)
@@ -62,7 +64,7 @@ module eth_receiver(
         .d(1'b1),
         .cp(n_bit_count_2),
         .n_sd(1'b1),
-        .n_cd(sck)
+        .n_cd(sck_f)
     );
 
     assign recv_a = byte_count[10:0];
