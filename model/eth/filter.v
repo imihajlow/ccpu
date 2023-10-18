@@ -9,10 +9,11 @@ module eth_mac_filter(
     input n_recv_buf_we,
     output n_inhibit
 );
-    // MAC should be of form x2-xx-xx-xx-xx-xx
+    // Two LSB of MAC should be 10
     // bits 7:5 of MAC are 111
     // bits 4:2 of MAC equal to inverted byte number
     // bits 1:0 of MAC are 10
+    // MAC is FE:FA:F6:F2:EE:EA
     wire #10 d_765_set = &d[7:5];
     wire #10 d_43210_set = &d[4:0];
     wire [2:0] #15 d_xor_a = d[4:2] ^ a[2:0];

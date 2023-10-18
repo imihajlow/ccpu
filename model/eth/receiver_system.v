@@ -110,13 +110,25 @@ module eth_receiver_system(
 
 
     // =====
-    wire a_cr_sel = a == 16'hfb00;
-    wire a_buf_sel = a[15:11] == 5'b11110;
-    wire a_cnt_lo_sel = a == 16'hfb02;
-    wire a_cnt_hi_sel = a == 16'hfb03;
+    wire #10 recv_ss = ~n_recv_ss;
+    wire #10 a_cr_sel = a == 16'hfb00;
+    wire #10 a_buf_sel = a[15:11] == 5'b11110;
+    wire #10 a_cnt_lo_sel = a == 16'hfb02;
+    wire #10 a_cnt_hi_sel = a == 16'hfb03;
 
     wire buf_full;
-    wire n_clr_frame_received = n_rst & ~(a_cr_sel & ~n_we & ~d[0]);
+    wire #10 n_rearm_req = ~a_cr_sel | n_we | d[0];
+    wire rearm_sched;
+    d_ff_7474 latch_rearm(
+        .q(rearm_sched),
+        .d(1'b0),
+        .cp(1'b0),
+        .n_cd(recv_ss),
+        .n_sd(n_rearm_req)
+    );
+
+    wire #10 n_rearm = recv_ss | ~rearm_sched;
+    wire #10 n_clr_frame_received = n_rst & n_rearm;
     d_ff_7474 latch_frame_received(
         .q(buf_full),
         .n_q(recv_sck_ena),
