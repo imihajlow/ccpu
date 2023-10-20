@@ -26,7 +26,7 @@ module test_receiver();
         .mosi(mosi),
         .ena(ena),
         .recv_d(d),
-        .recv_a(a),
+        .recv_byte_cnt(a),
         .n_recv_buf_we(n_recv_buf_we)
     );
 

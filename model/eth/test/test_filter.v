@@ -27,16 +27,13 @@ module test_filter();
         .mosi(mosi),
         .ena(recv_ena),
         .recv_d(d),
-        .recv_a(a),
+        .recv_byte_cnt(a),
         .n_recv_buf_we(n_recv_buf_we)
     );
 
 
     wire n_inhibit;
     eth_mac_filter filter_inst(
-        .n_rst(n_rst),
-        .sck(sck),
-        .mosi(mosi),
         .n_ss(n_ss),
         .d(d),
         .a(a[3:0]),

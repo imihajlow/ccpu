@@ -75,7 +75,7 @@ module eth_receiver_system(
         .mosi(recv_mosi),
         .ena(recv_sck_ena),
         .recv_d(recv_byte),
-        .recv_a(recv_byte_cnt),
+        .recv_byte_cnt(recv_byte_cnt),
         .n_recv_buf_we(n_recv_buf_we)
     );
 
@@ -96,9 +96,6 @@ module eth_receiver_system(
 
     wire n_inhibit;
     eth_mac_filter filter(
-        .n_rst(n_rst),
-        .sck(recv_sck),
-        .mosi(recv_mosi),
         .n_ss(n_recv_ss),
         .d(recv_byte),
         .a(recv_byte_cnt[3:0]),
@@ -106,18 +103,37 @@ module eth_receiver_system(
         .n_inhibit(n_inhibit)
     );
 
-    assign #10 n_recv_rst = n_clr_frame_received & n_inhibit;
+    assign #10 n_recv_rst = n_clr_frame_received & n_inhibit; // 74hc08
 
 
-    // =====
-    wire #10 recv_ss = ~n_recv_ss;
-    wire #10 a_cr_sel = a == 16'hfb00;
-    wire #10 a_buf_sel = a[15:11] == 5'b11110;
-    wire #10 a_cnt_lo_sel = a == 16'hfb02;
-    wire #10 a_cnt_hi_sel = a == 16'hfb03;
+    wire #10 recv_ss = ~n_recv_ss; // 74hc04
+    wire #10 n_a10 = ~a[10]; // 74hc04
+    wire #10 a_cdef_set = &a[15:12]; // 74hc21
+    wire #10 a_89nab_set = n_a10 & a[11] & a[9] & a[8]; // 74hc21
+    wire #10 n_a_fbxx = ~(a_89nab_set & a_cdef_set); // 74hc04 + diode logic
+    wire #10 n_reg_oe_ena = n_oe | n_a_fbxx; // 74hc32
+    wire [3:0] n_reg_oe;
+    decoder_74139 decoder_reg_oe(
+           .n_o(n_reg_oe),
+           .a(a[1:0]),
+           .n_e(n_reg_oe_ena)
+    );
+    wire n_oe_cr_to_d = n_reg_oe[0];
+    assign n_recv_byte_cnt_lo_oe = n_reg_oe[2];
+    assign n_recv_byte_cnt_hi_oe = n_reg_oe[3];
+
+    wire [3:0] n_v_cr_we;
+    decoder_74139 decoder_cr_we(
+           .n_o(n_v_cr_we),
+           .a({n_a_fbxx, a[0]}),
+           .n_e(n_we)
+    );
+    wire n_rearm_req = n_v_cr_we[0];
+
+    wire #10 n_a11 = ~a[11]; // 74hc04
+    wire #10 n_a_buf_sel = ~(n_a11 & a_cdef_set); // 74hc04 + diode logic
 
     wire buf_full;
-    wire #10 n_rearm_req = ~a_cr_sel | n_we | d[0];
     wire rearm_sched;
     d_ff_7474 latch_rearm(
         .q(rearm_sched),
@@ -126,9 +142,10 @@ module eth_receiver_system(
         .n_cd(recv_ss),
         .n_sd(n_rearm_req)
     );
+    wire #10 n_rearm_sched = ~rearm_sched; // 74hc04
+    wire #10 n_rearm = recv_ss | n_rearm_sched; // 74hc32
+    wire #10 n_clr_frame_received = n_rst & n_rearm; // 74hc08
 
-    wire #10 n_rearm = recv_ss | ~rearm_sched;
-    wire #10 n_clr_frame_received = n_rst & n_rearm;
     d_ff_7474 latch_frame_received(
         .q(buf_full),
         .n_q(recv_sck_ena),
@@ -137,7 +154,6 @@ module eth_receiver_system(
         .n_cd(n_clr_frame_received),
         .n_sd(1'b1)
     );
-    wire n_oe_cr_to_d = n_oe | ~a_cr_sel;
     buffer_74244 buf_cr_to_d(
         .i({7'b0, buf_full}),
         .o(d),
@@ -145,13 +161,14 @@ module eth_receiver_system(
         .n_oe2(n_oe_cr_to_d)
     );
 
-    assign recv_a_sel = recv_sck_ena & ~n_recv_ss;
+    assign #10 recv_a_sel = recv_sck_ena & recv_ss; // 74hc08
+    assign #10 n_recv_d_oe = n_a_buf_sel | n_oe; // 74hc32
+    assign #10 n_recv_buf_oe = n_recv_d_oe | recv_a_sel; // 74hc32
+
+    // =====
+
     assign n_rdy = 1'b0;
 
-    assign n_recv_d_oe = ~a_buf_sel | n_oe;
-    assign n_recv_byte_cnt_lo_oe = ~a_cnt_lo_sel | n_oe;
-    assign n_recv_byte_cnt_hi_oe = ~a_cnt_hi_sel | n_oe;
-    assign n_recv_buf_oe = n_oe | ~a_buf_sel | recv_a_sel;
     assign n_recv_byte_oe = n_recv_ss;
 
     // Bus contention checks

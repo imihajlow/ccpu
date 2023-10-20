@@ -5,10 +5,10 @@ module eth_receiver(
     input mosi,
     input ena,
     output [7:0] recv_d,
-    output [10:0] recv_a,
+    output [10:0] recv_byte_cnt,
     output n_recv_buf_we
 );
-    wire #10 sck_f = sck & ena;
+    wire #10 sck_f = sck & ena; // 74hc08
 
     wire [3:0] bit_count;
     counter_74161 bit_counter(
@@ -32,7 +32,7 @@ module eth_receiver(
         .n_sd(1'b1)
     );
 
-    wire #8 rst = ~n_rst;
+    wire #8 rst = ~n_rst; // 74hc04
     wire [11:0] byte_count;
     counter_744040 byte_counter(
         .clk(byte_clk),
@@ -55,7 +55,7 @@ module eth_receiver(
         end
     endgenerate
 
-    assign #10 n_bit_count_2 = ~bit_count[2];
+    assign #10 n_bit_count_2 = ~bit_count[2]; // 74hc04
 
     wire we;
     d_ff_7474 we_latch(
@@ -67,5 +67,5 @@ module eth_receiver(
         .n_cd(sck_f)
     );
 
-    assign recv_a = byte_count[10:0];
+    assign recv_byte_cnt = byte_count[10:0];
 endmodule

@@ -1,8 +1,5 @@
 `timescale 1ns/1ns
 module eth_mac_filter(
-    input n_rst,
-    input sck,
-    input mosi,
     input n_ss,
     input [7:0] d,
     input [3:0] a,
@@ -14,16 +11,17 @@ module eth_mac_filter(
     // bits 4:2 of MAC equal to inverted byte number
     // bits 1:0 of MAC are 10
     // MAC is FE:FA:F6:F2:EE:EA
-    wire #10 d_765_set = &d[7:5];
-    wire #10 d_43210_set = &d[4:0];
-    wire [2:0] #15 d_xor_a = d[4:2] ^ a[2:0];
-    wire #10 n_d0 = ~d[0];
-    wire #10 d_43210_mac = &d_xor_a & d[1] & n_d0;
-    wire #10 mac_ok = d_765_set & (d_43210_mac | d_43210_set);
+    wire #10 ss = ~n_ss; // 74hc04
+    wire [2:0] #15 d_xor_a = d[4:2] ^ a[2:0]; // 74hc86
+    wire #15 n_d0 = d[0] ^ 1'b1; // 74hc86
+    wire #10 d_4320_mac = &d_xor_a & n_d0; // 74hc21
+    wire #10 d_7651_set = &d[7:5] & d[1]; // 74hc21
+    wire #10 d_4320_set = &d[4:2] & d[0]; // 74hc21
+
+    wire #10 d_4320_ok = d_4320_mac | d_4320_set; // 74hc32
 
     wire last_mac_ok;
-    wire #10 next_mac_ok = mac_ok & last_mac_ok;
-    wire #10 ss = ~n_ss;
+    wire #10 next_mac_ok = d_7651_set & d_4320_ok & last_mac_ok & 1'b1; // 74hc21
     d_ff_7474 mac_accum(
         .q(last_mac_ok),
         .d(next_mac_ok),
@@ -32,7 +30,7 @@ module eth_mac_filter(
         .n_cd(1'b1)
     );
 
-    wire #10 a_02 = a[0] & a[2];
+    wire #10 a_02 = a[0] & a[2]; // 74hc08
     wire mac_end;
     d_ff_7474 a_eq_6_latch(
         .q(mac_end),
