@@ -142,7 +142,7 @@ module eth_transmitter(
     assign #10 n_tx_buf_we = n_a_buf_sel | n_we;
     assign tx_a_sel = n_tx_buf_we;
 
-    wire #10 n_tx_hold_set = n_rst & ~tx_byte_cnt[10];
+    wire #10 n_tx_hold_set = n_rst & ~(tx_byte_cnt[10] & n_tx_byte_clk);
     d_ff_7474 ff_hold(
         .q(tx_hold),
         .n_q(n_tx_hold),

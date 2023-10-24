@@ -94,9 +94,18 @@ module test_transmitter();
                 $display("recv failed: expected %0h, got %0h", expected_data, x);
                 #5
                 $fatal;
+            end else begin
+                // $display("recv %0h ok", x);
             end
         end
     endtask
+
+    function [7:0] get_tx_data;
+        input [15:0] addr;
+        begin
+            get_tx_data =  (addr[7:0] + 16'd1) * 16'd239 + addr[9:2] * 16'd113;
+        end
+    endfunction
 
     initial begin
         $dumpfile("test_transmitter.vcd");
@@ -133,21 +142,32 @@ module test_transmitter();
         n_rst = 1'b1;
         #101
         for (i = 16'hf000; i != 16'hf400; i = i + 1) begin
-            write(i[15:0], i[7:0]);
+            write(i[15:0], get_tx_data(i[15:0]));
         end
         write(TX_RST_ADDR, 8'b0);
     end
 
 
     integer j;
+    reg wait_for_extra_sck;
     initial begin
         wait(~n_rst);
         wait(n_rst);
         #50
         for (j = 0; j != 1024; j = j + 1) begin
-            recv_and_check(j[7:0]);
+            recv_and_check(get_tx_data(j[15:0]));
         end
+        wait_for_extra_sck = 1'b1;
+        #50000
         $finish;
+    end
+
+    initial begin
+        wait_for_extra_sck = 1'b0;
+        wait(wait_for_extra_sck);
+        wait(tx_sck);
+        $display("unexpected sck transition after receiving all data");
+        $fatal;
     end
 
     initial begin
