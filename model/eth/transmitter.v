@@ -28,14 +28,14 @@ module eth_transmitter(
         .n_we(n_tx_buf_we)
     );
 
-    wire n_tx_hold;
-    wire tx_hold;
+    wire n_tx_halt;
+    wire tx_halt;
 
     wire [3:0] tx_cnt;
     wire n_tx_byte_clk;
     counter_74161 half_bit_counter(
        .clk(tx_cp_in),
-       .clr_n(n_tx_hold),
+       .clr_n(n_tx_halt),
        .enp(1'b1),
        .ent(1'b1),
        .load_n(1'b1),
@@ -47,7 +47,7 @@ module eth_transmitter(
     wire [11:0] tx_byte_cnt;
     counter_744040 byte_counter(
         .clk(n_tx_byte_clk),
-        .clr(tx_hold),
+        .clr(tx_halt),
         .q(tx_byte_cnt)
     );
 
@@ -106,7 +106,6 @@ module eth_transmitter(
     wire tx_shift_q7;
     shift_74165 tx_shift(
         .q7(tx_shift_q7),
-        // .n_q7(),
         .ds(1'b0),
         .d(tx_buf_d),
         .n_pl(n_tx_shift_pl),
@@ -124,35 +123,35 @@ module eth_transmitter(
         .n_sd(1'b1)
     );
 
-    assign #10 tx_sck = tx_oe & tx_cnt[0];
-
     d_ff_7474 ff_tx_oe(
         .q(tx_oe),
         .d(1'b1),
         .cp(tx_byte_cnt[0]),
-        .n_cd(n_tx_hold),
+        .n_cd(n_tx_halt),
         .n_sd(1'b1)
     );
 
-    // =====
-    assign #10 n_tx_shift_pl = |tx_cnt;
-    assign #10 tx_shift_cp = ~tx_cnt[0];
-
-    assign #10 n_tx_buf_oe = ~n_tx_buf_we;
-    assign #10 n_tx_buf_we = n_a_buf_sel | n_we;
-    assign tx_a_sel = n_tx_buf_we;
-
-    wire #10 n_tx_hold_set = n_rst & ~(tx_byte_cnt[10] & n_tx_byte_clk);
-    d_ff_7474 ff_hold(
-        .q(tx_hold),
-        .n_q(n_tx_hold),
+    d_ff_7474 ff_halt(
+        .q(tx_halt),
+        .n_q(n_tx_halt),
         .d(1'b0),
         .cp(n_tx_req),
         .n_cd(1'b1),
-        .n_sd(n_tx_hold_set)
+        .n_sd(n_tx_halt_set)
     );
 
+    assign #10 n_tx_buf_we = n_a_buf_sel | n_we; // 74hc32
+    assign #10 tx_sck = tx_oe & tx_cnt[0]; // 74hc08
+    assign #10 n_tx_shift_pl = |tx_cnt; // diode logic
+    assign #10 tx_shift_cp = ~tx_cnt[0]; // 74hc04
+    assign #10 n_tx_buf_oe = ~n_tx_buf_we; // 74hc04
+    assign tx_a_sel = n_tx_buf_we;
     assign n_tx_d_oe = n_tx_buf_we;
+    wire #10 tx_finish = tx_byte_cnt[10] & n_tx_byte_clk; // 74hc08
+    wire #10 n_tx_finish = ~tx_finish; // 74hc04
+    wire #10 n_tx_halt_set = n_rst & n_tx_finish; // 74hc08
+
+
 
 
     // == copied from receiver system - common part
@@ -180,4 +179,25 @@ module eth_transmitter(
     wire #10 n_a11 = ~a[11]; // 74hc04
     wire #10 n_a_buf_sel = ~(n_a11 & a_cdef_set); // 74hc04 + diode logic
 
+    buffer_74244 buf_cr_to_d(
+        .i({6'b0, n_tx_halt, 1'b0}),
+        .o(d),
+        .n_oe1(n_oe_cr_to_d),
+        .n_oe2(n_oe_cr_to_d)
+    );
+
+    // test contention
+    always @(n_we or n_oe) begin
+        if (~n_we & ~n_oe) begin
+            $display("n_we and n_oe are asserted at the same time");
+            $fatal;
+        end
+    end
+
+    always @(n_oe or n_tx_d_oe) begin
+        if (~n_oe & ~n_tx_d_oe) begin
+            $display("tx_d bus contention");
+            $fatal;
+        end
+    end
 endmodule

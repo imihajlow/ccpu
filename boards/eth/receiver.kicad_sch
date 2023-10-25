@@ -1492,11 +1492,6 @@
     (stroke (width 0) (type default))
     (uuid d5b778b6-f6ea-4bfc-b0cd-84044456debc)
   )
-  (bus (pts (xy 189.23 62.865) (xy 189.23 60.325))
-    (stroke (width 0) (type default))
-    (uuid d6ed7b7c-1579-4142-b66b-4bf5aeb3ad2e)
-  )
-
   (wire (pts (xy 68.58 83.185) (xy 115.57 83.185))
     (stroke (width 0) (type default))
     (uuid d9b9e7ed-d6ed-4e3c-a0c0-d40e5adc36f1)

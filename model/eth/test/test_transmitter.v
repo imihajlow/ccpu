@@ -3,8 +3,8 @@ module test_transmitter();
     localparam BUF_ADDR = 16'hF000;
     localparam CR_ADDR = 16'hFB00;
     localparam TX_RST_ADDR = 16'hFB01;
-    localparam CR_TX_RDY_MASK = 8'h02;
-    localparam CR_TX_RDY_VAL = 8'h02;
+    localparam CR_TX_N_RDY_MASK = 8'h02;
+    localparam CR_TX_N_RDY_VAL = 8'h02;
 
     task assert;
         input v;
@@ -144,7 +144,10 @@ module test_transmitter();
         for (i = 16'hf000; i != 16'hf400; i = i + 1) begin
             write(i[15:0], get_tx_data(i[15:0]));
         end
+        read_and_check(CR_ADDR, CR_TX_N_RDY_MASK, 0);
         write(TX_RST_ADDR, 8'b0);
+        #638
+        read_and_check(CR_ADDR, CR_TX_N_RDY_MASK, CR_TX_N_RDY_VAL);
     end
 
 
@@ -158,6 +161,8 @@ module test_transmitter();
             recv_and_check(get_tx_data(j[15:0]));
         end
         wait_for_extra_sck = 1'b1;
+        #977
+        read_and_check(CR_ADDR, CR_TX_N_RDY_MASK, 0);
         #50000
         $finish;
     end

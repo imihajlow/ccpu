@@ -1,6 +1,6 @@
 /* https://wavedrom.com/editor.html */
 {signal: [
-  {name: "n_tx_hold", wave: "1..................0..."},
+  {name: "n_tx_halt", wave: "1..................0..."},
   {name: "tx_cp_in", wave: "p......................", period: 0.5},
   {name: "tx_oe", wave: "1.................0...."},
   {name: "tx_sck", wave: "101010101010101010....."},
