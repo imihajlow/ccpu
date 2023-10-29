@@ -1709,7 +1709,7 @@
   (symbol (lib_id "power:GND") (at 34.925 186.69 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 00510764-f718-4502-b8a4-395d546301bc)
-    (property "Reference" "#PWR037" (at 34.925 193.04 0)
+    (property "Reference" "#PWR0160" (at 34.925 193.04 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 34.925 191.77 0)
@@ -1725,7 +1725,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR037") (unit 1)
+          (reference "#PWR0160") (unit 1)
         )
       )
     )
@@ -1734,7 +1734,7 @@
   (symbol (lib_id "power:VCC") (at 81.915 57.785 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 02df2726-45f0-4f40-bb0a-71ee76eb7628)
-    (property "Reference" "#PWR041" (at 85.725 57.785 0)
+    (property "Reference" "#PWR0164" (at 85.725 57.785 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 78.74 57.785 90)
@@ -1750,7 +1750,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR041") (unit 1)
+          (reference "#PWR0164") (unit 1)
         )
       )
     )
@@ -1759,7 +1759,7 @@
   (symbol (lib_id "power:VCC") (at 166.37 33.655 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 0aecdaa4-cca2-48f6-ad2a-96f2d2bbe79a)
-    (property "Reference" "#PWR051" (at 166.37 37.465 0)
+    (property "Reference" "#PWR0174" (at 166.37 37.465 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 166.37 28.575 0)
@@ -1775,7 +1775,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR051") (unit 1)
+          (reference "#PWR0174") (unit 1)
         )
       )
     )
@@ -1784,7 +1784,7 @@
   (symbol (lib_id "power:VCC") (at 182.88 19.685 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1162205a-8773-4a43-bbcb-29cebcce1f7f)
-    (property "Reference" "#PWR055" (at 182.88 23.495 0)
+    (property "Reference" "#PWR0178" (at 182.88 23.495 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 182.88 14.605 0)
@@ -1800,7 +1800,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR055") (unit 1)
+          (reference "#PWR0178") (unit 1)
         )
       )
     )
@@ -1809,13 +1809,13 @@
   (symbol (lib_id "74xx:74HC04") (at 121.285 146.685 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 11629cce-ef47-4747-b805-f25b7218c86d)
-    (property "Reference" "U17" (at 121.285 138.43 0)
+    (property "Reference" "U9" (at 121.285 138.43 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC04" (at 121.285 140.97 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 121.285 146.685 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 121.285 146.685 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" (at 121.285 146.685 0)
@@ -1838,7 +1838,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U17") (unit 2)
+          (reference "U9") (unit 2)
         )
       )
     )
@@ -1847,13 +1847,13 @@
   (symbol (lib_id "74xx:74HC164") (at 166.37 109.22 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1d26d61e-2734-4edf-8aee-03a8d68da43f)
-    (property "Reference" "U20" (at 168.5641 93.98 0)
+    (property "Reference" "U32" (at 168.5641 93.98 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC164" (at 168.5641 96.52 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 189.23 116.84 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 189.23 116.84 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/74HC_HCT164.pdf" (at 189.23 116.84 0)
@@ -1876,7 +1876,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U20") (unit 1)
+          (reference "U32") (unit 1)
         )
       )
     )
@@ -1885,13 +1885,13 @@
   (symbol (lib_id "Device:C") (at 48.895 162.56 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 26f27ef8-2e62-4085-9f68-95deb4d0b6d9)
-    (property "Reference" "C1" (at 52.07 161.29 0)
+    (property "Reference" "C30" (at 52.07 161.29 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 52.07 163.83 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 49.8602 166.37 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 49.8602 166.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 48.895 162.56 0)
@@ -1902,7 +1902,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "C1") (unit 1)
+          (reference "C30") (unit 1)
         )
       )
     )
@@ -1911,7 +1911,7 @@
   (symbol (lib_id "power:GND") (at 153.035 93.345 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 299554ec-7389-4444-bfa2-d54312f7647e)
-    (property "Reference" "#PWR050" (at 153.035 99.695 0)
+    (property "Reference" "#PWR0173" (at 153.035 99.695 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 153.035 98.425 0)
@@ -1927,7 +1927,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR050") (unit 1)
+          (reference "#PWR0173") (unit 1)
         )
       )
     )
@@ -1936,7 +1936,7 @@
   (symbol (lib_id "power:VCC") (at 111.76 30.48 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c9296f8-0247-4ab4-9ef9-aaacb5027e58)
-    (property "Reference" "#PWR044" (at 111.76 34.29 0)
+    (property "Reference" "#PWR0167" (at 111.76 34.29 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 111.76 25.4 0)
@@ -1952,7 +1952,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR044") (unit 1)
+          (reference "#PWR0167") (unit 1)
         )
       )
     )
@@ -1961,7 +1961,7 @@
   (symbol (lib_id "power:GND") (at 166.37 124.46 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 41f59d47-f3bf-4ce8-b350-115dca9bbeac)
-    (property "Reference" "#PWR054" (at 166.37 130.81 0)
+    (property "Reference" "#PWR0177" (at 166.37 130.81 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 166.37 129.54 0)
@@ -1977,7 +1977,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR054") (unit 1)
+          (reference "#PWR0177") (unit 1)
         )
       )
     )
@@ -1986,13 +1986,13 @@
   (symbol (lib_id "Device:C") (at 111.76 34.29 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4336c9d4-d8cc-4d0d-830e-762166d1cdf6)
-    (property "Reference" "C2" (at 114.935 33.02 0)
+    (property "Reference" "C31" (at 114.935 33.02 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 114.935 35.56 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 112.7252 38.1 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 112.7252 38.1 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 111.76 34.29 0)
@@ -2003,7 +2003,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "C2") (unit 1)
+          (reference "C31") (unit 1)
         )
       )
     )
@@ -2012,7 +2012,7 @@
   (symbol (lib_id "power:VCC") (at 153.035 85.725 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 43d0fab7-3085-4c64-a439-9c6c028e06ea)
-    (property "Reference" "#PWR049" (at 153.035 89.535 0)
+    (property "Reference" "#PWR0172" (at 153.035 89.535 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 153.035 80.645 0)
@@ -2028,7 +2028,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR049") (unit 1)
+          (reference "#PWR0172") (unit 1)
         )
       )
     )
@@ -2037,7 +2037,7 @@
   (symbol (lib_id "power:VCC") (at 48.895 158.75 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 46aec6c1-d563-4e7c-9b29-cadb153eed09)
-    (property "Reference" "#PWR038" (at 48.895 162.56 0)
+    (property "Reference" "#PWR0161" (at 48.895 162.56 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 48.895 153.67 0)
@@ -2053,7 +2053,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR038") (unit 1)
+          (reference "#PWR0161") (unit 1)
         )
       )
     )
@@ -2062,7 +2062,7 @@
   (symbol (lib_id "power:VCC") (at 128.905 42.545 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4ee576bc-13c7-4846-8145-de36350ec47e)
-    (property "Reference" "#PWR046" (at 128.905 46.355 0)
+    (property "Reference" "#PWR0169" (at 128.905 46.355 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 128.905 37.465 0)
@@ -2078,7 +2078,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR046") (unit 1)
+          (reference "#PWR0169") (unit 1)
         )
       )
     )
@@ -2087,7 +2087,7 @@
   (symbol (lib_id "power:VCC") (at 34.925 166.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5be89cdd-04ec-4c5e-929a-a775e30a9f63)
-    (property "Reference" "#PWR036" (at 34.925 170.18 0)
+    (property "Reference" "#PWR0159" (at 34.925 170.18 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 34.925 161.29 0)
@@ -2103,7 +2103,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR036") (unit 1)
+          (reference "#PWR0159") (unit 1)
         )
       )
     )
@@ -2112,13 +2112,13 @@
   (symbol (lib_id "74xx:74LS08") (at 47.625 83.185 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5ebd9397-c536-4d8c-a660-a23114ebed73)
-    (property "Reference" "U7" (at 47.6167 74.93 0)
+    (property "Reference" "U6" (at 47.6167 74.93 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC08" (at 47.6167 77.47 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 47.625 83.185 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 47.625 83.185 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS08" (at 47.625 83.185 0)
@@ -2141,7 +2141,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U7") (unit 1)
+          (reference "U6") (unit 1)
         )
       )
     )
@@ -2150,13 +2150,13 @@
   (symbol (lib_id "74xx:74HC74") (at 128.905 50.165 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 62ba9fb1-16f3-4cad-99a0-10175b6043bc)
-    (property "Reference" "U16" (at 131.0991 40.64 0)
+    (property "Reference" "U29" (at 131.0991 40.64 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 131.0991 43.18 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 128.905 50.165 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 128.905 50.165 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 128.905 50.165 0)
@@ -2179,7 +2179,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U16") (unit 1)
+          (reference "U29") (unit 1)
         )
       )
     )
@@ -2188,7 +2188,7 @@
   (symbol (lib_id "power:VCC") (at 166.37 96.52 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 68d91794-2253-4c3d-8543-f9fa48fc569b)
-    (property "Reference" "#PWR053" (at 166.37 100.33 0)
+    (property "Reference" "#PWR0176" (at 166.37 100.33 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 166.37 91.44 0)
@@ -2204,7 +2204,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR053") (unit 1)
+          (reference "#PWR0176") (unit 1)
         )
       )
     )
@@ -2213,13 +2213,13 @@
   (symbol (lib_id "74xx:74HC04") (at 46.99 33.655 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6acbcdab-90e5-42a0-b219-5e1f5e539069)
-    (property "Reference" "U17" (at 46.99 24.765 0)
+    (property "Reference" "U9" (at 46.99 24.765 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC04" (at 46.99 27.305 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 46.99 33.655 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 46.99 33.655 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" (at 46.99 33.655 0)
@@ -2242,7 +2242,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U17") (unit 1)
+          (reference "U9") (unit 1)
         )
       )
     )
@@ -2251,13 +2251,13 @@
   (symbol (lib_id "74xx:74HC74") (at 34.925 176.53 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 73e6c7e7-6c96-4695-aa1e-6921bf976e6d)
-    (property "Reference" "U16" (at 41.91 175.26 0)
+    (property "Reference" "U29" (at 41.91 175.26 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 41.91 177.8 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 34.925 176.53 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 34.925 176.53 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 34.925 176.53 0)
@@ -2280,7 +2280,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U16") (unit 3)
+          (reference "U29") (unit 3)
         )
       )
     )
@@ -2289,7 +2289,7 @@
   (symbol (lib_id "power:GND") (at 111.76 38.1 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 884cde2a-1595-43d6-bbaa-b93834d82496)
-    (property "Reference" "#PWR045" (at 111.76 44.45 0)
+    (property "Reference" "#PWR0168" (at 111.76 44.45 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 111.76 43.18 0)
@@ -2305,7 +2305,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR045") (unit 1)
+          (reference "#PWR0168") (unit 1)
         )
       )
     )
@@ -2314,7 +2314,7 @@
   (symbol (lib_id "power:GND") (at 48.895 166.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8bc3ef78-4ffd-4067-a046-66cf50209b3a)
-    (property "Reference" "#PWR039" (at 48.895 172.72 0)
+    (property "Reference" "#PWR0162" (at 48.895 172.72 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 48.895 171.45 0)
@@ -2330,7 +2330,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR039") (unit 1)
+          (reference "#PWR0162") (unit 1)
         )
       )
     )
@@ -2339,7 +2339,7 @@
   (symbol (lib_id "power:GND") (at 166.37 69.215 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 91797c36-02c8-46e5-af59-7933774aad95)
-    (property "Reference" "#PWR052" (at 166.37 75.565 0)
+    (property "Reference" "#PWR0175" (at 166.37 75.565 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 166.37 74.295 0)
@@ -2355,7 +2355,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR052") (unit 1)
+          (reference "#PWR0175") (unit 1)
         )
       )
     )
@@ -2364,7 +2364,7 @@
   (symbol (lib_id "power:VCC") (at 142.875 139.065 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 9a2a3d0c-7fae-48a6-8996-937548bba767)
-    (property "Reference" "#PWR048" (at 142.875 142.875 0)
+    (property "Reference" "#PWR0171" (at 142.875 142.875 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 142.875 133.985 0)
@@ -2380,7 +2380,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR048") (unit 1)
+          (reference "#PWR0171") (unit 1)
         )
       )
     )
@@ -2389,13 +2389,13 @@
   (symbol (lib_id "Device:C") (at 182.88 23.495 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a48757f5-534b-46c8-a1ab-25e0dc68a7de)
-    (property "Reference" "C4" (at 186.055 22.225 0)
+    (property "Reference" "C33" (at 186.055 22.225 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 186.055 24.765 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 183.8452 27.305 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 183.8452 27.305 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 182.88 23.495 0)
@@ -2406,7 +2406,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "C4") (unit 1)
+          (reference "C33") (unit 1)
         )
       )
     )
@@ -2415,13 +2415,13 @@
   (symbol (lib_id "74xx:74HC74") (at 142.875 146.685 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a608d12f-3a6c-4be9-ab1a-4196ea906b0a)
-    (property "Reference" "U16" (at 145.0691 136.525 0)
+    (property "Reference" "U29" (at 145.0691 136.525 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 145.0691 139.065 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 142.875 146.685 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 142.875 146.685 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 142.875 146.685 0)
@@ -2444,7 +2444,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U16") (unit 2)
+          (reference "U29") (unit 2)
         )
       )
     )
@@ -2453,13 +2453,13 @@
   (symbol (lib_id "Device:C") (at 153.035 89.535 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aa735324-29d9-4206-b19c-0d984d77b31e)
-    (property "Reference" "C3" (at 156.21 88.265 0)
+    (property "Reference" "C32" (at 156.21 88.265 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 156.21 90.805 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 154.0002 93.345 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 154.0002 93.345 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 153.035 89.535 0)
@@ -2470,7 +2470,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "C3") (unit 1)
+          (reference "C32") (unit 1)
         )
       )
     )
@@ -2479,7 +2479,7 @@
   (symbol (lib_id "power:VCC") (at 94.615 34.925 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b4db41f0-efe7-4218-888f-0a0ad64bb46d)
-    (property "Reference" "#PWR042" (at 94.615 38.735 0)
+    (property "Reference" "#PWR0165" (at 94.615 38.735 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 94.615 29.845 0)
@@ -2495,7 +2495,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR042") (unit 1)
+          (reference "#PWR0165") (unit 1)
         )
       )
     )
@@ -2504,13 +2504,13 @@
   (symbol (lib_id "eth:74HC4040") (at 166.37 50.165 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid caa40209-0e28-4581-83a8-84ba7e10a7f5)
-    (property "Reference" "U19" (at 168.5641 31.75 0)
+    (property "Reference" "U31" (at 168.5641 31.75 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC4040" (at 168.5641 34.29 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 166.37 50.165 0)
+    (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" (at 166.37 50.165 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "https://www.mouser.com/datasheet/2/302/74HC_HCT4040-839700.pdf" (at 168.91 81.915 0)
@@ -2535,7 +2535,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U19") (unit 1)
+          (reference "U31") (unit 1)
         )
       )
     )
@@ -2544,13 +2544,13 @@
   (symbol (lib_id "74xx:74LS161") (at 94.615 55.245 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cd2ad504-81d6-4587-8839-0646422c03f6)
-    (property "Reference" "U18" (at 96.8091 35.56 0)
+    (property "Reference" "U30" (at 96.8091 35.56 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC161" (at 96.8091 38.1 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 94.615 55.245 0)
+    (property "Footprint" "Package_SO:TSSOP-16_4.4x5mm_P0.65mm" (at 94.615 55.245 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS161" (at 94.615 55.245 0)
@@ -2575,7 +2575,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "U18") (unit 1)
+          (reference "U30") (unit 1)
         )
       )
     )
@@ -2584,7 +2584,7 @@
   (symbol (lib_id "power:GND") (at 94.615 75.565 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid cffe134a-97ef-4b79-b72e-0bf1fd6a2e88)
-    (property "Reference" "#PWR043" (at 94.615 81.915 0)
+    (property "Reference" "#PWR0166" (at 94.615 81.915 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 94.615 80.645 0)
@@ -2600,7 +2600,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR043") (unit 1)
+          (reference "#PWR0166") (unit 1)
         )
       )
     )
@@ -2609,7 +2609,7 @@
   (symbol (lib_id "power:GND") (at 81.915 46.355 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f397dff9-04b5-4229-ac1f-cc3fac4e71b8)
-    (property "Reference" "#PWR040" (at 75.565 46.355 0)
+    (property "Reference" "#PWR0163" (at 75.565 46.355 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 78.74 46.355 90)
@@ -2625,7 +2625,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR040") (unit 1)
+          (reference "#PWR0163") (unit 1)
         )
       )
     )
@@ -2634,7 +2634,7 @@
   (symbol (lib_id "power:GND") (at 182.88 27.305 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f546748c-e6b0-4469-9211-0d1e8adab002)
-    (property "Reference" "#PWR056" (at 182.88 33.655 0)
+    (property "Reference" "#PWR0179" (at 182.88 33.655 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 182.88 32.385 0)
@@ -2650,7 +2650,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR056") (unit 1)
+          (reference "#PWR0179") (unit 1)
         )
       )
     )
@@ -2659,7 +2659,7 @@
   (symbol (lib_id "power:VCC") (at 135.255 144.145 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fa3146b8-fd26-415b-a36c-24c652057ca0)
-    (property "Reference" "#PWR047" (at 139.065 144.145 0)
+    (property "Reference" "#PWR0170" (at 139.065 144.145 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 131.445 144.145 90)
@@ -2675,7 +2675,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/1469089a-0780-42fc-a316-1651d9173cd2"
-          (reference "#PWR047") (unit 1)
+          (reference "#PWR0170") (unit 1)
         )
       )
     )

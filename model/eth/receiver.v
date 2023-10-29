@@ -14,7 +14,7 @@ module eth_receiver(
     counter_74161 bit_counter(
         .clk(sck_f),
         .clr_n(n_rst),
-        .enp(1'b1), // TODO enp goes down when clk is low (not allowed according to datasheet)
+        .enp(1'b1),
         .ent(1'b1),
         .load_n(1'b1),
         .P(4'b0000),

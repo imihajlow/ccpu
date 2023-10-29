@@ -1,6 +1,6 @@
 `timescale 1ns/1ns
 module eth_mac_filter(
-    input n_ss,
+    input ss,
     input [7:0] d,
     input [3:0] a,
     input n_recv_buf_we,
@@ -11,7 +11,6 @@ module eth_mac_filter(
     // bits 4:2 of MAC equal to inverted byte number
     // bits 1:0 of MAC are 10
     // MAC is FE:FA:F6:F2:EE:EA
-    wire #10 ss = ~n_ss; // 74hc04
     wire [2:0] #15 d_xor_a = d[4:2] ^ a[2:0]; // 74hc86
     wire #15 n_d0 = d[0] ^ 1'b1; // 74hc86
     wire #10 d_4320_mac = &d_xor_a & n_d0; // 74hc21

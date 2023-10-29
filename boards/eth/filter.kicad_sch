@@ -2325,13 +2325,13 @@
   (symbol (lib_id "Device:C") (at 189.865 226.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 101072f9-af6b-4ef3-997f-191d67928309)
-    (property "Reference" "C6" (at 193.04 224.79 0)
+    (property "Reference" "C35" (at 193.04 224.79 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 193.04 227.33 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 190.8302 229.87 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 190.8302 229.87 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 189.865 226.06 0)
@@ -2342,7 +2342,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "C6") (unit 1)
+          (reference "C35") (unit 1)
         )
       )
     )
@@ -2351,7 +2351,7 @@
   (symbol (lib_id "power:VCC") (at 187.325 92.075 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 120acd35-a04e-4784-a6cf-466a53bb3cd7)
-    (property "Reference" "#PWR064" (at 187.325 88.265 0)
+    (property "Reference" "#PWR0187" (at 187.325 88.265 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 187.325 96.52 0)
@@ -2367,7 +2367,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR064") (unit 1)
+          (reference "#PWR0187") (unit 1)
         )
       )
     )
@@ -2376,13 +2376,13 @@
   (symbol (lib_id "74xx:74LS32") (at 233.045 166.37 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 135ac8d1-8091-44eb-9513-99c48e23f31f)
-    (property "Reference" "U3" (at 233.045 157.48 0)
+    (property "Reference" "U5" (at 233.045 157.48 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC32" (at 233.045 160.02 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 233.045 166.37 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 233.045 166.37 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS32" (at 233.045 166.37 0)
@@ -2405,7 +2405,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U3") (unit 1)
+          (reference "U5") (unit 1)
         )
       )
     )
@@ -2414,13 +2414,13 @@
   (symbol (lib_id "74xx:74LS21") (at 202.565 175.895 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1976e67a-c060-41eb-ba01-855533643732)
-    (property "Reference" "U23" (at 202.5553 166.37 0)
+    (property "Reference" "U35" (at 202.5553 166.37 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 202.5553 168.91 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 202.565 175.895 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 202.565 175.895 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 202.565 175.895 0)
@@ -2441,7 +2441,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U23") (unit 1)
+          (reference "U35") (unit 1)
         )
       )
     )
@@ -2450,7 +2450,7 @@
   (symbol (lib_id "power:GND") (at 266.065 227.965 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 1a178119-4c5b-4a40-93fb-a408f629d07b)
-    (property "Reference" "#PWR079" (at 266.065 234.315 0)
+    (property "Reference" "#PWR0202" (at 266.065 234.315 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 266.065 233.045 0)
@@ -2466,7 +2466,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR079") (unit 1)
+          (reference "#PWR0202") (unit 1)
         )
       )
     )
@@ -2475,13 +2475,13 @@
   (symbol (lib_id "Device:C") (at 266.065 224.155 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 22fb91dd-a2b6-47f3-8a09-09a504a139e8)
-    (property "Reference" "C9" (at 269.24 222.885 0)
+    (property "Reference" "C38" (at 269.24 222.885 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 269.24 225.425 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 267.0302 227.965 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 267.0302 227.965 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 266.065 224.155 0)
@@ -2492,7 +2492,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "C9") (unit 1)
+          (reference "C38") (unit 1)
         )
       )
     )
@@ -2501,7 +2501,7 @@
   (symbol (lib_id "power:VCC") (at 266.065 220.345 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 2e76ced1-4e8e-475b-b17e-dfc93b8a1d29)
-    (property "Reference" "#PWR078" (at 266.065 224.155 0)
+    (property "Reference" "#PWR0201" (at 266.065 224.155 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 266.065 215.265 0)
@@ -2517,7 +2517,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR078") (unit 1)
+          (reference "#PWR0201") (unit 1)
         )
       )
     )
@@ -2526,13 +2526,13 @@
   (symbol (lib_id "74xx:74LS21") (at 184.15 254 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 33c4da2b-a27d-419a-bdb1-e868c65931f0)
-    (property "Reference" "U22" (at 190.5 252.73 0)
+    (property "Reference" "U34" (at 190.5 252.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC21" (at 190.5 255.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 184.15 254 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 184.15 254 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 184.15 254 0)
@@ -2553,7 +2553,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U22") (unit 3)
+          (reference "U34") (unit 3)
         )
       )
     )
@@ -2562,13 +2562,13 @@
   (symbol (lib_id "74xx:74LS21") (at 187.325 60.96 180) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 39045e14-036f-4201-b63b-ab465b52bbaf)
-    (property "Reference" "U22" (at 187.3346 51.435 0)
+    (property "Reference" "U34" (at 187.3346 51.435 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 187.3346 53.975 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 187.325 60.96 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 187.325 60.96 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 187.325 60.96 0)
@@ -2589,7 +2589,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U22") (unit 2)
+          (reference "U34") (unit 2)
         )
       )
     )
@@ -2598,7 +2598,7 @@
   (symbol (lib_id "power:VCC") (at 234.95 243.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3c71d676-9807-4aea-bae0-321fe9ff2874)
-    (property "Reference" "#PWR072" (at 234.95 247.65 0)
+    (property "Reference" "#PWR0195" (at 234.95 247.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 234.95 238.76 0)
@@ -2614,7 +2614,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR072") (unit 1)
+          (reference "#PWR0195") (unit 1)
         )
       )
     )
@@ -2623,7 +2623,7 @@
   (symbol (lib_id "power:VCC") (at 189.865 222.25 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 3d3947eb-a8b8-47a6-89b6-a0326e3ca828)
-    (property "Reference" "#PWR065" (at 189.865 226.06 0)
+    (property "Reference" "#PWR0188" (at 189.865 226.06 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 189.865 217.17 0)
@@ -2639,7 +2639,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR065") (unit 1)
+          (reference "#PWR0188") (unit 1)
         )
       )
     )
@@ -2648,13 +2648,13 @@
   (symbol (lib_id "74xx:74HC86") (at 158.115 254 0) (unit 5)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 46b39c46-5355-482d-9a66-e7b8567164ed)
-    (property "Reference" "U21" (at 165.1 252.73 0)
+    (property "Reference" "U33" (at 165.1 252.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC86" (at 165.1 255.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 158.115 254 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 158.115 254 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74HC86" (at 158.115 254 0)
@@ -2677,7 +2677,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U21") (unit 5)
+          (reference "U33") (unit 5)
         )
       )
     )
@@ -2686,13 +2686,13 @@
   (symbol (lib_id "74xx:74HC74") (at 234.95 254 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4ae1efa4-a62a-42ab-8c92-ee78b16c6c9b)
-    (property "Reference" "U6" (at 241.3 252.73 0)
+    (property "Reference" "U10" (at 241.3 252.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 241.3 255.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 234.95 254 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 234.95 254 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 234.95 254 0)
@@ -2715,7 +2715,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U6") (unit 3)
+          (reference "U10") (unit 3)
         )
       )
     )
@@ -2724,7 +2724,7 @@
   (symbol (lib_id "power:GND") (at 208.915 266.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 4ce2e3d3-92de-4b1e-96a6-b9c4a0a0964a)
-    (property "Reference" "#PWR069" (at 208.915 273.05 0)
+    (property "Reference" "#PWR0192" (at 208.915 273.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 208.915 271.78 0)
@@ -2740,7 +2740,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR069") (unit 1)
+          (reference "#PWR0192") (unit 1)
         )
       )
     )
@@ -2749,7 +2749,7 @@
   (symbol (lib_id "power:GND") (at 215.265 229.235 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 5248e70b-7a4d-44df-a646-626d1ad522e9)
-    (property "Reference" "#PWR071" (at 215.265 235.585 0)
+    (property "Reference" "#PWR0194" (at 215.265 235.585 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 215.265 234.315 0)
@@ -2765,7 +2765,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR071") (unit 1)
+          (reference "#PWR0194") (unit 1)
         )
       )
     )
@@ -2774,13 +2774,13 @@
   (symbol (lib_id "74xx:74HC74") (at 187.325 84.455 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 5da64fc4-a315-4658-850f-87bbaad11913)
-    (property "Reference" "U6" (at 189.865 72.39 0)
+    (property "Reference" "U10" (at 189.865 72.39 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 189.865 74.93 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 187.325 84.455 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 187.325 84.455 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 187.325 84.455 0)
@@ -2803,7 +2803,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U6") (unit 1)
+          (reference "U10") (unit 1)
         )
       )
     )
@@ -2812,13 +2812,13 @@
   (symbol (lib_id "74xx:74HC86") (at 165.1 148.59 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 673666cc-112d-4730-80f0-fb64fbbe4d29)
-    (property "Reference" "U21" (at 164.7952 139.7 0)
+    (property "Reference" "U33" (at 164.7952 139.7 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC86" (at 164.7952 142.24 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 165.1 148.59 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 165.1 148.59 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74HC86" (at 165.1 148.59 0)
@@ -2841,7 +2841,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U21") (unit 3)
+          (reference "U33") (unit 3)
         )
       )
     )
@@ -2850,7 +2850,7 @@
   (symbol (lib_id "power:GND") (at 184.15 266.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 6c05d896-501e-46bb-acd0-be2ed7d57ddf)
-    (property "Reference" "#PWR063" (at 184.15 273.05 0)
+    (property "Reference" "#PWR0186" (at 184.15 273.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 184.15 271.78 0)
@@ -2866,7 +2866,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR063") (unit 1)
+          (reference "#PWR0186") (unit 1)
         )
       )
     )
@@ -2875,13 +2875,13 @@
   (symbol (lib_id "74xx:74HC86") (at 164.465 118.745 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 70b9e3ef-331d-4f32-85de-7e3f0034c285)
-    (property "Reference" "U21" (at 164.1602 110.49 0)
+    (property "Reference" "U33" (at 164.1602 110.49 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC86" (at 164.1602 113.03 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 164.465 118.745 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 164.465 118.745 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74HC86" (at 164.465 118.745 0)
@@ -2904,7 +2904,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U21") (unit 1)
+          (reference "U33") (unit 1)
         )
       )
     )
@@ -2913,7 +2913,7 @@
   (symbol (lib_id "power:VCC") (at 158.115 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 76ae97a9-f97a-4df7-a1db-17513fe6ee94)
-    (property "Reference" "#PWR058" (at 158.115 245.11 0)
+    (property "Reference" "#PWR0181" (at 158.115 245.11 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 158.115 236.22 0)
@@ -2929,7 +2929,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR058") (unit 1)
+          (reference "#PWR0181") (unit 1)
         )
       )
     )
@@ -2938,13 +2938,13 @@
   (symbol (lib_id "74xx:74HC86") (at 165.1 161.925 0) (unit 4)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 79151dfd-295c-4f98-a970-7b0d7c8611db)
-    (property "Reference" "U21" (at 164.7952 153.67 0)
+    (property "Reference" "U33" (at 164.7952 153.67 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC86" (at 164.7952 156.21 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 165.1 161.925 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 165.1 161.925 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74HC86" (at 165.1 161.925 0)
@@ -2967,7 +2967,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U21") (unit 4)
+          (reference "U33") (unit 4)
         )
       )
     )
@@ -2976,13 +2976,13 @@
   (symbol (lib_id "74xx:74HC74") (at 277.495 107.95 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 793b5fc8-1dd2-4a62-9d86-58f4e3e2aee2)
-    (property "Reference" "U24" (at 279.6891 98.425 0)
+    (property "Reference" "U36" (at 279.6891 98.425 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 279.6891 100.965 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 277.495 107.95 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 277.495 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 277.495 107.95 0)
@@ -3005,7 +3005,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U24") (unit 1)
+          (reference "U36") (unit 1)
         )
       )
     )
@@ -3014,7 +3014,7 @@
   (symbol (lib_id "power:VCC") (at 194.945 57.15 270) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 7f7f20ee-cb67-4227-a135-879352fa718c)
-    (property "Reference" "#PWR067" (at 191.135 57.15 0)
+    (property "Reference" "#PWR0190" (at 191.135 57.15 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 198.12 57.15 90)
@@ -3030,7 +3030,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR067") (unit 1)
+          (reference "#PWR0190") (unit 1)
         )
       )
     )
@@ -3039,7 +3039,7 @@
   (symbol (lib_id "power:GND") (at 158.115 266.7 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8165a066-f01d-4fee-ae24-ee3434a28ae7)
-    (property "Reference" "#PWR059" (at 158.115 273.05 0)
+    (property "Reference" "#PWR0182" (at 158.115 273.05 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 158.115 271.78 0)
@@ -3055,7 +3055,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR059") (unit 1)
+          (reference "#PWR0182") (unit 1)
         )
       )
     )
@@ -3064,7 +3064,7 @@
   (symbol (lib_id "power:VCC") (at 241.935 220.98 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 843ecd0c-5777-44c1-9ea1-5fa76d1afb0e)
-    (property "Reference" "#PWR074" (at 241.935 224.79 0)
+    (property "Reference" "#PWR0197" (at 241.935 224.79 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 241.935 215.9 0)
@@ -3080,7 +3080,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR074") (unit 1)
+          (reference "#PWR0197") (unit 1)
         )
       )
     )
@@ -3089,13 +3089,13 @@
   (symbol (lib_id "Device:C") (at 241.935 224.79 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 881d0ffe-236b-4e04-9e54-5fed9f82dce5)
-    (property "Reference" "C8" (at 245.11 223.52 0)
+    (property "Reference" "C37" (at 245.11 223.52 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 245.11 226.06 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 242.9002 228.6 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 242.9002 228.6 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 241.935 224.79 0)
@@ -3106,7 +3106,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "C8") (unit 1)
+          (reference "C37") (unit 1)
         )
       )
     )
@@ -3115,7 +3115,7 @@
   (symbol (lib_id "power:VCC") (at 208.915 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 88ee0289-63c5-4560-87e4-05294d4940eb)
-    (property "Reference" "#PWR068" (at 208.915 245.11 0)
+    (property "Reference" "#PWR0191" (at 208.915 245.11 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 208.915 236.22 0)
@@ -3131,7 +3131,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR068") (unit 1)
+          (reference "#PWR0191") (unit 1)
         )
       )
     )
@@ -3140,7 +3140,7 @@
   (symbol (lib_id "power:VCC") (at 184.15 241.3 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8b3369d2-726a-439c-acdb-bc7b4ae62ca3)
-    (property "Reference" "#PWR062" (at 184.15 245.11 0)
+    (property "Reference" "#PWR0185" (at 184.15 245.11 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 184.15 236.22 0)
@@ -3156,7 +3156,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR062") (unit 1)
+          (reference "#PWR0185") (unit 1)
         )
       )
     )
@@ -3165,13 +3165,13 @@
   (symbol (lib_id "74xx:74LS21") (at 202.565 192.405 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 8c1f7b0a-1f86-428f-b0c0-2ca0f2c94e70)
-    (property "Reference" "U23" (at 202.5553 183.515 0)
+    (property "Reference" "U35" (at 202.5553 183.515 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 202.5553 186.055 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 202.565 192.405 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 202.565 192.405 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 202.565 192.405 0)
@@ -3192,7 +3192,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U23") (unit 2)
+          (reference "U35") (unit 2)
         )
       )
     )
@@ -3201,13 +3201,13 @@
   (symbol (lib_id "74xx:74HC74") (at 257.81 254 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no)
     (uuid 94179355-607f-4380-8263-8bd0a958fc98)
-    (property "Reference" "U24" (at 264.795 252.73 0)
+    (property "Reference" "U36" (at 264.795 252.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 264.795 255.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 257.81 254 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 257.81 254 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 257.81 254 0)
@@ -3230,7 +3230,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U24") (unit 3)
+          (reference "U36") (unit 3)
         )
       )
     )
@@ -3239,7 +3239,7 @@
   (symbol (lib_id "power:VCC") (at 307.975 113.03 180) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid 98bacc85-ac3e-4749-8c52-08db17a71e3a)
-    (property "Reference" "#PWR082" (at 307.975 109.22 0)
+    (property "Reference" "#PWR0205" (at 307.975 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 307.975 117.475 0)
@@ -3255,7 +3255,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR082") (unit 1)
+          (reference "#PWR0205") (unit 1)
         )
       )
     )
@@ -3264,7 +3264,7 @@
   (symbol (lib_id "power:GND") (at 234.95 264.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a4e975dd-3180-4c99-8a19-4a3d3f32b1b5)
-    (property "Reference" "#PWR073" (at 234.95 270.51 0)
+    (property "Reference" "#PWR0196" (at 234.95 270.51 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 234.95 268.605 0)
@@ -3280,7 +3280,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR073") (unit 1)
+          (reference "#PWR0196") (unit 1)
         )
       )
     )
@@ -3289,7 +3289,7 @@
   (symbol (lib_id "power:VCC") (at 269.875 105.41 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a4f6c93a-68e5-46b4-860b-7a35c6812654)
-    (property "Reference" "#PWR080" (at 273.685 105.41 0)
+    (property "Reference" "#PWR0203" (at 273.685 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 266.065 105.41 90)
@@ -3305,7 +3305,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR080") (unit 1)
+          (reference "#PWR0203") (unit 1)
         )
       )
     )
@@ -3314,13 +3314,13 @@
   (symbol (lib_id "74xx:74LS08") (at 225.425 107.95 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a55bd8ec-7c73-4abb-abb9-3cd9f4fc5b59)
-    (property "Reference" "U7" (at 225.4167 99.695 0)
+    (property "Reference" "U6" (at 225.4167 99.695 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC08" (at 225.4167 102.235 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 225.425 107.95 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 225.425 107.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS08" (at 225.425 107.95 0)
@@ -3343,7 +3343,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U7") (unit 2)
+          (reference "U6") (unit 2)
         )
       )
     )
@@ -3352,13 +3352,13 @@
   (symbol (lib_id "Device:C") (at 215.265 225.425 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a5e30e10-a1b0-46be-bbdf-6a386d3a9e1c)
-    (property "Reference" "C7" (at 218.44 224.155 0)
+    (property "Reference" "C36" (at 218.44 224.155 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 218.44 226.695 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 216.2302 229.235 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 216.2302 229.235 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 215.265 225.425 0)
@@ -3369,7 +3369,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "C7") (unit 1)
+          (reference "C36") (unit 1)
         )
       )
     )
@@ -3378,13 +3378,13 @@
   (symbol (lib_id "Device:C") (at 163.83 226.06 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid a7331d3b-d6e7-4bbd-afa8-70cfe1ea6bce)
-    (property "Reference" "C5" (at 167.005 224.79 0)
+    (property "Reference" "C34" (at 167.005 224.79 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "0.1" (at 167.005 227.33 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 164.7952 229.87 0)
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric" (at 164.7952 229.87 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "~" (at 163.83 226.06 0)
@@ -3395,7 +3395,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "C5") (unit 1)
+          (reference "C34") (unit 1)
         )
       )
     )
@@ -3404,13 +3404,13 @@
   (symbol (lib_id "74xx:74LS21") (at 208.915 254 0) (unit 3)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid aa9f4702-c7ce-48a8-8e8c-8ee32d1bff9c)
-    (property "Reference" "U23" (at 215.265 252.73 0)
+    (property "Reference" "U35" (at 215.265 252.73 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC21" (at 215.265 255.27 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 208.915 254 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 208.915 254 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 208.915 254 0)
@@ -3431,7 +3431,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U23") (unit 3)
+          (reference "U35") (unit 3)
         )
       )
     )
@@ -3440,13 +3440,13 @@
   (symbol (lib_id "74xx:74HC86") (at 165.1 133.35 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b42274fa-0c83-41cd-a0e5-b1fb7804faac)
-    (property "Reference" "U21" (at 164.7952 124.46 0)
+    (property "Reference" "U33" (at 164.7952 124.46 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC86" (at 164.7952 127 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 165.1 133.35 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 165.1 133.35 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74HC86" (at 165.1 133.35 0)
@@ -3469,7 +3469,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U21") (unit 2)
+          (reference "U33") (unit 2)
         )
       )
     )
@@ -3478,7 +3478,7 @@
   (symbol (lib_id "power:GND") (at 189.865 229.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid b470114c-a9d8-45d4-acab-ee97633f4895)
-    (property "Reference" "#PWR066" (at 189.865 236.22 0)
+    (property "Reference" "#PWR0189" (at 189.865 236.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 189.865 234.95 0)
@@ -3494,7 +3494,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR066") (unit 1)
+          (reference "#PWR0189") (unit 1)
         )
       )
     )
@@ -3503,13 +3503,13 @@
   (symbol (lib_id "74xx:74LS21") (at 202.565 158.115 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c1f9af25-b49a-4ca8-984c-a7359f2fcf9e)
-    (property "Reference" "U22" (at 202.5553 149.225 0)
+    (property "Reference" "U34" (at 202.5553 149.225 0)
       (effects (font (size 1.27 1.27)))
     )
     (property "Value" "74HC21" (at 202.5553 151.765 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at 202.565 158.115 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 202.565 158.115 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS21" (at 202.565 158.115 0)
@@ -3530,7 +3530,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U22") (unit 1)
+          (reference "U34") (unit 1)
         )
       )
     )
@@ -3539,7 +3539,7 @@
   (symbol (lib_id "power:GND") (at 257.81 264.16 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid c74b46b4-49f5-47ac-a02a-d2693a6c3dfc)
-    (property "Reference" "#PWR077" (at 257.81 270.51 0)
+    (property "Reference" "#PWR0200" (at 257.81 270.51 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 257.81 269.24 0)
@@ -3555,7 +3555,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR077") (unit 1)
+          (reference "#PWR0200") (unit 1)
         )
       )
     )
@@ -3564,7 +3564,7 @@
   (symbol (lib_id "power:VCC") (at 277.495 100.33 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid d3f55fb7-4e07-4579-8660-5bf175e56893)
-    (property "Reference" "#PWR081" (at 277.495 104.14 0)
+    (property "Reference" "#PWR0204" (at 277.495 104.14 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 277.495 95.25 0)
@@ -3580,7 +3580,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR081") (unit 1)
+          (reference "#PWR0204") (unit 1)
         )
       )
     )
@@ -3589,13 +3589,13 @@
   (symbol (lib_id "74xx:74HC74") (at 307.975 105.41 0) (unit 2)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e0926511-04ab-4a24-9f4a-1cacd06e42f0)
-    (property "Reference" "U24" (at 310.1691 95.885 0)
+    (property "Reference" "U36" (at 310.1691 95.885 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Value" "74HC74" (at 310.1691 98.425 0)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "" (at 307.975 105.41 0)
+    (property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm" (at 307.975 105.41 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "74xx/74hc_hct74.pdf" (at 307.975 105.41 0)
@@ -3618,7 +3618,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "U24") (unit 2)
+          (reference "U36") (unit 2)
         )
       )
     )
@@ -3627,7 +3627,7 @@
   (symbol (lib_id "power:GND") (at 163.83 229.87 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid e1729445-b054-4926-8af6-30e59551088c)
-    (property "Reference" "#PWR061" (at 163.83 236.22 0)
+    (property "Reference" "#PWR0184" (at 163.83 236.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 163.83 234.95 0)
@@ -3643,7 +3643,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR061") (unit 1)
+          (reference "#PWR0184") (unit 1)
         )
       )
     )
@@ -3652,7 +3652,7 @@
   (symbol (lib_id "power:VCC") (at 157.48 164.465 90) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid ef63d261-b04d-4875-a875-e620c59c82db)
-    (property "Reference" "#PWR057" (at 161.29 164.465 0)
+    (property "Reference" "#PWR0180" (at 161.29 164.465 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 153.67 164.465 90)
@@ -3668,7 +3668,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR057") (unit 1)
+          (reference "#PWR0180") (unit 1)
         )
       )
     )
@@ -3677,7 +3677,7 @@
   (symbol (lib_id "power:VCC") (at 257.81 243.84 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f2777f17-f6b9-4c7e-b026-ebc4dde2f3de)
-    (property "Reference" "#PWR076" (at 257.81 247.65 0)
+    (property "Reference" "#PWR0199" (at 257.81 247.65 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 257.81 238.76 0)
@@ -3693,7 +3693,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR076") (unit 1)
+          (reference "#PWR0199") (unit 1)
         )
       )
     )
@@ -3702,7 +3702,7 @@
   (symbol (lib_id "power:VCC") (at 163.83 222.25 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f54eb441-1a04-4501-bf16-52e12ddb807e)
-    (property "Reference" "#PWR060" (at 163.83 226.06 0)
+    (property "Reference" "#PWR0183" (at 163.83 226.06 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 163.83 217.17 0)
@@ -3718,7 +3718,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR060") (unit 1)
+          (reference "#PWR0183") (unit 1)
         )
       )
     )
@@ -3727,7 +3727,7 @@
   (symbol (lib_id "power:VCC") (at 215.265 221.615 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid f8b499d3-64c9-4ab6-bbe0-bd4c3e845420)
-    (property "Reference" "#PWR070" (at 215.265 225.425 0)
+    (property "Reference" "#PWR0193" (at 215.265 225.425 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "VCC" (at 215.265 216.535 0)
@@ -3743,7 +3743,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR070") (unit 1)
+          (reference "#PWR0193") (unit 1)
         )
       )
     )
@@ -3752,7 +3752,7 @@
   (symbol (lib_id "power:GND") (at 241.935 228.6 0) (unit 1)
     (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
     (uuid fe9cf7d4-29c1-44f7-97ee-b66431a4de25)
-    (property "Reference" "#PWR075" (at 241.935 234.95 0)
+    (property "Reference" "#PWR0198" (at 241.935 234.95 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (at 241.935 233.68 0)
@@ -3768,7 +3768,7 @@
     (instances
       (project "eth"
         (path "/25b810b6-8afb-4eb4-8eaf-dfe3b666cbdb/39e18fc2-9d3f-4915-a4a0-511df53a2759"
-          (reference "#PWR075") (unit 1)
+          (reference "#PWR0198") (unit 1)
         )
       )
     )

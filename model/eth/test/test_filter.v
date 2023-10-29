@@ -13,7 +13,7 @@ module test_filter();
 
     reg sck;
     reg mosi;
-    reg n_ss;
+    reg ss;
     reg n_rst;
     reg recv_ena;
 
@@ -34,7 +34,7 @@ module test_filter();
 
     wire n_inhibit;
     eth_mac_filter filter_inst(
-        .n_ss(n_ss),
+        .ss(ss),
         .d(d),
         .a(a[3:0]),
         .n_recv_buf_we(n_recv_buf_we),
@@ -44,7 +44,7 @@ module test_filter();
     initial begin
         sck = 1'b0;
         mosi = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         n_rst = 1'b0;
         recv_ena = 1'b1;
         #200
@@ -70,7 +70,7 @@ module test_filter();
     initial begin
         #300
         // frame 1 - MAC OK
-        n_ss = 1'b0;
+        ss = 1'b1;
         transmit_byte(8'b111_111_10);
         transmit_byte(8'b111_110_10);
         transmit_byte(8'b111_101_10);
@@ -93,11 +93,11 @@ module test_filter();
         transmit_byte(8'h88);
         #300
         sck = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         #1000;
 
         // frame 2 - wrong MAC - one of bits [7:5] is 0
-        n_ss = 1'b0;
+        ss = 1'b1;
         transmit_byte(8'b111_111_10);
         transmit_byte(8'b110_110_10);
         transmit_byte(8'b111_101_10);
@@ -120,11 +120,11 @@ module test_filter();
         transmit_byte(8'h88);
         #300
         sck = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         #1000;
 
         // frame 3 - MAC broadcast
-        n_ss = 1'b0;
+        ss = 1'b1;
         transmit_byte(8'hff);
         transmit_byte(8'hff);
         transmit_byte(8'hff);
@@ -147,11 +147,11 @@ module test_filter();
         transmit_byte(8'h88);
         #300
         sck = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         #1000;
 
         // frame 4 - wrong MAC - one of bits [4:2] is wrong
-        n_ss = 1'b0;
+        ss = 1'b1;
         transmit_byte(8'b111_111_10);
         transmit_byte(8'b110_110_10);
         transmit_byte(8'b111_101_10);
@@ -174,11 +174,11 @@ module test_filter();
         transmit_byte(8'h88);
         #300
         sck = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         #1000;
 
         // frame 5 - wrong MAC - one of bits [1:0] is wrong
-        n_ss = 1'b0;
+        ss = 1'b1;
         transmit_byte(8'b111_111_10);
         transmit_byte(8'b111_110_10);
         transmit_byte(8'b111_101_11);
@@ -201,7 +201,7 @@ module test_filter();
         transmit_byte(8'h88);
         #300
         sck = 1'b0;
-        n_ss = 1'b1;
+        ss = 1'b0;
         #1000;
     end
 
@@ -210,41 +210,41 @@ module test_filter();
         wait(n_rst);
 
         // frame 1 - MAC OK
-        wait(~n_ss);
-        wait(n_ss | ~n_inhibit);
+        wait(ss);
+        wait(~ss | ~n_inhibit);
         assert(n_inhibit === 1'b1);
-        assert(n_ss === 1'b1);
+        assert(ss === 1'b0);
 
         // frame 2 - wrong MAC
-        wait(~n_ss);
-        wait(n_ss | ~n_inhibit);
+        wait(ss);
+        wait(~ss | ~n_inhibit);
         assert(n_inhibit === 1'b0);
-        assert(n_ss === 1'b0);
-        wait(n_ss);
+        assert(ss === 1'b1);
+        wait(~ss);
         #100
         assert(n_inhibit === 1'b1);
 
         // frame 1 - MAC OK
-        wait(~n_ss);
-        wait(n_ss | ~n_inhibit);
+        wait(ss);
+        wait(~ss | ~n_inhibit);
         assert(n_inhibit === 1'b1);
-        assert(n_ss === 1'b1);
+        assert(ss === 1'b0);
 
         // frame 4 - wrong MAC
-        wait(~n_ss);
-        wait(n_ss | ~n_inhibit);
+        wait(ss);
+        wait(~ss | ~n_inhibit);
         assert(n_inhibit === 1'b0);
-        assert(n_ss === 1'b0);
-        wait(n_ss);
+        assert(ss === 1'b1);
+        wait(~ss);
         #100
         assert(n_inhibit === 1'b1);
 
         // frame 5 - wrong MAC
-        wait(~n_ss);
-        wait(n_ss | ~n_inhibit);
+        wait(ss);
+        wait(~ss | ~n_inhibit);
         assert(n_inhibit === 1'b0);
-        assert(n_ss === 1'b0);
-        wait(n_ss);
+        assert(ss === 1'b1);
+        wait(~ss);
         #100
         assert(n_inhibit === 1'b1);
 

@@ -34,12 +34,11 @@ module eth_receiver_system(
         .n_oe2(n_recv_d_oe)
     );
 
-    wire n_recv_byte_oe;
     buffer_74244 buf_recv_byte_to_recv_d(
         .i(recv_byte),
         .o(recv_d),
-        .n_oe1(n_recv_byte_oe),
-        .n_oe2(n_recv_byte_oe)
+        .n_oe1(n_recv_ss),
+        .n_oe2(n_recv_ss)
     );
 
     wire recv_a_sel;
@@ -96,7 +95,7 @@ module eth_receiver_system(
 
     wire n_inhibit;
     eth_mac_filter filter(
-        .n_ss(n_recv_ss),
+        .ss(recv_ss),
         .d(recv_byte),
         .a(recv_byte_cnt[3:0]),
         .n_recv_buf_we(n_recv_buf_we),
@@ -169,8 +168,6 @@ module eth_receiver_system(
 
     assign n_rdy = 1'b0;
 
-    assign n_recv_byte_oe = n_recv_ss;
-
     // Bus contention checks
     wire [2:0] d_oe_count = n_recv_d_oe + n_oe_cr_to_d + n_recv_byte_cnt_lo_oe + n_recv_byte_cnt_hi_oe;
     always @(d_oe_count or n_rst) begin
@@ -183,7 +180,7 @@ module eth_receiver_system(
         end
     end
 
-    wire [1:0] recv_d_oe_count = n_recv_buf_oe + n_recv_byte_oe;
+    wire [1:0] recv_d_oe_count = n_recv_buf_oe + n_recv_ss;
     always @(recv_d_oe_count or n_rst) begin
         if (n_rst) begin
             if (recv_d_oe_count < 1) begin
