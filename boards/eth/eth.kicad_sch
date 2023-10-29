@@ -13057,7 +13057,7 @@
     (property "Value" "eth-phy-shield-conn" (at 55.88 31.75 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "schield:partial-nucleo64" (at 55.88 47.625 0)
+    (property "Footprint" "eth:partial-nucleo64" (at 55.88 47.625 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at 55.88 38.735 0)
