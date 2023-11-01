@@ -8,6 +8,8 @@
     (title "Receiver module")
     (date "2023-10-18")
     (rev "1")
+    (comment 1 "Licensed under the TAPR Open Hardware License (www.tapr.org/OHL)")
+    (comment 2 "Copyright 2023 Ivan Mikhailov")
   )
 
   (lib_symbols
