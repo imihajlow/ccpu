@@ -17,7 +17,7 @@ module eth_mac_filter(
     wire #10 d_7651_set = &d[7:5] & d[1]; // 74hc21
     wire #10 d_4320_set = &d[4:2] & d[0]; // 74hc21
 
-    wire #10 d_4320_ok = d_4320_mac | d_4320_set; // 74hc32
+    wire #10 d_4320_ok = d_4320_mac | d_4320_set; // diode logic
 
     wire last_mac_ok;
     wire #10 next_mac_ok = d_7651_set & d_4320_ok & last_mac_ok & 1'b1; // 74hc21
