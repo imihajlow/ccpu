@@ -80,3 +80,21 @@ The `~we_mem` signal is asserted at the same time with `addr_dp`. This leads to 
 ![WE fix](we_fix.png)
 
 This introduces a ~100 nS delay.
+
+# Ethernet rev. 1
+
+## Receiver
+
+SCK and MOSI lines are swapped. To fix, cut the tracks and solder wires.
+
+Sometimes extra byte is received at the end of the packet. Workaround: check CRC twice.
+
+## Transmitter
+
+Shift register input bits are shuffled incorrectly. Software workaround is possible.
+
+If both U11 and U8 are of 74HC series, MOSI is delayed relative to SCK by 5 ns which leads to spikes after XOR. Fix: U11 must be 74LV74A.
+
+Last bit of the frame is transmitted incorrectly if it's 1. Workaround: manipulate the frame data such that the MSB of FCS is 0.
+
+First byte of the frame is wrong. Workaround: Make preamble longer.

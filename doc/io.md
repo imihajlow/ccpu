@@ -84,3 +84,20 @@ Stack is a mapping of 256 2kB pages onto 0xC000 and 0xC800. Those mappings are c
 0xFC03 - control register:
 
 	* bit 0 - enabled/disable stack
+
+## Ethernet board
+
+0xFB00 - status register (RO):
+
+	* bit 0 - packet is received
+	* bit 1 - transmitter is busy
+
+0xFB00 - write any value to re-arm receiver.
+
+0xFB01 - write any value to start transmission.
+
+0xFB02 - received frame length (16 bit, LSB first, RO).
+
+0xF000 - 2k receive buffer (RO).
+
+0xF000 - 1k transmit buffer (WO). Frame length for transmission is fixed.
