@@ -21,6 +21,7 @@ use crate::vga_window::VgaWindow;
 use memory::MemoryWriteError;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
+use std::path::PathBuf;
 use std::println;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{mpsc, Arc};
@@ -606,7 +607,7 @@ fn gui_thread(terminate_signal: mpsc::Receiver<()>, vga_window: VgaWindow) {
 
 fn main() {
     let mut fname_bin = String::new();
-    let mut fname_map = String::new();
+    let mut fname_map: Option<String> = None;
     let mut fname_config_param: Option<String> = None;
     let mut startup_commands: Vec<String> = Vec::new();
     {
@@ -622,7 +623,7 @@ fn main() {
         ap.refer(&mut fname_bin)
             .add_argument("file", Store, "Program file");
         ap.refer(&mut fname_map)
-            .add_argument("mapfile", Store, "Label map file");
+            .add_argument("mapfile", StoreOption, "Label map file");
         ap.parse_args_or_exit();
     }
 
@@ -630,9 +631,17 @@ fn main() {
 
     startup_commands.reverse();
 
-    let mut file_bin = File::open(fname_bin).expect("Can't open");
-    let mut file_map = File::open(fname_map).expect("Can't open");
-    let config = Config::new(&fname_config).expect("Can't load config");
+    let path_bin: PathBuf = fname_bin.into();
+    let path_map: PathBuf = fname_map
+        .map(|s| s.into())
+        .unwrap_or_else(|| path_bin.with_extension("map"));
+
+    let mut file_bin = File::open(path_bin.clone())
+        .unwrap_or_else(|e| panic!("Can't open {}: {}", path_bin.display(), e));
+    let mut file_map =
+        File::open(path_map).unwrap_or_else(|e| panic!("Can't open {}: {}", path_bin.display(), e));
+    let config = Config::new(&fname_config)
+        .unwrap_or_else(|e| panic!("Can't open config {}: {:?}", fname_config, e));
     println!("{:?}", &config);
     let system = system::System::new(&config, &mut file_bin).expect("Can't load");
     let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
