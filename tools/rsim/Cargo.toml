@@ -21,3 +21,4 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.8"
 lazy_static = "1.4.0"
 rustyline = "8.0.0"
+minifb = "0.25"

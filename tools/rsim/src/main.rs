@@ -13,15 +13,19 @@ mod stack;
 mod symmap;
 mod system;
 mod vga;
+mod vga_window;
 mod z80;
 
 use crate::config::Config;
+use crate::vga_window::VgaWindow;
 use memory::MemoryWriteError;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::println;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{mpsc, Arc};
+use symmap::SymMap;
+use system::System;
 #[macro_use]
 extern crate lazy_static;
 use crate::machine::StepResult;
@@ -412,48 +416,13 @@ fn dump_mem(mem: &dyn memory::Memory, addr: u16, t: Type, count: u16) {
     }
 }
 
-fn main() {
-    let mut fname_bin = String::new();
-    let mut fname_map = String::new();
-    let mut fname_config_param: Option<String> = None;
-    let mut startup_commands: Vec<String> = Vec::new();
-    {
-        let mut ap = ArgumentParser::new();
-        ap.set_description("CCPU simulator");
-        ap.refer(&mut startup_commands)
-            .add_option(&["-c"], Collect, "Commands to run on startup");
-        ap.refer(&mut fname_config_param).add_option(
-            &["--config"],
-            StoreOption,
-            "Config file (default: rsim.yaml in current directory)",
-        );
-        ap.refer(&mut fname_bin)
-            .add_argument("file", Store, "Program file");
-        ap.refer(&mut fname_map)
-            .add_argument("mapfile", Store, "Label map file");
-        ap.parse_args_or_exit();
-    }
-
-    let fname_config = fname_config_param.unwrap_or("rsim.yaml".to_string());
-
-    startup_commands.reverse();
-
-    let mut file_bin = File::open(fname_bin).expect("Can't open");
-    let mut file_map = File::open(fname_map).expect("Can't open");
-    let config = Config::new(&fname_config).expect("Can't load config");
-    println!("{:?}", &config);
-    let mut system = system::System::new(&config, &mut file_bin).expect("Can't load");
-    let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
-
-    let ctrlc_pressed = Arc::new(AtomicBool::new(false));
-    {
-        let r = ctrlc_pressed.clone();
-        ctrlc::set_handler(move || {
-            r.store(true, Ordering::SeqCst);
-        })
-        .expect("Error setting Ctrl-C handler");
-    }
-
+fn tui_thread(
+    ctrlc_pressed: Arc<AtomicBool>,
+    mut system: System,
+    syms: SymMap,
+    mut startup_commands: Vec<String>,
+    terminate_signal_souce: Option<mpsc::Sender<()>>,
+) {
     let mut state = machine::State::new();
     let mut last_input = "\n".to_string();
     let mut rl = Editor::<()>::new();
@@ -625,5 +594,75 @@ fn main() {
                 println!("Write error at 0x{:04X}: {}", addr, err);
             }
         }
+    }
+    if let Some(src) = terminate_signal_souce {
+        src.send(()).ok();
+    }
+}
+
+fn gui_thread(terminate_signal: mpsc::Receiver<()>, vga_window: VgaWindow) {
+    vga_window.run(terminate_signal);
+}
+
+fn main() {
+    let mut fname_bin = String::new();
+    let mut fname_map = String::new();
+    let mut fname_config_param: Option<String> = None;
+    let mut startup_commands: Vec<String> = Vec::new();
+    {
+        let mut ap = ArgumentParser::new();
+        ap.set_description("CCPU simulator");
+        ap.refer(&mut startup_commands)
+            .add_option(&["-c"], Collect, "Commands to run on startup");
+        ap.refer(&mut fname_config_param).add_option(
+            &["--config"],
+            StoreOption,
+            "Config file (default: rsim.yaml in current directory)",
+        );
+        ap.refer(&mut fname_bin)
+            .add_argument("file", Store, "Program file");
+        ap.refer(&mut fname_map)
+            .add_argument("mapfile", Store, "Label map file");
+        ap.parse_args_or_exit();
+    }
+
+    let fname_config = fname_config_param.unwrap_or("rsim.yaml".to_string());
+
+    startup_commands.reverse();
+
+    let mut file_bin = File::open(fname_bin).expect("Can't open");
+    let mut file_map = File::open(fname_map).expect("Can't open");
+    let config = Config::new(&fname_config).expect("Can't load config");
+    println!("{:?}", &config);
+    let system = system::System::new(&config, &mut file_bin).expect("Can't load");
+    let syms = symmap::SymMap::load(&mut file_map).expect("Symbol load failed");
+
+    let ctrlc_pressed = Arc::new(AtomicBool::new(false));
+    {
+        let r = ctrlc_pressed.clone();
+        ctrlc::set_handler(move || {
+            r.store(true, Ordering::SeqCst);
+        })
+        .expect("Error setting Ctrl-C handler");
+    }
+
+    let vga_window = VgaWindow::new(system.get_vga(), system.get_ps2());
+
+    if let Some(vga_window) = vga_window {
+        let (terminate_signal_source, terminate_signal) = mpsc::channel();
+
+        let tui_handle = std::thread::spawn(move || {
+            tui_thread(
+                ctrlc_pressed,
+                system,
+                syms,
+                startup_commands,
+                Some(terminate_signal_source),
+            )
+        });
+        gui_thread(terminate_signal, vga_window);
+        tui_handle.join().unwrap();
+    } else {
+        tui_thread(ctrlc_pressed, system, syms, startup_commands, None)
     }
 }

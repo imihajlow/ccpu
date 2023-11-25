@@ -24,6 +24,12 @@ impl Ps2 {
     pub fn push(&mut self, v: u8) {
         self.queue.push_back(v);
     }
+
+    pub fn push_many(&mut self, v: &[u8]) {
+        for x in v {
+            self.queue.push_back(*x);
+        }
+    }
 }
 
 impl Memory for Ps2 {

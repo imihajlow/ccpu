@@ -72,6 +72,21 @@ impl Vga {
         writer.write_image_data(&img_data)?;
         Ok(())
     }
+
+    pub fn render_to_buffer(&self, buf: &mut [u32]) {
+        assert!(buf.len() == 640 * 480);
+        for r in 0..30 {
+            for c in 0..80 {
+                let ch = self.char_seg[(r << 7) + c];
+                let color = self.color_seg[(r << 7) + c];
+                let fg_irgb = color & 0xf;
+                let bg_irgb = color >> 4;
+                let fg_rgba = irgb2rgba(fg_irgb);
+                let bg_rgba = irgb2rgba(bg_irgb);
+                self.font.render_rgba(buf, fg_rgba, bg_rgba, ch, c as u8, r as u8);
+            }
+        }
+    }
 }
 
 impl Memory for Vga {
@@ -92,4 +107,13 @@ impl Memory for Vga {
             _ => Err(MemoryWriteError::Empty)
         }
     }
+}
+
+fn irgb2rgba(irgb: u8) -> u32 {
+    let i = (irgb & 8 != 0) as u8;
+    let r = (irgb & 4 != 0) as u8;
+    let g = (irgb & 2 != 0) as u8;
+    let b = (irgb & 1 != 0) as u8;
+    let b = [i * 0xaa + b * 0x55, i * 0xaa + g * 0x55, i * 0xaa + r * 0x55, 0];
+    u32::from_le_bytes(b)
 }

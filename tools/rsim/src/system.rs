@@ -69,11 +69,15 @@ impl System {
     }
 
     pub fn get_keyboard_mut(&mut self) -> Option<&mut keyboard::Keyboard> {
-        self.kbd.as_mut() //.map(|k| k)
+        self.kbd.as_mut()
     }
 
     pub fn get_vga(&self) -> Option<Arc<Mutex<Vga>>> {
         self.vga.as_ref().map(|v| Arc::clone(v))
+    }
+
+    pub fn get_ps2(&self) -> Option<Arc<Mutex<Ps2>>> {
+        self.ps2.as_ref().map(|v| Arc::clone(v))
     }
 
     pub fn get_spi_mut(&mut self) -> Option<&mut Spi> {
