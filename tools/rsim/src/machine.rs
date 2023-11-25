@@ -1,11 +1,11 @@
+use crate::instruction;
+use crate::instruction::AluOperation;
+use crate::instruction::Instruction;
+use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
+use crate::symmap::SymMap;
 use std::fmt;
 use std::ops::Deref;
 use std::sync::atomic::{AtomicBool, Ordering};
-use crate::instruction::Instruction;
-use crate::instruction::AluOperation;
-use crate::instruction;
-use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
-use crate::symmap::SymMap;
 
 #[derive(Debug)]
 pub enum StepResult {
@@ -13,7 +13,7 @@ pub enum StepResult {
     ReadError(u16, MemoryReadError),
     WriteError(u16, MemoryWriteError),
     Breakpoint(u32),
-    Watchpoint(u32)
+    Watchpoint(u32),
 }
 
 pub struct State {
@@ -24,14 +24,14 @@ pub struct State {
     pub flags: Flags,
 
     breakpoints: Vec<(u32, u16)>,
-    last_id: u32
+    last_id: u32,
 }
 
 pub struct Flags {
     pub carry: bool,
     pub zero: bool,
     pub sign: bool,
-    pub overflow: bool
+    pub overflow: bool,
 }
 
 impl State {
@@ -43,7 +43,7 @@ impl State {
             p: 0,
             flags: Flags::new(),
             breakpoints: Vec::new(),
-            last_id: 0
+            last_id: 0,
         }
     }
 }
@@ -54,7 +54,7 @@ impl Flags {
             carry: false,
             zero: false,
             sign: false,
-            overflow: false
+            overflow: false,
         }
     }
 }
@@ -66,7 +66,7 @@ impl State {
             ZERO => self.flags.zero,
             CARRY => self.flags.carry,
             SIGN => self.flags.sign,
-            OVERFLOW => self.flags.overflow
+            OVERFLOW => self.flags.overflow,
         }
     }
 
@@ -96,25 +96,31 @@ impl State {
             A => self.a = value,
             B => self.b = value,
             PL => self.p = u16::from_le_bytes([value, self.get_reg(PH)]),
-            PH => self.p = u16::from_le_bytes([self.get_reg(PL), value])
+            PH => self.p = u16::from_le_bytes([self.get_reg(PL), value]),
         };
     }
 }
 
 impl fmt::Display for Flags {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "[{}{}{}{}]",
+        write!(
+            f,
+            "[{}{}{}{}]",
             if self.zero { "Z" } else { " " },
             if self.carry { "C" } else { " " },
             if self.sign { "S" } else { " " },
             if self.overflow { "O" } else { " " }
-            )
+        )
     }
 }
 
 impl fmt::Display for State {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "IP={:04X} A={:02X} B={:02X} P={:04X} F={}", self.ip, self.a, self.b, self.p, self.flags)
+        write!(
+            f,
+            "IP={:04X} A={:02X} B={:02X} P={:04X} F={}",
+            self.ip, self.a, self.b, self.p, self.flags
+        )
     }
 }
 
@@ -150,7 +156,7 @@ fn gen_ovf(a: u8, b: u8, r: u8, is_sum: bool) -> bool {
     let a_bit = a & 0x80 != 0;
     let b_bit = match is_sum {
         true => b & 0x80 != 0,
-        false => b & 0x80 == 0
+        false => b & 0x80 == 0,
     };
     let r_bit = r & 0x80 != 0;
     if a_bit == b_bit {
@@ -162,24 +168,20 @@ fn gen_ovf(a: u8, b: u8, r: u8, is_sum: bool) -> bool {
 
 fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Flags) {
     use AluOperation::*;
-    let (r,c) = match op {
+    let (r, c) = match op {
         MOV => (arg2, false),
-        ADD => {
-            arg1.overflowing_add(arg2)
-        },
+        ADD => arg1.overflowing_add(arg2),
         ADC => {
             let (r0, c0) = arg1.overflowing_add(arg2);
             let (r1, c1) = r0.overflowing_add(old_flags.carry as u8);
             (r1, c0 || c1)
-        },
-        SUB => {
-            arg1.overflowing_sub(arg2)
-        },
+        }
+        SUB => arg1.overflowing_sub(arg2),
         SBB => {
             let (r0, c0) = arg1.overflowing_sub(arg2);
             let (r1, c1) = r0.overflowing_sub(old_flags.carry as u8);
             (r1, c0 || c1)
-        },
+        }
         INC => arg1.overflowing_add(1),
         DEC => arg1.overflowing_sub(1),
         NEG => ((!arg1).wrapping_add(1), arg1 != 0),
@@ -191,21 +193,21 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         SHR => {
             let c = (arg1 & 1) == 1;
             (arg1 >> 1, c)
-        },
+        }
         SAR => {
             let c = (arg1 & 1) == 1;
             ((arg1 >> 1) | (arg1 & 0x80), c)
-        },
+        }
         EXP => {
             if old_flags.carry {
                 (0xff, false)
             } else {
                 (0, false)
             }
-        },
+        }
         OR => (arg1 | arg2, false),
         AND => (arg1 & arg2, false),
-        XOR => (arg1 ^ arg2, false)
+        XOR => (arg1 ^ arg2, false),
     };
 
     let ovf = match op {
@@ -214,18 +216,21 @@ fn exec_alu(op: AluOperation, arg1: u8, arg2: u8, old_flags: &Flags) -> (u8, Fla
         INC => gen_ovf(arg1, 1, r, true),
         DEC => gen_ovf(arg1, 1, r, false),
         NEG => gen_ovf(0, arg1, r, false),
-        _ => false
+        _ => false,
     };
 
     if let MOV = op {
-        (r, Flags { ..*old_flags } )
+        (r, Flags { ..*old_flags })
     } else {
-        (r, Flags {
-            carry: c,
-            zero: r == 0,
-            sign: r & 0x80 != 0,
-            overflow: ovf
-        })
+        (
+            r,
+            Flags {
+                carry: c,
+                zero: r == 0,
+                sign: r & 0x80 != 0,
+                overflow: ovf,
+            },
+        )
     }
 }
 
@@ -233,19 +238,26 @@ impl State {
     pub fn set_breakpoint(&mut self, address: u16) -> u32 {
         self.last_id += 1;
         self.breakpoints.push((self.last_id, address));
-        return self.last_id
+        return self.last_id;
     }
 
     pub fn del_breakpoint(&mut self, id_to_del: u32) {
         self.breakpoints.retain(|(id, _)| *id != id_to_del);
     }
 
-    pub fn until<C>(&mut self, mem: &mut dyn Memory, until_addr: Option<u16>, ctrlc_pressed: &C) -> StepResult
-    where C: Deref<Target = AtomicBool> {
+    pub fn until<C>(
+        &mut self,
+        mem: &mut dyn Memory,
+        until_addr: Option<u16>,
+        ctrlc_pressed: &C,
+    ) -> StepResult
+    where
+        C: Deref<Target = AtomicBool>,
+    {
         while !ctrlc_pressed.load(Ordering::SeqCst) {
             match self.step(mem) {
-                StepResult::Ok => {},
-                x => return x
+                StepResult::Ok => {}
+                x => return x,
             }
             if until_addr == Some(self.ip) {
                 break;
@@ -254,12 +266,19 @@ impl State {
         StepResult::Ok
     }
 
-    pub fn step_line<C>(&mut self, mem: &mut dyn Memory, symmap: &SymMap, ctrlc_pressed: &C) -> StepResult
-    where C: Deref<Target = AtomicBool> {
+    pub fn step_line<C>(
+        &mut self,
+        mem: &mut dyn Memory,
+        symmap: &SymMap,
+        ctrlc_pressed: &C,
+    ) -> StepResult
+    where
+        C: Deref<Target = AtomicBool>,
+    {
         while !ctrlc_pressed.load(Ordering::SeqCst) {
             match self.step(mem) {
-                StepResult::Ok => {},
-                x => return x
+                StepResult::Ok => {}
+                x => return x,
             }
             match symmap.associate_line(self.ip) {
                 Some(_) => return StepResult::Ok,
@@ -272,7 +291,7 @@ impl State {
     pub fn step(&mut self, mem: &mut dyn Memory) -> StepResult {
         let (instr, new_ip) = match Instruction::load(mem, self.ip) {
             Ok(instr) => instr,
-            Err(x) => return StepResult::ReadError(self.ip, x)
+            Err(x) => return StepResult::ReadError(self.ip, x),
         };
         match instr {
             Instruction::ALU { op, inverse, reg } => {
@@ -290,34 +309,34 @@ impl State {
                     }
                 }
                 self.ip = new_ip;
-            },
+            }
             Instruction::LD(reg) => {
                 let value = match mem.get(self.p) {
                     Ok(x) => x,
-                    Err(e) => return StepResult::ReadError(self.p, e)
+                    Err(e) => return StepResult::ReadError(self.p, e),
                 };
                 self.ip = new_ip;
                 self.set_reg(reg, value);
-            },
+            }
             Instruction::LDI(reg, value) => {
                 self.ip = new_ip;
                 self.set_reg(reg, value);
-            },
+            }
             Instruction::ST(reg) => {
                 let value = self.get_reg(reg);
                 match mem.set(self.p, value) {
-                    Ok(()) => {},
-                    Err(e) => return StepResult::WriteError(self.p, e)
+                    Ok(()) => {}
+                    Err(e) => return StepResult::WriteError(self.p, e),
                 }
                 self.ip = new_ip;
-            },
+            }
             Instruction::NOP => {
                 self.ip = new_ip;
-            },
+            }
             Instruction::JMP => {
                 self.ip = self.p;
                 self.p = new_ip;
-            },
+            }
             Instruction::JC { flag, inverse } => {
                 let flag_value = self.get_flag(flag);
                 if flag_value ^ inverse {
@@ -328,9 +347,9 @@ impl State {
                 }
             }
         };
-        match self.breakpoints.iter().find(|(_,a)| *a == self.ip) {
+        match self.breakpoints.iter().find(|(_, a)| *a == self.ip) {
             Some((id, _)) => StepResult::Breakpoint(*id),
-            None => StepResult::Ok
+            None => StepResult::Ok,
         }
     }
 }

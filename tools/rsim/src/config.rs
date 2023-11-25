@@ -1,7 +1,7 @@
-use std::fs::File;
+use crate::mem;
 use serde::Deserialize;
 use serde_yaml;
-use crate::mem;
+use std::fs::File;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -63,7 +63,7 @@ pub enum SpiConfig {
 #[serde(rename_all = "kebab-case")]
 pub enum StackConfig {
     Absent,
-    Present
+    Present,
 }
 
 #[derive(Debug, Deserialize)]
@@ -71,7 +71,7 @@ pub enum ServerConfig {
     #[serde(rename = "disabled")]
     Disabled,
     #[serde(rename = "port")]
-    EnabledOnPort(u16)
+    EnabledOnPort(u16),
 }
 
 #[derive(Debug)]
@@ -95,10 +95,10 @@ impl From<serde_yaml::Error> for ConfigError {
 impl Config {
     pub fn new(filename: &str) -> Result<Self, ConfigError> {
         let f = File::open(filename)?;
-        let mut r : Self = serde_yaml::from_reader(f)?;
+        let mut r: Self = serde_yaml::from_reader(f)?;
         if let VgaConfig::PresentWithFontPath(ref mut path) = r.vga_config {
             use std::path::PathBuf;
-            let config_path = PathBuf::from(filename); 
+            let config_path = PathBuf::from(filename);
             let mut config_dir = config_path.parent().unwrap().to_path_buf();
             config_dir.push(PathBuf::clone(path));
             *path = config_dir;

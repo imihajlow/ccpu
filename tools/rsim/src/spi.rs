@@ -1,6 +1,6 @@
+use crate::card::Card;
 use crate::config::SpiConfig;
 use crate::memory::{Memory, MemoryReadError, MemoryWriteError};
-use crate::card::Card;
 
 const DATA_ADDR: u16 = 0xFD02;
 const CTRL_ADDR: u16 = 0xFD03;
@@ -20,8 +20,8 @@ impl Spi {
                 spi_buf: 0,
                 power: false,
                 cs: true,
-                card: None
-            })
+                card: None,
+            }),
         }
     }
 
@@ -43,10 +43,10 @@ impl Memory for Spi {
         match addr {
             CTRL_ADDR => match self.card {
                 Some(_) => Ok(0),
-                None => Ok(1)
-            }
+                None => Ok(1),
+            },
             DATA_ADDR => Ok(self.spi_buf),
-            _ => Err(MemoryReadError::Empty)
+            _ => Err(MemoryReadError::Empty),
         }
     }
 
@@ -60,27 +60,24 @@ impl Memory for Spi {
                         card.set_power(self.power);
                         card.set_cs(self.cs);
                     }
-                    None => ()
+                    None => (),
                 };
                 Ok(())
             }
-            DATA_ADDR => {
-                match self.card {
-                    Some(ref mut card) => match card.transfer(value) {
-                        Some(x) => {
-                            self.spi_buf = x;
-                            Ok(())
-                        }
-                        None => Err(MemoryWriteError::DeviceError)
-                    }
-                    None => {
-                        self.spi_buf = 0xff;
+            DATA_ADDR => match self.card {
+                Some(ref mut card) => match card.transfer(value) {
+                    Some(x) => {
+                        self.spi_buf = x;
                         Ok(())
                     }
+                    None => Err(MemoryWriteError::DeviceError),
+                },
+                None => {
+                    self.spi_buf = 0xff;
+                    Ok(())
                 }
-            }
-            _ => Err(MemoryWriteError::Empty)
+            },
+            _ => Err(MemoryWriteError::Empty),
         }
     }
 }
-

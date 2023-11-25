@@ -30,7 +30,7 @@ pub const KEY_ENTER: (u8, u8) = (0, 0);
 
 pub struct Keyboard {
     pressed: Option<(u8, u8)>,
-    row_mask: u8
+    row_mask: u8,
 }
 
 impl Keyboard {
@@ -39,8 +39,8 @@ impl Keyboard {
             KbConfig::Absent => None,
             KbConfig::Present => Some(Keyboard {
                 pressed: None,
-                row_mask: 0xFF
-            })
+                row_mask: 0xFF,
+            }),
         }
     }
 

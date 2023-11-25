@@ -16,8 +16,8 @@ impl Ps2 {
             Ps2Config::Absent => None,
             Ps2Config::Present => Some(Self {
                 queue: VecDeque::new(),
-                last_data: 0
-            })
+                last_data: 0,
+            }),
         }
     }
 
@@ -35,17 +35,15 @@ impl Ps2 {
 impl Memory for Ps2 {
     fn get(&self, addr: u16) -> Result<u8, MemoryReadError> {
         match addr {
-            PS2_DATA_ADDR => {
-                match self.queue.front() {
-                    None => Ok(self.last_data),
-                    Some(x) => Ok(*x)
-                }
-            }
+            PS2_DATA_ADDR => match self.queue.front() {
+                None => Ok(self.last_data),
+                Some(x) => Ok(*x),
+            },
             PS2_CTRL_ADDR => {
                 let has_data = self.queue.len() != 0;
                 Ok(has_data as u8 | 2)
             }
-            _ => Err(MemoryReadError::Empty)
+            _ => Err(MemoryReadError::Empty),
         }
     }
 
@@ -64,7 +62,7 @@ impl Memory for Ps2 {
                 println!("PS2 transmit {}", value);
                 Ok(())
             }
-            _ => Err(MemoryWriteError::Empty)
+            _ => Err(MemoryWriteError::Empty),
         }
     }
 }

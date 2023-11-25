@@ -48,12 +48,15 @@ impl Z80EmuState {
         let prefix = mem.get(self.addr_prefix).unwrap();
         let imm = mem.get_u16(self.addr_imm).unwrap();
 
-        println!("A  \x1b[1m{:02X}\x1b[0m   F  \x1b[1m{}\x1b[0m", a, get_flags_string(f));
+        println!(
+            "A  \x1b[1m{:02X}\x1b[0m   F  \x1b[1m{}\x1b[0m",
+            a,
+            get_flags_string(f)
+        );
         println!("BC \x1b[1m{:04X}\x1b[0m DE \x1b[1m{:04X}\x1b[0m", bc, de);
         println!("HL \x1b[1m{:04X}\x1b[0m SP \x1b[1m{:04X}\x1b[0m", hl, sp);
         println!("IX \x1b[1m{:04X}\x1b[0m IY \x1b[1m{:04X}\x1b[0m", ix, iy);
         println!("PC \x1b[1m{:04X}\x1b[0m op \x1b[1m{:02X}\x1b[0m pr \x1b[1m{:02X}\x1b[0m imm \x1b[1m{:04X}\x1b[0m", pc, opcode, prefix, imm);
-
     }
 }
 
@@ -66,12 +69,13 @@ impl Z80EmuState {
 .const z80_sf = 0x80
 */
 fn get_flags_string(f: u8) -> String {
-    format!("[{}{} {} {}{}{}]",
+    format!(
+        "[{}{} {} {}{}{}]",
         if f & 0x80 != 0 { 'S' } else { ' ' },
         if f & 0x40 != 0 { 'Z' } else { ' ' },
         if f & 0x10 != 0 { 'H' } else { ' ' },
         if f & 0x04 != 0 { 'P' } else { ' ' },
         if f & 0x02 != 0 { 'N' } else { ' ' },
         if f & 0x01 != 0 { 'C' } else { ' ' }
-        )
+    )
 }

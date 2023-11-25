@@ -41,11 +41,7 @@ impl Font {
             let mask = glyph[y];
             for x in 0..8 {
                 let offset = ((r as usize) * 16 + y) * 640 + (c as usize) * 8 + x;
-                buf[offset] = if mask & (1 << x) != 0 {
-                    fg
-                } else {
-                    bg
-                };
+                buf[offset] = if mask & (1 << x) != 0 { fg } else { bg };
             }
         }
     }

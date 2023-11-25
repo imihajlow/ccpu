@@ -1,7 +1,7 @@
+use crate::config::StackConfig;
+use crate::memory::Memory;
 use crate::memory::MemoryReadError;
 use crate::memory::MemoryWriteError;
-use crate::memory::Memory;
-use crate::config::StackConfig;
 
 const SP0_ADDR: u16 = 0xFC00;
 const SP1_ADDR: u16 = 0xFC01;
@@ -23,7 +23,7 @@ pub struct Stack {
     enabled: bool,
     sp0: u8,
     sp1: u8,
-    ram: [u8; 256 * (FRAME_SIZE as usize)]
+    ram: [u8; 256 * (FRAME_SIZE as usize)],
 }
 
 impl Stack {
@@ -34,8 +34,8 @@ impl Stack {
                 enabled: false,
                 sp0: 0,
                 sp1: 0,
-                ram: [0; 256 * (FRAME_SIZE as usize)]
-            })
+                ram: [0; 256 * (FRAME_SIZE as usize)],
+            }),
         }
     }
 
@@ -44,7 +44,7 @@ impl Stack {
         let offset = addr & 0x07FF;
         let sp = match frame {
             false => self.sp0,
-            true => self.sp1
+            true => self.sp1,
         };
         (sp as usize) * (FRAME_SIZE as usize) + (offset as usize)
     }
@@ -61,8 +61,8 @@ impl Memory for Stack {
                 } else {
                     Err(MemoryReadError::Empty)
                 }
-            },
-            _ => Err(MemoryReadError::Empty)
+            }
+            _ => Err(MemoryReadError::Empty),
         }
     }
 
@@ -105,7 +105,7 @@ impl Memory for Stack {
                 match val {
                     0 => self.enabled = false,
                     ENABLE => self.enabled = true,
-                    _ => return Err(MemoryWriteError::InvalidValue)
+                    _ => return Err(MemoryWriteError::InvalidValue),
                 }
                 Ok(())
             }
@@ -117,7 +117,7 @@ impl Memory for Stack {
                     Err(MemoryWriteError::Empty)
                 }
             }
-            _ => Err(MemoryWriteError::Empty)
+            _ => Err(MemoryWriteError::Empty),
         }
     }
 }

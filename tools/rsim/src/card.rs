@@ -1,6 +1,5 @@
 use std::fs::File;
-use std::io::{Seek, Read, Write};
-
+use std::io::{Read, Seek, Write};
 
 const CMD_0: u8 = 0x40;
 const CMD_17: u8 = 0x40 | 17;
@@ -10,7 +9,6 @@ const CMD_41: u8 = 0x40 | 41;
 
 const R1_IDLE: u8 = 1;
 const R1_READY: u8 = 0;
-
 
 pub struct Card {
     image: File,
@@ -24,32 +22,20 @@ enum HardState {
     ON {
         is_ready: bool,
         is_acmd: bool,
-        state: SoftState
-    }
+        state: SoftState,
+    },
 }
 
 #[derive(Debug)]
 enum SoftState {
     Idle,
-    Cmd {
-        index: usize,
-        data: [u8; 6]
-    },
-    DelayRead {
-        addr: u32,
-        counter: usize
-    },
-    Read {
-        buf: [u8; 512],
-        index: usize
-    },
+    Cmd { index: usize, data: [u8; 6] },
+    DelayRead { addr: u32, counter: usize },
+    Read { buf: [u8; 512], index: usize },
     WaitWrite,
-    Write {
-        buf: [u8; 512],
-        index: usize,
-    },
+    Write { buf: [u8; 512], index: usize },
     BlockCrc1,
-    BlockCrc2
+    BlockCrc2,
 }
 
 impl Card {
@@ -57,7 +43,7 @@ impl Card {
         Self {
             image,
             cs: true,
-            state: HardState::POWEROFF
+            state: HardState::POWEROFF,
         }
     }
 
@@ -68,7 +54,7 @@ impl Card {
                 self.state = ON {
                     is_ready: false,
                     is_acmd: false,
-                    state: SoftState::Idle
+                    state: SoftState::Idle,
                 };
             }
             _ if !v => {
@@ -84,49 +70,50 @@ impl Card {
 
     pub fn transfer(&mut self, v: u8) -> Option<u8> {
         if !self.cs {
-            return Some(0xff)
+            return Some(0xff);
         }
         use HardState::*;
         use SoftState::*;
         match self.state {
             POWEROFF => Some(0xff),
-            ON { is_ready, is_acmd, ref mut state } => match state {
-                Idle => {
-                    match v {
-                        0xff => Some(0xff),
-                        CMD_0 |
-                        CMD_55 |
-                        CMD_17 |
-                        CMD_24 |
-                        CMD_41 => {
-                            self.state = ON {
-                                is_ready,
-                                is_acmd,
-                                state: Cmd {
-                                    index: 1,
-                                    data: [v, 0, 0, 0, 0, 0]
-                                }
-                            };
-                            Some(0xff)
-                        }
-                        _ => {
-                            eprintln!("Unhandled card command: 0x{:02X}", v);
-                            None
-                        }
+            ON {
+                is_ready,
+                is_acmd,
+                ref mut state,
+            } => match state {
+                Idle => match v {
+                    0xff => Some(0xff),
+                    CMD_0 | CMD_55 | CMD_17 | CMD_24 | CMD_41 => {
+                        self.state = ON {
+                            is_ready,
+                            is_acmd,
+                            state: Cmd {
+                                index: 1,
+                                data: [v, 0, 0, 0, 0, 0],
+                            },
+                        };
+                        Some(0xff)
+                    }
+                    _ => {
+                        eprintln!("Unhandled card command: 0x{:02X}", v);
+                        None
                     }
                 },
-                Cmd { ref mut index, ref mut data } if *index < 6 => {
+                Cmd {
+                    ref mut index,
+                    ref mut data,
+                } if *index < 6 => {
                     data[*index] = v;
                     *index = *index + 1;
                     Some(0xff)
-                },
+                }
                 Cmd { data, .. } => {
                     match data[0] {
                         CMD_0 if !is_acmd => {
                             self.state = ON {
                                 is_ready: false,
                                 is_acmd: false,
-                                state: Idle
+                                state: Idle,
                             };
                             Some(R1_IDLE)
                         }
@@ -134,7 +121,7 @@ impl Card {
                             self.state = ON {
                                 is_ready,
                                 is_acmd: true,
-                                state: Idle
+                                state: Idle,
                             };
                             Some(if is_ready { R1_READY } else { R1_IDLE })
                         }
@@ -142,7 +129,7 @@ impl Card {
                             self.state = ON {
                                 is_ready: true,
                                 is_acmd: false,
-                                state: Idle
+                                state: Idle,
                             };
                             Some(R1_READY)
                         }
@@ -151,7 +138,7 @@ impl Card {
                             println!("Read block from 0x{:08X}", pos);
                             *state = DelayRead {
                                 addr: pos,
-                                counter: 3
+                                counter: 3,
                             };
 
                             Some(R1_READY)
@@ -176,7 +163,7 @@ impl Card {
                             self.state = ON {
                                 is_ready,
                                 is_acmd: false,
-                                state: Idle
+                                state: Idle,
                             };
                             Some(0b00000100 | ((!is_ready) as u8)) // illegal command
                         }
@@ -189,10 +176,7 @@ impl Card {
                             let mut buf: [u8; 512] = [0; 512];
                             match self.image.read_exact(&mut buf) {
                                 Ok(()) => {
-                                    *state = Read {
-                                        buf,
-                                        index: 0
-                                    };
+                                    *state = Read { buf, index: 0 };
                                     Some(0b11111110) // data token
                                 }
                                 Err(e) => {
@@ -209,7 +193,9 @@ impl Card {
                         }
                     }
                 }
-                DelayRead { ref mut counter, .. } => {
+                DelayRead {
+                    ref mut counter, ..
+                } => {
                     *counter -= 1;
                     Some(0xFF)
                 }
@@ -223,25 +209,21 @@ impl Card {
                     *index += 1;
                     Some(buf[i])
                 }
-                WaitWrite => {
-                    match v {
-                        0xFE => {
-                            *state = Write {
-                                index: 0,
-                                buf: [0; 512]
-                            };
-                            Some(0xFF)
-                        }
-                        0xFF => {
-                            Some(0xFF)
-                        }
-                        _ => {
-                            *state = Idle;
-                            eprintln!("Wrong block start: {}", v);
-                            Some(0xFF)
-                        }
+                WaitWrite => match v {
+                    0xFE => {
+                        *state = Write {
+                            index: 0,
+                            buf: [0; 512],
+                        };
+                        Some(0xFF)
                     }
-                }
+                    0xFF => Some(0xFF),
+                    _ => {
+                        *state = Idle;
+                        eprintln!("Wrong block start: {}", v);
+                        Some(0xFF)
+                    }
+                },
                 Write { index, buf } if *index < 512 => {
                     buf[*index as usize] = v;
                     *index += 1;
@@ -273,7 +255,7 @@ impl Card {
                     *state = Idle;
                     Some(0xff)
                 }
-            }
+            },
         }
     }
 }

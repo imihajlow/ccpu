@@ -31,7 +31,7 @@ impl fmt::Display for MemoryReadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             MemoryReadError::Contention => write!(f, "bus contention"),
-            MemoryReadError::Empty => write!(f, "empty address")
+            MemoryReadError::Empty => write!(f, "empty address"),
         }
     }
 }
@@ -50,10 +50,12 @@ pub trait ErrorChainable {
     fn chain_error(self, other: Self) -> Self;
 
     fn chain_some_error(self, other: Option<Self>) -> Self
-    where Self: Sized {
+    where
+        Self: Sized,
+    {
         match other {
             None => self,
-            Some(x) => self.chain_error(x)
+            Some(x) => self.chain_error(x),
         }
     }
 }
@@ -67,8 +69,8 @@ impl ErrorChainable for Result<u8, MemoryReadError> {
             Ok(_) => match other {
                 Ok(_) => Err(Contention),
                 Err(Empty) => self,
-                Err(Contention) => Err(Contention)
-            }
+                Err(Contention) => Err(Contention),
+            },
         }
     }
 }
@@ -80,7 +82,7 @@ impl ErrorChainable for Result<(), MemoryWriteError> {
             Err(Empty) => other,
             Err(DeviceError) => Err(DeviceError),
             Err(InvalidValue) => Err(InvalidValue),
-            Ok(()) => Ok(())
+            Ok(()) => Ok(()),
         }
     }
 }
