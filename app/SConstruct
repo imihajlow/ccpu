@@ -42,7 +42,7 @@ env = Environment(BUILDERS = {
     'Loader': loaderLinkBuilder,
     'Extension': extensionLinkBuilder,
     'App': appLinkBuilder,
-    'Image': imageBuilder})
+    'Image': imageBuilder}, ENV={'PATH': os.environ['PATH']})
 
 env.PrependENVPath("PATH", "../tools")
 env.PrependENVPath("PATH", "../tools/natrix")

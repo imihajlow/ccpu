@@ -167,13 +167,11 @@ class SymbolMap:
         if f is not None:
             yaml.dump({"labels": self._labels, "lines": self._lines}, f)
 
-
-def link(objects, layout, fit, sectionsFilter, api):
-    ip = 0
-    exportedSymbolValues = dict()
+def tryFitSections(objects, layout, fit, sectionsFilter, bloatSize):
     segments = {}
-    # place sections into segments
-    for segment in layout.layout:
+    ip = 0
+    for segmentIdx in range(len(layout.layout)):
+        segment = layout.layout[segmentIdx]
         if segment["begin"] is not None:
             if ip > segment["begin"]:
                 raise LinkerError("segment overflow: IP is beyond segment `{}' begin".format(segment["name"]))
@@ -189,10 +187,42 @@ def link(objects, layout, fit, sectionsFilter, api):
         ip = fit(ip, sectionList)
         if segment["end"] is not None:
             end = segment["end"]
-            if end < ip:
-                raise LinkerError("Segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
-            ip = segment["end"]
+            if end == "bloat":
+                ip += bloatSize
+            else:
+                if end < ip:
+                    raise LinkerError("Segment overflow: IP is beyond segment `{}' end".format(segment["name"]), o, s)
+                ip = segment["end"]
         segments[segment["name"]] = segBegin, ip
+    return segments
+
+def fitSections(objects, layout, fit, sectionsFilter):
+    hasBloatSegment = any(seg["end"] == "bloat" for seg in layout.layout)
+    if hasBloatSegment:
+        lowerLimit = 0
+        upperLimit = 65536
+        bloatSize = (upperLimit + lowerLimit) // 2
+        bestLayout = None
+        while bloatSize != lowerLimit and bloatSize != upperLimit:
+            try:
+               bestLayout = tryFitSections(objects, layout, fit, sectionsFilter, bloatSize)
+               lowerLimit = bloatSize
+               bloatSize = (bloatSize + upperLimit) // 2
+            except LinkerError:
+                upperLimit = bloatSize
+                bloatSize = (bloatSize + lowerLimit) // 2
+        if bestLayout is None:
+            raise LinkerError("No size of the bloat segment produced suitable output")
+        return bestLayout
+    else:
+        return tryFitSections(objects, layout, fit, sectionsFilter, None)
+
+def link(objects, layout, fit, sectionsFilter, api):
+    ip = 0
+    exportedSymbolValues = dict()
+    # place sections into segments
+    segments = fitSections(objects, layout, fit, sectionsFilter)
+
     # update origin segments sizes
     ip = 0
     for segment in layout.layout:
