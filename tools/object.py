@@ -115,7 +115,10 @@ class Object:
         o.weakSymbols = d["weakSymbols"]
         o.sections = [Section.fromDict(s) for s in d["sections"]]
         o.consts = d["consts"]
-        o.flags = Flags.fromString(d["flags"])
+        if "flags" in d:
+            o.flags = Flags.fromString(d["flags"])
+        else:
+            o.flags = Flags(0)
         return o
 
     def beginSection(self, name, alignment):
