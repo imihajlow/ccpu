@@ -290,7 +290,7 @@ fn select_symbol<N: std::fmt::Display>(
 fn select_address(syms: &symmap::SymMap, name: &str, rl: &mut Editor<()>) -> Option<u16> {
     lazy_static! {
         static ref RE: Regex = Regex::new(
-            r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|(0x[0-9a-f]+)$"
+            r"(?i)^(?:(?:([a-z_/][^: ]+):)([1-9][0-9]*))|([_a-z][_a-z0-9]+)|([1-9][0-9]*|0x[0-9a-f]+)$"
         )
         .unwrap();
     }
