@@ -6,6 +6,7 @@ import sys
 import yaml
 import os
 import unix_ar
+import pathlib
 from layout import Layout
 from object import Object
 from expression import evaluate, extractVarNames
@@ -336,7 +337,14 @@ def loadLib(libname):
     ar.close()
     return r
 
-def load(filenames):
+def findLib(libpath, libname):
+    for p in libpath:
+        path = f"{p}/lib{libname}.a"
+        if os.path.isfile(path):
+            return path
+    raise LinkerError(f"Library -l{libname} cannot be found")
+
+def load(filenames, libpath, libs):
     r = []
     for filename in filenames:
         if filename.endswith(".o"):
@@ -345,6 +353,10 @@ def load(filenames):
             r += loadLib(filename)
         else:
             raise LinkerError(f"Unknown file format: {filename}")
+    if libs is not None:
+        for lib in libs:
+            filename = findLib(libpath, lib)
+            r += loadLib(filename)
     return r
 
 
@@ -430,13 +442,15 @@ if __name__ == '__main__':
     parser.add_argument('--no-gc-sections', action='store_true', default=False, help='drop unreachable sections')
     parser.add_argument('--api-in', metavar="MAPFILE", required=False, type=argparse.FileType("r"), help='external global symbols list')
     parser.add_argument('--api-out', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='generate external global symbols list')
-    parser.add_argument('-m', metavar="MAPFILE", required=False, type=argparse.FileType("w"), help='map file name')
+    parser.add_argument('-m', metavar="MAPFILE", required=False, help='map file name')
+    parser.add_argument('-l', metavar="LIBRARY", required=False, action="append", help='static library')
+    parser.add_argument('-L', metavar="LIBPATH", required=False, action="append", help='static library path')
     parser.add_argument('file', nargs="+", help='input files')
     args = parser.parse_args()
     layout = loadLayout(args.layout)
     try:
         apiIn = loadApi(args.api_in)
-        objects = load(args.file)
+        objects = load(args.file, args.L, args.l)
         checkFlagsCompatibility(objects)
         for o in objects:
             if len(o.weakSymbols) != 0:
@@ -446,7 +460,11 @@ if __name__ == '__main__':
         symbolMap, apiOut, segments = link(objects, layout, fitters[args.fit_strategy], sectionsFilter, apiIn)
         rom = createRom(objects, segments, sectionsFilter, layout)
         save(rom, args.o, args.type, args.full, args.filler, args.slim)
-        symbolMap.save(args.m)
+        map_file_name = args.m
+        if map_file_name is None:
+            map_file_name = pathlib.Path(args.o).with_suffix(".map")
+        with open(map_file_name, "w") as f:
+            symbolMap.save(f)
         saveLabels(args.api_out, apiOut)
     except LinkerError as e:
         sys.stderr.write(str(e) + "\n")
